@@ -1,0 +1,955 @@
+// API 配置
+const API_BASE = {
+    user: 'http://localhost:8888/douyin/user',
+    product: 'http://localhost:8888/douyin/product',
+    cart: 'http://localhost:8888/douyin/cart',
+    order: 'http://localhost:8888/douyin/order',
+    coupon: 'http://localhost:8888/douyin/coupon',
+    checkout: 'http://localhost:8888/douyin/checkout',
+    payment: 'http://localhost:8888/douyin/payment',
+    flash: 'http://localhost:8888/douyin/flash'
+};
+
+// 状态管理
+let state = {
+    user: null,
+    token: null,
+    refreshToken: null,
+    cart: [],
+    products: [],
+    orders: []
+};
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+    loadFromStorage();
+    updateNav();
+    showPage('home');
+    loadProducts();
+});
+
+// 从 localStorage 加载状态
+function loadFromStorage() {
+    const token = localStorage.getItem('token');
+    const refreshToken = localStorage.getItem('refreshToken');
+    const user = localStorage.getItem('user');
+    if (token && user) {
+        state.token = token;
+        state.refreshToken = refreshToken;
+        state.user = JSON.parse(user);
+    }
+}
+
+// 保存到 localStorage
+function saveToStorage() {
+    if (state.token) {
+        localStorage.setItem('token', state.token);
+        if (state.refreshToken) {
+            localStorage.setItem('refreshToken', state.refreshToken);
+        }
+        localStorage.setItem('user', JSON.stringify(state.user));
+    } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+    }
+}
+
+// 更新导航栏
+function updateNav() {
+    const navAuth = document.getElementById('navAuth');
+    const navUser = document.getElementById('navUser');
+    const userName = document.getElementById('userName');
+    const ordersNav = document.getElementById('ordersNav');
+
+    if (state.user && state.token) {
+        navAuth.style.display = 'none';
+        navUser.style.display = 'flex';
+        ordersNav.style.display = 'inline';
+        userName.textContent = state.user.user_name || state.user.email || '用户';
+    } else {
+        navAuth.style.display = 'flex';
+        navUser.style.display = 'none';
+        ordersNav.style.display = 'none';
+    }
+
+    updateCartCount();
+}
+
+// 更新购物车数量
+function updateCartCount() {
+    const cartCount = document.getElementById('cartCount');
+    const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCount.textContent = count;
+}
+
+// 显示页面
+function showPage(pageName) {
+    console.log('showPage function called with pageName:', pageName);
+    // 隐藏所有页面
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+
+    // 显示目标页面
+    const targetPage = document.getElementById(`page-${pageName}`);
+    if (targetPage) {
+        targetPage.style.display = 'block';
+    }
+
+    // 根据页面加载数据
+    if (pageName === 'products') {
+        loadProducts();
+    } else if (pageName === 'cart') {
+        loadCart();
+    } else if (pageName === 'orders') {
+        loadOrders();
+    } else if (pageName === 'flash') {
+        loadFlashProducts();
+        startCountdown();
+    }
+}
+
+// 秒杀倒计时
+let countdownInterval;
+
+function startCountdown() {
+    // 设置倒计时结束时间（2小时后）
+    const endTime = Date.now() + 2 * 60 * 60 * 1000;
+
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+
+    countdownInterval = setInterval(() => {
+        const remaining = endTime - Date.now();
+        if (remaining <= 0) {
+            clearInterval(countdownInterval);
+            document.getElementById('countdownTime').textContent = '00:00:00';
+            return;
+        }
+
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+        const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        document.getElementById('countdownTime').textContent = timeStr;
+    }, 1000);
+}
+
+// 加载秒杀商品
+async function loadFlashProducts() {
+    const flashProductList = document.getElementById('flashProductList');
+
+    // 先显示一些演示数据
+    const demoFlashProducts = [
+        { id: 1, name: 'iPhone 15 Pro', description: '最新款苹果手机，搭载 A17 芯片', price: 7999, flashPrice: 5999, stock: 50, picture: '📱' },
+        { id: 2, name: 'MacBook Pro 14"', description: '高性能笔记本电脑，M3 Pro 芯片', price: 14999, flashPrice: 11999, stock: 30, picture: '💻' },
+        { id: 3, name: 'Sony PS5', description: '次世代游戏主机', price: 3899, flashPrice: 2999, stock: 20, picture: '🎮' },
+        { id: 4, name: 'AirPods Pro 2', description: '最新款降噪耳机', price: 1899, flashPrice: 1499, stock: 100, picture: '🎧' }
+    ];
+
+    renderFlashProducts(demoFlashProducts);
+}
+
+// 渲染秒杀商品列表
+function renderFlashProducts(products) {
+    const flashProductList = document.getElementById('flashProductList');
+    flashProductList.innerHTML = products.map(product => `
+        <div class="flash-product-card">
+            <div class="flash-product-image">
+                <span class="flash-badge">秒杀</span>
+                ${product.picture || '📦'}
+            </div>
+            <div class="flash-product-info">
+                <h3>${product.name}</h3>
+                <p class="description">${product.description || ''}</p>
+                <div class="flash-price-container">
+                    <span class="flash-original-price">¥${product.price}</span>
+                    <span class="flash-price">¥${product.flashPrice}</span>
+                </div>
+                <div class="flash-stock">
+                    库存: <span class="stock-number">${product.stock}</span> 件
+                </div>
+                <div class="flash-action">
+                    <button class="flash-btn" onclick="handleFlashBuy(${product.id})" ${product.stock <= 0 ? 'disabled' : ''}>
+                        ${product.stock > 0 ? '立即抢购' : '已售罄'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 处理秒杀购买
+async function handleFlashBuy(productId) {
+    if (!state.token) {
+        showToast('请先登录', 'error');
+        showPage('login');
+        return;
+    }
+
+    // 获取商品信息
+    const products = [
+        { id: 1, name: 'iPhone 15 Pro', price: 7999, flashPrice: 5999, stock: 50 },
+        { id: 2, name: 'MacBook Pro 14"', price: 14999, flashPrice: 11999, stock: 30 },
+        { id: 3, name: 'Sony PS5', price: 3899, flashPrice: 2999, stock: 20 },
+        { id: 4, name: 'AirPods Pro 2', price: 1899, flashPrice: 1499, stock: 100 }
+    ];
+
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+        showToast('商品不存在', 'error');
+        return;
+    }
+
+    // 真实的秒杀请求
+    try {
+        const data = await apiRequest(`${API_BASE.flash}/buy`, {
+            method: 'POST',
+            body: JSON.stringify({ productId: productId, quantity: 1 })
+        });
+
+        // 创建订单对象
+        const order = {
+            id: data.data.orderId,
+            order_no: data.data.orderNo,
+            product: product,
+            quantity: 1,
+            total: data.data.total / 100, // 转换为元
+            status: 'pending',
+            created_at: new Date().toISOString()
+        };
+
+        state.orders.unshift(order);
+        showToast('秒杀成功！正在跳转支付页面...', 'success');
+
+        // 跳转支付页面
+        setTimeout(() => {
+            showPaymentPage(order);
+        }, 1500);
+
+    } catch (error) {
+        showToast(error.message || '秒杀失败，请重试', 'error');
+    }
+}
+
+// 显示支付页面
+function showPaymentPage(order) {
+    const paymentContainer = document.getElementById('paymentContainer');
+
+    // 渲染商品信息（处理单个商品或多个商品的情况）
+    let productDetails = '';
+    if (order.product) {
+        // 单个商品（秒杀订单）
+        productDetails = `
+            <div class="detail-row">
+                <span class="detail-label">商品</span>
+                <span class="detail-value">${order.product.name}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">单价</span>
+                <span class="detail-value">¥${order.product.flashPrice || order.product.price}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">数量</span>
+                <span class="detail-value">${order.quantity}</span>
+            </div>
+        `;
+    } else if (order.items && order.items.length > 0) {
+        // 多个商品（购物车订单）
+        productDetails = order.items.map(item => `
+            <div class="detail-row">
+                <span class="detail-label">${item.product?.name || '商品'}</span>
+                <span class="detail-value">${item.quantity} × ¥${item.product?.price || 0}</span>
+            </div>
+        `).join('');
+    }
+
+    paymentContainer.innerHTML = `
+        <div class="payment-info">
+            <h3>订单信息</h3>
+            <div class="payment-details">
+                <div class="detail-row">
+                    <span class="detail-label">订单号</span>
+                    <span class="detail-value">${order.order_no}</span>
+                </div>
+                ${productDetails}
+            </div>
+        </div>
+
+        <div class="payment-methods">
+            <h3>支付方式</h3>
+            <div class="payment-method-list">
+                <div class="payment-method active">
+                    <input type="radio" name="paymentMethod" value="alipay" checked>
+                    <span>支付宝</span>
+                </div>
+                <div class="payment-method">
+                    <input type="radio" name="paymentMethod" value="wechat">
+                    <span>微信支付</span>
+                </div>
+                <div class="payment-method">
+                    <input type="radio" name="paymentMethod" value="credit">
+                    <span>信用卡</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-summary">
+            <div class="total-row">
+                <span>应付总额</span>
+                <span>¥${order.total}</span>
+            </div>
+        </div>
+
+        <div class="payment-actions">
+            <button class="btn btn-secondary" onclick="showPage('orders')">取消支付</button>
+            <button class="btn btn-primary" onclick="handlePayment('${order.order_no}')">立即支付</button>
+        </div>
+    `;
+
+    showPage('payment');
+}
+
+// 处理支付
+async function handlePayment(orderNo) {
+    try {
+        // 模拟支付过程
+        showToast('正在处理支付...', 'info');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // 调用后端支付接口
+        await apiRequest(`${API_BASE.payment}/create`, {
+            method: 'POST',
+            body: JSON.stringify({
+                order_id: orderNo,
+                payment_method: 1 // 1-WECHAT_PAY 2-ALIPAY
+            })
+        });
+
+        // 更新订单状态
+        const order = state.orders.find(o => o.order_no === orderNo);
+        if (order) {
+            order.status = 'paid';
+        }
+
+        showToast('支付成功！', 'success');
+
+        // 跳转订单页面
+        setTimeout(() => {
+            showPage('orders');
+        }, 1500);
+
+    } catch (error) {
+        showToast(error.message || '支付失败，请重试', 'error');
+    }
+}
+
+// 显示消息提示
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 30000);
+}
+
+// API 请求工具
+async function apiRequest(url, options = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+
+    if (state.token) {
+        headers['Access-Token'] = state.token;
+    }
+    if (state.refreshToken) {
+        headers['Refresh-Token'] = state.refreshToken;
+    }
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            headers
+        });
+        
+        // Handle 404 (Gateway Not Found) or 500
+        if (!response.ok) {
+             throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // 兼容 Gateway (statusCode) 和 API (code)
+        const code = data.code !== undefined ? data.code : data.statusCode;
+        const msg = data.msg || data.statusMsg || '请求失败';
+
+        // 令牌续期成功，更新令牌并重试
+        if (code === 10004) {
+            console.log('Token renewed, updating tokens...');
+            state.token = data.data?.access_token || data.accessToken || data.access_token;
+            state.refreshToken = data.data?.refresh_token || data.refreshToken || data.refresh_token;
+            saveToStorage();
+
+            // 重试原请求
+            return apiRequest(url, options);
+        }
+
+        if (code !== 0 && code !== undefined) {
+            // 如果认证失效，且不是续期成功，则清除状态
+            if (code === 10001 || code === 10003) {
+                logout();
+            }
+            throw new Error(msg);
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+}
+
+// 用户注册
+async function handleRegister(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+    if (password !== confirmPassword) {
+        showToast('两次密码输入不一致', 'error');
+        return;
+    }
+
+    try {
+        const data = await apiRequest(`${API_BASE.user}/register`, {
+            method: 'POST',
+            body: JSON.stringify({ email, password, confirmPassword })
+        });
+
+        // 兼容 Gateway 和 API
+        state.token = data.accessToken || data.access_token || data.data?.accessToken || data.data?.access_token;
+        state.refreshToken = data.refreshToken || data.refresh_token || data.data?.refreshToken || data.data?.refresh_token;
+        state.user = { email, user_id: data.userId || data.user_id || data.data?.userId || data.data?.user_id };
+        saveToStorage();
+        updateNav();
+        showToast('注册成功！', 'success');
+        showPage('home');
+    } catch (error) {
+        showToast(error.message || '注册失败', 'error');
+    }
+}
+
+// 用户登录
+async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+
+    try {
+        const data = await apiRequest(`${API_BASE.user}/login`, {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
+        });
+
+        // 兼容 Gateway 和 API
+        state.token = data.accessToken || data.access_token || data.data?.accessToken || data.data?.access_token;
+        state.refreshToken = data.refreshToken || data.refresh_token || data.data?.refreshToken || data.data?.refresh_token;
+        state.user = { email, user_id: data.userId || data.user_id || data.data?.userId || data.data?.user_id };
+        saveToStorage();
+        updateNav();
+        showToast('登录成功！', 'success');
+        showPage('home');
+    } catch (error) {
+        showToast(error.message || '登录失败', 'error');
+    }
+}
+
+// 用户登出
+function logout() {
+    state.user = null;
+    state.token = null;
+    state.refreshToken = null;
+    state.cart = [];
+    saveToStorage();
+    updateNav();
+    showToast('已退出登录', 'info');
+    showPage('home');
+}
+
+// 加载商品列表
+async function loadProducts() {
+    const productList = document.getElementById('productList');
+
+    try {
+        const data = await apiRequest(`${API_BASE.product}/list?page=1&pageSize=100`, {
+             method: 'GET'
+        });
+        console.log('Product API Response:', data);
+        
+        if (data.products && data.products.length > 0) {
+             state.products = data.products.map(p => ({
+                 id: p.id,
+                 name: p.name || '商品', // Fallback if name is empty
+                 description: p.description,
+                 price: parseFloat(p.price),
+                 stock: parseInt(p.stock),
+                 picture: p.thumbnailUrl || p.picture || '📦'
+             }));
+             renderProducts(state.products);
+             return;
+        }
+        
+        productList.innerHTML = '<div class="empty-state">暂无商品</div>';
+    } catch (error) {
+        console.error("Failed to load products:", error);
+        showToast(`加载商品失败: ${error.message}`, 'error');
+        productList.innerHTML = '<div class="error-state">加载失败，请刷新重试</div>';
+    }
+}
+
+// 渲染商品列表
+function renderProducts(products) {
+    const productList = document.getElementById('productList');
+    productList.innerHTML = products.map(product => `
+        <div class="product-card" onclick="showProductDetail(${product.id})">
+            <div class="product-image">${product.picture || '📦'}</div>
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="description">${product.description || ''}</p>
+                <p class="price">¥${product.price}</p>
+                <div class="meta">
+                    <span>库存: ${product.stock || 0}</span>
+                    <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); addToCart(${product.id})">加入购物车</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 筛选商品
+function filterProducts() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = state.products.filter(p =>
+        p.name.toLowerCase().includes(searchTerm) ||
+        (p.description && p.description.toLowerCase().includes(searchTerm))
+    );
+    renderProducts(filtered);
+}
+
+// 显示商品详情
+function showProductDetail(productId) {
+    const product = state.products.find(p => p.id === productId);
+    if (!product) return;
+
+    const productDetail = document.getElementById('productDetail');
+    productDetail.innerHTML = `
+        <div class="product-detail-image">${product.picture || '📦'}</div>
+        <div class="product-detail-info">
+            <h2>${product.name}</h2>
+            <p class="price">¥${product.price}</p>
+            <p class="description">${product.description || '暂无描述'}</p>
+            <div class="stock">
+                <strong>库存:</strong> ${product.stock || 0} 件
+            </div>
+            <div class="product-actions">
+                <button class="btn btn-primary btn-large" onclick="addToCart(${product.id})">加入购物车</button>
+                <button class="btn btn-secondary btn-large" onclick="showPage('products')">返回列表</button>
+            </div>
+        </div>
+    `;
+    showPage('product-detail');
+}
+
+// 添加到购物车
+async function addToCart(productId) {
+    if (!state.token) {
+        showToast('请先登录', 'error');
+        showPage('login');
+        return;
+    }
+
+    try {
+        await apiRequest(`${API_BASE.cart}/add`, {
+            method: 'POST',
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: 1
+            })
+        });
+
+        updateCartCount();
+        showToast('已添加到购物车', 'success');
+        // Refresh cart if we are on cart page, but usually we are on product list
+        if (document.getElementById('page-cart').style.display === 'block') {
+            loadCart();
+        } else {
+            // Optimistically update count or just fetch count?
+            // For now, let's just reload cart to be safe and update count
+            loadCart();
+        }
+    } catch (error) {
+        showToast(error.message || '添加失败', 'error');
+    }
+}
+
+// 加载购物车
+async function loadCart() {
+    const cartList = document.getElementById('cartList');
+    const cartSummary = document.getElementById('cartSummary');
+
+    if (!state.token) {
+         state.cart = [];
+         renderCart();
+         return;
+    }
+
+    try {
+        const data = await apiRequest(`${API_BASE.cart}/list`, {
+            method: 'GET'
+        });
+
+        if (data.data) {
+            state.cart = data.data.map(item => {
+                const product = state.products.find(p => p.id === item.product_id);
+                return {
+                    id: item.id,
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    product: product || { name: '加载中...', price: 0, picture: '📦' }
+                };
+            });
+        } else {
+            state.cart = [];
+        }
+    } catch (error) {
+        console.error('加载购物车失败:', error);
+        // Don't clear cart if error, maybe just show toast
+        showToast('加载购物车失败', 'error');
+    }
+
+    renderCart();
+}
+
+function renderCart() {
+    const cartList = document.getElementById('cartList');
+    const cartSummary = document.getElementById('cartSummary');
+
+    if (state.cart.length === 0) {
+        cartList.innerHTML = '<div class="cart-empty">购物车是空的，快去选购商品吧！</div>';
+        cartSummary.style.display = 'none';
+        return;
+    }
+
+    cartList.innerHTML = state.cart.map(item => `
+        <div class="cart-item">
+            <div class="cart-item-image">${item.product?.picture || '📦'}</div>
+            <div class="cart-item-info">
+                <h3>${item.product?.name || '商品'}</h3>
+                <p class="price">¥${item.product?.price || 0}</p>
+            </div>
+            <div class="cart-item-quantity">
+                <button class="quantity-btn" onclick="updateCartItem(${item.product_id}, -1)">-</button>
+                <span class="quantity-display">${item.quantity}</span>
+                <button class="quantity-btn" onclick="updateCartItem(${item.product_id}, 1)">+</button>
+            </div>
+            <button class="btn btn-danger btn-small" onclick="removeFromCart(${item.product_id})">删除</button>
+        </div>
+    `).join('');
+
+    const total = state.cart.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0);
+    document.getElementById('cartTotal').textContent = total;
+    cartSummary.style.display = 'block';
+    
+    updateCartCount();
+}
+
+// 更新购物车商品数量
+async function updateCartItem(productId, delta) {
+    try {
+        if (delta > 0) {
+            await apiRequest(`${API_BASE.cart}/add`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: 1
+                })
+            });
+        } else {
+            // Check if quantity is 1, if so, maybe ask to delete? 
+            // Current backend SubCartItem returns error if quantity <= 1.
+            // So we should check local state first.
+            const item = state.cart.find(i => i.product_id === productId);
+            if (item && item.quantity <= 1) {
+                if (confirm('确定要删除该商品吗？')) {
+                    await removeFromCart(productId);
+                }
+                return;
+            }
+
+            await apiRequest(`${API_BASE.cart}/sub`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: 1
+                })
+            });
+        }
+        loadCart();
+    } catch (error) {
+        showToast(error.message || '更新失败', 'error');
+    }
+}
+
+// 从购物车删除
+async function removeFromCart(productId) {
+    try {
+        await apiRequest(`${API_BASE.cart}/delete`, {
+            method: 'POST',
+            body: JSON.stringify({
+                product_id: productId
+            })
+        });
+        showToast('已从购物车删除', 'success');
+        loadCart();
+    } catch (error) {
+        showToast(error.message || '删除失败', 'error');
+    }
+}
+
+// 结算
+async function checkout() {
+    if (!state.token) {
+        showToast('请先登录', 'error');
+        showPage('login');
+        return;
+    }
+
+    if (state.cart.length === 0) {
+        showToast('购物车是空的', 'error');
+        return;
+    }
+
+    try {
+        // 调用后端结算 API
+        const orderItems = state.cart.map(item => ({
+            product_id: item.product_id,
+            quantity: item.quantity
+        }));
+
+        const data = await apiRequest(`${API_BASE.checkout}/prepare`, {
+            method: 'POST',
+            body: JSON.stringify({
+                coupon_id: '',
+                order_items: orderItems,
+                address_id: 1 // 暂时使用默认地址
+            })
+        });
+
+        // 调用创建订单 API
+        const createData = await apiRequest(`${API_BASE.order}/create`, {
+            method: 'POST',
+            body: JSON.stringify({
+                pre_order_id: data.data.pre_order_id,
+                coupon_id: '',
+                address_id: 1,
+                payment_method: 1 // 1-WECHAT_PAY 2-ALIPAY
+            })
+        });
+
+        // 创建订单对象
+        const order = {
+            id: createData.data.order_id,
+            order_no: createData.data.order_id,
+            items: [...state.cart],
+            total: state.cart.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0),
+            status: 'pending',
+            created_at: new Date().toISOString()
+        };
+
+        state.orders.unshift(order);
+        state.cart = [];
+        updateCartCount();
+        showToast('订单创建成功！正在跳转支付页面...', 'success');
+
+        // 跳转支付页面
+        setTimeout(() => {
+            showPaymentPage(order);
+        }, 1500);
+    } catch (error) {
+        showToast(error.message || '结算失败，请重试', 'error');
+        console.error('Checkout Error:', error);
+    }
+}
+
+// MinIO Upload Function
+async function uploadFile(file) {
+    if (!state.token) {
+        showToast('Please login first', 'error');
+        return;
+    }
+
+    try {
+        // 1. Get Presigned URL
+        const presignRes = await apiRequest(`${API_BASE.product}/upload`, {
+            method: 'POST',
+            body: JSON.stringify({
+                filename: file.name,
+                contentType: file.type
+            })
+        });
+
+        if (presignRes.statusCode !== 0) {
+            throw new Error(presignRes.statusMsg || 'Get upload url failed');
+        }
+
+        const { uploadUrl, formData, key } = presignRes;
+
+        // 2. Construct FormData
+        const data = new FormData();
+        for (const k in formData) {
+            data.append(k, formData[k]);
+        }
+        data.append('file', file);
+
+        // 3. Upload to MinIO
+        const uploadRes = await fetch(uploadUrl, {
+            method: 'POST',
+            body: data
+        });
+
+        if (!uploadRes.ok) {
+            throw new Error('Upload to MinIO failed');
+        }
+
+        showToast('Upload success!', 'success');
+        return key; // Return the key (path) for saving to DB
+    } catch (error) {
+        console.error('Upload error:', error);
+        showToast(error.message, 'error');
+        throw error;
+    }
+}
+
+// 加载订单
+async function loadOrders() {
+    console.log('loadOrders function called');
+    const orderList = document.getElementById('orderList');
+
+    // 先尝试从后端获取真实的订单数据
+    if (state.token) {
+        try {
+            const data = await apiRequest(`${API_BASE.order}/list`, {
+                method: 'GET'
+            });
+
+            if (data.data && data.data.orders && data.data.orders.length > 0) {
+                state.orders = data.data.orders.map(order => ({
+                    id: order.order_id,
+                    order_no: order.order_id,
+                    items: order.items || [],
+                    total: parseFloat(order.payable_amount), // 返回的是元
+                    status: order.order_status,
+                    created_at: order.created_at
+                }));
+            }
+        } catch (error) {
+            console.error('加载订单失败:', error);
+        }
+    }
+
+    if (state.orders.length === 0) {
+        orderList.innerHTML = '<div class="order-empty">暂无订单</div>';
+        return;
+    }
+
+    // 输出 item.product_id 的值
+    state.orders.forEach(order => {
+        order.items.forEach(item => {
+            console.log('item.product_id:', item.product_id, typeof item.product_id);
+        });
+    });
+
+    orderList.innerHTML = state.orders.map(order => `
+        <div class="order-card">
+            <div class="order-header">
+                <span class="order-id">订单号: ${order.order_no}</span>
+                <span class="order-status ${order.status}">${getStatusText(order.status)}</span>
+            </div>
+            <div class="order-items">
+                ${order.items.map(item => {
+                    // 优先使用后端返回的商品名称，如果没有则使用硬编码映射（兼容旧数据）
+                    let productName = item.product_name || '商品';
+                    
+                    // 兼容旧数据的硬编码映射
+                    if (!item.product_name) {
+                        if (item.product_id === 1) {
+                            productName = 'iPhone 15 Pro';
+                        } else if (item.product_id === 2) {
+                            productName = 'MacBook Pro 14"';
+                        } else if (item.product_id === 3) {
+                            productName = 'Sony PS5';
+                        } else if (item.product_id === 4) {
+                            productName = 'AirPods Pro 2';
+                        }
+                    }
+
+                    return `
+                        <div class="order-item">
+                            <span>${productName} x ${item.quantity}</span>
+                            <span>¥${parseFloat(item.unit_price) * item.quantity}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            <div class="order-footer">
+                <span>下单时间: ${new Date(order.created_at).toLocaleString()}</span>
+                <strong>总计: ¥${order.total.toFixed(2)}</strong>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 获取状态文本
+function getStatusText(status) {
+    // 后端返回的是数字状态，对应 OrderStatus 枚举
+    const statusMap = {
+        0: '待支付',
+        1: '已支付',
+        2: '已发货',
+        3: '已完成',
+        4: '已取消',
+        5: '已退款',
+        6: '已关闭',
+        'pending': '待支付',
+        'paid': '已支付',
+        'shipped': '已发货',
+        'completed': '已完成',
+        'cancelled': '已取消',
+        'refund': '已退款',
+        'closed': '已关闭'
+    };
+    return statusMap[status] || status;
+}
+
+// 模拟商品数据（用于演示）
+const mockProducts = [
+    { id: 1, name: 'iPhone 15', description: '最新款苹果手机，搭载 A17 芯片', price: 7999, stock: 100, picture: '📱' },
+    { id: 2, name: 'MacBook Pro', description: '高性能笔记本电脑，M3 Pro 芯片', price: 14999, stock: 50, picture: '💻' },
+    { id: 3, name: 'Nike Air Max', description: '舒适的运动鞋子，气垫设计', price: 899, stock: 200, picture: '👟' },
+    { id: 4, name: 'Sony WH-1000XM5', description: '顶级降噪耳机', price: 2699, stock: 75, picture: '🎧' },
+    { id: 5, name: 'iPad Pro', description: '12.9英寸平板电脑，M2芯片', price: 8999, stock: 40, picture: '📱' },
+    { id: 6, name: 'Apple Watch', description: '智能手表，健康监测', price: 2999, stock: 60, picture: '⌚' }
+];
+
+// 初始化时设置演示商品
+state.products = mockProducts;

@@ -1,0 +1,6 @@
+[submodule ".claude/ai-context"]
+	path = .claude/ai-context
+	url = https://github.com/zeromicro/ai-context.git
+[submodule ".cursorrules"]
+	path = .cursorrules
+	url = https://github.com/zeromicro/ai-context.git

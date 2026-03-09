@@ -1,0 +1,8 @@
+{
+  "setup": [
+    "go mod download",
+    "[ ! -f .env ] && cp .env.example .env",
+    "git submodule update --init --recursive"
+  ],
+  "teardown": []
+}

@@ -1,0 +1,130 @@
+# Go-Mall 本地开发环境 Docker Compose 配置
+# 使用方法: docker-compose -f docker-compose.dev.yml up -d
+
+services:
+  # Consul 服务发现
+  consul:
+    image: consul:1.8.8
+    container_name: go-mall-consul
+    command: [
+      "agent",
+      "-dev",
+      "-client=0.0.0.0"
+    ]
+    ports:
+      - "8500:8500"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - go-mall
+
+  # Redis 缓存
+  redis:
+    image: redis:6-alpine
+    container_name: go-mall-redis
+    volumes:
+      - ./construct/depend/conf/redis.conf:/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - go-mall
+    command: [ "redis-server", "/etc/redis/redis.conf" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # MySQL 数据库 (兼容 ARM64 架构)
+  mysql:
+    image: mysql:8.0.37
+    container_name: go-mall-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./construct/depend/sql:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+    networks:
+      - go-mall
+    environment:
+      MYSQL_ROOT_PASSWORD: 'fht3825099'
+      MYSQL_DATABASE: 'mall'
+      TZ: 'Asia/Shanghai'
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pfht3825099" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # RabbitMQ 消息队列
+  rabbitmq:
+    image: rabbitmq:3.8.17-management-alpine
+    container_name: go-mall-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - go-mall
+    environment:
+      RABBITMQ_DEFAULT_USER: 'admin'
+      RABBITMQ_DEFAULT_PASS: 'admin'
+      RABBITMQ_DEFAULT_VHOST: '/'
+      TZ: 'Asia/Shanghai'
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "rabbitmqctl status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Elasticsearch 搜索引擎
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    container_name: go-mall-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - go-mall
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+
+  # DTM 分布式事务（可选）
+  dtm:
+    image: yedf/dtm:latest
+    container_name: go-mall-dtm
+    ports:
+      - "36789:36789"
+      - "36790:36790"
+    command: [ "-c", "/app/dtm/configs/config.yaml" ]
+    volumes:
+      - ./construct/depend/conf/dtm.yaml:/app/dtm/configs/config.yaml
+    networks:
+      - go-mall
+    restart: unless-stopped
+    profiles:
+      - optional
+
+volumes:
+  mysql-data:
+  es-data:
+
+networks:
+  go-mall:
+    driver: bridge

@@ -1,0 +1,97 @@
+Name: gateway
+Host: 0.0.0.0
+Port: 8888
+Auth:
+  AccessSecret: "u666" # Matches auths service secret
+  AccessExpire: 86400
+
+Upstreams:
+  - Grpc:
+      Target: 127.0.0.1:10001
+    ProtoSets:
+      - proto/users.pb
+    Mappings:
+      - Method: post
+        Path: /douyin/user/login
+        RpcPath: users.Users/Login
+      - Method: post
+        Path: /douyin/user/register
+        RpcPath: users.Users/Register
+      - Method: get
+        Path: /douyin/user
+        RpcPath: users.Users/GetUser
+      - Method: post
+        Path: /douyin/user/address/add
+        RpcPath: users.Users/AddAddress
+      - Method: get
+        Path: /douyin/user/address/list
+        RpcPath: users.Users/ListAddresses
+
+  - Grpc:
+      Target: 127.0.0.1:10004
+    ProtoSets:
+      - proto/order.pb
+    Mappings:
+      - Method: get
+        Path: /douyin/order/list
+        RpcPath: order.OrderService/ListOrders
+      - Method: post
+        Path: /douyin/order/create
+        RpcPath: order.OrderService/CreateOrder
+      - Method: get
+        Path: /douyin/order/detail
+        RpcPath: order.OrderService/GetOrder
+
+  - Grpc:
+      Target: 127.0.0.1:10002
+    ProtoSets:
+      - proto/product.pb
+    Mappings:
+      - Method: get
+        Path: /douyin/product/list
+        RpcPath: product.ProductCatalogService/GetAllProduct
+      - Method: get
+        Path: /douyin/product
+        RpcPath: product.ProductCatalogService/GetProduct
+      - Method: post
+        Path: /douyin/product/upload
+        RpcPath: product.ProductCatalogService/GetUploadURL
+      - Method: get
+        Path: /douyin/product/list/cursor
+        RpcPath: product.ProductCatalogService/ListProducts
+
+  - Grpc:
+      Target: 127.0.0.1:10003
+    ProtoSets:
+      - proto/carts.pb
+    Mappings:
+      - Method: post
+        Path: /douyin/cart/add
+        RpcPath: carts.Cart/CreateCartItem
+      - Method: get
+        Path: /douyin/cart/list
+        RpcPath: carts.Cart/CartItemList
+      - Method: post
+        Path: /douyin/cart/delete
+        RpcPath: carts.Cart/DeleteCartItem
+      - Method: post
+        Path: /douyin/cart/sub
+        RpcPath: carts.Cart/SubCartItem
+
+  - Grpc:
+      Target: 127.0.0.1:10005
+    ProtoSets:
+      - proto/checkout.pb
+    Mappings:
+      - Method: post
+        Path: /douyin/checkout/prepare
+        RpcPath: checkout.CheckoutService/PrepareCheckout
+
+  - Grpc:
+      Target: 127.0.0.1:10006
+    ProtoSets:
+      - proto/payment.pb
+    Mappings:
+      - Method: post
+        Path: /douyin/payment/create
+        RpcPath: payment.Payment/CreatePayment

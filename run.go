@@ -1,0 +1,186 @@
+package main
+
+import (
+	"flag"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
+	"os/signal"
+	"path/filepath"
+	"slices"
+	"strings"
+	"syscall"
+	"time"
+)
+
+type ServiceManager struct {
+	rootPath string
+	cmds     []*exec.Cmd
+}
+
+func NewServiceManager(rootPath string) *ServiceManager {
+	return &ServiceManager{
+		rootPath: rootPath,
+		cmds:     make([]*exec.Cmd, 0),
+	}
+}
+
+var Service []string
+
+func (sm *ServiceManager) startServices(dirName, ext string) error {
+	dirPath := filepath.Join(sm.rootPath, dirName)
+	dirs, err := os.ReadDir(dirPath)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range dirs {
+		if !entry.IsDir() {
+			continue
+		}
+		if !slices.Contains(Service, entry.Name()) {
+			continue
+		}
+		dir := filepath.Join(dirPath, entry.Name())
+
+		if err := os.Chdir(dir); err != nil {
+			return err
+		}
+
+		fileName := fmt.Sprintf("%s.%s", entry.Name(), ext)
+		cmd := exec.Command("go", "run", fileName)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Start(); err != nil {
+			fmt.Printf("Error running %s %s: %v\n", dirName, entry.Name(), err)
+		} else {
+			sm.cmds = append(sm.cmds, cmd)
+		}
+
+		if err := os.Chdir(sm.rootPath); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (sm *ServiceManager) startFrontendServer() {
+	frontendPath := filepath.Join(sm.rootPath, "frontend")
+
+	// Check if frontend directory exists
+	if _, err := os.Stat(frontendPath); os.IsNotExist(err) {
+		log.Println("Frontend directory not found, skipping frontend server")
+		return
+	}
+
+	fs := http.FileServer(http.Dir(frontendPath))
+	http.Handle("/", fs)
+
+	go func() {
+		log.Println("Starting frontend server at http://localhost:3000")
+		if err := http.ListenAndServe(":3000", nil); err != nil {
+			log.Printf("Frontend server error: %v", err)
+		}
+	}()
+}
+
+func (sm *ServiceManager) stopAll() {
+	log.Println("Stopping all services...")
+	for _, cmd := range sm.cmds {
+		if cmd.Process != nil {
+			_ = cmd.Process.Kill()
+		}
+	}
+}
+
+func (sm *ServiceManager) handleSignals() {
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
+	for sig := range sigCh {
+		fmt.Printf("\nReceived signal: %s\n", sig)
+		sm.stopAll()
+		os.Exit(0)
+	}
+}
+
+func printBanner() {
+	fmt.Println(`╔═══════════════════════════════════════════════════════════════╗
+║                    🛒  Go-Mall 电商平台                         ║
+╠═══════════════════════════════════════════════════════════════╣
+║  基于 Go-Zero 微服务架构的现代电商系统                       ║
+╚═══════════════════════════════════════════════════════════════╝`)
+}
+
+func run() {
+	printBanner()
+
+	root, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	// 获取命令行参数
+	var services string
+	var serviceSet []string
+	var withFrontend bool
+
+	servicesPath := filepath.Join(root, "services")
+	serviceDir, err := os.ReadDir(servicesPath)
+	if err != nil {
+		panic(err)
+	}
+	for _, service := range serviceDir {
+		serviceSet = append(serviceSet, service.Name())
+	}
+
+	flag.StringVar(&services, "services", "", fmt.Sprintf("you can choose services to run services：%v", strings.Join(serviceSet, ",")))
+	flag.BoolVar(&withFrontend, "frontend", true, "start frontend server (default: true)")
+	flag.Parse()
+
+	if services != "" {
+		Service = strings.Split(services, ",")
+		for _, svc := range Service {
+			if !slices.Contains(serviceSet, svc) {
+				log.Fatalf("Invalid service name: %s. Available services: %v", svc, serviceSet)
+			}
+		}
+	} else {
+		// 默认启动核心服务
+		Service = []string{"auths", "users", "product", "inventory", "order", "checkout", "carts", "coupons", "payment"}
+	}
+
+	log.Println("Starting services:", Service)
+	sm := NewServiceManager(root)
+
+	// 启动前端服务器
+	if withFrontend {
+		sm.startFrontendServer()
+	}
+
+	// 等待一下让前端服务器先启动
+	time.Sleep(500 * time.Millisecond)
+
+	// 启动后端服务
+	if err := sm.startServices("services", "go"); err != nil {
+		panic(err)
+	}
+
+	fmt.Println()
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	if withFrontend {
+		fmt.Println("  🎨  前端界面:  http://localhost:3000")
+	}
+	fmt.Println("  🔧  Consul UI:  http://localhost:8500")
+	fmt.Println("  🔍  Elasticsearch: http://localhost:9200")
+	fmt.Println("  🐰  RabbitMQ:  http://localhost:15672")
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Println()
+	fmt.Println("按 Ctrl+C 停止所有服务")
+	fmt.Println()
+
+	sm.handleSignals()
+}

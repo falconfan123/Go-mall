@@ -1,0 +1,11 @@
+# 这是一个简化的 DTM 配置，不依赖 Consul
+Store:
+  Driver: mysql
+  Host: localhost
+  Port: 3306
+  User: root
+  Password: fht3825099
+  Database: mall
+MicroService:
+  Driver: 'dtm-driver-gozero'
+  EndPoint: 'localhost:36790'
