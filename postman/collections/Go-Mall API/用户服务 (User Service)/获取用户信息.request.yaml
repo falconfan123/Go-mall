@@ -1,0 +1,6 @@
+$kind: http-request
+url: http://localhost:8080/douyin/user/info
+method: GET
+headers:
+  Authorization: Bearer {{access_token}}
+order: 1000

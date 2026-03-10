@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:8080/douyin/user/login
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "test@example.com",
+      "password": "password123"
+    }
+order: 3000

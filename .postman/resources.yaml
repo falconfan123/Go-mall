@@ -1,0 +1,35 @@
+# Use this workspace to collaborate
+workspace:
+  id: a5c48e7e-5192-4bc0-81ae-3ed3cfea70e5
+
+localResources:
+  specs:
+    - ../common/proto/empty.proto
+    - ../services/auths/auths.proto
+    - ../services/carts/carts.proto
+    - ../services/audit/audit.proto
+    - ../services/coupons/coupons.proto
+    - ../services/checkout/checkout.proto
+    - ../services/order/order.proto
+    - ../services/payment/payment.proto
+    - ../services/product/product.proto
+    - ../services/users/users.proto
+    - ../services/inventory/inventory.proto
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+cloudResources:
+  specs:
+    ../services/carts/carts.proto: 80dda03a-e4aa-4333-8d42-27c89d3f4ffd
+    ../services/product/product.proto: 954d2249-b6ab-4c6a-aff1-482efdedaec7
+    ../services/auths/auths.proto: 5bbfc6d0-4f60-4b33-8a1d-564acbfcfb14
+    ../services/coupons/coupons.proto: e2a1b623-321f-4a1d-a262-49182b8eef42
+    ../services/payment/payment.proto: 9c470e2d-51ea-4c83-982e-6981e4553339
+    ../services/users/users.proto: 4e4ef82e-3bb6-4165-b176-e6190f096f82
+    ../common/proto/empty.proto: 43fb03b3-ba0e-4a9e-bdd7-c6bbcbf2b7c8
+    ../services/inventory/inventory.proto: 3bd44a23-05c2-45d2-9017-2ce39aa88d38
+    ../services/order/order.proto: 365e7528-6af4-4bbf-9a54-cf8596fc0b34
+    ../services/checkout/checkout.proto: 2216f853-296e-4bab-b6fc-eb6ef02ed2f3
+    ../services/audit/audit.proto: 1a138c14-1f71-482b-884d-e5a855cf6f52
+  collections:
+    ../postman/collections/Go-Mall API: 53060092-5ca7af2a-6711-40f1-ac25-683ebfc25ceb
+    ../postman/collections/Go-Mall Project: 53060092-c58f41f5-a3fe-4228-bfe8-ac8d59321f66
