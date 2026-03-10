@@ -1,0 +1,338 @@
+{
+  "name": "抖音商城API",
+  "description": "抖音商城前端接口文档",
+  "itemType": "project",
+  "version": "2.0",
+  "environments": [
+    {
+      "name": "本地开发环境",
+      "url": "http://localhost:8888/douyin",
+      "isDefault": true
+    }
+  ],
+  "apiCollection": [
+    {
+      "name": "用户模块",
+      "items": [
+        {
+          "name": "用户注册",
+          "method": "POST",
+          "path": "/user/register",
+          "request": {
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "email", "type": "string", "required": true, "description": "邮箱"},
+                {"name": "password", "type": "string", "required": true, "description": "密码"},
+                {"name": "confirmPassword", "type": "string", "required": true, "description": "确认密码"}
+              ]
+            }
+          },
+          "response": {
+            "parameters": [
+              {"name": "accessToken", "type": "string", "description": "访问令牌"},
+              {"name": "refreshToken", "type": "string", "description": "刷新令牌"},
+              {"name": "userId", "type": "integer", "description": "用户ID"}
+            ]
+          }
+        },
+        {
+          "name": "用户登录",
+          "method": "POST",
+          "path": "/user/login",
+          "request": {
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "email", "type": "string", "required": true, "description": "邮箱"},
+                {"name": "password", "type": "string", "required": true, "description": "密码"}
+              ]
+            }
+          },
+          "response": {
+            "parameters": [
+              {"name": "accessToken", "type": "string", "description": "访问令牌"},
+              {"name": "refreshToken", "type": "string", "description": "刷新令牌"},
+              {"name": "userId", "type": "integer", "description": "用户ID"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "商品模块",
+      "items": [
+        {
+          "name": "获取商品列表",
+          "method": "GET",
+          "path": "/product/list",
+          "request": {
+            "query": [
+              {"name": "page", "type": "integer", "required": false, "description": "页码", "default": 1},
+              {"name": "pageSize", "type": "integer", "required": false, "description": "每页数量", "default": 100}
+            ]
+          },
+          "response": {
+            "parameters": [
+              {"name": "products", "type": "array", "description": "商品列表", "items": {
+                "type": "object",
+                "properties": {
+                  "id": {"type": "integer", "description": "商品ID"},
+                  "name": {"type": "string", "description": "商品名称"},
+                  "description": {"type": "string", "description": "商品描述"},
+                  "price": {"type": "number", "description": "商品价格"},
+                  "stock": {"type": "integer", "description": "库存"},
+                  "thumbnailUrl": {"type": "string", "description": "缩略图URL"}
+                }
+              }}
+            ]
+          }
+        },
+        {
+          "name": "获取文件上传预签名URL",
+          "method": "POST",
+          "path": "/product/upload",
+          "request": {
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "filename", "type": "string", "required": true, "description": "文件名"},
+                {"name": "contentType", "type": "string", "required": true, "description": "文件类型"}
+              ]
+            }
+          },
+          "response": {
+            "parameters": [
+              {"name": "uploadUrl", "type": "string", "description": "上传URL"},
+              {"name": "formData", "type": "object", "description": "表单数据"},
+              {"name": "key", "type": "string", "description": "文件存储路径"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "购物车模块",
+      "items": [
+        {
+          "name": "添加商品到购物车",
+          "method": "POST",
+          "path": "/cart/add",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ],
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "product_id", "type": "integer", "required": true, "description": "商品ID"},
+                {"name": "quantity", "type": "integer", "required": true, "description": "数量"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "获取购物车列表",
+          "method": "GET",
+          "path": "/cart/list",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ]
+          },
+          "response": {
+            "parameters": [
+              {"name": "data", "type": "array", "description": "购物车列表", "items": {
+                "type": "object",
+                "properties": {
+                  "id": {"type": "integer", "description": "购物车项ID"},
+                  "product_id": {"type": "integer", "description": "商品ID"},
+                  "quantity": {"type": "integer", "description": "数量"}
+                }
+              }}
+            ]
+          }
+        },
+        {
+          "name": "减少购物车商品数量",
+          "method": "POST",
+          "path": "/cart/sub",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ],
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "product_id", "type": "integer", "required": true, "description": "商品ID"},
+                {"name": "quantity", "type": "integer", "required": true, "description": "数量"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "删除购物车商品",
+          "method": "POST",
+          "path": "/cart/delete",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ],
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "product_id", "type": "integer", "required": true, "description": "商品ID"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "订单模块",
+      "items": [
+        {
+          "name": "创建订单",
+          "method": "POST",
+          "path": "/order/create",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ],
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "pre_order_id", "type": "string", "required": true, "description": "预订单ID"},
+                {"name": "coupon_id", "type": "string", "required": false, "description": "优惠券ID"},
+                {"name": "address_id", "type": "integer", "required": true, "description": "地址ID"},
+                {"name": "payment_method", "type": "integer", "required": true, "description": "支付方式：1-微信支付，2-支付宝"}
+              ]
+            }
+          },
+          "response": {
+            "parameters": [
+              {"name": "data", "type": "object", "properties": {
+                "order_id": {"type": "string", "description": "订单ID"}
+              }}
+            ]
+          }
+        },
+        {
+          "name": "获取订单列表",
+          "method": "GET",
+          "path": "/order/list",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ]
+          },
+          "response": {
+            "parameters": [
+              {"name": "data", "type": "object", "properties": {
+                "orders": {"type": "array", "description": "订单列表", "items": {
+                  "type": "object",
+                  "properties": {
+                    "order_id": {"type": "string", "description": "订单ID"},
+                    "items": {"type": "array", "description": "订单商品"},
+                    "payable_amount": {"type": "number", "description": "应付金额"},
+                    "order_status": {"type": "integer", "description": "订单状态：0-待支付，1-已支付，2-已发货，3-已完成，4-已取消，5-已退款，6-已关闭"},
+                    "created_at": {"type": "string", "description": "创建时间"}
+                  }
+                }}
+              }}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "结算模块",
+      "items": [
+        {
+          "name": "结算准备",
+          "method": "POST",
+          "path": "/checkout/prepare",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ],
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "coupon_id", "type": "string", "required": false, "description": "优惠券ID"},
+                {"name": "order_items", "type": "array", "required": true, "description": "订单商品列表", "items": {
+                  "type": "object",
+                  "properties": {
+                    "product_id": {"type": "integer", "description": "商品ID"},
+                    "quantity": {"type": "integer", "description": "数量"}
+                  }
+                }},
+                {"name": "address_id", "type": "integer", "required": true, "description": "地址ID"}
+              ]
+            }
+          },
+          "response": {
+            "parameters": [
+              {"name": "data", "type": "object", "properties": {
+                "pre_order_id": {"type": "string", "description": "预订单ID"}
+              }}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "支付模块",
+      "items": [
+        {
+          "name": "创建支付",
+          "method": "POST",
+          "path": "/payment/create",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ],
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "order_id", "type": "string", "required": true, "description": "订单ID"},
+                {"name": "payment_method", "type": "integer", "required": true, "description": "支付方式：1-微信支付，2-支付宝"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "秒杀模块",
+      "items": [
+        {
+          "name": "秒杀购买",
+          "method": "POST",
+          "path": "/flash/buy",
+          "request": {
+            "headers": [
+              {"name": "Access-Token", "type": "string", "required": true, "description": "访问令牌"}
+            ],
+            "body": {
+              "type": "json",
+              "parameters": [
+                {"name": "productId", "type": "integer", "required": true, "description": "商品ID"},
+                {"name": "quantity", "type": "integer", "required": true, "description": "数量"}
+              ]
+            }
+          },
+          "response": {
+            "parameters": [
+              {"name": "data", "type": "object", "properties": {
+                "orderId": {"type": "string", "description": "订单ID"},
+                "orderNo": {"type": "string", "description": "订单号"},
+                "total": {"type": "integer", "description": "总金额（分）"}
+              }}
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
