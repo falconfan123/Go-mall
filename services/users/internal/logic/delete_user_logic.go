@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
 	"github.com/falconfan123/Go-mall/services/users/userspb"
 
@@ -25,7 +26,18 @@ func NewDeleteUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delete
 
 // 删除用户方法
 func (l *DeleteUserLogic) DeleteUser(in *userspb.DeleteUserRequest) (*userspb.DeleteUserResponse, error) {
-	// todo: add your logic here and delete this line
+	// Soft delete user
+	err := l.svcCtx.UsersModel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
+	if err != nil {
+		l.Logger.Errorw("delete user failed", logx.Field("err", err))
+		return &userspb.DeleteUserResponse{
+			StatusCode: uint32(code.ServerError),
+			StatusMsg:  code.ServerErrorMsg,
+		}, nil
+	}
 
-	return &userspb.DeleteUserResponse{}, nil
+	return &userspb.DeleteUserResponse{
+		StatusCode: 0,
+		StatusMsg:  "success",
+	}, nil
 }

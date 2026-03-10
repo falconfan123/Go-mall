@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
 	"github.com/falconfan123/Go-mall/services/users/userspb"
 
@@ -25,7 +26,19 @@ func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 
 // 更新用户方法
 func (l *UpdateUserLogic) UpdateUser(in *userspb.UpdateUserRequest) (*userspb.UpdateUserResponse, error) {
-	// todo: add your logic here and delete this line
+	// Update user info
+	// Use UsrName instead of Username as per proto definition
+	err := l.svcCtx.UsersModel.UpdateUserNameandUrl(l.ctx, int64(in.UserId), in.UsrName, in.AvatarUrl)
+	if err != nil {
+		l.Logger.Errorw("update user failed", logx.Field("err", err))
+		return &userspb.UpdateUserResponse{
+			StatusCode: uint32(code.ServerError),
+			StatusMsg:  code.ServerErrorMsg,
+		}, nil
+	}
 
-	return &userspb.UpdateUserResponse{}, nil
+	return &userspb.UpdateUserResponse{
+		StatusCode: 0,
+		StatusMsg:  "success",
+	}, nil
 }

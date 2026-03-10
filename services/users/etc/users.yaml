@@ -30,9 +30,14 @@ Log:
   Encoding: "json"
   Path: "./logs/users-rpc"
 
-MysqlConfig:
-  datasource: "root:fht3825099@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+Mysql:
+  DataSource: "root:fht3825099@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   Conntimeout: 5
+
+Salt: "J1j1zH4zH4"
+AuthConfig:
+  AccessSecret: "uKq5xR8vW2zN9mP4sL7jH6yG3bF1dC0"
+  AccessExpire: 86400
 
 
 Cache:

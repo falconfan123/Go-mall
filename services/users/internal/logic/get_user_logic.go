@@ -3,6 +3,8 @@ package logic
 import (
 	"context"
 
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/dal/model/user"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
 	"github.com/falconfan123/Go-mall/services/users/userspb"
 
@@ -25,7 +27,29 @@ func NewGetUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserLo
 
 // 获取用户信息方法
 func (l *GetUserLogic) GetUser(in *userspb.GetUserRequest) (*userspb.GetUserResponse, error) {
-	// todo: add your logic here and delete this line
+	u, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
+	if err != nil {
+		if err == user.ErrNotFound {
+			return &userspb.GetUserResponse{
+				StatusCode: uint32(code.UserNotExistError),
+				StatusMsg:  code.UserNotExistErrorMsg,
+			}, nil
+		}
+		l.Logger.Errorw("get user failed", logx.Field("err", err))
+		return &userspb.GetUserResponse{
+			StatusCode: uint32(code.ServerError),
+			StatusMsg:  code.ServerErrorMsg,
+		}, nil
+	}
 
-	return &userspb.GetUserResponse{}, nil
+	return &userspb.GetUserResponse{
+		StatusCode: 0,
+		StatusMsg:  "success",
+		UserId:     uint32(u.UserId),
+		Email:      u.Email.String,
+		UserName:   u.Username.String,
+		AvatarUrl:  u.AvatarUrl.String,
+		CreatedAt:  u.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:  u.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}, nil
 }

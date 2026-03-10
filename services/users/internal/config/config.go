@@ -9,13 +9,18 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	MysqlConfig MysqlConfig
+	Mysql       MysqlConfig
 	GorseConfig GorseConfig
 	AuditRpc    zrpc.RpcClientConf
 	AuthsRpc    zrpc.RpcClientConf
 	Consul      consul.Conf
 	Cache       cache.CacheConf
 	RedisConf   redis.RedisConf
+	Salt        string
+	AuthConfig  struct {
+		AccessSecret string
+		AccessExpire int64
+	}
 }
 type MysqlConfig struct {
 	DataSource  string

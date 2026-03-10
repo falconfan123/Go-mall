@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/users/internal/config"
 	"github.com/falconfan123/Go-mall/services/users/internal/server"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/services/users/userspb"
 
 	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"strings"
@@ -31,7 +31,7 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		users.RegisterUsersServer(grpcServer, server.NewUsersServer(ctx))
+		userspb.RegisterUsersServer(grpcServer, server.NewUsersServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
