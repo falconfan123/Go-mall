@@ -27,8 +27,8 @@ type FlashProduct struct {
 }
 
 type FlashBuyReq struct {
-	ProductID int64 `json:"productId"` // 商品ID
-	Quantity  int64 `json:"quantity"`  // 购买数量
+	ProductID int64 `json:"productId" form:"product_id"` // 商品ID
+	Quantity  int64 `json:"quantity" form:"quantity"`    // 购买数量
 }
 
 type FlashBuyResp struct {

@@ -24,6 +24,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/list",
 					Handler: GetProductListHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/upload",
+					Handler: UploadHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/douyin/product"),

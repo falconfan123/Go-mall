@@ -34,6 +34,7 @@ type DeleteCartResp struct {
 
 type SubCartReq struct {
 	ProductId int32 `json:"product_id"`
+	Quantity  int32 `json:"quantity,optional"` // 可选参数，默认减1
 }
 
 type SubCartResp struct {

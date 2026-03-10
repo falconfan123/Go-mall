@@ -1,0 +1,1481 @@
+openapi: 3.0.3
+info:
+  title: Go-Mall API Documentation
+  description: Go Mall 电商平台后端API接口文档
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: 开发环境服务器
+paths:
+  # 购物车服务
+  /douyin/cart/add:
+    post:
+      tags:
+        - 购物车
+      summary: 添加商品到购物车
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCartReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCartResp'
+  /douyin/cart/delete:
+    post:
+      tags:
+        - 购物车
+      summary: 从购物车删除商品
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteCartReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteCartResp'
+  /douyin/cart/list:
+    get:
+      tags:
+        - 购物车
+      summary: 获取购物车列表
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItemListResp'
+  /douyin/cart/sub:
+    post:
+      tags:
+        - 购物车
+      summary: 减少购物车商品数量
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubCartReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubCartResp'
+
+  # 优惠券服务
+  /douyin/coupon/calculate:
+    get:
+      tags:
+        - 优惠券
+      summary: 计算优惠券折扣
+      parameters:
+        - name: coupon_id
+          in: query
+          schema:
+            type: string
+        - name: items
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Items'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculateCouponResp'
+  /douyin/coupon/claim:
+    post:
+      tags:
+        - 优惠券
+      summary: 领取优惠券
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponItemReq'
+      responses:
+        '200':
+          description: 成功
+  /douyin/coupon/detail:
+    get:
+      tags:
+        - 优惠券
+      summary: 获取优惠券详情
+      parameters:
+        - name: coupon_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponItemResp'
+  /douyin/coupon/list:
+    get:
+      tags:
+        - 优惠券
+      summary: 获取优惠券列表
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: type
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponListResp'
+  /douyin/coupon/my/list:
+    get:
+      tags:
+        - 优惠券
+      summary: 获取我的优惠券列表
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponMyListResp'
+  /douyin/coupon/my/usage:
+    get:
+      tags:
+        - 优惠券
+      summary: 获取我的优惠券使用记录
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponUsageListResp'
+
+  # 支付服务
+  /douyin/payment/create:
+    post:
+      tags:
+        - 支付
+      summary: 创建支付订单
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+  /douyin/payment/list:
+    get:
+      tags:
+        - 支付
+      summary: 获取支付列表
+      parameters:
+        - name: method
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentListResponse'
+
+  # 商品服务
+  /douyin/product/:
+    get:
+      tags:
+        - 商品
+      summary: 根据ID获取商品详情
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProductByIDResp'
+  /douyin/product/list:
+    get:
+      tags:
+        - 商品
+      summary: 获取商品列表
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProductListResp'
+  /douyin/product/upload:
+    post:
+      tags:
+        - 商品
+      summary: 上传商品图片
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResp'
+
+  # 结算服务
+  /douyin/checkout/detail:
+    get:
+      tags:
+        - 结算
+      summary: 获取结算详情
+      parameters:
+        - name: pre_order_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutDetailResp'
+  /douyin/checkout/list:
+    get:
+      tags:
+        - 结算
+      summary: 获取结算列表
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutListResp'
+  /douyin/checkout/prepare:
+    post:
+      tags:
+        - 结算
+      summary: 预结算
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutResp'
+
+  # 秒杀服务
+  /douyin/flash/products:
+    get:
+      tags:
+        - 秒杀
+      summary: 获取秒杀商品列表
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFlashProductsResp'
+  /douyin/flash/buy:
+    post:
+      tags:
+        - 秒杀
+      summary: 秒杀商品
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlashBuyReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlashBuyResp'
+
+  # 订单服务
+  /douyin/order/cancel:
+    post:
+      tags:
+        - 订单
+      summary: 取消订单
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelOrderReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelOrderResp'
+  /douyin/order/create:
+    post:
+      tags:
+        - 订单
+      summary: 创建订单
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderReq'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrderResp'
+  /douyin/order/detail:
+    get:
+      tags:
+        - 订单
+      summary: 获取订单详情
+      parameters:
+        - name: order_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailResp'
+  /douyin/order/list:
+    get:
+      tags:
+        - 订单
+      summary: 获取订单列表
+      parameters:
+        - name: statuses
+          in: query
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOrdersResp'
+
+  # 用户服务
+  /douyin/user/address:
+    post:
+      tags:
+        - 用户地址
+      summary: 添加地址
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAddressRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddAddressResponse'
+    delete:
+      tags:
+        - 用户地址
+      summary: 删除地址
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAddressRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteAddressResponse'
+    put:
+      tags:
+        - 用户地址
+      summary: 更新地址
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAddressRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateAddressResponse'
+    get:
+      tags:
+        - 用户地址
+      summary: 获取地址详情
+      parameters:
+        - name: address_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAddressResponse'
+  /douyin/user/address/list:
+    get:
+      tags:
+        - 用户地址
+      summary: 获取地址列表
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressListResponse'
+  /douyin/user/delete:
+    post:
+      tags:
+        - 用户
+      summary: 删除用户
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+  /douyin/user/info:
+    get:
+      tags:
+        - 用户
+      summary: 获取用户信息
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetInfoResponse'
+  /douyin/user/login:
+    post:
+      tags:
+        - 用户
+      summary: 用户登录
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  /douyin/user/logout:
+    post:
+      tags:
+        - 用户
+      summary: 用户登出
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+  /douyin/user/register:
+    post:
+      tags:
+        - 用户
+      summary: 用户注册
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+  /douyin/user/update:
+    put:
+      tags:
+        - 用户
+      summary: 更新用户信息
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+
+components:
+  schemas:
+    # 购物车相关
+    CartInfoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+        product:
+          type: array
+          items: {}
+    CartItemListResp:
+      type: object
+      properties:
+        total:
+          type: integer
+        cart_info:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartInfoResponse'
+    CreateCartReq:
+      type: object
+      properties:
+        product_id:
+          type: integer
+    CreateCartResp:
+      type: object
+      properties:
+        id:
+          type: integer
+    DeleteCartReq:
+      type: object
+      properties:
+        product_id:
+          type: integer
+    DeleteCartResp:
+      type: object
+      properties:
+        success:
+          type: boolean
+    SubCartReq:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+          description: 减少的数量，可选，默认减1
+    SubCartResp:
+      type: object
+      properties:
+        id:
+          type: integer
+
+    # 优惠券相关
+    CalculateCouponReq:
+      type: object
+      properties:
+        coupon_id:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Items'
+    CalculateCouponResp:
+      type: object
+      properties:
+        origin_amount:
+          type: integer
+        final_amount:
+          type: integer
+        discount_amount:
+          type: integer
+        coupon_type:
+          type: string
+        is_usable:
+          type: boolean
+        unusable_reason:
+          type: string
+    CouponItemReq:
+      type: object
+      properties:
+        coupon_id:
+          type: string
+    CouponItemResp:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: integer
+        value:
+          type: string
+        min_amount:
+          type: string
+        start_time:
+          type: string
+        end_time:
+          type: string
+        total_count:
+          type: integer
+        remaining_count:
+          type: integer
+        created_at:
+          type: string
+        updated_at:
+          type: string
+    CouponListReq:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+        size:
+          type: integer
+          default: 10
+        type:
+          type: integer
+    CouponListResp:
+      type: object
+      properties:
+        coupon_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/CouponItemResp'
+    CouponMy:
+      type: object
+      properties:
+        id:
+          type: integer
+        coupon_id:
+          type: string
+        status:
+          type: string
+        order_id:
+          type: string
+        used_at:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+    CouponMyListResp:
+      type: object
+      properties:
+        coupon_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/CouponMy'
+    CouponUsage:
+      type: object
+      properties:
+        id:
+          type: integer
+        pre_order_id:
+          type: string
+        order_id:
+          type: string
+        coupon_id:
+          type: string
+        user_id:
+          type: integer
+        coupon_type:
+          type: string
+        origin_value:
+          type: string
+        discount_amount:
+          type: string
+        applied_at:
+          type: string
+    CouponUsageListResp:
+      type: object
+      properties:
+        coupon_usage_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/CouponUsage'
+    Items:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+
+    # 支付相关
+    PaymentItem:
+      type: object
+      properties:
+        payment_id:
+          type: string
+        order_id:
+          type: string
+        paid_amount:
+          type: integer
+        payment_method:
+          type: integer
+        transaction_id:
+          type: string
+        pay_url:
+          type: string
+        status:
+          type: integer
+        created_at:
+          type: integer
+    PaymentListReq:
+      type: object
+      properties:
+        method:
+          type: integer
+        page:
+          type: integer
+          default: 1
+        page_size:
+          type: integer
+          default: 10
+    PaymentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentItem'
+    PaymentReq:
+      type: object
+      properties:
+        order_id:
+          type: string
+        payment_method:
+          type: integer
+    PaymentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PaymentItem'
+
+    # 商品相关
+    GetProductByIDReq:
+      type: object
+      properties:
+        id:
+          type: integer
+    GetProductByIDResp:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        picture:
+          type: string
+        stock:
+          type: integer
+        sold:
+          type: integer
+        price:
+          type: integer
+        categories:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    GetProductListReq:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+        size:
+          type: integer
+          default: 10
+    GetProductListResp:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        stock:
+          type: integer
+        price:
+          type: integer
+        sold:
+          type: integer
+        picture:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        description:
+          type: string
+    UploadReq:
+      type: object
+      properties:
+        filename:
+          type: string
+        contentType:
+          type: string
+    UploadResp:
+      type: object
+      properties:
+        uploadUrl:
+          type: string
+        formData:
+          type: object
+          additionalProperties: {}
+        key:
+          type: string
+
+    # 结算相关
+    CheckoutDetailReq:
+      type: object
+      properties:
+        pre_order_id:
+          type: string
+    CheckoutDetailResp:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CheckoutOrder'
+    CheckoutItem:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+        product_name:
+          type: string
+        product_desc:
+          type: string
+        price:
+          type: string
+    CheckoutItemReq:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+    CheckoutListReq:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+        page_size:
+          type: integer
+          default: 10
+    CheckoutListResp:
+      type: object
+      properties:
+        total:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutOrder'
+    CheckoutOrder:
+      type: object
+      properties:
+        pre_order_id:
+          type: string
+        user_id:
+          type: integer
+        status:
+          type: integer
+        expire_time:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutItem'
+        original_amount:
+          type: string
+        final_amount:
+          type: string
+    CheckoutReq:
+      type: object
+      properties:
+        coupon_id:
+          type: string
+        order_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutItemReq'
+        address_id:
+          type: integer
+    CheckoutResp:
+      type: object
+      properties:
+        expire_time:
+          type: integer
+        pre_order_id:
+          type: string
+        pay_method:
+          type: array
+          items:
+            type: integer
+    UpdateStatusReq:
+      type: object
+      properties:
+        pre_order_id:
+          type: string
+        status:
+          type: integer
+
+    # 秒杀相关
+    GetFlashProductsReq:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+        size:
+          type: integer
+          default: 10
+    GetFlashProductsResp:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlashProduct'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    FlashProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        picture:
+          type: string
+        price:
+          type: integer
+        flashPrice:
+          type: integer
+        stock:
+          type: integer
+        sold:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    FlashBuyReq:
+      type: object
+      properties:
+        productId:
+          type: integer
+          description: 商品ID（支持驼峰和下划线格式）
+        product_id:
+          type: integer
+          description: 商品ID（支持驼峰和下划线格式）
+        quantity:
+          type: integer
+    FlashBuyResp:
+      type: object
+      properties:
+        orderId:
+          type: string
+        orderNo:
+          type: string
+        total:
+          type: integer
+
+    # 订单相关
+    CancelOrderReq:
+      type: object
+      properties:
+        order_id:
+          type: string
+        cancel_reason:
+          type: string
+    CancelOrderResp:
+      type: object
+      properties:
+        order_id:
+          type: string
+    CreateOrderReq:
+      type: object
+      properties:
+        pre_order_id:
+          type: string
+        coupon_id:
+          type: string
+        address_id:
+          type: integer
+        payment_method:
+          type: integer
+    CreateOrderResp:
+      type: object
+      properties:
+        order_id:
+          type: string
+    GetOrderReq:
+      type: object
+      properties:
+        order_id:
+          type: string
+    ListOrdersReq:
+      type: object
+      properties:
+        statuses:
+          type: array
+          items:
+            type: integer
+        page:
+          type: integer
+          default: 1
+        page_size:
+          type: integer
+          default: 10
+    ListOrdersResp:
+      type: object
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResp'
+    OrderAddressResp:
+      type: object
+      properties:
+        address_id:
+          type: integer
+        recipient_name:
+          type: string
+        phone_number:
+          type: string
+        province:
+          type: string
+        city:
+          type: string
+        detailed_address:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        order_id:
+          type: string
+    OrderDetailResp:
+      type: object
+      properties:
+        order:
+          $ref: '#/components/schemas/OrderResp'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemResp'
+        address:
+          $ref: '#/components/schemas/OrderAddressResp'
+    OrderItemResp:
+      type: object
+      properties:
+        item_id:
+          type: string
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+        product_name:
+          type: string
+        product_desc:
+          type: string
+        unit_price:
+          type: string
+    OrderResp:
+      type: object
+      properties:
+        order_id:
+          type: string
+        pre_order_id:
+          type: string
+        user_id:
+          type: integer
+        payment_method:
+          type: integer
+        transaction_id:
+          type: string
+        paid_at:
+          type: integer
+        original_amount:
+          type: string
+        discount_amount:
+          type: string
+        payable_amount:
+          type: string
+        paid_amount:
+          type: string
+        order_status:
+          type: integer
+        payment_status:
+          type: integer
+        reason:
+          type: string
+        expire_time:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemResp'
+
+    # 用户相关
+    AddAddressRequest:
+      type: object
+      properties:
+        recipient_name:
+          type: string
+        phone_number:
+          type: string
+        province:
+          type: string
+        city:
+          type: string
+        detailed_address:
+          type: string
+        is_default:
+          type: boolean
+    AddAddressResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/AddressData'
+    AddressData:
+      type: object
+      properties:
+        address_id:
+          type: integer
+        recipient_name:
+          type: string
+        phone_number:
+          type: string
+        province:
+          type: string
+        city:
+          type: string
+        detailed_address:
+          type: string
+        is_default:
+          type: boolean
+        created_at:
+          type: string
+        updated_at:
+          type: string
+    AddressListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressData'
+    AddressResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        recipient_name:
+          type: string
+        phone_number:
+          type: string
+        province:
+          type: string
+        city:
+          type: string
+        detailed_address:
+          type: string
+        is_default:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+    AllAddressListRequest:
+      type: object
+    DeleteAddressRequest:
+      type: object
+      properties:
+        address_id:
+          type: integer
+    DeleteAddressResponse:
+      type: object
+    DeleteRequest:
+      type: object
+    DeleteResponse:
+      type: object
+    GetAddressRequest:
+      type: object
+      properties:
+        address_id:
+          type: integer
+    GetAddressResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/AddressData'
+    GetInfoRequest:
+      type: object
+    GetInfoResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        logout_at:
+          type: string
+        created_at:
+          type: string
+        update_at:
+          type: string
+        email:
+          type: string
+        user_name:
+          type: string
+        avatar:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+    LogoutRequest:
+      type: object
+    LogoutResponse:
+      type: object
+      properties:
+        logout_at:
+          type: integer
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        confirmPassword:
+          type: string
+    RegisterResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+    UpdateAddressRequest:
+      type: object
+      properties:
+        recipient_name:
+          type: string
+        phone_number:
+          type: string
+        province:
+          type: string
+        city:
+          type: string
+        detailed_address:
+          type: string
+        is_default:
+          type: boolean
+        address_id:
+          type: integer
+    UpdateAddressResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/AddressData'
+    UpdateRequest:
+      type: object
+      properties:
+        user_name:
+          type: string
+        avatar:
+          type: string
+    UpdateResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        user_name:
+          type: string
+        avatar:
+          type: string

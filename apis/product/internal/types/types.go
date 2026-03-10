@@ -42,3 +42,14 @@ type Product struct {
 	UpdatedAt   string   `json:"updatedAt"`
 	Description string   `json:"description"`
 }
+
+type UploadReq struct {
+	Filename    string `json:"filename"`
+	ContentType string `json:"contentType"`
+}
+
+type UploadResp struct {
+	UploadUrl string                 `json:"uploadUrl"`
+	FormData  map[string]interface{} `json:"formData"`
+	Key       string                 `json:"key"`
+}

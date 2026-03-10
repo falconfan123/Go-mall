@@ -22,7 +22,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: CreateCartItemHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodDelete,
+					Method:  http.MethodPost,
 					Path:    "/delete",
 					Handler: DeleteCartItemHandler(serverCtx),
 				},
@@ -38,6 +38,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-		rest.WithPrefix("/douyin/carts"),
+		rest.WithPrefix("/douyin/cart"),
 	)
 }
