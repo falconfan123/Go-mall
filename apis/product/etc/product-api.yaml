@@ -2,6 +2,12 @@ Name: product-api
 Host: 0.0.0.0
 Port: 8002
 
+Consul:
+  Host: localhost:8500 # consul endpoint
+  Key: product-api
+  Meta:
+    Protocol: http
+
 
 ProductRpc:
   Target: consul://localhost:8500/products.rpc?wait=14s

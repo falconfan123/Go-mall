@@ -5,8 +5,7 @@ Mode: dev
 # 服务发现
 Consul:
   Host: localhost:8500 # consul endpoint
-  Key: 
-    users.rpc
+  Key: users.rpc
   Meta:
     Protocol: grpc
 
