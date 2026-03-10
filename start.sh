@@ -10,7 +10,7 @@ echo "Cleaning up..."
 pkill -f "go run" 2>/dev/null || true
 pkill -f "services/" 2>/dev/null || true
 pkill -f "apis/" 2>/dev/null || true
-lsof -ti:10000,10001,10002,8001,8002 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti:10000,10001,10002,8001,8002,8888 2>/dev/null | xargs kill -9 2>/dev/null || true
 sleep 2
 
 # Start backend RPC services
@@ -49,6 +49,13 @@ PRODUCT_API_PID=$!
 echo "  - product-api (PID $PRODUCT_API_PID) on http://localhost:8002"
 sleep 2
 
+# Start unified API Gateway
+cd /Users/fan/go-mall/services/gateway
+go run gateway.go > /tmp/gateway.log 2>&1 &
+GATEWAY_PID=$!
+echo "  - api-gateway (PID $GATEWAY_PID) on http://localhost:8888"
+sleep 2
+
 echo ""
 echo "=== Services started successfully! ==="
 echo ""
@@ -60,9 +67,11 @@ echo ""
 echo "API Endpoints:"
 echo "  - User API:     http://localhost:8001"
 echo "  - Product API:  http://localhost:8002"
+echo "  - API Gateway:  http://localhost:8888"
 echo ""
 echo "Test URLs:"
-echo "  - Product List: http://localhost:8002/douyin/product/list?page=1&size=10"
+echo "  - Product List (API): http://localhost:8002/douyin/product/list?page=1&size=10"
+echo "  - Product List (Gateway): http://localhost:8888/douyin/product/list?page=1&size=10"
 echo ""
 echo "Consul UI: http://localhost:8500"
 echo ""
@@ -72,6 +81,7 @@ echo "  tail -f /tmp/users.log"
 echo "  tail -f /tmp/product.log"
 echo "  tail -f /tmp/user-api.log"
 echo "  tail -f /tmp/product-api.log"
+echo "  tail -f /tmp/gateway.log"
 echo ""
 echo "To stop: pkill -f 'go run'"
 echo ""
@@ -83,6 +93,7 @@ USERS_PID=$USERS_PID
 PRODUCT_PID=$PRODUCT_PID
 USER_API_PID=$USER_API_PID
 PRODUCT_API_PID=$PRODUCT_API_PID
+GATEWAY_PID=$GATEWAY_PID
 EOF
 
 # Wait a bit and test
