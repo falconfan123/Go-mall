@@ -3,14 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 	"jijizhazha1024/go-mall/apis/product/internal/config"
 	"jijizhazha1024/go-mall/apis/product/internal/handler"
 	"jijizhazha1024/go-mall/apis/product/internal/svc"
-
-	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
+	"jijizhazha1024/go-mall/common/utils/ip"
 
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
+	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 )
 
 var configFile = flag.String("f", "etc/product-api.yaml", "the config file")
@@ -26,6 +28,21 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+
+	// 注册服务到Consul
+	registerOn := fmt.Sprintf("%s:%d", c.Host, c.Port)
+	if strings.Contains(registerOn, "0.0.0.0") {
+		localIP, err := ip.GetLocalIP()
+		if err == nil && localIP != "" {
+			registerOn = strings.Replace(registerOn, "0.0.0.0", localIP, 1)
+		} else {
+			registerOn = strings.Replace(registerOn, "0.0.0.0", "host.docker.internal", 1)
+		}
+	}
+	if err := consul.RegisterService(registerOn, c.Consul); err != nil {
+		logx.Errorw("register service error", logx.Field("err", err))
+		panic(err)
+	}
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()

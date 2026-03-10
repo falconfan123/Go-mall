@@ -15,10 +15,10 @@ AuthsRpc:
 
 Consul:
   Host: ${CONSUL_HOST}
-  Key: 
-    users.rpc
-    auths.rpc
-    # 日志配置
+  Key: user-api
+  Meta:
+    Protocol: http
+# 日志配置
 Log:
   ServiceName: "user-api"
   Mode: 'file'

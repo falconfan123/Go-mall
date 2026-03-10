@@ -12,9 +12,9 @@ AuthsRpc:
 
 Consul:
   Host: localhost:8500 # consul endpoint
-  Key: 
-    users.rpc
-    auths.rpc
+  Key: user-api
+  Meta:
+    Protocol: http
 WhitePathList:
   - /douyin/user/login
   - /douyin/user/register
