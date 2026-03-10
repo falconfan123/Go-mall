@@ -7,6 +7,18 @@ servers:
   - url: http://localhost:8080
     description: 开发环境服务器
 paths:
+  # 全局安全要求：所有接口都需要携带长短令牌
+  security:
+    - LongTokenAuth: []
+    - ShortTokenAuth: []
+
+  # 公共响应头定义
+  x-common-headers:
+    Short-Token-Refresh:
+      description: 当短令牌过期时，服务端会在响应头中返回新的短令牌，客户端需要自动更新
+      schema:
+        type: string
+
   # 购物车服务
   /douyin/cart/add:
     post:
@@ -595,6 +607,7 @@ paths:
       tags:
         - 用户
       summary: 用户登出
+      description: 登出后会销毁服务端Session数据，长短令牌均失效
       requestBody:
         content:
           application/json:
@@ -607,6 +620,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LogoutResponse'
+
+  /douyin/user/refresh-token:
+    post:
+      tags:
+        - 用户
+      summary: 主动刷新短令牌
+      description: 客户端可以主动调用此接口刷新短令牌，无需等待短令牌过期
+      responses:
+        '200':
+          description: 成功
+          headers:
+            Short-Token-Refresh:
+              description: 新的短令牌
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  short_token:
+                    type: string
+                    description: 新的短令牌
   /douyin/user/register:
     post:
       tags:
@@ -643,6 +681,18 @@ paths:
                 $ref: '#/components/schemas/UpdateResponse'
 
 components:
+  securitySchemes:
+    LongTokenAuth:
+      type: apiKey
+      in: header
+      name: long_token
+      description: 长令牌，登录成功后获取，有效期30天
+    ShortTokenAuth:
+      type: apiKey
+      in: header
+      name: short_token
+      description: 短令牌，登录成功后获取，有效期1天，过期后服务端会自动下发新的短令牌
+
   schemas:
     # 购物车相关
     CartInfoResponse:
@@ -1414,10 +1464,12 @@ components:
     LoginResponse:
       type: object
       properties:
-        access_token:
+        long_token:
           type: string
-        refresh_token:
+          description: 长令牌，有效期30天，格式为SessionID+数字签名
+        short_token:
           type: string
+          description: 短令牌，有效期1天，格式为用户ID+设备ID+过期时间+数字签名
     LogoutRequest:
       type: object
     LogoutResponse:
