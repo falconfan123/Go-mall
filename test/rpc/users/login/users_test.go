@@ -3,9 +3,9 @@ package login
 import (
 	"context"
 	"fmt"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/services/auths/auths"
-	"jijizhazha1024/go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/users/users"
 	"sync"
 	"testing"
 

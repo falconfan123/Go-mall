@@ -8,11 +8,11 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/zeromicro/go-zero/zrpc"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/common/response"
-	"jijizhazha1024/go-mall/services/auths/auths"
-	"jijizhazha1024/go-mall/services/auths/authsclient"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/response"
+	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/authsclient"
 )
 
 func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf, whitePaths, optionPaths []string) func(next http.HandlerFunc) http.HandlerFunc {

@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"jijizhazha1024/go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/consts/code"
 
-	"jijizhazha1024/go-mall/services/order/internal/svc"
-	"jijizhazha1024/go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/internal/svc"
+	"github.com/falconfan123/Go-mall/services/order/order"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

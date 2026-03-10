@@ -3,13 +3,13 @@ package handler
 import (
 	"github.com/zeromicro/x/errors"
 	xhttp "github.com/zeromicro/x/http"
-	"jijizhazha1024/go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/consts/code"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"jijizhazha1024/go-mall/apis/checkout/internal/logic"
-	"jijizhazha1024/go-mall/apis/checkout/internal/svc"
-	"jijizhazha1024/go-mall/apis/checkout/internal/types"
+	"github.com/falconfan123/Go-mall/apis/checkout/internal/logic"
+	"github.com/falconfan123/Go-mall/apis/checkout/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/checkout/internal/types"
 )
 
 func DetailHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

@@ -3,12 +3,12 @@ package logic
 import (
 	"context"
 	"errors"
-	"jijizhazha1024/go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/consts/code"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
-	"jijizhazha1024/go-mall/services/inventory/internal/svc"
-	"jijizhazha1024/go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
+	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

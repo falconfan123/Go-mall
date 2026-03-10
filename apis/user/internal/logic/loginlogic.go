@@ -6,12 +6,12 @@ import (
 
 	"github.com/zeromicro/x/errors"
 
-	"jijizhazha1024/go-mall/apis/user/internal/svc"
-	"jijizhazha1024/go-mall/apis/user/internal/types"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/services/auths/authsclient"
-	"jijizhazha1024/go-mall/services/users/usersclient"
+	"github.com/falconfan123/Go-mall/apis/user/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/user/internal/types"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/auths/authsclient"
+	"github.com/falconfan123/Go-mall/services/users/usersclient"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

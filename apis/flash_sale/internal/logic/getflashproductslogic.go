@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"jijizhazha1024/go-mall/apis/flash_sale/internal/svc"
-	"jijizhazha1024/go-mall/apis/flash_sale/internal/types"
+	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

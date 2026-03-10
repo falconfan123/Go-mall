@@ -1,10 +1,10 @@
 package logic
 
 import (
-	order2 "jijizhazha1024/go-mall/dal/model/order"
-	"jijizhazha1024/go-mall/services/checkout/checkout"
-	"jijizhazha1024/go-mall/services/coupons/coupons"
-	"jijizhazha1024/go-mall/services/order/order"
+	order2 "github.com/falconfan123/Go-mall/dal/model/order"
+	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/order/order"
 	"time"
 )
 

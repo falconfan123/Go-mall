@@ -6,9 +6,9 @@ import (
 
 	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
-	"jijizhazha1024/go-mall/apis/payment/internal/config"
-	"jijizhazha1024/go-mall/apis/payment/internal/handler"
-	"jijizhazha1024/go-mall/apis/payment/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/payment/internal/config"
+	"github.com/falconfan123/Go-mall/apis/payment/internal/handler"
+	"github.com/falconfan123/Go-mall/apis/payment/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"

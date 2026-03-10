@@ -3,8 +3,8 @@ package deleteaddress
 import (
 	"context"
 	"fmt"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/services/users/users"
 	"testing"
 
 	"google.golang.org/grpc"

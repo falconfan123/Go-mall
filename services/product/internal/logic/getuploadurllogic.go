@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"jijizhazha1024/go-mall/services/product/internal/svc"
-	"jijizhazha1024/go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/services/product/internal/svc"
+	"github.com/falconfan123/Go-mall/services/product/product"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"

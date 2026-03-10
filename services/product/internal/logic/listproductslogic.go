@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"jijizhazha1024/go-mall/services/product/internal/svc"
-	"jijizhazha1024/go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/services/product/internal/svc"
+	"github.com/falconfan123/Go-mall/services/product/product"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

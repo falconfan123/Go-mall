@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"jijizhazha1024/go-mall/services/payment/payment"
+	"github.com/falconfan123/Go-mall/services/payment/payment"
 	"testing"
 )
 

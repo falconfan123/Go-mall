@@ -1,7 +1,7 @@
 package users_biz
 
 import (
-	"jijizhazha1024/go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/services/users/users"
 	"time"
 )
 

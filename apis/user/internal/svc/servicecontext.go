@@ -1,10 +1,10 @@
 package svc
 
 import (
-	"jijizhazha1024/go-mall/apis/user/internal/config"
-	"jijizhazha1024/go-mall/common/middleware"
-	"jijizhazha1024/go-mall/services/auths/authsclient"
-	"jijizhazha1024/go-mall/services/users/usersclient"
+	"github.com/falconfan123/Go-mall/apis/user/internal/config"
+	"github.com/falconfan123/Go-mall/common/middleware"
+	"github.com/falconfan123/Go-mall/services/auths/authsclient"
+	"github.com/falconfan123/Go-mall/services/users/usersclient"
 
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"

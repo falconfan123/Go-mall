@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
-	"jijizhazha1024/go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"log"
 	"time"
 
@@ -15,12 +15,12 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"jijizhazha1024/go-mall/services/product/internal/config"
-	"jijizhazha1024/go-mall/services/product/internal/logic"
-	"jijizhazha1024/go-mall/services/product/internal/server"
-	"jijizhazha1024/go-mall/services/product/internal/svc"
-	"jijizhazha1024/go-mall/services/product/product"
-	"jijizhazha1024/go-mall/common/utils/ip"
+	"github.com/falconfan123/Go-mall/services/product/internal/config"
+	"github.com/falconfan123/Go-mall/services/product/internal/logic"
+	"github.com/falconfan123/Go-mall/services/product/internal/server"
+	"github.com/falconfan123/Go-mall/services/product/internal/svc"
+	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"strings"
 )
 

@@ -6,7 +6,7 @@ package paymentclient
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/payment/payment"
+	"github.com/falconfan123/Go-mall/services/payment/payment"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

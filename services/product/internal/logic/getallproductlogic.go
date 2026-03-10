@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	product2 "jijizhazha1024/go-mall/dal/model/products/product"
-	"jijizhazha1024/go-mall/services/product/internal/svc"
-	"jijizhazha1024/go-mall/services/product/product"
+	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
+	"github.com/falconfan123/Go-mall/services/product/internal/svc"
+	"github.com/falconfan123/Go-mall/services/product/product"
 	"sync"
 
 	"github.com/zeromicro/go-zero/core/logx"

@@ -4,12 +4,12 @@ import (
 	"flag"
 	"fmt"
 
-	"jijizhazha1024/go-mall/services/order/internal/config"
-	"jijizhazha1024/go-mall/services/order/internal/server"
-	"jijizhazha1024/go-mall/services/order/internal/svc"
-	"jijizhazha1024/go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/internal/config"
+	"github.com/falconfan123/Go-mall/services/order/internal/server"
+	"github.com/falconfan123/Go-mall/services/order/internal/svc"
+	"github.com/falconfan123/Go-mall/services/order/order"
 
-	"jijizhazha1024/go-mall/common/utils/ip"
+	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"strings"
 
 	"github.com/zeromicro/go-zero/core/conf"

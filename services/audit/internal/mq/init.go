@@ -8,10 +8,10 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"io"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/dal/model/audit"
-	"jijizhazha1024/go-mall/services/audit/internal/config"
-	"jijizhazha1024/go-mall/services/audit/model/es"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/dal/model/audit"
+	"github.com/falconfan123/Go-mall/services/audit/internal/config"
+	"github.com/falconfan123/Go-mall/services/audit/model/es"
 	"strings"
 )
 

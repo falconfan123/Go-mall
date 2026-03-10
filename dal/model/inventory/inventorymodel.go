@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"jijizhazha1024/go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"strings"
 
 	sqlx1 "github.com/jmoiron/sqlx"

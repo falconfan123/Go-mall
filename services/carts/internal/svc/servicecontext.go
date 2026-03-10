@@ -2,9 +2,9 @@ package svc
 
 import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"jijizhazha1024/go-mall/dal/model/cart"
-	"jijizhazha1024/go-mall/services/carts/internal/config"
-	"jijizhazha1024/go-mall/services/carts/internal/db"
+	"github.com/falconfan123/Go-mall/dal/model/cart"
+	"github.com/falconfan123/Go-mall/services/carts/internal/config"
+	"github.com/falconfan123/Go-mall/services/carts/internal/db"
 )
 
 type ServiceContext struct {

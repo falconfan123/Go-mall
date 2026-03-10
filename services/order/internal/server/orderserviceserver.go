@@ -7,9 +7,9 @@ package server
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/order/internal/logic"
-	"jijizhazha1024/go-mall/services/order/internal/svc"
-	"jijizhazha1024/go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/internal/logic"
+	"github.com/falconfan123/Go-mall/services/order/internal/svc"
+	"github.com/falconfan123/Go-mall/services/order/order"
 )
 
 type OrderServiceServer struct {

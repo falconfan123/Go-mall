@@ -3,15 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"jijizhazha1024/go-mall/services/auths/auths"
-	"jijizhazha1024/go-mall/services/auths/internal/config"
-	"jijizhazha1024/go-mall/services/auths/internal/server"
-	"jijizhazha1024/go-mall/services/auths/internal/svc"
+	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/internal/config"
+	"github.com/falconfan123/Go-mall/services/auths/internal/server"
+	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
-	"jijizhazha1024/go-mall/common/utils/ip"
+	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"strings"
 
 	"github.com/zeromicro/go-zero/core/conf"

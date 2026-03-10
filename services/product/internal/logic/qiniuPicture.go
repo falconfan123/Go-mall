@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
-	"jijizhazha1024/go-mall/services/product/internal/config"
+	"github.com/falconfan123/Go-mall/services/product/internal/config"
 	"time"
 )
 

@@ -6,8 +6,8 @@ package handler
 import (
 	"net/http"
 
-	order "jijizhazha1024/go-mall/apis/order/internal/handler/order"
-	"jijizhazha1024/go-mall/apis/order/internal/svc"
+	order "github.com/falconfan123/Go-mall/apis/order/internal/handler/order"
+	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

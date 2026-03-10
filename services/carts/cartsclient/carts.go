@@ -7,7 +7,7 @@ package cartsclient
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/carts/carts"
+	"github.com/falconfan123/Go-mall/services/carts/carts"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

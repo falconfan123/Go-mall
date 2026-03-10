@@ -1,6 +1,6 @@
 package users_biz
 
-import "jijizhazha1024/go-mall/services/users/users"
+import "github.com/falconfan123/Go-mall/services/users/users"
 
 func HandleLoginerror(msg string, code int, err error) (*users.LoginResponse, error) {
 	return &users.LoginResponse{

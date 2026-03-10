@@ -3,7 +3,7 @@ package audit
 import (
 	"context"
 	"fmt"
-	"jijizhazha1024/go-mall/services/audit/audit"
+	"github.com/falconfan123/Go-mall/services/audit/audit"
 	"sync"
 	"testing"
 	"time"
@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"jijizhazha1024/go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 )
 
 var auditClient audit.AuditClient

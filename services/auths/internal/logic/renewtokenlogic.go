@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/common/utils/token"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/utils/token"
 
-	"jijizhazha1024/go-mall/services/auths/auths"
-	"jijizhazha1024/go-mall/services/auths/internal/svc"
+	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

@@ -7,12 +7,12 @@ import (
 	"errors"
 	"time"
 
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/dal/model/user_address"
-	"jijizhazha1024/go-mall/services/audit/audit"
-	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/dal/model/user_address"
+	"github.com/falconfan123/Go-mall/services/audit/audit"
+	"github.com/falconfan123/Go-mall/services/users/internal/svc"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"

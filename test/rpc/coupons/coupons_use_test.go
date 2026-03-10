@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"testing"
 )
 

@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/common/utils/token"
-	"jijizhazha1024/go-mall/services/order/internal/svc"
-	"jijizhazha1024/go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/utils/token"
+	"github.com/falconfan123/Go-mall/services/order/internal/svc"
+	"github.com/falconfan123/Go-mall/services/order/order"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/metadata"

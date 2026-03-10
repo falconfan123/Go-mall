@@ -1,9 +1,9 @@
 package logic
 
 import (
-	"jijizhazha1024/go-mall/apis/coupon/internal/types"
-	"jijizhazha1024/go-mall/services/coupons/coupons"
-	"jijizhazha1024/go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/apis/coupon/internal/types"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
 )
 
 func convertCoupon2Resp(c *couponsclient.Coupon) *types.CouponItemResp {

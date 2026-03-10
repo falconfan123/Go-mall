@@ -7,9 +7,9 @@ package server
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/inventory/internal/logic"
-	"jijizhazha1024/go-mall/services/inventory/internal/svc"
-	"jijizhazha1024/go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/services/inventory/internal/logic"
+	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
+	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 )
 
 type InventoryServer struct {

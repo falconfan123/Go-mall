@@ -4,7 +4,7 @@ package handler
 import (
 	"net/http"
 
-	"jijizhazha1024/go-mall/apis/coupon/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/coupon/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

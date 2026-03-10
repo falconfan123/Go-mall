@@ -4,13 +4,13 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
-	"jijizhazha1024/go-mall/dal/model/cart"
-	"jijizhazha1024/go-mall/dal/model/checkout"
-	"jijizhazha1024/go-mall/services/checkout/internal/config"
-	"jijizhazha1024/go-mall/services/checkout/internal/db"
-	"jijizhazha1024/go-mall/services/coupons/couponsclient"
-	"jijizhazha1024/go-mall/services/inventory/inventoryclient"
-	"jijizhazha1024/go-mall/services/product/productcatalogservice"
+	"github.com/falconfan123/Go-mall/dal/model/cart"
+	"github.com/falconfan123/Go-mall/dal/model/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/internal/config"
+	"github.com/falconfan123/Go-mall/services/checkout/internal/db"
+	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
+	"github.com/falconfan123/Go-mall/services/product/product"
 )
 
 type ServiceContext struct {
@@ -22,7 +22,7 @@ type ServiceContext struct {
 	CartsModel         cart.CartsModel
 	InventoryRpc       inventoryclient.Inventory
 	CouponsRpc         couponsclient.Coupons
-	ProductRpc         productcatalogservice.ProductCatalogService
+	ProductRpc         product.ProductCatalogService
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -40,6 +40,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CheckoutItemsModel: checkout.NewCheckoutItemsModel(mysql),
 		InventoryRpc:       inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		CouponsRpc:         couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponsRpc)),
-		ProductRpc:         productcatalogservice.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
+		ProductRpc:         product.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
 	}
 }

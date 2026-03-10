@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"jijizhazha1024/go-mall/apis/order/internal/config"
-	"jijizhazha1024/go-mall/apis/order/internal/handler"
-	"jijizhazha1024/go-mall/apis/order/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/order/internal/config"
+	"github.com/falconfan123/Go-mall/apis/order/internal/handler"
+	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
 
 	_ "github.com/dtm-labs/dtmdriver-gozero"
 	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"

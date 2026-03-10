@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"jijizhazha1024/go-mall/services/payment/internal/svc"
-	"jijizhazha1024/go-mall/services/payment/payment"
+	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
+	"github.com/falconfan123/Go-mall/services/payment/payment"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

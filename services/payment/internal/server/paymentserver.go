@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/payment/internal/logic"
-	"jijizhazha1024/go-mall/services/payment/internal/svc"
-	"jijizhazha1024/go-mall/services/payment/payment"
+	"github.com/falconfan123/Go-mall/services/payment/internal/logic"
+	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
+	"github.com/falconfan123/Go-mall/services/payment/payment"
 )
 
 type PaymentServer struct {

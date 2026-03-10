@@ -7,9 +7,9 @@ package server
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/carts/carts"
-	"jijizhazha1024/go-mall/services/carts/internal/logic"
-	"jijizhazha1024/go-mall/services/carts/internal/svc"
+	"github.com/falconfan123/Go-mall/services/carts/carts"
+	"github.com/falconfan123/Go-mall/services/carts/internal/logic"
+	"github.com/falconfan123/Go-mall/services/carts/internal/svc"
 )
 
 type CartServer struct {

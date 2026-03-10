@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"jijizhazha1024/go-mall/services/users/internal/config"
+	"github.com/falconfan123/Go-mall/services/users/internal/config"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )

@@ -6,7 +6,7 @@ package auditclient
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/audit/audit"
+	"github.com/falconfan123/Go-mall/services/audit/audit"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

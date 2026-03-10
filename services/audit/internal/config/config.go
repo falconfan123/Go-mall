@@ -1,7 +1,7 @@
 package config
 
 import (
-	"jijizhazha1024/go-mall/common/config"
+	"github.com/falconfan123/Go-mall/common/config"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"

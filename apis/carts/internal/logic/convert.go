@@ -1,8 +1,8 @@
 package logic
 
 import (
-	"jijizhazha1024/go-mall/apis/carts/internal/types"
-	"jijizhazha1024/go-mall/services/carts/carts"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/types"
+	"github.com/falconfan123/Go-mall/services/carts/carts"
 )
 
 func ConvertCartInfoResponse(res []*carts.CartInfoResponse) []*types.CartInfoResponse {

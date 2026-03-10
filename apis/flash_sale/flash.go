@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"jijizhazha1024/go-mall/apis/flash_sale/internal/config"
-	"jijizhazha1024/go-mall/apis/flash_sale/internal/handler"
-	"jijizhazha1024/go-mall/apis/flash_sale/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/config"
+	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/handler"
+	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/svc"
 
 	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 

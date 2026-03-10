@@ -1,4 +1,4 @@
-module jijizhazha1024/go-mall
+module github.com/falconfan123/Go-mall
 
 go 1.25
 
@@ -25,6 +25,26 @@ require (
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.36.1
 )
+
+replace github.com/falconfan123/Go-mall/services/auths/auths => ./services/auths/auths
+
+replace github.com/falconfan123/Go-mall/services/users/usersclient/userspb => ./services/users/usersclient/userspb
+
+replace github.com/falconfan123/Go-mall/services/product/product => ./services/product/product
+
+replace github.com/falconfan123/Go-mall/services/carts/carts => ./services/carts/carts
+
+replace github.com/falconfan123/Go-mall/services/order/order => ./services/order/order
+
+replace github.com/falconfan123/Go-mall/services/checkout/checkout => ./services/checkout/checkout
+
+replace github.com/falconfan123/Go-mall/services/payment/payment => ./services/payment/payment
+
+replace github.com/falconfan123/Go-mall/services/coupons/coupons => ./services/coupons/coupons
+
+replace github.com/falconfan123/Go-mall/services/inventory/inventory => ./services/inventory/inventory
+
+replace github.com/falconfan123/Go-mall/services/audit/audit => ./services/audit/audit
 
 require (
 	github.com/bufbuild/protocompile v0.14.1 // indirect

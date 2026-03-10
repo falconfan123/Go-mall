@@ -7,7 +7,7 @@ package checkoutservice
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/checkout"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
