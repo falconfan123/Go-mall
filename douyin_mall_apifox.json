@@ -25,6 +25,16 @@
                 {"name": "email", "type": "string", "required": true, "description": "邮箱"},
                 {"name": "password", "type": "string", "required": true, "description": "密码"},
                 {"name": "confirmPassword", "type": "string", "required": true, "description": "确认密码"}
+              ],
+              "examples": [
+                {
+                  "name": "正常注册",
+                  "content": {
+                    "email": "test@example.com",
+                    "password": "12345678",
+                    "confirmPassword": "12345678"
+                  }
+                }
               ]
             }
           },
@@ -33,6 +43,20 @@
               {"name": "accessToken", "type": "string", "description": "访问令牌"},
               {"name": "refreshToken", "type": "string", "description": "刷新令牌"},
               {"name": "userId", "type": "integer", "description": "用户ID"}
+            ],
+            "examples": [
+              {
+                "name": "注册成功",
+                "content": {
+                  "code": 0,
+                  "message": "success",
+                  "data": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user_id": 1
+                  }
+                }
+              }
             ]
           }
         },
@@ -46,6 +70,15 @@
               "parameters": [
                 {"name": "email", "type": "string", "required": true, "description": "邮箱"},
                 {"name": "password", "type": "string", "required": true, "description": "密码"}
+              ],
+              "examples": [
+                {
+                  "name": "正常登录",
+                  "content": {
+                    "email": "test@example.com",
+                    "password": "12345678"
+                  }
+                }
               ]
             }
           },
@@ -54,6 +87,20 @@
               {"name": "accessToken", "type": "string", "description": "访问令牌"},
               {"name": "refreshToken", "type": "string", "description": "刷新令牌"},
               {"name": "userId", "type": "integer", "description": "用户ID"}
+            ],
+            "examples": [
+              {
+                "name": "登录成功",
+                "content": {
+                  "code": 0,
+                  "message": "success",
+                  "data": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user_id": 1
+                  }
+                }
+              }
             ]
           }
         }
