@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"context"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/common/response"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/response"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/core/limit"

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"jijizhazha1024/go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 )
 
 var _ UserCouponsModel = (*customUserCouponsModel)(nil)

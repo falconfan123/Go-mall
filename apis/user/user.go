@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"jijizhazha1024/go-mall/apis/user/internal/config"
-	"jijizhazha1024/go-mall/apis/user/internal/handler"
-	"jijizhazha1024/go-mall/apis/user/internal/svc"
-	"jijizhazha1024/go-mall/common/utils/ip"
+	"github.com/falconfan123/Go-mall/apis/user/internal/config"
+	"github.com/falconfan123/Go-mall/apis/user/internal/handler"
+	"github.com/falconfan123/Go-mall/apis/user/internal/svc"
+	"github.com/falconfan123/Go-mall/common/utils/ip"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"

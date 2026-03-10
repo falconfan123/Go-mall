@@ -3,10 +3,10 @@ package logic
 import (
 	"context"
 	"fmt"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	inventory2 "jijizhazha1024/go-mall/dal/model/inventory"
-	"jijizhazha1024/go-mall/services/inventory/internal/svc"
-	"jijizhazha1024/go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	inventory2 "github.com/falconfan123/Go-mall/dal/model/inventory"
+	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
+	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"jijizhazha1024/go-mall/apis/carts/internal/config"
-	"jijizhazha1024/go-mall/apis/carts/internal/handler"
-	"jijizhazha1024/go-mall/apis/carts/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/config"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/handler"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/svc"
 
 	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 

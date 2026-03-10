@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"jijizhazha1024/go-mall/apis/product/internal/logic"
-	"jijizhazha1024/go-mall/apis/product/internal/svc"
-	"jijizhazha1024/go-mall/apis/product/internal/types"
+	"github.com/falconfan123/Go-mall/apis/product/internal/logic"
+	"github.com/falconfan123/Go-mall/apis/product/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/product/internal/types"
 )
 
 func GetProductByIDHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

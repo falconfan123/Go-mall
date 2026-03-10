@@ -1,7 +1,7 @@
 package response
 
 import (
-	"jijizhazha1024/go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/consts/code"
 )
 
 type RefreshResponse struct {

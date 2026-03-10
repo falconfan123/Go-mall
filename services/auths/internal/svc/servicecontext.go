@@ -1,8 +1,8 @@
 package svc
 
 import (
-	"jijizhazha1024/go-mall/dal/model/user"
-	"jijizhazha1024/go-mall/services/auths/internal/config"
+	"github.com/falconfan123/Go-mall/dal/model/user"
+	"github.com/falconfan123/Go-mall/services/auths/internal/config"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"

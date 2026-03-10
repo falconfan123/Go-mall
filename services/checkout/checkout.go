@@ -7,12 +7,12 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
-	"jijizhazha1024/go-mall/services/checkout/checkout"
-	"jijizhazha1024/go-mall/services/checkout/internal/config"
-	"jijizhazha1024/go-mall/services/checkout/internal/server"
-	"jijizhazha1024/go-mall/services/checkout/internal/svc"
+	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/internal/config"
+	"github.com/falconfan123/Go-mall/services/checkout/internal/server"
+	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
 
-	"jijizhazha1024/go-mall/common/utils/ip"
+	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"strings"
 
 	"github.com/zeromicro/go-zero/core/conf"

@@ -3,12 +3,12 @@ package logic
 import (
 	"context"
 	"github.com/zeromicro/x/errors"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/services/carts/carts"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/carts/carts"
 
-	"jijizhazha1024/go-mall/apis/carts/internal/svc"
-	"jijizhazha1024/go-mall/apis/carts/internal/types"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

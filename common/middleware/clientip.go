@@ -3,9 +3,9 @@ package middleware
 import (
 	"context"
 	"errors"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/common/response"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/response"
 	"net"
 	"net/http"
 	"strings"

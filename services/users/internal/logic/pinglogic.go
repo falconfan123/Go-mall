@@ -3,8 +3,8 @@ package logic
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/services/users/internal/svc"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

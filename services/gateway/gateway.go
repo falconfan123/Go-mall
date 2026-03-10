@@ -7,7 +7,7 @@ import (
 
 	"strings"
 
-	"jijizhazha1024/go-mall/common/utils/token"
+	"github.com/falconfan123/Go-mall/common/utils/token"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/gateway"

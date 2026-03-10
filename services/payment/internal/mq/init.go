@@ -3,7 +3,7 @@ package mq
 import (
 	"context"
 	"github.com/streadway/amqp"
-	"jijizhazha1024/go-mall/services/payment/internal/config"
+	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"time"
 )
 

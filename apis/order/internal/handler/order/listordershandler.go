@@ -5,9 +5,9 @@ import (
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 	xhttp "github.com/zeromicro/x/http"
-	"jijizhazha1024/go-mall/apis/order/internal/logic/order"
-	"jijizhazha1024/go-mall/apis/order/internal/svc"
-	"jijizhazha1024/go-mall/apis/order/internal/types"
+	"github.com/falconfan123/Go-mall/apis/order/internal/logic/order"
+	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/order/internal/types"
 )
 
 func ListOrdersHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

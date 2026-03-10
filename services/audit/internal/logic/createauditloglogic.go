@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"go.opentelemetry.io/otel/trace"
-	"jijizhazha1024/go-mall/services/audit/audit"
-	"jijizhazha1024/go-mall/services/audit/internal/mq"
-	"jijizhazha1024/go-mall/services/audit/internal/svc"
+	"github.com/falconfan123/Go-mall/services/audit/audit"
+	"github.com/falconfan123/Go-mall/services/audit/internal/mq"
+	"github.com/falconfan123/Go-mall/services/audit/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

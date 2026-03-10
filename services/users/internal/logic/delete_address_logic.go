@@ -1,0 +1,31 @@
+package logic
+
+import (
+	"context"
+
+	"github.com/falconfan123/Go-mall/services/users/internal/svc"
+	"github.com/falconfan123/Go-mall/services/users/userspb"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type DeleteAddressLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logx.Logger
+}
+
+func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteAddressLogic {
+	return &DeleteAddressLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		Logger: logx.WithContext(ctx),
+	}
+}
+
+// 删除用户地址
+func (l *DeleteAddressLogic) DeleteAddress(in *userspb.DeleteAddressRequest) (*userspb.DeleteAddressResponse, error) {
+	// todo: add your logic here and delete this line
+
+	return &userspb.DeleteAddressResponse{}, nil
+}

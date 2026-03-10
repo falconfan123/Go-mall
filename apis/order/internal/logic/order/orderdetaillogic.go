@@ -3,8 +3,8 @@ package order
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/apis/order/internal/svc"
-	"jijizhazha1024/go-mall/apis/order/internal/types"
+	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/order/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

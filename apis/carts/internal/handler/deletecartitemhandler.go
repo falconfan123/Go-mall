@@ -4,10 +4,10 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/zeromicro/x/errors"
 	xhttp "github.com/zeromicro/x/http"
-	"jijizhazha1024/go-mall/apis/carts/internal/logic"
-	"jijizhazha1024/go-mall/apis/carts/internal/svc"
-	"jijizhazha1024/go-mall/apis/carts/internal/types"
-	"jijizhazha1024/go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/logic"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/carts/internal/types"
+	"github.com/falconfan123/Go-mall/common/consts/code"
 	"net/http"
 )
 

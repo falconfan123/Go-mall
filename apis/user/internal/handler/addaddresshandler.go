@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"jijizhazha1024/go-mall/apis/user/internal/logic"
-	"jijizhazha1024/go-mall/apis/user/internal/svc"
-	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"github.com/falconfan123/Go-mall/apis/user/internal/logic"
+	"github.com/falconfan123/Go-mall/apis/user/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/user/internal/types"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 	xhttp "github.com/zeromicro/x/http"

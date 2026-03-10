@@ -2,9 +2,9 @@ package logic
 
 import (
 	"context"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/services/coupons/coupons"
-	"jijizhazha1024/go-mall/services/coupons/internal/svc"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"

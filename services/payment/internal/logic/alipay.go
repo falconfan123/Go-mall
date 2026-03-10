@@ -3,7 +3,7 @@ package logic
 import (
 	"fmt"
 	"github.com/smartwalle/alipay/v3"
-	"jijizhazha1024/go-mall/services/payment/internal/svc"
+	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
 	"time"
 )
 

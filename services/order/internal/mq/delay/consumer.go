@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"jijizhazha1024/go-mall/common/consts/code"
-	order2 "jijizhazha1024/go-mall/dal/model/order"
-	"jijizhazha1024/go-mall/services/inventory/inventory"
-	"jijizhazha1024/go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	order2 "github.com/falconfan123/Go-mall/dal/model/order"
+	"github.com/falconfan123/Go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/services/order/order"
 )
 
 func (a *OrderDelayMQ) consumer(ctx context.Context) {

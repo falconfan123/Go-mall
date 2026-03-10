@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"jijizhazha1024/go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/order"
 )
 
 var _ OrdersModel = (*customOrdersModel)(nil)

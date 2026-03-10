@@ -3,10 +3,10 @@ package svc
 import (
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
-	"jijizhazha1024/go-mall/apis/payment/internal/config"
-	"jijizhazha1024/go-mall/common/middleware"
-	"jijizhazha1024/go-mall/services/payment/payment"
-	"jijizhazha1024/go-mall/services/payment/paymentclient"
+	"github.com/falconfan123/Go-mall/apis/payment/internal/config"
+	"github.com/falconfan123/Go-mall/common/middleware"
+	"github.com/falconfan123/Go-mall/services/payment/payment"
+	"github.com/falconfan123/Go-mall/services/payment/paymentclient"
 )
 
 type ServiceContext struct {

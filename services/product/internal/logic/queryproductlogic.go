@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"github.com/olivere/elastic/v7"
 	"github.com/zeromicro/go-zero/core/logx"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/services/product/internal/svc"
-	"jijizhazha1024/go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/services/product/internal/svc"
+	"github.com/falconfan123/Go-mall/services/product/product"
 )
 
 type QueryProductLogic struct {

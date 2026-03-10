@@ -2,9 +2,9 @@ package logic
 
 import (
 	"context"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/services/checkout/checkout"
-	"jijizhazha1024/go-mall/services/checkout/internal/svc"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

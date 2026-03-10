@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/services/inventory/internal/svc"
-	"jijizhazha1024/go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
+	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"

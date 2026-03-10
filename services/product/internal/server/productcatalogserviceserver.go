@@ -7,9 +7,9 @@ package server
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/product/internal/logic"
-	"jijizhazha1024/go-mall/services/product/internal/svc"
-	"jijizhazha1024/go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/services/product/internal/logic"
+	"github.com/falconfan123/Go-mall/services/product/internal/svc"
+	"github.com/falconfan123/Go-mall/services/product/product"
 )
 
 type ProductCatalogServiceServer struct {

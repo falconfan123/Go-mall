@@ -6,7 +6,7 @@ package authsclient
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/auths"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

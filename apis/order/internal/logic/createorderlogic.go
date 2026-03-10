@@ -7,13 +7,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	xerrors "github.com/zeromicro/x/errors"
-	"jijizhazha1024/go-mall/apis/order/internal/svc"
-	"jijizhazha1024/go-mall/apis/order/internal/types"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/services/checkout/checkout"
-	"jijizhazha1024/go-mall/services/coupons/coupons"
-	"jijizhazha1024/go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/order/internal/types"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/order/order"
 )
 
 type CreateOrderLogic struct {

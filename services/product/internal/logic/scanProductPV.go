@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/zeromicro/go-zero/core/logx"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	product2 "jijizhazha1024/go-mall/dal/model/products/product"
-	"jijizhazha1024/go-mall/services/product/internal/svc"
-	"jijizhazha1024/go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
+	"github.com/falconfan123/Go-mall/services/product/internal/svc"
+	"github.com/falconfan123/Go-mall/services/product/product"
 	"strconv"
 )
 

@@ -2,9 +2,9 @@ package logic
 
 import (
 	"context"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/services/carts/carts"
-	"jijizhazha1024/go-mall/services/carts/internal/svc"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/carts/carts"
+	"github.com/falconfan123/Go-mall/services/carts/internal/svc"
 	"strconv"
 	"strings"
 

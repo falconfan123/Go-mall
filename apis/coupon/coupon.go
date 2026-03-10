@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 
-	"jijizhazha1024/go-mall/apis/coupon/internal/config"
-	"jijizhazha1024/go-mall/apis/coupon/internal/handler"
-	"jijizhazha1024/go-mall/apis/coupon/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/coupon/internal/config"
+	"github.com/falconfan123/Go-mall/apis/coupon/internal/handler"
+	"github.com/falconfan123/Go-mall/apis/coupon/internal/svc"
 
 	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 

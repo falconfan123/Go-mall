@@ -7,7 +7,7 @@ package inventoryclient
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

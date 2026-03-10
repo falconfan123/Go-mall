@@ -3,7 +3,7 @@ package coupons
 import (
 	"context"
 	"github.com/stretchr/testify/assert"
-	"jijizhazha1024/go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"testing"
 )
 

@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"jijizhazha1024/go-mall/apis/flash_sale/internal/logic"
-	"jijizhazha1024/go-mall/apis/flash_sale/internal/svc"
-	"jijizhazha1024/go-mall/apis/flash_sale/internal/types"
+	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/logic"
+	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/svc"
+	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/types"
 )
 
 func FlashBuyHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

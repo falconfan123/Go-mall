@@ -3,14 +3,14 @@ package svc
 import (
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
-	"jijizhazha1024/go-mall/apis/product/internal/config"
-	"jijizhazha1024/go-mall/common/middleware"
-	"jijizhazha1024/go-mall/services/product/productcatalogservice"
+	"github.com/falconfan123/Go-mall/apis/product/internal/config"
+	"github.com/falconfan123/Go-mall/common/middleware"
+	"github.com/falconfan123/Go-mall/services/product/product"
 )
 
 type ServiceContext struct {
 	Config                config.Config
-	ProductRpc            productcatalogservice.ProductCatalogService
+	ProductRpc            product.ProductCatalogService
 	WithClientMiddleware  rest.Middleware
 	WrapperAuthMiddleware rest.Middleware
 }
@@ -18,7 +18,7 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:                c,
-		ProductRpc:            productcatalogservice.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
+		ProductRpc:            product.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
 		WithClientMiddleware:  middleware.WithClientMiddleware,
 		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, nil, c.OptionPathList),
 	}

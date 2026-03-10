@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/coupons/coupons"
-	"jijizhazha1024/go-mall/services/coupons/internal/logic"
-	"jijizhazha1024/go-mall/services/coupons/internal/svc"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/internal/logic"
+	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 )
 
 type CouponsServer struct {

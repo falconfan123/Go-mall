@@ -3,7 +3,7 @@ package auths
 import (
 	"context"
 	"fmt"
-	"jijizhazha1024/go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"sync"
 	"testing"
 	"time"
@@ -11,8 +11,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/auths/auths"
 
 	"github.com/stretchr/testify/assert"
 )

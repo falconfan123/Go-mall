@@ -3,9 +3,9 @@ package svc
 import (
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
-	"jijizhazha1024/go-mall/apis/checkout/internal/config"
-	"jijizhazha1024/go-mall/common/middleware"
-	"jijizhazha1024/go-mall/services/checkout/checkoutservice"
+	"github.com/falconfan123/Go-mall/apis/checkout/internal/config"
+	"github.com/falconfan123/Go-mall/common/middleware"
+	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
 )
 
 type ServiceContext struct {

@@ -6,7 +6,7 @@ package couponsclient
 import (
 	"context"
 
-	"jijizhazha1024/go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

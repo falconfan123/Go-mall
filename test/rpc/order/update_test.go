@@ -6,7 +6,7 @@ import (
 	_ "github.com/dtm-labs/driver-gozero"
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/zrpc"
-	"jijizhazha1024/go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/order"
 	"testing"
 	"time"
 )

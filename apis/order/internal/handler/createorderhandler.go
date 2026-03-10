@@ -4,13 +4,13 @@ import (
 	"fmt"
 	// "github.com/zeromicro/x/errors"
 	// xhttp "github.com/zeromicro/x/http"
-	// "jijizhazha1024/go-mall/common/consts/code"
+	// "github.com/falconfan123/Go-mall/common/consts/code"
 	"net/http"
 
 	// "github.com/zeromicro/go-zero/rest/httpx"
-	// "jijizhazha1024/go-mall/apis/order/internal/logic"
-	"jijizhazha1024/go-mall/apis/order/internal/svc"
-	// "jijizhazha1024/go-mall/apis/order/internal/types"
+	// "github.com/falconfan123/Go-mall/apis/order/internal/logic"
+	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
+	// "github.com/falconfan123/Go-mall/apis/order/internal/types"
 )
 
 func CreateOrderHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
