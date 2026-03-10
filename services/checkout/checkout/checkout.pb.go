@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v6.33.1
-// source: services/checkout/checkout.proto
+// source: checkout.proto
 
 package checkout
 
@@ -61,11 +61,11 @@ func (x CheckoutStatus) String() string {
 }
 
 func (CheckoutStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_services_checkout_checkout_proto_enumTypes[0].Descriptor()
+	return file_checkout_proto_enumTypes[0].Descriptor()
 }
 
 func (CheckoutStatus) Type() protoreflect.EnumType {
-	return &file_services_checkout_checkout_proto_enumTypes[0]
+	return &file_checkout_proto_enumTypes[0]
 }
 
 func (x CheckoutStatus) Number() protoreflect.EnumNumber {
@@ -74,7 +74,7 @@ func (x CheckoutStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CheckoutStatus.Descriptor instead.
 func (CheckoutStatus) EnumDescriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{0}
+	return file_checkout_proto_rawDescGZIP(), []int{0}
 }
 
 type CheckoutItem struct {
@@ -90,7 +90,7 @@ type CheckoutItem struct {
 
 func (x *CheckoutItem) Reset() {
 	*x = CheckoutItem{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[0]
+	mi := &file_checkout_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -102,7 +102,7 @@ func (x *CheckoutItem) String() string {
 func (*CheckoutItem) ProtoMessage() {}
 
 func (x *CheckoutItem) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[0]
+	mi := &file_checkout_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -115,7 +115,7 @@ func (x *CheckoutItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutItem.ProtoReflect.Descriptor instead.
 func (*CheckoutItem) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{0}
+	return file_checkout_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CheckoutItem) GetProductId() int32 {
@@ -170,7 +170,7 @@ type CheckoutOrder struct {
 
 func (x *CheckoutOrder) Reset() {
 	*x = CheckoutOrder{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[1]
+	mi := &file_checkout_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -182,7 +182,7 @@ func (x *CheckoutOrder) String() string {
 func (*CheckoutOrder) ProtoMessage() {}
 
 func (x *CheckoutOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[1]
+	mi := &file_checkout_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -195,7 +195,7 @@ func (x *CheckoutOrder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutOrder.ProtoReflect.Descriptor instead.
 func (*CheckoutOrder) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{1}
+	return file_checkout_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CheckoutOrder) GetPreOrderId() string {
@@ -271,7 +271,7 @@ type CheckoutDetailReq struct {
 
 func (x *CheckoutDetailReq) Reset() {
 	*x = CheckoutDetailReq{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[2]
+	mi := &file_checkout_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -283,7 +283,7 @@ func (x *CheckoutDetailReq) String() string {
 func (*CheckoutDetailReq) ProtoMessage() {}
 
 func (x *CheckoutDetailReq) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[2]
+	mi := &file_checkout_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -296,7 +296,7 @@ func (x *CheckoutDetailReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutDetailReq.ProtoReflect.Descriptor instead.
 func (*CheckoutDetailReq) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{2}
+	return file_checkout_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CheckoutDetailReq) GetPreOrderId() string {
@@ -324,7 +324,7 @@ type UpdateCheckoutStatusReq struct {
 
 func (x *UpdateCheckoutStatusReq) Reset() {
 	*x = UpdateCheckoutStatusReq{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[3]
+	mi := &file_checkout_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -336,7 +336,7 @@ func (x *UpdateCheckoutStatusReq) String() string {
 func (*UpdateCheckoutStatusReq) ProtoMessage() {}
 
 func (x *UpdateCheckoutStatusReq) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[3]
+	mi := &file_checkout_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -349,7 +349,7 @@ func (x *UpdateCheckoutStatusReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCheckoutStatusReq.ProtoReflect.Descriptor instead.
 func (*UpdateCheckoutStatusReq) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{3}
+	return file_checkout_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *UpdateCheckoutStatusReq) GetPreOrderId() string {
@@ -384,7 +384,7 @@ type CheckoutListReq struct {
 
 func (x *CheckoutListReq) Reset() {
 	*x = CheckoutListReq{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[4]
+	mi := &file_checkout_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -396,7 +396,7 @@ func (x *CheckoutListReq) String() string {
 func (*CheckoutListReq) ProtoMessage() {}
 
 func (x *CheckoutListReq) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[4]
+	mi := &file_checkout_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -409,7 +409,7 @@ func (x *CheckoutListReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutListReq.ProtoReflect.Descriptor instead.
 func (*CheckoutListReq) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{4}
+	return file_checkout_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CheckoutListReq) GetUserId() uint32 {
@@ -445,7 +445,7 @@ type CheckoutReq struct {
 
 func (x *CheckoutReq) Reset() {
 	*x = CheckoutReq{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[5]
+	mi := &file_checkout_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -457,7 +457,7 @@ func (x *CheckoutReq) String() string {
 func (*CheckoutReq) ProtoMessage() {}
 
 func (x *CheckoutReq) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[5]
+	mi := &file_checkout_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -470,7 +470,7 @@ func (x *CheckoutReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutReq.ProtoReflect.Descriptor instead.
 func (*CheckoutReq) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{5}
+	return file_checkout_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CheckoutReq) GetUserId() uint32 {
@@ -514,7 +514,7 @@ type CheckoutListResp struct {
 
 func (x *CheckoutListResp) Reset() {
 	*x = CheckoutListResp{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[6]
+	mi := &file_checkout_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -526,7 +526,7 @@ func (x *CheckoutListResp) String() string {
 func (*CheckoutListResp) ProtoMessage() {}
 
 func (x *CheckoutListResp) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[6]
+	mi := &file_checkout_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -539,7 +539,7 @@ func (x *CheckoutListResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutListResp.ProtoReflect.Descriptor instead.
 func (*CheckoutListResp) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{6}
+	return file_checkout_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *CheckoutListResp) GetStatusCode() int32 {
@@ -583,7 +583,7 @@ type CheckoutResp struct {
 
 func (x *CheckoutResp) Reset() {
 	*x = CheckoutResp{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[7]
+	mi := &file_checkout_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +595,7 @@ func (x *CheckoutResp) String() string {
 func (*CheckoutResp) ProtoMessage() {}
 
 func (x *CheckoutResp) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[7]
+	mi := &file_checkout_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +608,7 @@ func (x *CheckoutResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutResp.ProtoReflect.Descriptor instead.
 func (*CheckoutResp) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{7}
+	return file_checkout_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CheckoutResp) GetStatusCode() int32 {
@@ -657,7 +657,7 @@ type CheckoutDetailResp struct {
 
 func (x *CheckoutDetailResp) Reset() {
 	*x = CheckoutDetailResp{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[8]
+	mi := &file_checkout_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -669,7 +669,7 @@ func (x *CheckoutDetailResp) String() string {
 func (*CheckoutDetailResp) ProtoMessage() {}
 
 func (x *CheckoutDetailResp) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[8]
+	mi := &file_checkout_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -682,7 +682,7 @@ func (x *CheckoutDetailResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutDetailResp.ProtoReflect.Descriptor instead.
 func (*CheckoutDetailResp) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{8}
+	return file_checkout_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *CheckoutDetailResp) GetStatusCode() int32 {
@@ -716,7 +716,7 @@ type ReleaseReq struct {
 
 func (x *ReleaseReq) Reset() {
 	*x = ReleaseReq{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[9]
+	mi := &file_checkout_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -728,7 +728,7 @@ func (x *ReleaseReq) String() string {
 func (*ReleaseReq) ProtoMessage() {}
 
 func (x *ReleaseReq) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[9]
+	mi := &file_checkout_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -741,7 +741,7 @@ func (x *ReleaseReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReleaseReq.ProtoReflect.Descriptor instead.
 func (*ReleaseReq) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{9}
+	return file_checkout_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ReleaseReq) GetPreOrderId() string {
@@ -768,7 +768,7 @@ type EmptyResp struct {
 
 func (x *EmptyResp) Reset() {
 	*x = EmptyResp{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[10]
+	mi := &file_checkout_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -780,7 +780,7 @@ func (x *EmptyResp) String() string {
 func (*EmptyResp) ProtoMessage() {}
 
 func (x *EmptyResp) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[10]
+	mi := &file_checkout_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -793,7 +793,7 @@ func (x *EmptyResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmptyResp.ProtoReflect.Descriptor instead.
 func (*EmptyResp) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{10}
+	return file_checkout_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *EmptyResp) GetStatusCode() int32 {
@@ -820,7 +820,7 @@ type UpdateStatusReq struct {
 
 func (x *UpdateStatusReq) Reset() {
 	*x = UpdateStatusReq{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[11]
+	mi := &file_checkout_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -832,7 +832,7 @@ func (x *UpdateStatusReq) String() string {
 func (*UpdateStatusReq) ProtoMessage() {}
 
 func (x *UpdateStatusReq) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[11]
+	mi := &file_checkout_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -845,7 +845,7 @@ func (x *UpdateStatusReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateStatusReq.ProtoReflect.Descriptor instead.
 func (*UpdateStatusReq) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{11}
+	return file_checkout_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UpdateStatusReq) GetUserId() int32 {
@@ -872,7 +872,7 @@ type CheckoutReq_OrderItem struct {
 
 func (x *CheckoutReq_OrderItem) Reset() {
 	*x = CheckoutReq_OrderItem{}
-	mi := &file_services_checkout_checkout_proto_msgTypes[12]
+	mi := &file_checkout_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -884,7 +884,7 @@ func (x *CheckoutReq_OrderItem) String() string {
 func (*CheckoutReq_OrderItem) ProtoMessage() {}
 
 func (x *CheckoutReq_OrderItem) ProtoReflect() protoreflect.Message {
-	mi := &file_services_checkout_checkout_proto_msgTypes[12]
+	mi := &file_checkout_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -897,7 +897,7 @@ func (x *CheckoutReq_OrderItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckoutReq_OrderItem.ProtoReflect.Descriptor instead.
 func (*CheckoutReq_OrderItem) Descriptor() ([]byte, []int) {
-	return file_services_checkout_checkout_proto_rawDescGZIP(), []int{5, 0}
+	return file_checkout_proto_rawDescGZIP(), []int{5, 0}
 }
 
 func (x *CheckoutReq_OrderItem) GetProductId() int32 {
@@ -914,11 +914,11 @@ func (x *CheckoutReq_OrderItem) GetQuantity() int32 {
 	return 0
 }
 
-var File_services_checkout_checkout_proto protoreflect.FileDescriptor
+var File_checkout_proto protoreflect.FileDescriptor
 
-const file_services_checkout_checkout_proto_rawDesc = "" +
+const file_checkout_proto_rawDesc = "" +
 	"\n" +
-	" services/checkout/checkout.proto\x12\bcheckout\"\xa5\x01\n" +
+	"\x0echeckout.proto\x12\bcheckout\"\xa5\x01\n" +
 	"\fCheckoutItem\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x05R\tproductId\x12\x1a\n" +
@@ -1018,20 +1018,20 @@ const file_services_checkout_checkout_proto_rawDesc = "" +
 	"./checkoutb\x06proto3"
 
 var (
-	file_services_checkout_checkout_proto_rawDescOnce sync.Once
-	file_services_checkout_checkout_proto_rawDescData []byte
+	file_checkout_proto_rawDescOnce sync.Once
+	file_checkout_proto_rawDescData []byte
 )
 
-func file_services_checkout_checkout_proto_rawDescGZIP() []byte {
-	file_services_checkout_checkout_proto_rawDescOnce.Do(func() {
-		file_services_checkout_checkout_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_services_checkout_checkout_proto_rawDesc), len(file_services_checkout_checkout_proto_rawDesc)))
+func file_checkout_proto_rawDescGZIP() []byte {
+	file_checkout_proto_rawDescOnce.Do(func() {
+		file_checkout_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_checkout_proto_rawDesc), len(file_checkout_proto_rawDesc)))
 	})
-	return file_services_checkout_checkout_proto_rawDescData
+	return file_checkout_proto_rawDescData
 }
 
-var file_services_checkout_checkout_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_services_checkout_checkout_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
-var file_services_checkout_checkout_proto_goTypes = []any{
+var file_checkout_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_checkout_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_checkout_proto_goTypes = []any{
 	(CheckoutStatus)(0),             // 0: checkout.CheckoutStatus
 	(*CheckoutItem)(nil),            // 1: checkout.CheckoutItem
 	(*CheckoutOrder)(nil),           // 2: checkout.CheckoutOrder
@@ -1047,7 +1047,7 @@ var file_services_checkout_checkout_proto_goTypes = []any{
 	(*UpdateStatusReq)(nil),         // 12: checkout.UpdateStatusReq
 	(*CheckoutReq_OrderItem)(nil),   // 13: checkout.CheckoutReq.OrderItem
 }
-var file_services_checkout_checkout_proto_depIdxs = []int32{
+var file_checkout_proto_depIdxs = []int32{
 	0,  // 0: checkout.CheckoutOrder.status:type_name -> checkout.CheckoutStatus
 	1,  // 1: checkout.CheckoutOrder.items:type_name -> checkout.CheckoutItem
 	0,  // 2: checkout.UpdateCheckoutStatusReq.status:type_name -> checkout.CheckoutStatus
@@ -1073,27 +1073,27 @@ var file_services_checkout_checkout_proto_depIdxs = []int32{
 	0,  // [0:6] is the sub-list for field type_name
 }
 
-func init() { file_services_checkout_checkout_proto_init() }
-func file_services_checkout_checkout_proto_init() {
-	if File_services_checkout_checkout_proto != nil {
+func init() { file_checkout_proto_init() }
+func file_checkout_proto_init() {
+	if File_checkout_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_checkout_checkout_proto_rawDesc), len(file_services_checkout_checkout_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_checkout_proto_rawDesc), len(file_checkout_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_services_checkout_checkout_proto_goTypes,
-		DependencyIndexes: file_services_checkout_checkout_proto_depIdxs,
-		EnumInfos:         file_services_checkout_checkout_proto_enumTypes,
-		MessageInfos:      file_services_checkout_checkout_proto_msgTypes,
+		GoTypes:           file_checkout_proto_goTypes,
+		DependencyIndexes: file_checkout_proto_depIdxs,
+		EnumInfos:         file_checkout_proto_enumTypes,
+		MessageInfos:      file_checkout_proto_msgTypes,
 	}.Build()
-	File_services_checkout_checkout_proto = out.File
-	file_services_checkout_checkout_proto_goTypes = nil
-	file_services_checkout_checkout_proto_depIdxs = nil
+	File_checkout_proto = out.File
+	file_checkout_proto_goTypes = nil
+	file_checkout_proto_depIdxs = nil
 }
