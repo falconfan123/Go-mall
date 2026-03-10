@@ -1,13 +1,13 @@
-// API 配置
+// API 配置（使用相对路径，通过代理服务器转发）
 const API_BASE = {
-    user: 'http://localhost:8888/douyin/user',
-    product: 'http://localhost:8888/douyin/product',
-    cart: 'http://localhost:8888/douyin/cart',
-    order: 'http://localhost:8888/douyin/order',
-    coupon: 'http://localhost:8888/douyin/coupon',
-    checkout: 'http://localhost:8888/douyin/checkout',
-    payment: 'http://localhost:8888/douyin/payment',
-    flash: 'http://localhost:8888/douyin/flash'
+    user: '/douyin/user',
+    product: '/douyin/product',
+    cart: '/douyin/cart',
+    order: '/douyin/order',
+    coupon: '/douyin/coupon',
+    checkout: '/douyin/checkout',
+    payment: '/douyin/payment',
+    flash: '/douyin/flash'
 };
 
 // 状态管理
@@ -358,8 +358,444 @@ function showToast(message, type = 'info') {
     }, 30000);
 }
 
+// Mock 数据配置
+const MOCK_ENABLED = true; // 开启mock模式
+const MOCK_DELAY = 500; // mock请求延迟毫秒
+
+// Mock 响应数据
+const mockResponses = {
+    // 用户注册
+    'POST:/douyin/user/register': (body) => {
+        return {
+            code: 0,
+            msg: '注册成功',
+            data: {
+                access_token: 'mock_access_token_' + Date.now(),
+                refresh_token: 'mock_refresh_token_' + Date.now(),
+                user_id: 1,
+                email: body.email
+            }
+        };
+    },
+    // 用户登录
+    'POST:/douyin/user/login': (body) => {
+        return {
+            code: 0,
+            msg: '登录成功',
+            data: {
+                access_token: 'mock_access_token_' + Date.now(),
+                refresh_token: 'mock_refresh_token_' + Date.now(),
+                user_id: 1,
+                email: body.email
+            }
+        };
+    },
+    // 获取用户信息
+    'GET:/douyin/user/info': () => {
+        return {
+            code: 0,
+            msg: 'success',
+            data: {
+                user_id: 1,
+                email: 'test@example.com',
+                user_name: '测试用户',
+                avatar: 'https://example.com/avatar.jpg',
+                phone: '13800138000'
+            }
+        };
+    },
+    // 更新用户信息
+    'PUT:/douyin/user/update': (body) => {
+        return {
+            code: 0,
+            msg: '更新成功',
+            data: {
+                user_id: 1,
+                email: 'test@example.com',
+                user_name: body.user_name || '测试用户',
+                avatar: body.avatar || 'https://example.com/avatar.jpg'
+            }
+        };
+    },
+    // 添加用户地址
+    'POST:/douyin/user/address': (body) => {
+        return {
+            code: 0,
+            msg: '添加成功',
+            data: {
+                id: 1,
+                ...body,
+                user_id: 1
+            }
+        };
+    },
+    // 获取地址列表
+    'GET:/douyin/user/address/list': () => {
+        return {
+            code: 0,
+            msg: 'success',
+            data: [
+                {
+                    id: 1,
+                    recipient_name: '张三',
+                    phone_number: '13800138000',
+                    province: '北京市',
+                    city: '北京市',
+                    detailed_address: '朝阳区某某街道123号',
+                    is_default: true
+                }
+            ]
+        };
+    },
+    // 用户登出
+    'POST:/douyin/user/logout': () => {
+        return {
+            code: 0,
+            msg: '登出成功',
+            data: {
+                logout_at: Date.now()
+            }
+        };
+    },
+    // 获取商品列表
+    'GET:/douyin/product/list': () => {
+        return {
+            code: 0,
+            msg: 'success',
+            products: [
+                { id: 1, name: 'iPhone 15 Pro', description: '最新款苹果手机，搭载 A17 芯片', price: 7999, stock: 100, picture: '📱', thumbnailUrl: '📱' },
+                { id: 2, name: 'MacBook Pro 14"', description: '高性能笔记本电脑，M3 Pro 芯片', price: 14999, stock: 50, picture: '💻', thumbnailUrl: '💻' },
+                { id: 3, name: 'Sony PS5', description: '次世代游戏主机', price: 3899, stock: 200, picture: '🎮', thumbnailUrl: '🎮' },
+                { id: 4, name: 'AirPods Pro 2', description: '最新款降噪耳机', price: 1899, stock: 150, picture: '🎧', thumbnailUrl: '🎧' },
+                { id: 5, name: 'iPad Pro', description: '12.9英寸平板电脑，M2芯片', price: 8999, stock: 75, picture: '📱', thumbnailUrl: '📱' },
+                { id: 6, name: 'Apple Watch', description: '智能手表，健康监测', price: 2999, stock: 120, picture: '⌚', thumbnailUrl: '⌚' }
+            ]
+        };
+    },
+    // 获取商品详情
+    'GET:/douyin/product/': (_, params) => {
+        const id = parseInt(params.get('id'));
+        const products = [
+            { id: 1, name: 'iPhone 15 Pro', description: '最新款苹果手机，搭载 A17 芯片', price: 7999, stock: 100, picture: '📱' },
+            { id: 2, name: 'MacBook Pro 14"', description: '高性能笔记本电脑，M3 Pro 芯片', price: 14999, stock: 50, picture: '💻' },
+            { id: 3, name: 'Sony PS5', description: '次世代游戏主机', price: 3899, stock: 200, picture: '🎮' }
+        ];
+        return {
+            code: 0,
+            msg: 'success',
+            data: products.find(p => p.id === id) || products[0]
+        };
+    },
+    // 添加商品到购物车
+    'POST:/douyin/cart/add': (body) => {
+        // 检查商品是否已在购物车中
+        const existingItem = state.cart.find(item => item.product_id === body.product_id);
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            state.cart.push({
+                id: Date.now(),
+                product_id: body.product_id,
+                quantity: 1
+            });
+        }
+        return {
+            code: 0,
+            msg: '添加成功',
+            data: {
+                id: Date.now(),
+                product_id: body.product_id,
+                quantity: existingItem ? existingItem.quantity : 1
+            }
+        };
+    },
+    // 获取购物车列表
+    'GET:/douyin/cart/list': () => {
+        // 从本地状态获取购物车数据
+        return {
+            code: 0,
+            msg: 'success',
+            data: state.cart.map(item => ({
+                id: item.id,
+                product_id: item.product_id,
+                quantity: item.quantity
+            }))
+        };
+    },
+    // 减少购物车商品数量
+    'POST:/douyin/cart/sub': (body) => {
+        const existingItem = state.cart.find(item => item.product_id === body.product_id);
+        if (existingItem) {
+            existingItem.quantity -= body.quantity || 1;
+            if (existingItem.quantity <= 0) {
+                state.cart = state.cart.filter(item => item.product_id !== body.product_id);
+            }
+        }
+        return {
+            code: 0,
+            msg: '更新成功',
+            data: {
+                product_id: body.product_id,
+                quantity: existingItem ? existingItem.quantity : 0
+            }
+        };
+    },
+    // 删除购物车商品
+    'POST:/douyin/cart/delete': (body) => {
+        state.cart = state.cart.filter(item => item.product_id !== body.product_id);
+        return {
+            code: 0,
+            msg: '删除成功',
+            data: {
+                success: true
+            }
+        };
+    },
+    // 获取优惠券列表
+    'GET:/douyin/coupon/list': () => {
+        return {
+            code: 0,
+            msg: 'success',
+            data: [
+                { id: 'coupon_001', name: '满100减20优惠券', discount: 20, min_amount: 100, expire_time: '2026-12-31' },
+                { id: 'coupon_002', name: '满200减50优惠券', discount: 50, min_amount: 200, expire_time: '2026-12-31' }
+            ]
+        };
+    },
+    // 领取优惠券
+    'POST:/douyin/coupon/claim': (body) => {
+        return {
+            code: 0,
+            msg: '领取成功',
+            data: {
+                coupon_id: body.coupon_id,
+                receive_time: Date.now()
+            }
+        };
+    },
+    // 获取我的优惠券列表
+    'GET:/douyin/coupon/my/list': () => {
+        return {
+            code: 0,
+            msg: 'success',
+            data: [
+                { id: 'coupon_001', name: '满100减20优惠券', discount: 20, min_amount: 100, expire_time: '2026-12-31', used: false }
+            ]
+        };
+    },
+    // 预结算
+    'POST:/douyin/checkout/prepare': (body) => {
+        const total = body.order_items.reduce((sum, item) => {
+            const product = state.products.find(p => p.id === item.product_id);
+            return sum + (product ? product.price * item.quantity : 0);
+        }, 0);
+        return {
+            code: 0,
+            msg: 'success',
+            data: {
+                pre_order_id: 'pre_' + Date.now(),
+                total_amount: total,
+                discount_amount: body.coupon_id ? 20 : 0,
+                payable_amount: total - (body.coupon_id ? 20 : 0)
+            }
+        };
+    },
+    // 获取结算详情
+    'GET:/douyin/checkout/detail': (_, params) => {
+        return {
+            code: 0,
+            msg: 'success',
+            data: {
+                pre_order_id: params.get('pre_order_id'),
+                order_items: state.cart,
+                total_amount: 7999,
+                discount_amount: 0,
+                payable_amount: 7999,
+                address: {
+                    id: 1,
+                    recipient_name: '张三',
+                    phone_number: '13800138000',
+                    province: '北京市',
+                    city: '北京市',
+                    detailed_address: '朝阳区某某街道123号'
+                }
+            }
+        };
+    },
+    // 创建订单
+    'POST:/douyin/order/create': (body) => {
+        return {
+            code: 0,
+            msg: '订单创建成功',
+            data: {
+                order_id: 'order_' + Date.now(),
+                pre_order_id: body.pre_order_id,
+                order_status: 0,
+                created_at: new Date().toISOString()
+            }
+        };
+    },
+    // 获取订单列表
+    'GET:/douyin/order/list': () => {
+        return {
+            code: 0,
+            msg: 'success',
+            data: {
+                orders: state.orders.map(order => ({
+                    order_id: order.id,
+                    order_no: order.order_no,
+                    items: order.items.map(item => ({
+                        product_id: item.product_id,
+                        product_name: item.product?.name || '商品',
+                        unit_price: item.product?.price || 0,
+                        quantity: item.quantity
+                    })),
+                    payable_amount: order.total,
+                    order_status: order.status === 'pending' ? 0 : 1,
+                    created_at: order.created_at
+                }))
+            }
+        };
+    },
+    // 获取订单详情
+    'GET:/douyin/order/detail': (_, params) => {
+        const order = state.orders.find(o => o.id === params.get('order_id'));
+        return {
+            code: 0,
+            msg: 'success',
+            data: order ? {
+                order_id: order.id,
+                order_no: order.order_no,
+                items: order.items.map(item => ({
+                    product_id: item.product_id,
+                    product_name: item.product?.name || '商品',
+                    unit_price: item.product?.price || 0,
+                    quantity: item.quantity
+                })),
+                payable_amount: order.total,
+                order_status: order.status === 'pending' ? 0 : 1,
+                created_at: order.created_at,
+                address: {
+                    recipient_name: '张三',
+                    phone_number: '13800138000',
+                    province: '北京市',
+                    city: '北京市',
+                    detailed_address: '朝阳区某某街道123号'
+                }
+            } : null
+        };
+    },
+    // 取消订单
+    'POST:/douyin/order/cancel': (body) => {
+        return {
+            code: 0,
+            msg: '订单取消成功',
+            data: {
+                order_id: body.order_id,
+                order_status: 4
+            }
+        };
+    },
+    // 创建支付订单
+    'POST:/douyin/payment/create': (body) => {
+        return {
+            code: 0,
+            msg: '支付订单创建成功',
+            data: {
+                payment_id: 'pay_' + Date.now(),
+                order_id: body.order_id,
+                amount: 7999,
+                payment_url: 'https://example.com/pay/' + Date.now()
+            }
+        };
+    },
+    // 获取支付列表
+    'GET:/douyin/payment/list': () => {
+        return {
+            code: 0,
+            msg: 'success',
+            data: [
+                {
+                    id: 'pay_123',
+                    order_id: 'order_123',
+                    amount: 7999,
+                    status: 'success',
+                    created_at: new Date().toISOString()
+                }
+            ]
+        };
+    },
+    // 获取秒杀商品列表
+    'GET:/douyin/flash/products': () => {
+        return {
+            code: 0,
+            msg: 'success',
+            data: [
+                { id: 1, name: 'iPhone 15 Pro', description: '最新款苹果手机，搭载 A17 芯片', price: 7999, flashPrice: 5999, stock: 50, picture: '📱' },
+                { id: 2, name: 'MacBook Pro 14"', description: '高性能笔记本电脑，M3 Pro 芯片', price: 14999, flashPrice: 11999, stock: 30, picture: '💻' }
+            ]
+        };
+    },
+    // 秒杀商品
+    'POST:/douyin/flash/buy': (body) => {
+        // 模拟10%的秒杀失败概率
+        if (Math.random() < 0.1) {
+            return {
+                code: 1001,
+                msg: '秒杀失败，商品已售罄'
+            };
+        }
+        return {
+            code: 0,
+            msg: '秒杀成功',
+            data: {
+                orderId: 'order_flash_' + Date.now(),
+                orderNo: 'FLASH' + Date.now(),
+                total: 599900 // 单位分
+            }
+        };
+    }
+};
+
 // API 请求工具
 async function apiRequest(url, options = {}) {
+    // Mock模式下拦截请求
+    if (MOCK_ENABLED) {
+        await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
+
+        const method = options.method || 'GET';
+        const urlObj = new URL(url, window.location.origin);
+        const path = urlObj.pathname;
+        const params = urlObj.searchParams;
+
+        // 匹配mock响应
+        const mockKey = `${method}:${path}`;
+        let mockHandler = mockResponses[mockKey];
+
+        // 处理带参数的路径，如 /douyin/product/
+        if (!mockHandler) {
+            for (const key of Object.keys(mockResponses)) {
+                const [m, p] = key.split(':');
+                if (m === method && path.startsWith(p)) {
+                    mockHandler = mockResponses[key];
+                    break;
+                }
+            }
+        }
+
+        if (mockHandler) {
+            let body = null;
+            if (options.body) {
+                body = JSON.parse(options.body);
+            }
+            const mockResponse = mockHandler(body, params);
+            console.log(`[Mock] ${method} ${url}`, mockResponse);
+            return mockResponse;
+        }
+
+        throw new Error(`Mock 响应未找到: ${method} ${url}`);
+    }
+
     const headers = {
         'Content-Type': 'application/json',
         ...options.headers
@@ -375,9 +811,11 @@ async function apiRequest(url, options = {}) {
     try {
         const response = await fetch(url, {
             ...options,
-            headers
+            headers,
+            mode: 'cors',
+            credentials: 'same-origin'
         });
-        
+
         // Handle 404 (Gateway Not Found) or 500
         if (!response.ok) {
              throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
@@ -411,6 +849,11 @@ async function apiRequest(url, options = {}) {
         return data;
     } catch (error) {
         console.error('API Error:', error);
+        // 处理CORS错误
+        if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
+            console.error('CORS 错误提示：请确保后端网关已配置允许跨域访问，或使用代理访问');
+            throw new Error('网络请求失败，请检查后端服务是否正常运行或联系管理员配置跨域');
+        }
         throw error;
     }
 }
