@@ -34,8 +34,9 @@ The role of this file is to describe common mistakes and confusion points that a
 ## CI/CD 检查规范
 
 ### 本地检查要求
-**重要**：每次完成代码修改后，必须先运行本地 CI 检查，确保没有问题后再提交。
+**重要**：本地检查只在本地运行，不会在 GitHub Actions 中执行。
 
+每次完成代码修改后，建议先运行本地 CI 检查：
 ```bash
 # 运行本地 CI 检查（跳过测试，加快检查速度）
 ./scripts/local-ci.sh --skip-tests
@@ -43,6 +44,8 @@ The role of this file is to describe common mistakes and confusion points that a
 # 或使用 Makefile
 make lint
 ```
+
+**GitHub Actions CI 只验证构建和依赖安全，不运行 lint 检查。**
 
 ### 检查内容
 本地 CI 脚本会自动检查：
