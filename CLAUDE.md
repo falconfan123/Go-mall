@@ -87,6 +87,48 @@ GitHub Actions 会运行标准 CI 检查：
 
 注意：由于项目使用了 `replace` 本地模块替换，某些本地检查工具可能无法在 CI 环境中运行，因此本地检查只应在本地执行。
 
+## Go Workspace (go.work) 规范
+
+### 常见错误与避免方法
+
+**错误1：在 go.work 中同时使用 use 和 replace**
+- 问题：`go work` 中对同一模块不能同时使用 `use` 和 `replace`，会导致 "workspace module is replaced at all versions" 错误
+- 解决：go.work 只使用 `use` 指令，replace 指令放在各服务的 go.mod 中
+
+**错误2：子模块导入路径错误**
+- 问题：proto 文件生成的 go_package 配置错误，导致导入路径多了一个 `/order` 后缀
+- 解决：确保 proto 文件的 `option go_package = ".";` 配置正确，所有导入路径应为 `github.com/falconfan123/Go-mall/services/服务名`，而不是 `.../services/服务名/服务名`
+
+**错误3：子模块遗留的 go.mod**
+- 问题：旧代码可能残留子模块目录（如 services/order/order/），包含独立的 go.mod
+- 解决：删除这些遗留目录，确保 proto 生成的文件在正确位置
+
+### 正确配置步骤
+
+1. **清理阶段**：删除根目录的 go.mod（如果有）
+2. **go.work 配置**：只使用 `use` 指令
+   ```go
+   go 1.25.0
+
+   use (
+       ./common
+       ./dal
+       ./services/checkout
+       ...
+   )
+   ```
+3. **各服务 go.mod**：添加需要的 replace 指令
+   ```go
+   module github.com/falconfan123/Go-mall/services/order
+
+   go 1.25.0
+
+   replace github.com/falconfan123/Go-mall/common => ../../common
+   replace github.com/falconfan123/Go-mall/dal => ../../dal
+   ...
+   ```
+4. **修复导入路径**：确保所有导入路径与 module name 匹配
+
 ## 单元测试规范
 
 **重要原则**：单元测试应当依附于 Swagger 文档，不能随便乱测。

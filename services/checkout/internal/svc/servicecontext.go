@@ -20,9 +20,9 @@ type ServiceContext struct {
 	CheckoutModel      checkout.CheckoutsModel
 	CheckoutItemsModel checkout.CheckoutItemsModel
 	CartsModel         cart.CartsModel
-	InventoryRpc       inventoryclient.Inventory
-	CouponsRpc         couponsclient.Coupons
-	ProductRpc         product.ProductCatalogService
+	InventoryRpc       inventory.InventoryClient
+	CouponsRpc         coupons.CouponsClient
+	ProductRpc         product.ProductCatalogClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -38,8 +38,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CartsModel:         cart.NewCartsModel(mysql),
 		CheckoutModel:      checkout.NewCheckoutsModel(mysql),
 		CheckoutItemsModel: checkout.NewCheckoutItemsModel(mysql),
-		InventoryRpc:       inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
-		CouponsRpc:         couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponsRpc)),
-		ProductRpc:         product.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
+		InventoryRpc:       inventory.NewInventoryClient(zrpc.MustNewClient(c.InventoryRpc)),
+		CouponsRpc:         coupons.NewCouponsClient(zrpc.MustNewClient(c.CouponsRpc)),
+		ProductRpc:         product.NewProductCatalogClient(zrpc.MustNewClient(c.ProductRpc)),
 	}
 }
