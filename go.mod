@@ -27,23 +27,25 @@ require (
 	google.golang.org/protobuf v1.36.1
 )
 
-replace github.com/falconfan123/Go-mall/services/auths/auths => ./services/auths/auths
+replace github.com/falconfan123/Go-mall/services/auths/auths => ./services/auths
 
-replace github.com/falconfan123/Go-mall/services/product/product => ./services/product/product
+replace github.com/falconfan123/Go-mall/services/product/product => ./services/product
 
-replace github.com/falconfan123/Go-mall/services/carts/carts => ./services/carts/carts
+replace github.com/falconfan123/Go-mall/services/carts/carts => ./services/carts
 
-replace github.com/falconfan123/Go-mall/services/order/order => ./services/order/order
+replace github.com/falconfan123/Go-mall/services/order/order => ./services/order
 
-replace github.com/falconfan123/Go-mall/services/checkout/checkout => ./services/checkout/checkout
+replace github.com/falconfan123/Go-mall/services/checkout/checkout => ./services/checkout
 
-replace github.com/falconfan123/Go-mall/services/payment/payment => ./services/payment/payment
+replace github.com/falconfan123/Go-mall/services/payment/payment => ./services/payment
 
-replace github.com/falconfan123/Go-mall/services/coupons/coupons => ./services/coupons/coupons
+replace github.com/falconfan123/Go-mall/services/coupons/coupons => ./services/coupons
 
-replace github.com/falconfan123/Go-mall/services/inventory/inventory => ./services/inventory/inventory
+replace github.com/falconfan123/Go-mall/services/inventory/inventory => ./services/inventory
 
-replace github.com/falconfan123/Go-mall/services/audit/audit => ./services/audit/audit
+replace github.com/falconfan123/Go-mall/services/audit/audit => ./services/audit
+
+replace github.com/falconfan123/Go-mall/services/users/users => ./services/users
 
 require (
 	github.com/bufbuild/protocompile v0.14.1 // indirect

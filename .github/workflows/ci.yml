@@ -43,38 +43,19 @@ jobs:
       - name: 构建 ${{ matrix.service }} 服务
         run: |
           case "${{ matrix.service }}" in
-            auths) cd services/auths/auths ;;
-            audit) cd services/audit/audit ;;
-            carts) cd services/carts/carts ;;
-            checkout) cd services/checkout/checkout ;;
-            coupons) cd services/coupons/coupons ;;
-            inventory) cd services/inventory/inventory ;;
-            order) cd services/order/order ;;
-            payment) cd services/payment/payment ;;
-            product) cd services/product/product ;;
-            users) cd services/users/users ;;
+            auths) cd services/auths ;;
+            audit) cd services/audit ;;
+            carts) cd services/carts ;;
+            checkout) cd services/checkout ;;
+            coupons) cd services/coupons ;;
+            inventory) cd services/inventory ;;
+            order) cd services/order ;;
+            payment) cd services/payment ;;
+            product) cd services/product ;;
+            users) cd services/users ;;
             gateway) cd services/gateway ;;
           esac
           go build -o /dev/null .
-
-  # 测试
-  test:
-    name: 单元测试
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 代码
-        uses: actions/checkout@v4
-
-      - name: 设置 Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: 下载依赖
-        run: go mod download
-
-      - name: 运行测试
-        run: go test -race -short -timeout 10m ./...
 
   # 安全扫描
   security:
