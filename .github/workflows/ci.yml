@@ -37,6 +37,14 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: 同步工作区依赖
+        run: go work sync
+
+      - name: 预理顺公共模块
+        run: |
+          cd common && go mod tidy
+          cd ../dal && go mod tidy
+
       - name: 构建 ${{ matrix.service }} 服务
         run: |
           cd services/${{ matrix.service }}
