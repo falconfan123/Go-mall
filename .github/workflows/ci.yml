@@ -10,7 +10,7 @@ env:
   GO_VERSION: '1.25'
 
 jobs:
-  # 构建验证 - 只验证能否编译通过
+  # 构建验证
   build:
     name: 构建验证
     runs-on: ubuntu-latest
@@ -56,6 +56,25 @@ jobs:
             gateway) cd services/gateway ;;
           esac
           go build -o /dev/null .
+
+  # 测试
+  test:
+    name: 单元测试
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: 下载依赖
+        run: go mod download
+
+      - name: 运行测试
+        run: go test -race -short -timeout 10m ./...
 
   # 安全扫描
   security:
