@@ -222,11 +222,11 @@ func (s *CartAppService) GetCart(ctx context.Context, req *dto.GetCartReq) (*dto
 	}
 
 	return &dto.CartDTO{
-		UserID:         cart.UserID,
-		Items:          items,
-		TotalQuantity:  cart.GetTotalQuantity(),
-		TotalAmount:    cart.GetTotalAmount(),
-		CheckedCount:   checkedCount,
-		CheckedAmount:  checkedAmount,
+		UserID:        cart.UserID,
+		Items:         items,
+		TotalQuantity: cart.GetTotalQuantity(),
+		TotalAmount:   cart.GetTotalAmount(),
+		CheckedCount:  checkedCount,
+		CheckedAmount: checkedAmount,
 	}, nil
 }

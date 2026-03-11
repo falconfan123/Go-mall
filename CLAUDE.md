@@ -30,3 +30,48 @@ The role of this file is to describe common mistakes and confusion points that a
 ### Apifox 配置信息
 - API Key: `afxp_1bd4b5Je1OTIXl6b6AlwXgwQ7qxzzttqqTlk`
 - 项目 ID: `7907732`
+
+## CI/CD 检查规范
+
+### 本地检查要求
+**重要**：每次完成代码修改后，必须先运行本地 CI 检查，确保没有问题后再提交。
+
+```bash
+# 运行本地 CI 检查（跳过测试，加快检查速度）
+./scripts/local-ci.sh --skip-tests
+
+# 或使用 Makefile
+make lint
+```
+
+### 检查内容
+本地 CI 脚本会自动检查：
+1. 代码格式 (`gofmt`)
+2. 静态分析 (`go vet`, `staticcheck`)
+3. 代码风格 (`golint`, `revive`)
+4. 编译检查
+
+### 快速格式化
+如果格式检查失败，可以自动修复：
+```bash
+./scripts/local-ci.sh --auto-fix
+# 或
+make fmt
+```
+
+### 工具安装
+首次使用需要安装检查工具：
+```bash
+make install-tools
+```
+
+## 单元测试规范
+
+**重要原则**：单元测试应当依附于 Swagger 文档，不能随便乱测。
+
+具体要求：
+1. 测试用例必须基于 API 规范（Swagger/OpenAPI 文档）编写
+2. 测试输入输出应与 API 定义保持一致
+3. 测试场景应覆盖 API 文档中声明的所有端点和参数
+4. 禁止编写与 API 文档无关的随机测试用例
+5. 在编写测试前，应先查阅对应的 Swagger 文档或 API 定义

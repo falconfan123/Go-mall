@@ -3,10 +3,10 @@ package logic
 import (
 	"context"
 	"errors"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/dal/model/coupons/coupon"
 	"github.com/falconfan123/Go-mall/dal/model/coupons/user_coupons"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"

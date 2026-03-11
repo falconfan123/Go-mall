@@ -4,8 +4,8 @@ import "time"
 
 // BaseEvent 基础事件结构
 type BaseEvent struct {
-	EventID   string    `json:"event_id"`
-	EventType string    `json:"event_type"`
+	EventID    string    `json:"event_id"`
+	EventType  string    `json:"event_type"`
 	OccurredAt time.Time `json:"occurred_at"`
 }
 

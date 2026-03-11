@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/falconfan123/Go-mall/dal/model/cart"
+	cartmodel "github.com/falconfan123/Go-mall/dal/model/cart"
 	"github.com/falconfan123/Go-mall/services/carts/internal/domain/aggregate"
 	"github.com/falconfan123/Go-mall/services/carts/internal/domain/entity"
 	"github.com/falconfan123/Go-mall/services/carts/internal/domain/repository"
@@ -13,11 +13,11 @@ import (
 
 // CartRepositoryImpl 购物车仓储实现
 type CartRepositoryImpl struct {
-	cartsModel cart.CartsModel
+	cartsModel cartmodel.CartsModel
 }
 
 // NewCartRepositoryImpl 创建购物车仓储实现
-func NewCartRepositoryImpl(cartsModel cart.CartsModel) repository.CartRepository {
+func NewCartRepositoryImpl(cartsModel cartmodel.CartsModel) repository.CartRepository {
 	return &CartRepositoryImpl{
 		cartsModel: cartsModel,
 	}
@@ -91,7 +91,7 @@ func (r *CartRepositoryImpl) Save(ctx context.Context, cart *aggregate.Cart) err
 			}
 
 			// 准备更新数据
-			cartData := &cart.Carts{
+			cartData := &cartmodel.Carts{
 				Id: int64(existingID),
 				UserId: sql.NullInt64{
 					Int64: cart.UserID,
@@ -119,7 +119,7 @@ func (r *CartRepositoryImpl) Save(ctx context.Context, cart *aggregate.Cart) err
 			}
 		} else {
 			// 插入新项
-			cartData := &cart.Carts{
+			cartData := &cartmodel.Carts{
 				UserId: sql.NullInt64{
 					Int64: cart.UserID,
 					Valid: true,
@@ -169,7 +169,7 @@ func (r *CartRepositoryImpl) UpdateItemQuantity(ctx context.Context, userID int6
 	}
 
 	// 更新数量
-	cartData := &cart.Carts{
+	cartData := &cartmodel.Carts{
 		Id: int64(existingID),
 		Quantity: sql.NullInt64{
 			Int64: int64(quantity),

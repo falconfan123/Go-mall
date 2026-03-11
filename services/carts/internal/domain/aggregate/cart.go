@@ -5,14 +5,13 @@ import (
 	"time"
 
 	"github.com/falconfan123/Go-mall/services/carts/internal/domain/entity"
-	"github.com/falconfan123/Go-mall/services/carts/internal/domain/valueobject"
 )
 
 // Cart 购物车聚合根
 type Cart struct {
-	UserID    int64                 // 用户ID
-	Items     []*entity.CartItem    // 购物车项列表
-	UpdatedAt time.Time             // 更新时间
+	UserID    int64              // 用户ID
+	Items     []*entity.CartItem // 购物车项列表
+	UpdatedAt time.Time          // 更新时间
 }
 
 var (

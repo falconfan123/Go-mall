@@ -12,8 +12,8 @@ type ValidPeriod struct {
 }
 
 var (
-	ErrInvalidPeriod = errors.New("end time must be after start time")
-	ErrCouponExpired = errors.New("coupon has expired")
+	ErrInvalidPeriod   = errors.New("end time must be after start time")
+	ErrCouponExpired   = errors.New("coupon has expired")
 	ErrCouponNotActive = errors.New("coupon is not active yet")
 )
 

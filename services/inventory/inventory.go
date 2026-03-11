@@ -7,11 +7,11 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
+	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/config"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/server"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
-	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"

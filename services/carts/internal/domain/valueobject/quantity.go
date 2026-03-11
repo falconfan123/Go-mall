@@ -6,7 +6,7 @@ import "errors"
 type Quantity int32
 
 var (
-	ErrInvalidQuantity = errors.New("quantity must be greater than 0")
+	ErrInvalidQuantity     = errors.New("quantity must be greater than 0")
 	ErrMaxQuantityExceeded = errors.New("maximum quantity per item is 99")
 )
 

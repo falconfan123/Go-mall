@@ -3,10 +3,10 @@ package order
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/falconfan123/Go-mall/apis/order/internal/logic/order"
 	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
 	"github.com/falconfan123/Go-mall/apis/order/internal/types"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func CancelOrderHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

@@ -119,12 +119,12 @@ func (m *customInventoryModel) BatchReturn(ctx context.Context, session sqlx.Ses
 
 	res, err := session.ExecCtx(ctx, updateQuery, updateArgs...)
 	if err != nil {
-		return biz.InventoryDecreaseFailedErr
+		return biz.ErrInventoryDecreaseFailed
 	}
 
 	// 验证影响行数
 	if affected, _ := res.RowsAffected(); affected != int64(len(productIDs)) {
-		return biz.InventoryDecreaseFailedErr
+		return biz.ErrInventoryDecreaseFailed
 	}
 
 	return nil
@@ -137,18 +137,18 @@ func (m *customInventoryModel) ReturnInventory(ctx context.Context, productId in
 		if errors.Is(err, sqlx.ErrNotFound) {
 			return 0, err
 		}
-		return 0, biz.InventoryDecreaseFailedErr
+		return 0, biz.ErrInventoryDecreaseFailed
 	}
 	cnt = inventory.Total + int64(quantity)
 	query = fmt.Sprintf("UPDATE %s SET sold = sold - ?, total = total + ? WHERE product_id = ?", m.table)
 	res, err := m.conn.ExecCtx(ctx, query, quantity, quantity, productId)
 	if err != nil {
-		return 0, biz.InventoryDecreaseFailedErr
+		return 0, biz.ErrInventoryDecreaseFailed
 	}
 	if affected, err := res.RowsAffected(); err != nil {
-		return 0, biz.InventoryDecreaseFailedErr
+		return 0, biz.ErrInventoryDecreaseFailed
 	} else if affected == 0 {
-		return 0, biz.InventoryDecreaseFailedErr
+		return 0, biz.ErrInventoryDecreaseFailed
 	}
 	return cnt, nil
 }
@@ -272,7 +272,7 @@ func (m *customInventoryModel) BatchDecreaseInventoryAtom(
 				return fmt.Errorf("product %d not found: %w", pid, sqlx.ErrNotFound)
 			}
 			if inv.Total < int64(quantities[i]) {
-				return fmt.Errorf("product %d not enough: %w", pid, biz.InventoryNotEnoughErr)
+				return fmt.Errorf("product %d not enough: %w", pid, biz.ErrInventoryNotEnough)
 			}
 		}
 
@@ -313,12 +313,12 @@ func (m *customInventoryModel) Batchdecrease(ctx context.Context, session sqlx.S
 
 	res, err := session.ExecCtx(ctx, updateQuery, updateArgs...)
 	if err != nil {
-		return biz.InventoryDecreaseFailedErr
+		return biz.ErrInventoryDecreaseFailed
 	}
 
 	// 验证影响行数
 	if affected, _ := res.RowsAffected(); affected != int64(len(productIDs)) {
-		return biz.InventoryDecreaseFailedErr
+		return biz.ErrInventoryDecreaseFailed
 	}
 
 	return nil
@@ -335,11 +335,11 @@ func (m *customInventoryModel) DecreaseInventoryAtom(ctx context.Context, produc
 			if errors.Is(err, sqlx.ErrNotFound) {
 				return err
 			}
-			return biz.InventoryDecreaseFailedErr
+			return biz.ErrInventoryDecreaseFailed
 		}
 		cnt = inventory.Total - inventory.Sold - int64(quantity)
 		if cnt < int64(quantity) {
-			return biz.InventoryNotEnoughErr
+			return biz.ErrInventoryNotEnough
 		}
 
 		// --------------- update ---------------
@@ -347,12 +347,12 @@ func (m *customInventoryModel) DecreaseInventoryAtom(ctx context.Context, produc
 		query = fmt.Sprintf("UPDATE %s SET sold = sold + ?, total = total - ? WHERE product_id = ?", m.table)
 		res, err := session.ExecCtx(ctx, query, quantity, quantity, productId)
 		if err != nil {
-			return biz.InventoryDecreaseFailedErr
+			return biz.ErrInventoryDecreaseFailed
 		}
 		if affected, err := res.RowsAffected(); err != nil {
-			return biz.InventoryDecreaseFailedErr
+			return biz.ErrInventoryDecreaseFailed
 		} else if affected == 0 {
-			return biz.InventoryDecreaseFailedErr
+			return biz.ErrInventoryDecreaseFailed
 		}
 		return nil
 	}); err != nil {

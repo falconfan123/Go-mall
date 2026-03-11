@@ -8,7 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/checkout/checkout"
 	"github.com/falconfan123/Go-mall/services/order/order"
-	"github.com/falconfan123/Go-mall/services/users/usersclient"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	xerrors "github.com/zeromicro/x/errors"
@@ -35,7 +35,7 @@ func (l *FlashBuyLogic) FlashBuy(req *types.FlashBuyReq) (resp *types.FlashBuyRe
 	}
 
 	// 0. 获取用户地址
-	addressListResp, err := l.svcCtx.UsersRpc.ListAddresses(l.ctx, &usersclient.AllAddressLitstRequest{
+	addressListResp, err := l.svcCtx.UsersRpc.ListAddresses(l.ctx, &users.AllAddressLitstRequest{
 		UserId: userID,
 	})
 	if err != nil {
@@ -110,16 +110,4 @@ func (l *FlashBuyLogic) FlashBuy(req *types.FlashBuyReq) (resp *types.FlashBuyRe
 		OrderNo: createOrderResp.Order.OrderId,
 		Total:   createOrderResp.Order.PayableAmount,
 	}, nil
-}
-
-func newError(msg string) error {
-	return &customError{msg}
-}
-
-type customError struct {
-	message string
-}
-
-func (e *customError) Error() string {
-	return e.message
 }

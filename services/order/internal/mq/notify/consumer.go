@@ -3,13 +3,13 @@ package notify
 import (
 	"context"
 	"encoding/json"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	order2 "github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 // 处理支付成功的回调

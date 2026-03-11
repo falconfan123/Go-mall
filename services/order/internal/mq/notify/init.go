@@ -2,9 +2,6 @@ package notify
 
 import (
 	"context"
-	"github.com/streadway/amqp"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
@@ -12,6 +9,9 @@ import (
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
+	"github.com/streadway/amqp"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 const (

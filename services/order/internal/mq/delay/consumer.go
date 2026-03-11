@@ -3,12 +3,12 @@ package delay
 import (
 	"context"
 	"encoding/json"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	order2 "github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 func (a *OrderDelayMQ) consumer(ctx context.Context) {
@@ -19,12 +19,12 @@ func (a *OrderDelayMQ) consumer(ctx context.Context) {
 	}
 	results, err := ch.Consume(
 		DeadLetterQueue, // 死信队列名称
-		"",        // 消费者标签
-		true,      // 自动确认（ack）
-		false,     // 排他性
-		false,     // 本地消息
-		false,     // 等待确认
-		nil,       // 参数
+		"",              // 消费者标签
+		true,            // 自动确认（ack）
+		false,           // 排他性
+		false,           // 本地消息
+		false,           // 等待确认
+		nil,             // 参数
 	)
 	if err != nil {
 		logx.Errorw("Failed to register a consumer", logx.Field("err", err))

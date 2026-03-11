@@ -6,13 +6,13 @@ import (
 
 // CartItem 购物车项实体
 type CartItem struct {
-	ID          int64                   // 购物车项ID
-	ProductID   int64                   // 商品ID
-	ProductName string                  // 商品名称
-	ProductImage string                 // 商品图片
-	ProductPrice float64                // 商品价格
-	Quantity    valueobject.Quantity    // 商品数量
-	Checked     bool                    // 是否选中
+	ID           int64                // 购物车项ID
+	ProductID    int64                // 商品ID
+	ProductName  string               // 商品名称
+	ProductImage string               // 商品图片
+	ProductPrice float64              // 商品价格
+	Quantity     valueobject.Quantity // 商品数量
+	Checked      bool                 // 是否选中
 }
 
 // NewCartItem 创建购物车项
@@ -24,12 +24,12 @@ func NewCartItem(
 	quantity valueobject.Quantity,
 ) *CartItem {
 	return &CartItem{
-		ProductID:   productID,
-		ProductName: productName,
+		ProductID:    productID,
+		ProductName:  productName,
 		ProductImage: productImage,
 		ProductPrice: productPrice,
-		Quantity:    quantity,
-		Checked:     true, // 默认选中
+		Quantity:     quantity,
+		Checked:      true, // 默认选中
 	}
 }
 

@@ -61,10 +61,10 @@ type CartItemDTO struct {
 
 // CartDTO 购物车响应
 type CartDTO struct {
-	UserID         int64          `json:"userId"`
-	Items          []*CartItemDTO `json:"items"`
-	TotalQuantity  int32          `json:"totalQuantity"`
-	TotalAmount    float64        `json:"totalAmount"`
-	CheckedCount   int32          `json:"checkedCount"`
-	CheckedAmount  float64        `json:"checkedAmount"`
+	UserID        int64          `json:"userId"`
+	Items         []*CartItemDTO `json:"items"`
+	TotalQuantity int32          `json:"totalQuantity"`
+	TotalAmount   float64        `json:"totalAmount"`
+	CheckedCount  int32          `json:"checkedCount"`
+	CheckedAmount float64        `json:"checkedAmount"`
 }

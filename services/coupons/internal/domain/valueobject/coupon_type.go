@@ -6,8 +6,8 @@ import "errors"
 type CouponType int64
 
 const (
-	CouponTypeFullReduction CouponType = 1 // 满减
-	CouponTypeDiscount       CouponType = 2 // 折扣
+	CouponTypeFullReduction   CouponType = 1 // 满减
+	CouponTypeDiscount        CouponType = 2 // 折扣
 	CouponTypeDirectReduction CouponType = 3 // 立减
 )
 

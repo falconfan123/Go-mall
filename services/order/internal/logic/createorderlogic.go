@@ -3,11 +3,6 @@ package logic
 import (
 	"context"
 	"database/sql"
-	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	order2 "github.com/falconfan123/Go-mall/dal/model/order"
@@ -15,6 +10,11 @@ import (
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/delay"
 	"github.com/falconfan123/Go-mall/services/users/users"
+	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"time"
 
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"

@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strings"
 )
 

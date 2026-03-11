@@ -32,7 +32,7 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.UpdateInventoryReq)
 
 		if item.Quantity <= 0 {
 			l.Logger.Errorw("quantity must be greater than 0", logx.Field("quantity", item.Quantity), logx.Field("product_id", item.ProductId))
-			return nil, biz.InvalidInventoryErr
+			return nil, biz.ErrInvalidInventory
 		}
 		tostr := fmt.Sprintf("%d", item.Quantity)
 		err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId), tostr)

@@ -49,13 +49,13 @@ func (l *ReturnInventoryLogic) ReturnInventory(in *inventory.InventoryReq) (*inv
 		res.StatusMsg = code.ProductNotFoundInventoryMsg
 		return res, nil
 
-	case errors.Is(err, biz.InventoryNotEnoughErr):
+	case errors.Is(err, biz.ErrInventoryNotEnough):
 		l.Logger.Infow("product inventory not enough", logx.Field("product_id", productId))
 		res.StatusCode = code.InventoryNotEnough
 		res.StatusMsg = code.InventoryNotEnoughMsg
 		return res, nil
 
-	case errors.Is(err, biz.InventoryDecreaseFailedErr):
+	case errors.Is(err, biz.ErrInventoryDecreaseFailed):
 		l.Logger.Errorw("product inventory decrease failed", logx.Field("product_id", productId))
 		return nil, err
 	}

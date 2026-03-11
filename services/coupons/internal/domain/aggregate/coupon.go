@@ -9,20 +9,20 @@ import (
 
 // Coupon 优惠券聚合根
 type Coupon struct {
-	ID             string                         // 优惠券ID
-	Name           string                         // 券名称
-	Discount       *valueobject.Discount          // 折扣信息
-	ValidPeriod    *valueobject.ValidPeriod       // 有效期
-	Status         valueobject.CouponStatus       // 状态
-	TotalCount     uint64                         // 发行总量
-	RemainingCount uint64                         // 剩余数量
-	CreatedAt      time.Time                      // 创建时间
-	UpdatedAt      time.Time                        // 更新时间
+	ID             string                   // 优惠券ID
+	Name           string                   // 券名称
+	Discount       *valueobject.Discount    // 折扣信息
+	ValidPeriod    *valueobject.ValidPeriod // 有效期
+	Status         valueobject.CouponStatus // 状态
+	TotalCount     uint64                   // 发行总量
+	RemainingCount uint64                   // 剩余数量
+	CreatedAt      time.Time                // 创建时间
+	UpdatedAt      time.Time                // 更新时间
 }
 
 var (
 	ErrCouponOutOfStock = errors.New("coupon is out of stock")
-	ErrCouponInvalid = errors.New("invalid coupon")
+	ErrCouponInvalid    = errors.New("invalid coupon")
 )
 
 // NewCoupon 创建新优惠券
@@ -56,8 +56,8 @@ func NewCoupon(
 		Status:         valueobject.CouponStatusEnabled,
 		TotalCount:     totalCount,
 		RemainingCount: totalCount,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
 	}, nil
 }
 

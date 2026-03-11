@@ -2,22 +2,24 @@ package logic
 
 import (
 	"context"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/x/errors"
 	"github.com/falconfan123/Go-mall/apis/carts/internal/svc"
 	"github.com/falconfan123/Go-mall/apis/carts/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/carts/carts"
 	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/x/errors"
 )
 
+// CartItemListLogic handles the logic of listing cart items.
 type CartItemListLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCartItemListLogic creates a new CartItemListLogic.
 func NewCartItemListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CartItemListLogic {
 	return &CartItemListLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,6 +28,7 @@ func NewCartItemListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cart
 	}
 }
 
+// CartItemList retrieves the list of cart items for a user.
 func (l *CartItemListLogic) CartItemList(req *types.UserInfo) (resp *types.CartItemListResp, err error) {
 	// 获取购物车信息
 	userId := l.ctx.Value(biz.UserIDKey).(uint32)

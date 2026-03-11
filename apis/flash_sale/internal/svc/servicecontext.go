@@ -5,7 +5,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/middleware"
 	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
 	"github.com/falconfan123/Go-mall/services/order/order"
-	"github.com/falconfan123/Go-mall/services/users/usersclient"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -16,8 +16,8 @@ type ServiceContext struct {
 	WithClientMiddleware  rest.Middleware
 	WrapperAuthMiddleware rest.Middleware
 	CheckoutRpc           checkoutservice.CheckoutService
-	OrderRpc              order.OrderService
-	UsersRpc              usersclient.Users
+	OrderRpc              order.OrderServiceClient
+	UsersRpc              users.Users
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -26,7 +26,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		WithClientMiddleware:  middleware.WithClientMiddleware,
 		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, nil, c.OptionPathList),
 		CheckoutRpc:           checkoutservice.NewCheckoutService(zrpc.MustNewClient(c.CheckoutRpc)),
-		OrderRpc:              order.NewOrderService(zrpc.MustNewClient(c.OrderRpc)),
-		UsersRpc:              usersclient.NewUsers(zrpc.MustNewClient(c.UsersRpc)),
+		OrderRpc:              order.NewOrderServiceClient(zrpc.MustNewClient(c.OrderRpc).Conn()),
+		UsersRpc:              users.NewUsers(zrpc.MustNewClient(c.UsersRpc)),
 	}
 }

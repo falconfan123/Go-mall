@@ -2,8 +2,8 @@ package mq
 
 import (
 	"context"
-	"github.com/streadway/amqp"
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
+	"github.com/streadway/amqp"
 	"time"
 )
 

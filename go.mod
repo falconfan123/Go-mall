@@ -17,6 +17,7 @@ require (
 	github.com/smartwalle/alipay/v3 v3.2.25
 	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.11.1
+	github.com/zeromicro/go-queue v1.2.2
 	github.com/zeromicro/go-zero v1.7.6
 	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f
@@ -27,7 +28,6 @@ require (
 )
 
 replace github.com/falconfan123/Go-mall/services/auths/auths => ./services/auths/auths
-
 
 replace github.com/falconfan123/Go-mall/services/product/product => ./services/product/product
 
@@ -60,6 +60,7 @@ require (
 	github.com/minio/crc64nvme v1.1.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/smartwalle/ncrypto v1.0.4 // indirect
 	github.com/smartwalle/ngx v1.0.9 // indirect

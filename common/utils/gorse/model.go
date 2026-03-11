@@ -2,6 +2,7 @@ package client
 
 import "time"
 
+// Feedback represents user feedback in the Gorse system.
 type Feedback struct {
 	FeedbackType string `json:"FeedbackType"`
 	UserId       string `json:"UserId"`
@@ -9,11 +10,13 @@ type Feedback struct {
 	Timestamp    string `json:"Timestamp"`
 }
 
+// Feedbacks represents a list of feedbacks with cursor.
 type Feedbacks struct {
 	Cursor   string     `json:"Cursor"`
 	Feedback []Feedback `json:"Feedback"`
 }
 
+// ErrorMessage represents an error message from Gorse.
 type ErrorMessage string
 
 func (e ErrorMessage) Error() string {

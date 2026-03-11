@@ -130,15 +130,15 @@ func (r *UserRepositoryImpl) toDomainUser(u *daluser.Users) *aggregate.User {
 	passwordHash := valueobject.NewPasswordHashFromHash(u.PasswordHash.String)
 
 	domainUser := &aggregate.User{
-		ID:           u.UserId,
-		Email:        email,
-		PasswordHash: passwordHash,
-		Username:     u.Username.String,
-		Avatar:       u.AvatarUrl.String,
-		CreateTime:   u.CreatedAt,
-		UpdateTime:   u.UpdatedAt,
+		ID:            u.UserId,
+		Email:         email,
+		PasswordHash:  passwordHash,
+		Username:      u.Username.String,
+		Avatar:        u.AvatarUrl.String,
+		CreateTime:    u.CreatedAt,
+		UpdateTime:    u.UpdatedAt,
 		LastLoginTime: u.LoginAt.Time,
-		Addresses:    make([]*entity.Address, 0),
+		Addresses:     make([]*entity.Address, 0),
 	}
 	return domainUser
 }

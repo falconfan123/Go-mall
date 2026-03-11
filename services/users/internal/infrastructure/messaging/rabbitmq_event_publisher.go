@@ -2,21 +2,22 @@ package messaging
 
 import (
 	"encoding/json"
+
 	"github.com/falconfan123/Go-mall/services/users/internal/application/event"
 	domainevent "github.com/falconfan123/Go-mall/services/users/internal/domain/event"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-queue/rabbitmq"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // RabbitMQEventPublisher RabbitMQ事件发布器实现
 type RabbitMQEventPublisher struct {
-	producer *rabbitmq.Producer
+	sender *rabbitmq.RabbitMqSender
 }
 
 // NewRabbitMQEventPublisher 创建RabbitMQ事件发布器
-func NewRabbitMQEventPublisher(producer *rabbitmq.Producer) event.EventPublisher {
+func NewRabbitMQEventPublisher(sender *rabbitmq.RabbitMqSender) event.EventPublisher {
 	return &RabbitMQEventPublisher{
-		producer: producer,
+		sender: sender,
 	}
 }
 
@@ -63,7 +64,7 @@ func (p *RabbitMQEventPublisher) publish(routingKey string, event interface{}) e
 		return err
 	}
 
-	err = p.producer.Publish(routingKey, body)
+	err = p.sender.Send("", routingKey, body)
 	if err != nil {
 		logx.Errorw("publish event failed", logx.Field("err", err), logx.Field("routing_key", routingKey))
 		return err

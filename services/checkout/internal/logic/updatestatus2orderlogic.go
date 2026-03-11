@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
-	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
 )
 
 type UpdateStatus2OrderLogic struct {

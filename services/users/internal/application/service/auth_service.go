@@ -24,8 +24,8 @@ type AuthAppService struct {
 
 // AuthConfig 认证配置
 type AuthConfig struct {
-	AccessExpire  int64 // 访问令牌有效期（秒）
-	RefreshExpire int64 // 刷新令牌有效期（秒）
+	AccessExpire  int64  // 访问令牌有效期（秒）
+	RefreshExpire int64  // 刷新令牌有效期（秒）
 	Secret        string // JWT密钥
 }
 
@@ -109,8 +109,8 @@ func (s *AuthAppService) Register(ctx context.Context, req *dto.RegisterRequest)
 	go func() {
 		event := &domainevent.UserRegisteredEvent{
 			BaseEvent: domainevent.BaseEvent{
-				EventID:   uuid.NewString(),
-				EventType: "user_registered",
+				EventID:    uuid.NewString(),
+				EventType:  "user_registered",
 				OccurredAt: time.Now(),
 			},
 			UserID:   userID,
@@ -185,8 +185,8 @@ func (s *AuthAppService) Login(ctx context.Context, req *dto.LoginRequest) (*dto
 	go func() {
 		event := &domainevent.UserLoggedInEvent{
 			BaseEvent: domainevent.BaseEvent{
-				EventID:   uuid.NewString(),
-				EventType: "user_logged_in",
+				EventID:    uuid.NewString(),
+				EventType:  "user_logged_in",
 				OccurredAt: time.Now(),
 			},
 			UserID: user.ID,
@@ -218,8 +218,8 @@ func (s *AuthAppService) Logout(ctx context.Context, req *dto.LogoutRequest) (*d
 	go func() {
 		event := &domainevent.UserLoggedOutEvent{
 			BaseEvent: domainevent.BaseEvent{
-				EventID:   uuid.NewString(),
-				EventType: "user_logged_out",
+				EventID:    uuid.NewString(),
+				EventType:  "user_logged_out",
 				OccurredAt: time.Now(),
 			},
 			UserID: int64(req.UserID),

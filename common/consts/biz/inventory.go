@@ -12,10 +12,10 @@ const (
 )
 
 var (
-	// InventoryNotEnoughErr 库存不足err
-	InventoryNotEnoughErr = errors.New("not enough inventory")
-	// InventoryDecreaseFailedErr 扣减失败
-	InventoryDecreaseFailedErr = errors.New("decrease inventory failed")
-	// InvalidInventoryErr 非法的库存信息
-	InvalidInventoryErr = errors.New("invalid inventory")
+	// ErrInventoryNotEnough 库存不足err
+	ErrInventoryNotEnough = errors.New("not enough inventory")
+	// ErrInventoryDecreaseFailed 扣减失败
+	ErrInventoryDecreaseFailed = errors.New("decrease inventory failed")
+	// ErrInvalidInventory 非法的库存信息
+	ErrInvalidInventory = errors.New("invalid inventory")
 )

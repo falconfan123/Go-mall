@@ -14,7 +14,7 @@ type (
 	// and implement the added methods in customOrderAddressesModel.
 	OrderAddressesModel interface {
 		orderAddressesModel
-		withSession(session sqlx.Session) OrderAddressesModel
+		WithSession(session sqlx.Session) OrderAddressesModel
 		GetOrderAddressByOrderID(ctx context.Context, orderID string) (*OrderAddresses, error)
 		DeleteOrderAddressByOrderID(ctx context.Context, session sqlx.Session, orderID string) error
 	}
@@ -51,6 +51,6 @@ func NewOrderAddressesModel(conn sqlx.SqlConn) OrderAddressesModel {
 	}
 }
 
-func (m *customOrderAddressesModel) withSession(session sqlx.Session) OrderAddressesModel {
+func (m *customOrderAddressesModel) WithSession(session sqlx.Session) OrderAddressesModel {
 	return NewOrderAddressesModel(sqlx.NewSqlConnFromSession(session))
 }

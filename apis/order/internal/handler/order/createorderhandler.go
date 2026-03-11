@@ -3,11 +3,11 @@ package order
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
-	xhttp "github.com/zeromicro/x/http"
 	"github.com/falconfan123/Go-mall/apis/order/internal/logic/order"
 	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
 	"github.com/falconfan123/Go-mall/apis/order/internal/types"
+	"github.com/zeromicro/go-zero/rest/httpx"
+	xhttp "github.com/zeromicro/x/http"
 )
 
 func CreateOrderHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

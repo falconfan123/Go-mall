@@ -1,5 +1,6 @@
 package code
 
+// Inventory error codes.
 const (
 	UpdateInventoryError int32 = 100000 + iota
 	InventoryNotEnough
@@ -11,6 +12,8 @@ const (
 	CheckoutRecordNotFound
 	CheckoutRecordStatusNotReserving
 )
+
+// Inventory error messages.
 const (
 	UpdateInventoryErrorMsg             = "更新库存失败"
 	InventoryNotEnoughMsg               = "库存不足"

@@ -7,8 +7,8 @@ import (
 // Discount 折扣值对象
 type Discount struct {
 	couponType CouponType
-	value      int64   // 优惠值：满减/立减单位为分，折扣为百分比*100（如9折为90）
-	minAmount  int64   // 最低消费金额（分）
+	value      int64 // 优惠值：满减/立减单位为分，折扣为百分比*100（如9折为90）
+	minAmount  int64 // 最低消费金额（分）
 }
 
 var (

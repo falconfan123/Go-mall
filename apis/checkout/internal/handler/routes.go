@@ -33,8 +33,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: CheckoutHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodOptions,
-					Path:    "/*",
+					Method: http.MethodOptions,
+					Path:   "/*",
 					Handler: func(w http.ResponseWriter, r *http.Request) {
 						w.WriteHeader(http.StatusOK)
 					},

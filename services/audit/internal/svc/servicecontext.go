@@ -1,10 +1,10 @@
 package svc
 
 import (
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/falconfan123/Go-mall/dal/model/audit"
 	"github.com/falconfan123/Go-mall/services/audit/internal/config"
 	"github.com/falconfan123/Go-mall/services/audit/internal/mq"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type ServiceContext struct {

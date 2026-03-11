@@ -9,26 +9,26 @@ import (
 type UserCouponStatus int64
 
 const (
-	UserCouponStatusUnused UserCouponStatus = 1 // 未使用
-	UserCouponStatusUsed   UserCouponStatus = 2 // 已使用
+	UserCouponStatusUnused  UserCouponStatus = 1 // 未使用
+	UserCouponStatusUsed    UserCouponStatus = 2 // 已使用
 	UserCouponStatusExpired UserCouponStatus = 3 // 已过期
 )
 
 var (
 	ErrInvalidUserCouponStatus = errors.New("invalid user coupon status")
-	ErrUserCouponAlreadyUsed = errors.New("user coupon already used")
-	ErrUserCouponExpired = errors.New("user coupon has expired")
+	ErrUserCouponAlreadyUsed   = errors.New("user coupon already used")
+	ErrUserCouponExpired       = errors.New("user coupon has expired")
 )
 
 // UserCoupon 用户优惠券实体
 type UserCoupon struct {
-	ID         int64                 // 记录ID
-	UserID     int64                 // 用户ID
-	CouponID   string                // 优惠券ID
-	Status     UserCouponStatus      // 状态
-	GetTime    time.Time             // 领取时间
-	UseTime    *time.Time            // 使用时间
-	OrderID    *string               // 关联订单ID
+	ID       int64            // 记录ID
+	UserID   int64            // 用户ID
+	CouponID string           // 优惠券ID
+	Status   UserCouponStatus // 状态
+	GetTime  time.Time        // 领取时间
+	UseTime  *time.Time       // 使用时间
+	OrderID  *string          // 关联订单ID
 }
 
 // NewUserCoupon 创建用户优惠券

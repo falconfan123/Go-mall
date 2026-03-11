@@ -2,12 +2,12 @@ package logic
 
 import (
 	"context"
-	xerrors "github.com/zeromicro/x/errors"
 	"github.com/falconfan123/Go-mall/apis/payment/internal/svc"
 	"github.com/falconfan123/Go-mall/apis/payment/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/payment/payment"
+	xerrors "github.com/zeromicro/x/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
