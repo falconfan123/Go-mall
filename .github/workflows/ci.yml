@@ -40,6 +40,7 @@ jobs:
       - name: 构建 ${{ matrix.service }} 服务
         run: |
           cd services/${{ matrix.service }}
+          go mod tidy
           go build -o /dev/null .
 
   # 安全扫描
