@@ -1,3 +1,5 @@
+# Go-mall 项目规范
+
 The role of this file is to describe common mistakes and confusion points that agents might encounter as they work in this project. If you ever encounter something in the project that surprises you, please alert the developer working with you and indicate that this is the case in the AgentMD file to help prevent future agents from having the same issue
 
 ## go-zero 开发规范
@@ -33,31 +35,37 @@ The role of this file is to describe common mistakes and confusion points that a
 
 ## CI/CD 检查规范
 
-### 本地检查要求
-**重要**：本地检查只在本地运行，不会在 GitHub Actions 中执行。
+### 检查流程
+项目有两套独立的检查机制，**各管各的**：
 
-每次完成代码修改后，建议先运行本地 CI 检查：
+| 检查类型 | 运行位置 | 检查内容 |
+|---------|---------|---------|
+| **本地检查** | 本地电脑 (`./scripts/check.sh`) | staticcheck, golint, revive, gofmt 等 |
+| **GitHub Actions CI** | GitHub 自动流程 | build, test, security, deps |
+
+### 本地检查（每次 PR 前必运行）
+
+**重要**：每次提交 PR 前，必须先运行本地检查，确保没有问题后再提交。
+
 ```bash
 # 运行本地 CI 检查（跳过测试，加快检查速度）
-./scripts/local-ci.sh --skip-tests
+./scripts/check.sh --skip-tests
 
 # 或使用 Makefile
 make lint
 ```
 
-**GitHub Actions CI 只验证构建和依赖安全，不运行 lint 检查。**
-
-### 检查内容
-本地 CI 脚本会自动检查：
+本地检查包含：
 1. 代码格式 (`gofmt`)
 2. 静态分析 (`go vet`, `staticcheck`)
 3. 代码风格 (`golint`, `revive`)
 4. 编译检查
+5. 单元测试（可选）
 
 ### 快速格式化
 如果格式检查失败，可以自动修复：
 ```bash
-./scripts/local-ci.sh --auto-fix
+./scripts/check.sh --auto-fix
 # 或
 make fmt
 ```
@@ -67,6 +75,15 @@ make fmt
 ```bash
 make install-tools
 ```
+
+### GitHub Actions CI
+GitHub Actions 会运行标准 CI 检查：
+- **build** - 验证各服务编译
+- **test** - 单元测试
+- **security** - go vet + 敏感信息检查
+- **deps** - 依赖一致性 + 漏洞扫描
+
+注意：由于项目使用了 `replace` 本地模块替换，某些本地检查工具可能无法在 CI 环境中运行，因此本地检查只应在本地执行。
 
 ## 单元测试规范
 

@@ -73,7 +73,7 @@ staticcheck:
 # 运行本地 CI 检查 (跳过测试，因为测试需要服务运行)
 lint:
 	@echo -e "$(BLUE)运行本地 CI 检查...$(NC)"
-	@bash scripts/local-ci.sh --skip-tests
+	@bash scripts/check.sh --skip-tests
 
 # 整理依赖
 tidy:
@@ -109,7 +109,7 @@ build:
 # 模拟 CI 检查 (跳过测试)
 ci:
 	@echo -e "$(BLUE)模拟 CI 检查...$(NC)"
-	@bash scripts/local-ci.sh --skip-tests
+	@bash scripts/check.sh --skip-tests
 
 # 清理缓存
 clean:
