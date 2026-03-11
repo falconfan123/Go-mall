@@ -44,7 +44,14 @@ jobs:
 
       - name: 同步工作区依赖
         run: |
-          export GOWORK=${{ github.workspace }}/go.work
+          export GOWORK="${GITHUB_WORKSPACE}/go.work"
+
+          if [ ! -f "$GOWORK" ]; then
+            echo "错误：找不到 go.work 文件！当前目录结构如下："
+            ls -R ${GITHUB_WORKSPACE}
+            exit 1
+          fi
+
           go work sync
 
       - name: 预理顺公共模块
