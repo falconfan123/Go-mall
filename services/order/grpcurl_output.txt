@@ -1,0 +1,19 @@
+
+Resolved method descriptor:
+rpc CreateOrder ( .order.CreateOrderRequest ) returns ( .order.OrderDetailResponse );
+
+Request metadata to send:
+(empty)
+
+Response headers received:
+content-type: application/grpc
+
+Response contents:
+{
+  "statusCode": 11003,
+  "statusMsg": "订单已存在"
+}
+
+Response trailers received:
+(empty)
+Sent 1 request and received 1 response

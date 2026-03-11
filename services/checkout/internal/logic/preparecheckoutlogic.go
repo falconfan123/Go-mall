@@ -115,25 +115,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			logx.Field("user_id", in.UserId),
 			logx.Field("pre_order_id", preOrderId))
 
-		// 释放 Redis 锁
-		if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
-			l.Logger.Errorw("删除 Redis 锁失败",
-				logx.Field("err", err),
-				logx.Field("user_id", in.UserId))
-		}
-
-		// 同步回滚库存
-		_, errRollback := l.svcCtx.InventoryRpc.ReturnPreInventory(l.ctx, &inventory.InventoryReq{
-			Items:      inventoryItems,
-			PreOrderId: preOrderId,
-			UserId:     int32(in.UserId),
-		})
-		if errRollback != nil {
-			l.Logger.Errorw("库存回滚失败",
-				logx.Field("err", errRollback),
-				logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", preOrderId))
-		}
+		l.rollback(preOrderId, int32(in.UserId), inventoryItems, cacheKey)
 
 		return &checkout.CheckoutResp{
 			StatusCode: code.OutOfInventory,
@@ -142,11 +124,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	}
 	if inventoryRes.StatusCode != code.Success {
 		// 释放 Redis 锁
-		if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
-			l.Logger.Errorw("删除 Redis 锁失败",
-				logx.Field("err", err),
-				logx.Field("user_id", in.UserId))
-		}
+		l.svcCtx.RedisClient.Del(cacheKey)
 		res.StatusCode = inventoryRes.StatusCode
 		res.StatusMsg = inventoryRes.StatusMsg
 		return res, nil
@@ -166,6 +144,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			l.Logger.Errorw("获取商品详情失败",
 				logx.Field("err", err),
 				logx.Field("product_id", item.ProductId))
+			l.rollback(preOrderId, int32(in.UserId), inventoryItems, cacheKey)
 			return nil, err
 		}
 		snapshotData := map[string]interface{}{"name": productResp.Product.Name, "desc": productResp.Product.Description}
@@ -195,11 +174,13 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			l.Logger.Errorw("计算优惠券失败",
 				logx.Field("err", err),
 				logx.Field("user_id", in.UserId))
+			l.rollback(preOrderId, int32(in.UserId), inventoryItems, cacheKey)
 			return nil, err
 		}
 		if resp.StatusCode != code.Success {
 			res.StatusCode = int32(resp.StatusCode)
 			res.StatusMsg = resp.StatusMsg
+			l.rollback(preOrderId, int32(in.UserId), inventoryItems, cacheKey)
 			return res, nil
 		}
 		finalPrice = uint64(resp.FinalAmount)
@@ -229,6 +210,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	}); err != nil {
 		l.Logger.Errorw("处理结算信息失败",
 			logx.Field("err", err))
+		l.rollback(preOrderId, int32(in.UserId), inventoryItems, cacheKey)
 		return nil, err
 	}
 	// 6. 返回预结算信息
@@ -237,4 +219,26 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 		ExpireTime: expireTime,
 		PayMethod:  []int64{1, 2},
 	}, nil
+}
+
+func (l *PrepareCheckoutLogic) rollback(preOrderId string, userId int32, items []*inventory.InventoryReq_Items, cacheKey string) {
+	// 释放 Redis 锁
+	if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
+		l.Logger.Errorw("删除 Redis 锁失败",
+			logx.Field("err", err),
+			logx.Field("user_id", userId))
+	}
+
+	// 回滚库存
+	_, errRollback := l.svcCtx.InventoryRpc.ReturnPreInventory(l.ctx, &inventory.InventoryReq{
+		Items:      items,
+		PreOrderId: preOrderId,
+		UserId:     userId,
+	})
+	if errRollback != nil {
+		l.Logger.Errorw("库存回滚失败",
+			logx.Field("err", errRollback),
+			logx.Field("user_id", userId),
+			logx.Field("pre_order_id", preOrderId))
+	}
 }

@@ -34,6 +34,7 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 	resp := &inventory.InventoryResp{}
 	// 构建幂等锁Key（用户ID+预订单ID）
 	lockKey := fmt.Sprintf("%s:%d:%s", biz.InventoryDeductLockPrefix, in.UserId, in.PreOrderId)
+	l.Logger.Infof("DecreasePreInventory: lockKey=%s, preOrderId=%s", lockKey, in.PreOrderId)
 	//准备参数
 	keys := make([]string, len(in.Items)+1)
 	args := make([]interface{}, len(in.Items)+1)

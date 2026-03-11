@@ -11,7 +11,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/auths/authsclient"
-	"github.com/falconfan123/Go-mall/services/users/usersclient"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -52,7 +52,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 
 	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
 
-	response, err := l.svcCtx.UserRpc.Register(l.ctx, &usersclient.RegisterRequest{
+	response, err := l.svcCtx.UserRpc.Register(l.ctx, &users.RegisterRequest{
 		Ip:              user_ip,
 		Email:           req.Email,
 		Password:        req.Password,

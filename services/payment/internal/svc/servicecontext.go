@@ -1,22 +1,22 @@
 package svc
 
 import (
+	"github.com/falconfan123/Go-mall/dal/model/payment"
+	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/payment/internal/config"
+	"github.com/falconfan123/Go-mall/services/payment/internal/mq"
 	"github.com/smartwalle/alipay/v3"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
-	"github.com/falconfan123/Go-mall/dal/model/payment"
-	"github.com/falconfan123/Go-mall/services/order/order"
-	"github.com/falconfan123/Go-mall/services/payment/internal/config"
-	"github.com/falconfan123/Go-mall/services/payment/internal/mq"
 )
 
 type ServiceContext struct {
 	Config       config.Config
 	Rdb          *redis.Redis
 	PaymentModel payment.PaymentsModel
-	OrderRpc     order.OrderService
+	OrderRpc     order.OrderServiceClient
 	Alipay       *alipay.Client
 	PaymentMQ    *mq.PaymentDelayMQ
 	Model        sqlx.SqlConn
@@ -45,7 +45,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:       c,
 		Rdb:          redis.MustNewRedis(c.RedisConf),
 		PaymentModel: payment.NewPaymentsModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
-		OrderRpc:     order.NewOrderService(zrpc.MustNewClient(c.OrderRpc)),
+		OrderRpc:     order.NewOrderServiceClient(zrpc.MustNewClient(c.OrderRpc).Conn()),
 		Alipay:       client,
 		PaymentMQ:    nil, // 暂时设置为nil
 		Model:        sqlx.NewMysql(c.MysqlConfig.DataSource),

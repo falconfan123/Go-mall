@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/apis/user/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/users/usersclient"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/x/errors"
@@ -32,7 +32,7 @@ func (l *DeleteLogic) Delete(req *types.DeleteRequest) (resp *types.DeleteRespon
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
 
-	deleteresp, err := l.svcCtx.UserRpc.DeleteUser(l.ctx, &usersclient.DeleteUserRequest{
+	deleteresp, err := l.svcCtx.UserRpc.DeleteUser(l.ctx, &users.DeleteUserRequest{
 
 		UserId: uint32(user_id),
 		Ip:     user_ip,

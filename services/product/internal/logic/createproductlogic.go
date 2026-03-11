@@ -9,6 +9,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	pc "github.com/falconfan123/Go-mall/dal/model/products/product_categories"
+	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	"github.com/falconfan123/Go-mall/services/product/product"
 	"strconv"
@@ -57,6 +58,7 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		Description: sql.NullString{String: in.Description, Valid: in.Description != ""},
 		Picture:     sql.NullString{String: pictureUrl, Valid: pictureUrl != ""},
 		Price:       in.Price, // 注意类型转换
+		Stock:       in.Stock,
 	}
 	res := &product.CreateProductResp{}
 	// 2. 使用 Transact 开启事务
@@ -105,6 +107,19 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 			logx.Field("err", err))
 		return res, nil
 	}
+
+	// 4. Update Inventory
+	if _, err := l.svcCtx.InventoryRpc.UpdateInventory(l.ctx, &inventory.UpdateInventoryReq{
+		Items: []*inventory.UpdateInventoryReq_Items{
+			{
+				ProductId: int32(productId),
+				Quantity:  int32(in.Stock),
+			},
+		},
+	}); err != nil {
+		l.Logger.Errorw("product inventory update failed", logx.Field("err", err))
+	}
+
 	res.ProductId = productId
 	return res, nil
 }

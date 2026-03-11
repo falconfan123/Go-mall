@@ -3,10 +3,9 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	gorse "github.com/falconfan123/Go-mall/common/utils/gorse"
@@ -49,7 +48,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	// 从Redis中获取数据
 	cacheData, err := l.svcCtx.RedisClient.Get(cacheKey)
 	if err != nil {
-		// 这里也是，可以想象一个场景，假设在请求redis时网络抖动了，导致请求失败，但是在后面还可以通过mysql获取数据
+		// ...
 		l.Logger.Errorw("get product from cache failed",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
@@ -60,7 +59,11 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		var productRes product.Product
 		if err := json.Unmarshal([]byte(cacheData), &productRes); err == nil {
 			// 序列化成功返回，查询库存，我们进行返回动态库存
-			productRes.Stock, productRes.Sold = l.getRealTimeStockAndSold(int64(in.Id))
+			stock, sold, err := l.getRealTimeStockAndSold(int64(in.Id))
+			if err == nil {
+				productRes.Stock = stock
+				productRes.Sold = sold
+			}
 			return &product.GetProductResp{
 				Product: &productRes,
 			}, nil
@@ -74,23 +77,18 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	// 如果Redis中没有数据，从数据库中获取
 
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
+	// 4. 从数据库获取
 	productData, err := productModel.FindOne(l.ctx, int64(in.Id))
-	// 存在错误直接返回，因为没有兜底的了。
 	if err != nil {
-		if errors.Is(err, sqlx.ErrNotFound) {
-			// 不存在并不属于错误，所以这里不需要返回错误，由调用端返回信息
+		if err == product2.ErrNotFound {
 			return &product.GetProductResp{
-				StatusCode: uint32(code.ProductNotFoundInventory),
-				StatusMsg:  code.ProductNotFoundInventoryMsg,
+				StatusCode: uint32(code.ProductNotFound),
+				StatusMsg:  code.ProductNotFoundMsg,
 			}, nil
 		}
-		l.Logger.Errorw("Failed to find product from database",
-			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
 		return nil, err
 	}
 
-	// --------------- 到这里就说明查询到部分数据了，进行组装操作 ---------------
 	resp := &product.GetProductResp{
 		Product: &product.Product{
 			Id:          uint32(productData.Id),
@@ -98,6 +96,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 			Description: productData.Description.String,
 			Picture:     productData.Picture.String,
 			Price:       productData.Price,
+			Stock:       productData.Stock,
 			CratedAt:    productData.CreatedAt.Format(time.DateTime),
 			UpdatedAt:   productData.CreatedAt.Format(time.DateTime),
 		},
@@ -132,7 +131,11 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	}
 
 	// 查询实时库存
-	resp.Product.Stock, resp.Product.Sold = l.getRealTimeStockAndSold(productData.Id)
+	stock, sold, err := l.getRealTimeStockAndSold(productData.Id)
+	if err == nil {
+		resp.Product.Stock = stock
+		resp.Product.Sold = sold
+	}
 	if in.UserId != 0 {
 		go func() {
 			// 插入反馈
@@ -154,13 +157,15 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 }
 
 // 抽取重复的库存查询逻辑
-func (l *GetProductLogic) getRealTimeStockAndSold(productId int64) (int64, int64) {
-	inventoryResp, err := l.svcCtx.InventoryRpc.GetInventory(l.ctx, &inventory.GetInventoryReq{
+func (l *GetProductLogic) getRealTimeStockAndSold(productId int64) (int64, int64, error) {
+	ctx, cancel := context.WithTimeout(l.ctx, 500*time.Millisecond)
+	defer cancel()
+	inventoryResp, err := l.svcCtx.InventoryRpc.GetInventory(ctx, &inventory.GetInventoryReq{
 		ProductId: int32(productId),
 	})
 	if err != nil {
 		l.Logger.Errorw("call rpc InventoryRpc.GetInventory failed", logx.Field("err", err), logx.Field("product_id", productId))
-		return 0, 0 // 返回默认值或特殊标记
+		return 0, 0, err
 	}
-	return inventoryResp.Inventory, inventoryResp.SoldCount
+	return inventoryResp.Inventory, inventoryResp.SoldCount, nil
 }

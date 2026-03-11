@@ -11,7 +11,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/auths/authsclient"
-	"github.com/falconfan123/Go-mall/services/users/usersclient"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -37,7 +37,7 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 		return nil, errors.New(code.LoginMessageEmpty, code.LoginMessageEmptyMsg)
 	}
 
-	loginres, err := l.svcCtx.UserRpc.Login(l.ctx, &usersclient.LoginRequest{
+	loginres, err := l.svcCtx.UserRpc.Login(l.ctx, &users.LoginRequest{
 		Email:    req.Email,
 		Password: req.Password,
 	})

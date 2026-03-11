@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/apis/user/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/users/usersclient"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/x/errors"
@@ -31,7 +31,7 @@ func (l *LogoutLogic) Logout(req *types.LogoutRequest) (resp *types.LogoutRespon
 
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 
-	logoutrep, err := l.svcCtx.UserRpc.Logout(l.ctx, &usersclient.LogoutRequest{
+	logoutrep, err := l.svcCtx.UserRpc.Logout(l.ctx, &users.LogoutRequest{
 
 		UserId: user_id,
 	})

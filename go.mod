@@ -28,7 +28,6 @@ require (
 
 replace github.com/falconfan123/Go-mall/services/auths/auths => ./services/auths/auths
 
-replace github.com/falconfan123/Go-mall/services/users/usersclient/userspb => ./services/users/usersclient/userspb
 
 replace github.com/falconfan123/Go-mall/services/product/product => ./services/product/product
 

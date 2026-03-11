@@ -38,6 +38,11 @@ const (
 	AuditDeleteaddressFailed = 20034
 	AuditDeleteuserFailed    = 20035
 	AuditAddAddressFailed    = 20036
+	RePasswordError          = 20037
+	UserExistError           = 20038
+	UserNotExistError        = 20039
+	LoginError               = 20040
+	AddressNotExist          = 20041
 )
 
 const (
@@ -77,4 +82,9 @@ const (
 	AuditDeleteaddressFailedMsg = "删除地址审计操作失败"
 	AuditDeleteuserFailedMsg    = "删除用户审计操作失败"
 	AuditAddAddressFailedMsg    = "添加地址审计操作失败"
+	RePasswordErrorMsg          = "两次密码输入不一致"
+	UserExistErrorMsg           = "用户已存在"
+	UserNotExistErrorMsg        = "用户不存在"
+	LoginErrorMsg               = "账号或密码错误"
+	AddressNotExistMsg          = "收货地址不存在"
 )

@@ -1,8 +1,9 @@
 CREATE TABLE checkouts
 (
-    pre_order_id    VARCHAR(36)  NOT NULL COMMENT '预订单ID',
-    user_id         INT UNSIGNED NOT NULL COMMENT '用户ID',
-    coupon_id       VARCHAR(36) COMMENT '使用优惠券ID列表（支持多券）',
+    pre_order_id    VARCHAR(64)  NOT NULL COMMENT '预订单ID',
+    user_id         BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
+    address_id      BIGINT UNSIGNED NOT NULL COMMENT '收货地址ID',
+    coupon_id       VARCHAR(255) DEFAULT NULL COMMENT '使用优惠券ID列表（支持多券）',
     original_amount BIGINT       NOT NULL COMMENT '原始金额（单位：分）',
     final_amount    BIGINT       NOT NULL COMMENT '实付金额（单位：分）',
     status          TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '状态：0-预占中 1-已确认 2-已取消 3-已过期',
@@ -16,13 +17,14 @@ CREATE TABLE checkouts
 
 CREATE TABLE checkout_items
 (
+    id           BIGINT AUTO_INCREMENT,
     pre_order_id VARCHAR(64)  NOT NULL COMMENT '预订单ID',
     product_id   INT UNSIGNED NOT NULL COMMENT '商品ID',
     quantity     INT UNSIGNED NOT NULL COMMENT '数量',
     price        BIGINT       NOT NULL COMMENT '当时单价（分）',
     snapshot     JSON         NOT NULL COMMENT '商品快照（名称、规格等）',
     created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3),
-    PRIMARY KEY (pre_order_id),
+    PRIMARY KEY (id),
     INDEX idx_product (product_id),
     INDEX idx_preorder (pre_order_id)
 ) COMMENT ='预订单商品明细';

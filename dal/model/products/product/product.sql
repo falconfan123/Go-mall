@@ -4,6 +4,7 @@ CREATE TABLE products (
     description TEXT COMMENT '商品描述',
     picture VARCHAR(255)  COMMENT '商品图片信息',
     price bigint NOT NULL COMMENT '商品价格（分）',
+    stock INT NOT NULL DEFAULT 0 COMMENT '库存',
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (id)

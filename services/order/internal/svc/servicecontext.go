@@ -15,7 +15,6 @@ import (
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/delay"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/notify"
 	"github.com/falconfan123/Go-mall/services/users/users"
-	"github.com/falconfan123/Go-mall/services/users/usersclient"
 )
 
 type ServiceContext struct {
@@ -25,7 +24,7 @@ type ServiceContext struct {
 	OrderAddress   order.OrderAddressesModel
 	CheckoutRpc    checkoutservice.CheckoutService
 	CouponRpc      coupons.CouponsClient
-	UserRpc        users.UsersClient
+	UserRpc        users.Users
 	InventoryRpc   inventory.InventoryClient
 	Model          sqlx.SqlConn
 	OrderDelayMQ   *delay.OrderDelayMQ
@@ -57,7 +56,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Model:          sqlx.NewMysql(c.MysqlConfig.DataSource),
 		CheckoutRpc:    checkoutservice.NewCheckoutService(zrpc.MustNewClient(c.CheckoutRpc)),
 		CouponRpc:      couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponRpc)),
-		UserRpc:        usersclient.NewUsers(zrpc.MustNewClient(c.UserRpc)),
+		UserRpc:        users.NewUsers(zrpc.MustNewClient(c.UserRpc)),
 		InventoryRpc:   inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		OrderDelayMQ:   orderDelayMQ,
 		OrderNotifyMQ:  notifyMQ,

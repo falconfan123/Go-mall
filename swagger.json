@@ -1,0 +1,2324 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Go-Mall API Documentation",
+    "description": "Go Mall \u7535\u5546\u5e73\u53f0\u540e\u7aefAPI\u63a5\u53e3\u6587\u6863",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "\u5f00\u53d1\u73af\u5883\u670d\u52a1\u5668"
+    }
+  ],
+  "paths": {
+    "/douyin/cart/add": {
+      "post": {
+        "tags": [
+          "\u8d2d\u7269\u8f66"
+        ],
+        "summary": "\u6dfb\u52a0\u5546\u54c1\u5230\u8d2d\u7269\u8f66",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCartReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCartResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/delete": {
+      "post": {
+        "tags": [
+          "\u8d2d\u7269\u8f66"
+        ],
+        "summary": "\u4ece\u8d2d\u7269\u8f66\u5220\u9664\u5546\u54c1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteCartReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteCartResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/list": {
+      "get": {
+        "tags": [
+          "\u8d2d\u7269\u8f66"
+        ],
+        "summary": "\u83b7\u53d6\u8d2d\u7269\u8f66\u5217\u8868",
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartItemListResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/sub": {
+      "post": {
+        "tags": [
+          "\u8d2d\u7269\u8f66"
+        ],
+        "summary": "\u51cf\u5c11\u8d2d\u7269\u8f66\u5546\u54c1\u6570\u91cf",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubCartReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubCartResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/coupon/calculate": {
+      "get": {
+        "tags": [
+          "\u4f18\u60e0\u5238"
+        ],
+        "summary": "\u8ba1\u7b97\u4f18\u60e0\u5238\u6298\u6263",
+        "parameters": [
+          {
+            "name": "coupon_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "items",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Items"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculateCouponResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/coupon/claim": {
+      "post": {
+        "tags": [
+          "\u4f18\u60e0\u5238"
+        ],
+        "summary": "\u9886\u53d6\u4f18\u60e0\u5238",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponItemReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f"
+          }
+        }
+      }
+    },
+    "/douyin/coupon/detail": {
+      "get": {
+        "tags": [
+          "\u4f18\u60e0\u5238"
+        ],
+        "summary": "\u83b7\u53d6\u4f18\u60e0\u5238\u8be6\u60c5",
+        "parameters": [
+          {
+            "name": "coupon_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CouponItemResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/coupon/list": {
+      "get": {
+        "tags": [
+          "\u4f18\u60e0\u5238"
+        ],
+        "summary": "\u83b7\u53d6\u4f18\u60e0\u5238\u5217\u8868",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CouponListResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/coupon/my/list": {
+      "get": {
+        "tags": [
+          "\u4f18\u60e0\u5238"
+        ],
+        "summary": "\u83b7\u53d6\u6211\u7684\u4f18\u60e0\u5238\u5217\u8868",
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CouponMyListResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/coupon/my/usage": {
+      "get": {
+        "tags": [
+          "\u4f18\u60e0\u5238"
+        ],
+        "summary": "\u83b7\u53d6\u6211\u7684\u4f18\u60e0\u5238\u4f7f\u7528\u8bb0\u5f55",
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CouponUsageListResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/payment/create": {
+      "post": {
+        "tags": [
+          "\u652f\u4ed8"
+        ],
+        "summary": "\u521b\u5efa\u652f\u4ed8\u8ba2\u5355",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/payment/list": {
+      "get": {
+        "tags": [
+          "\u652f\u4ed8"
+        ],
+        "summary": "\u83b7\u53d6\u652f\u4ed8\u5217\u8868",
+        "parameters": [
+          {
+            "name": "method",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/product/": {
+      "get": {
+        "tags": [
+          "\u5546\u54c1"
+        ],
+        "summary": "\u6839\u636eID\u83b7\u53d6\u5546\u54c1\u8be6\u60c5",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProductByIDResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/product/list": {
+      "get": {
+        "tags": [
+          "\u5546\u54c1"
+        ],
+        "summary": "\u83b7\u53d6\u5546\u54c1\u5217\u8868",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProductListResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/product/upload": {
+      "post": {
+        "tags": [
+          "\u5546\u54c1"
+        ],
+        "summary": "\u4e0a\u4f20\u5546\u54c1\u56fe\u7247",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/checkout/detail": {
+      "get": {
+        "tags": [
+          "\u7ed3\u7b97"
+        ],
+        "summary": "\u83b7\u53d6\u7ed3\u7b97\u8be6\u60c5",
+        "parameters": [
+          {
+            "name": "pre_order_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutDetailResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/checkout/list": {
+      "get": {
+        "tags": [
+          "\u7ed3\u7b97"
+        ],
+        "summary": "\u83b7\u53d6\u7ed3\u7b97\u5217\u8868",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutListResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/checkout/prepare": {
+      "post": {
+        "tags": [
+          "\u7ed3\u7b97"
+        ],
+        "summary": "\u9884\u7ed3\u7b97",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/flash/products": {
+      "get": {
+        "tags": [
+          "\u79d2\u6740"
+        ],
+        "summary": "\u83b7\u53d6\u79d2\u6740\u5546\u54c1\u5217\u8868",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFlashProductsResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/flash/buy": {
+      "post": {
+        "tags": [
+          "\u79d2\u6740"
+        ],
+        "summary": "\u79d2\u6740\u5546\u54c1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlashBuyReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlashBuyResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/order/cancel": {
+      "post": {
+        "tags": [
+          "\u8ba2\u5355"
+        ],
+        "summary": "\u53d6\u6d88\u8ba2\u5355",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOrderReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelOrderResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/order/create": {
+      "post": {
+        "tags": [
+          "\u8ba2\u5355"
+        ],
+        "summary": "\u521b\u5efa\u8ba2\u5355",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrderResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/order/detail": {
+      "get": {
+        "tags": [
+          "\u8ba2\u5355"
+        ],
+        "summary": "\u83b7\u53d6\u8ba2\u5355\u8be6\u60c5",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetailResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/order/list": {
+      "get": {
+        "tags": [
+          "\u8ba2\u5355"
+        ],
+        "summary": "\u83b7\u53d6\u8ba2\u5355\u5217\u8868",
+        "parameters": [
+          {
+            "name": "statuses",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOrdersResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/address": {
+      "post": {
+        "tags": [
+          "\u7528\u6237\u5730\u5740"
+        ],
+        "summary": "\u6dfb\u52a0\u5730\u5740",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAddressRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddAddressResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "\u7528\u6237\u5730\u5740"
+        ],
+        "summary": "\u5220\u9664\u5730\u5740",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAddressRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteAddressResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "\u7528\u6237\u5730\u5740"
+        ],
+        "summary": "\u66f4\u65b0\u5730\u5740",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAddressRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAddressResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "\u7528\u6237\u5730\u5740"
+        ],
+        "summary": "\u83b7\u53d6\u5730\u5740\u8be6\u60c5",
+        "parameters": [
+          {
+            "name": "address_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAddressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/address/list": {
+      "get": {
+        "tags": [
+          "\u7528\u6237\u5730\u5740"
+        ],
+        "summary": "\u83b7\u53d6\u5730\u5740\u5217\u8868",
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/delete": {
+      "post": {
+        "tags": [
+          "\u7528\u6237"
+        ],
+        "summary": "\u5220\u9664\u7528\u6237",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/info": {
+      "get": {
+        "tags": [
+          "\u7528\u6237"
+        ],
+        "summary": "\u83b7\u53d6\u7528\u6237\u4fe1\u606f",
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/login": {
+      "post": {
+        "tags": [
+          "\u7528\u6237"
+        ],
+        "summary": "\u7528\u6237\u767b\u5f55",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/logout": {
+      "post": {
+        "tags": [
+          "\u7528\u6237"
+        ],
+        "summary": "\u7528\u6237\u767b\u51fa",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/register": {
+      "post": {
+        "tags": [
+          "\u7528\u6237"
+        ],
+        "summary": "\u7528\u6237\u6ce8\u518c",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/update": {
+      "put": {
+        "tags": [
+          "\u7528\u6237"
+        ],
+        "summary": "\u66f4\u65b0\u7528\u6237\u4fe1\u606f",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CartInfoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "product_id": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "product": {
+            "type": "array",
+            "items": {}
+          }
+        }
+      },
+      "CartItemListResp": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "cart_info": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartInfoResponse"
+            }
+          }
+        }
+      },
+      "CreateCartReq": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "CreateCartResp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          }
+        }
+      },
+      "DeleteCartReq": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "DeleteCartResp": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SubCartReq": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "\u51cf\u5c11\u7684\u6570\u91cf\uff0c\u53ef\u9009\uff0c\u9ed8\u8ba4\u51cf1"
+          }
+        }
+      },
+      "SubCartResp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          }
+        }
+      },
+      "CalculateCouponReq": {
+        "type": "object",
+        "properties": {
+          "coupon_id": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Items"
+            }
+          }
+        }
+      },
+      "CalculateCouponResp": {
+        "type": "object",
+        "properties": {
+          "origin_amount": {
+            "type": "integer"
+          },
+          "final_amount": {
+            "type": "integer"
+          },
+          "discount_amount": {
+            "type": "integer"
+          },
+          "coupon_type": {
+            "type": "string"
+          },
+          "is_usable": {
+            "type": "boolean"
+          },
+          "unusable_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "CouponItemReq": {
+        "type": "object",
+        "properties": {
+          "coupon_id": {
+            "type": "string"
+          }
+        }
+      },
+      "CouponItemResp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "integer"
+          },
+          "value": {
+            "type": "string"
+          },
+          "min_amount": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          },
+          "total_count": {
+            "type": "integer"
+          },
+          "remaining_count": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "CouponListReq": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "size": {
+            "type": "integer",
+            "default": 10
+          },
+          "type": {
+            "type": "integer"
+          }
+        }
+      },
+      "CouponListResp": {
+        "type": "object",
+        "properties": {
+          "coupon_list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CouponItemResp"
+            }
+          }
+        }
+      },
+      "CouponMy": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "coupon_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          },
+          "used_at": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "CouponMyListResp": {
+        "type": "object",
+        "properties": {
+          "coupon_list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CouponMy"
+            }
+          }
+        }
+      },
+      "CouponUsage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "pre_order_id": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          },
+          "coupon_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "coupon_type": {
+            "type": "string"
+          },
+          "origin_value": {
+            "type": "string"
+          },
+          "discount_amount": {
+            "type": "string"
+          },
+          "applied_at": {
+            "type": "string"
+          }
+        }
+      },
+      "CouponUsageListResp": {
+        "type": "object",
+        "properties": {
+          "coupon_usage_list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CouponUsage"
+            }
+          }
+        }
+      },
+      "Items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaymentItem": {
+        "type": "object",
+        "properties": {
+          "payment_id": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          },
+          "paid_amount": {
+            "type": "integer"
+          },
+          "payment_method": {
+            "type": "integer"
+          },
+          "transaction_id": {
+            "type": "string"
+          },
+          "pay_url": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaymentListReq": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 10
+          }
+        }
+      },
+      "PaymentListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentItem"
+            }
+          }
+        }
+      },
+      "PaymentReq": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "payment_method": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaymentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PaymentItem"
+          }
+        }
+      },
+      "GetProductByIDReq": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetProductByIDResp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "sold": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "integer"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "GetProductListReq": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "size": {
+            "type": "integer",
+            "default": 10
+          }
+        }
+      },
+      "GetProductListResp": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "integer"
+          },
+          "sold": {
+            "type": "integer"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "UploadReq": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          }
+        }
+      },
+      "UploadResp": {
+        "type": "object",
+        "properties": {
+          "uploadUrl": {
+            "type": "string"
+          },
+          "formData": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "CheckoutDetailReq": {
+        "type": "object",
+        "properties": {
+          "pre_order_id": {
+            "type": "string"
+          }
+        }
+      },
+      "CheckoutDetailResp": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CheckoutOrder"
+          }
+        }
+      },
+      "CheckoutItem": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "product_desc": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          }
+        }
+      },
+      "CheckoutItemReq": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer"
+          }
+        }
+      },
+      "CheckoutListReq": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 10
+          }
+        }
+      },
+      "CheckoutListResp": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutOrder"
+            }
+          }
+        }
+      },
+      "CheckoutOrder": {
+        "type": "object",
+        "properties": {
+          "pre_order_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "expire_time": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutItem"
+            }
+          },
+          "original_amount": {
+            "type": "string"
+          },
+          "final_amount": {
+            "type": "string"
+          }
+        }
+      },
+      "CheckoutReq": {
+        "type": "object",
+        "properties": {
+          "coupon_id": {
+            "type": "string"
+          },
+          "order_items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutItemReq"
+            }
+          },
+          "address_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "CheckoutResp": {
+        "type": "object",
+        "properties": {
+          "expire_time": {
+            "type": "integer"
+          },
+          "pre_order_id": {
+            "type": "string"
+          },
+          "pay_method": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "UpdateStatusReq": {
+        "type": "object",
+        "properties": {
+          "pre_order_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetFlashProductsReq": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "size": {
+            "type": "integer",
+            "default": 10
+          }
+        }
+      },
+      "GetFlashProductsResp": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlashProduct"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        }
+      },
+      "FlashProduct": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "price": {
+            "type": "integer"
+          },
+          "flashPrice": {
+            "type": "integer"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "sold": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "FlashBuyReq": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "description": "\u5546\u54c1ID\uff08\u652f\u6301\u9a7c\u5cf0\u548c\u4e0b\u5212\u7ebf\u683c\u5f0f\uff09"
+          },
+          "product_id": {
+            "type": "integer",
+            "description": "\u5546\u54c1ID\uff08\u652f\u6301\u9a7c\u5cf0\u548c\u4e0b\u5212\u7ebf\u683c\u5f0f\uff09"
+          },
+          "quantity": {
+            "type": "integer"
+          }
+        }
+      },
+      "FlashBuyResp": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "CancelOrderReq": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "cancel_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "CancelOrderResp": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateOrderReq": {
+        "type": "object",
+        "properties": {
+          "pre_order_id": {
+            "type": "string"
+          },
+          "coupon_id": {
+            "type": "string"
+          },
+          "address_id": {
+            "type": "integer"
+          },
+          "payment_method": {
+            "type": "integer"
+          }
+        }
+      },
+      "CreateOrderResp": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          }
+        }
+      },
+      "GetOrderReq": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ListOrdersReq": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 10
+          }
+        }
+      },
+      "ListOrdersResp": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderResp"
+            }
+          }
+        }
+      },
+      "OrderAddressResp": {
+        "type": "object",
+        "properties": {
+          "address_id": {
+            "type": "integer"
+          },
+          "recipient_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "detailed_address": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderDetailResp": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/OrderResp"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemResp"
+            }
+          },
+          "address": {
+            "$ref": "#/components/schemas/OrderAddressResp"
+          }
+        }
+      },
+      "OrderItemResp": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "product_id": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "product_desc": {
+            "type": "string"
+          },
+          "unit_price": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderResp": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "pre_order_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "payment_method": {
+            "type": "integer"
+          },
+          "transaction_id": {
+            "type": "string"
+          },
+          "paid_at": {
+            "type": "integer"
+          },
+          "original_amount": {
+            "type": "string"
+          },
+          "discount_amount": {
+            "type": "string"
+          },
+          "payable_amount": {
+            "type": "string"
+          },
+          "paid_amount": {
+            "type": "string"
+          },
+          "order_status": {
+            "type": "integer"
+          },
+          "payment_status": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "expire_time": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemResp"
+            }
+          }
+        }
+      },
+      "AddAddressRequest": {
+        "type": "object",
+        "properties": {
+          "recipient_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "detailed_address": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AddAddressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AddressData"
+          }
+        }
+      },
+      "AddressData": {
+        "type": "object",
+        "properties": {
+          "address_id": {
+            "type": "integer"
+          },
+          "recipient_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "detailed_address": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "AddressListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressData"
+            }
+          }
+        }
+      },
+      "AddressResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "recipient_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "detailed_address": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "AllAddressListRequest": {
+        "type": "object"
+      },
+      "DeleteAddressRequest": {
+        "type": "object",
+        "properties": {
+          "address_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "DeleteAddressResponse": {
+        "type": "object"
+      },
+      "DeleteRequest": {
+        "type": "object"
+      },
+      "DeleteResponse": {
+        "type": "object"
+      },
+      "GetAddressRequest": {
+        "type": "object",
+        "properties": {
+          "address_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetAddressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AddressData"
+          }
+        }
+      },
+      "GetInfoRequest": {
+        "type": "object"
+      },
+      "GetInfoResponse": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "integer"
+          },
+          "logout_at": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "update_at": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          }
+        }
+      },
+      "LogoutRequest": {
+        "type": "object"
+      },
+      "LogoutResponse": {
+        "type": "object",
+        "properties": {
+          "logout_at": {
+            "type": "integer"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "confirmPassword": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateAddressRequest": {
+        "type": "object",
+        "properties": {
+          "recipient_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "detailed_address": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "address_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "UpdateAddressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AddressData"
+          }
+        }
+      },
+      "UpdateRequest": {
+        "type": "object",
+        "properties": {
+          "user_name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateResponse": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "integer"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
