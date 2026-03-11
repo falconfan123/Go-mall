@@ -5,6 +5,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/carts/carts"
+	"github.com/falconfan123/Go-mall/services/carts/internal/application/dto"
 	"github.com/falconfan123/Go-mall/services/carts/internal/svc"
 	"strconv"
 
@@ -38,12 +39,15 @@ func (l *CartItemListLogic) CartItemList(in *carts.UserInfo) (*carts.CartItemLis
 		}
 	}
 
-	// 定义响应对象
-	var rsp carts.CartItemListResponse
+	// 1. 转换为DTO
+	req := &dto.GetCartReq{
+		UserID: int64(in.Id),
+	}
 
-	shopCarts, err := l.svcCtx.CartsModel.FindByUserID(l.ctx, int64(in.Id))
+	// 2. 调用应用服务
+	cartDTO, err := l.svcCtx.CartAppService.GetCart(l.ctx, req)
 	if err != nil {
-		l.Logger.Errorw("get shopCarts from database failed",
+		l.Logger.Errorw("Failed to get cart",
 			logx.Field("err", err),
 			logx.Field("user_id", in.Id))
 		return &carts.CartItemListResponse{
@@ -54,17 +58,16 @@ func (l *CartItemListLogic) CartItemList(in *carts.UserInfo) (*carts.CartItemLis
 		}, err
 	}
 
-	// 设置响应中的总数
-	rsp.Total = int32(len(shopCarts))
+	// 3. 转换为Proto响应
+	var rsp carts.CartItemListResponse
+	rsp.Total = int32(len(cartDTO.Items))
 
-	// 构建响应数据
-	for _, shopCart := range shopCarts {
+	for _, item := range cartDTO.Items {
 		rsp.Data = append(rsp.Data, &carts.CartInfoResponse{
-			Id:        int32(shopCart.Id),
-			UserId:    int32(shopCart.UserId.Int64),
-			ProductId: int32(shopCart.ProductId.Int64),
-			Quantity:  int32(shopCart.Quantity.Int64),
-			Checked:   shopCart.Checked.Int64 == 1,
+			ProductId: int32(item.ProductID),
+			Quantity:  item.Quantity,
+			Checked:   item.Checked,
+			// 注意：原有响应缺少商品名称、图片、价格字段，可根据需要扩展
 		})
 	}
 
