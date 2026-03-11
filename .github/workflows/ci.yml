@@ -37,6 +37,11 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: 检查文件位置
+        run: |
+          pwd
+          ls -F $GITHUB_WORKSPACE
+
       - name: 同步工作区依赖
         run: |
           export GOWORK=${{ github.workspace }}/go.work
