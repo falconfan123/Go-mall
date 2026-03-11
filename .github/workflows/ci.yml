@@ -55,6 +55,7 @@ jobs:
             users) cd services/users ;;
             gateway) cd services/gateway ;;
           esac
+          go mod tidy
           go build -o /dev/null .
 
   # 安全扫描
