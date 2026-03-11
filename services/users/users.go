@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/falconfan123/Go-mall/services/users/internal/config"
-	"github.com/falconfan123/Go-mall/services/users/internal/server"
+	"github.com/falconfan123/Go-mall/services/users/internal/interface/grpc/server"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
 	"github.com/falconfan123/Go-mall/services/users/userspb"
 

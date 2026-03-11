@@ -7,7 +7,7 @@ package server
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/users/internal/logic"
+	"github.com/falconfan123/Go-mall/services/users/internal/interface/grpc/logic"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
 	"github.com/falconfan123/Go-mall/services/users/userspb"
 )
