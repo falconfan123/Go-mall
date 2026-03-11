@@ -42,8 +42,8 @@ jobs:
 
       - name: 预理顺公共模块
         run: |
-          cd common && go mod tidy
-          cd ../dal && go mod tidy
+          if [ -f common/go.mod ]; then cd common && go mod tidy && cd ..; fi
+          if [ -f dal/go.mod ]; then cd dal && go mod tidy && cd ..; fi
 
       - name: 构建 ${{ matrix.service }} 服务
         run: |
