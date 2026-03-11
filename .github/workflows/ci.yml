@@ -38,7 +38,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
 
       - name: 构建 ${{ matrix.service }} 服务
-        run: go build -o /dev/null ./services/${{ matrix.service }}/...
+        run: go build -o /dev/null github.com/falconfan123/Go-mall/services/${{ matrix.service }}
 
   # 安全扫描
   security:
@@ -54,10 +54,10 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
 
       - name: 下载依赖
-        run: go mod download
+        run: go work sync
 
       - name: 运行 go vet
-        run: go vet -unsafeptr=false ./...
+        run: go vet -unsafeptr=false github.com/falconfan123/Go-mall/...
 
       - name: 检查敏感信息
         run: |
@@ -81,11 +81,11 @@ jobs:
 
       - name: 检查 go.mod 一致性
         run: |
-          go mod tidy
-          git diff --exit-code go.mod go.sum
+          go work sync
+          git diff --exit-code
 
       - name: 检查依赖漏洞
         uses: govulncheck/action@v3
         with:
           go-version: '1.25'
-          package: ./...
+          package: github.com/falconfan123/Go-mall/...
