@@ -3,7 +3,7 @@ package logic
 import (
 	"github.com/falconfan123/Go-mall/apis/coupon/internal/types"
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
-	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 )
 
 func convertCoupon2Resp(c *couponsclient.Coupon) *types.CouponItemResp {

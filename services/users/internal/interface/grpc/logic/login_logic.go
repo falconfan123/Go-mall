@@ -6,7 +6,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/dto"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/userspb"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,7 +26,7 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 }
 
 // 登录方法
-func (l *LoginLogic) Login(in *userspb.LoginRequest) (*userspb.LoginResponse, error) {
+func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error) {
 	// 调用应用服务处理登录逻辑
 	req := &dto.LoginRequest{
 		Email:    in.Email,
@@ -37,13 +37,13 @@ func (l *LoginLogic) Login(in *userspb.LoginRequest) (*userspb.LoginResponse, er
 	resp, err := l.svcCtx.AuthAppService.Login(l.ctx, req)
 	if err != nil {
 		l.Logger.Errorw("login failed", logx.Field("err", err))
-		return &userspb.LoginResponse{
+		return &users.LoginResponse{
 			StatusCode: uint32(code.ServerError),
 			StatusMsg:  code.ServerErrorMsg,
 		}, nil
 	}
 
-	return &userspb.LoginResponse{
+	return &users.LoginResponse{
 		StatusCode:   resp.StatusCode,
 		StatusMsg:    resp.StatusMsg,
 		UserId:       resp.UserID,

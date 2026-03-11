@@ -6,7 +6,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/dto"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/userspb"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,7 +26,7 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 }
 
 // 注册方法
-func (l *RegisterLogic) Register(in *userspb.RegisterRequest) (*userspb.RegisterResponse, error) {
+func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResponse, error) {
 	// 调用应用服务处理注册逻辑
 	req := &dto.RegisterRequest{
 		Email:           in.Email,
@@ -39,13 +39,13 @@ func (l *RegisterLogic) Register(in *userspb.RegisterRequest) (*userspb.Register
 	resp, err := l.svcCtx.AuthAppService.Register(l.ctx, req)
 	if err != nil {
 		l.Logger.Errorw("register failed", logx.Field("err", err))
-		return &userspb.RegisterResponse{
+		return &users.RegisterResponse{
 			StatusCode: uint32(code.ServerError),
 			StatusMsg:  code.ServerErrorMsg,
 		}, nil
 	}
 
-	return &userspb.RegisterResponse{
+	return &users.RegisterResponse{
 		StatusCode:   resp.StatusCode,
 		StatusMsg:    resp.StatusMsg,
 		UserId:       resp.UserID,

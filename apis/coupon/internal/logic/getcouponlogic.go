@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"github.com/zeromicro/x/errors"
 
 	"github.com/falconfan123/Go-mall/apis/coupon/internal/svc"

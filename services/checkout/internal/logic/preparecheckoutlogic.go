@@ -9,7 +9,7 @@ import (
 	checkout2 "github.com/falconfan123/Go-mall/dal/model/checkout"
 	"github.com/falconfan123/Go-mall/services/checkout/checkout"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
-	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/product/product"
 	"github.com/google/uuid"

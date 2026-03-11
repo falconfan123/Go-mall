@@ -6,7 +6,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/dto"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/userspb"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,7 +26,7 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 }
 
 // 登出方法
-func (l *LogoutLogic) Logout(in *userspb.LogoutRequest) (*userspb.LogoutResponse, error) {
+func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, error) {
 	// 调用应用服务处理登出逻辑
 	req := &dto.LogoutRequest{
 		UserID: in.UserId,
@@ -36,13 +36,13 @@ func (l *LogoutLogic) Logout(in *userspb.LogoutRequest) (*userspb.LogoutResponse
 	resp, err := l.svcCtx.AuthAppService.Logout(l.ctx, req)
 	if err != nil {
 		l.Logger.Errorw("logout failed", logx.Field("err", err))
-		return &userspb.LogoutResponse{
+		return &users.LogoutResponse{
 			StatusCode: uint32(code.ServerError),
 			StatusMsg:  code.ServerErrorMsg,
 		}, nil
 	}
 
-	return &userspb.LogoutResponse{
+	return &users.LogoutResponse{
 		StatusCode: resp.StatusCode,
 		StatusMsg:  resp.StatusMsg,
 	}, nil

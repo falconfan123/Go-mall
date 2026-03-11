@@ -2,11 +2,11 @@ package svc
 
 import (
 	"github.com/falconfan123/Go-mall/dal/model/order"
-	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
+	"github.com/falconfan123/Go-mall/services/checkout/checkout"
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
-	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
-	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
+	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/delay"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/notify"

@@ -3,7 +3,7 @@ package svc
 import (
 	"github.com/falconfan123/Go-mall/apis/user/internal/config"
 	"github.com/falconfan123/Go-mall/common/middleware"
-	"github.com/falconfan123/Go-mall/services/auths/authsclient"
+	"github.com/falconfan123/Go-mall/services/auths/auths"
 	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/rest"

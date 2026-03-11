@@ -5,7 +5,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/userspb"
+	"github.com/falconfan123/Go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,19 +25,19 @@ func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 }
 
 // 更新用户方法
-func (l *UpdateUserLogic) UpdateUser(in *userspb.UpdateUserRequest) (*userspb.UpdateUserResponse, error) {
+func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.UpdateUserResponse, error) {
 	// Update user info
 	// Use UsrName instead of Username as per proto definition
 	err := l.svcCtx.UsersModel.UpdateUserNameandUrl(l.ctx, int64(in.UserId), in.UsrName, in.AvatarUrl)
 	if err != nil {
 		l.Logger.Errorw("update user failed", logx.Field("err", err))
-		return &userspb.UpdateUserResponse{
+		return &users.UpdateUserResponse{
 			StatusCode: uint32(code.ServerError),
 			StatusMsg:  code.ServerErrorMsg,
 		}, nil
 	}
 
-	return &userspb.UpdateUserResponse{
+	return &users.UpdateUserResponse{
 		StatusCode: 0,
 		StatusMsg:  "success",
 	}, nil

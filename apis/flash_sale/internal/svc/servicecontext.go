@@ -3,7 +3,7 @@ package svc
 import (
 	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/config"
 	"github.com/falconfan123/Go-mall/common/middleware"
-	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
+	"github.com/falconfan123/Go-mall/services/checkout/checkout"
 	"github.com/falconfan123/Go-mall/services/order/order"
 	"github.com/falconfan123/Go-mall/services/users/users"
 
