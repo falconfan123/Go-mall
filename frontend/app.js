@@ -13,12 +13,37 @@ const API_BASE = {
 // 状态管理
 let state = {
     user: null,
-    token: null,
-    refreshToken: null,
+    longToken: null,    // 长令牌，用于身份验证
+    shortToken: null,   // 短令牌，用于接口访问
+    shortTokenExpire: null, // 短令牌过期时间
     cart: [],
     products: [],
     orders: []
 };
+
+// 设备ID管理
+const DEVICE_ID_KEY = 'device_id';
+let deviceId = null;
+
+// 获取或生成设备ID
+function getDeviceId() {
+    if (deviceId) return deviceId;
+
+    let storedDeviceId = localStorage.getItem(DEVICE_ID_KEY);
+    if (storedDeviceId) {
+        deviceId = storedDeviceId;
+        return deviceId;
+    }
+
+    // 生成UUID
+    deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+    localStorage.setItem(DEVICE_ID_KEY, deviceId);
+    return deviceId;
+}
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,27 +55,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 从 localStorage 加载状态
 function loadFromStorage() {
-    const token = localStorage.getItem('token');
-    const refreshToken = localStorage.getItem('refreshToken');
+    const longToken = localStorage.getItem('long_token');
+    const shortToken = localStorage.getItem('short_token');
+    const shortTokenExpire = localStorage.getItem('short_token_expire');
     const user = localStorage.getItem('user');
-    if (token && user) {
-        state.token = token;
-        state.refreshToken = refreshToken;
+    if (longToken && user) {
+        state.longToken = longToken;
+        state.shortToken = shortToken;
+        state.shortTokenExpire = shortTokenExpire ? parseInt(shortTokenExpire) : null;
         state.user = JSON.parse(user);
     }
 }
 
 // 保存到 localStorage
 function saveToStorage() {
-    if (state.token) {
-        localStorage.setItem('token', state.token);
-        if (state.refreshToken) {
-            localStorage.setItem('refreshToken', state.refreshToken);
+    if (state.longToken) {
+        localStorage.setItem('long_token', state.longToken);
+        if (state.shortToken) {
+            localStorage.setItem('short_token', state.shortToken);
+        }
+        if (state.shortTokenExpire) {
+            localStorage.setItem('short_token_expire', state.shortTokenExpire.toString());
         }
         localStorage.setItem('user', JSON.stringify(state.user));
     } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('long_token');
+        localStorage.removeItem('short_token');
+        localStorage.removeItem('short_token_expire');
         localStorage.removeItem('user');
     }
 }
@@ -62,7 +93,7 @@ function updateNav() {
     const userName = document.getElementById('userName');
     const ordersNav = document.getElementById('ordersNav');
 
-    if (state.user && state.token) {
+    if (state.user && state.longToken) {
         navAuth.style.display = 'none';
         navUser.style.display = 'flex';
         ordersNav.style.display = 'inline';
@@ -184,7 +215,7 @@ function renderFlashProducts(products) {
 
 // 处理秒杀购买
 async function handleFlashBuy(productId) {
-    if (!state.token) {
+    if (!state.longToken) {
         showToast('请先登录', 'error');
         showPage('login');
         return;
@@ -366,12 +397,19 @@ const MOCK_DELAY = 500; // mock请求延迟毫秒
 const mockResponses = {
     // 用户注册
     'POST:/douyin/user/register': (body) => {
+        // 生成mock的长短令牌
+        const deviceId = body.device_id || 'unknown_device';
+        const timestamp = Date.now();
         return {
             code: 0,
             msg: '注册成功',
             data: {
-                access_token: 'mock_access_token_' + Date.now(),
-                refresh_token: 'mock_refresh_token_' + Date.now(),
+                // 长令牌：有效期7天，用于身份验证和刷新短令牌
+                long_token: 'mock_long_token_' + deviceId + '_' + timestamp,
+                // 短令牌：有效期2小时，用于接口访问
+                short_token: 'mock_short_token_' + deviceId + '_' + timestamp,
+                // 短令牌过期时间（时间戳）
+                short_token_expire: timestamp + 2 * 60 * 60 * 1000,
                 user_id: 1,
                 email: body.email
             }
@@ -379,12 +417,19 @@ const mockResponses = {
     },
     // 用户登录
     'POST:/douyin/user/login': (body) => {
+        // 生成mock的长短令牌
+        const deviceId = body.device_id || 'unknown_device';
+        const timestamp = Date.now();
         return {
             code: 0,
             msg: '登录成功',
             data: {
-                access_token: 'mock_access_token_' + Date.now(),
-                refresh_token: 'mock_refresh_token_' + Date.now(),
+                // 长令牌：有效期7天，用于身份验证和刷新短令牌
+                long_token: 'mock_long_token_' + deviceId + '_' + timestamp,
+                // 短令牌：有效期2小时，用于接口访问
+                short_token: 'mock_short_token_' + deviceId + '_' + timestamp,
+                // 短令牌过期时间（时间戳）
+                short_token_expire: timestamp + 2 * 60 * 60 * 1000,
                 user_id: 1,
                 email: body.email
             }
@@ -448,12 +493,28 @@ const mockResponses = {
         };
     },
     // 用户登出
-    'POST:/douyin/user/logout': () => {
+    'POST:/douyin/user/logout': (body) => {
         return {
             code: 0,
             msg: '登出成功',
             data: {
-                logout_at: Date.now()
+                logout_at: Date.now(),
+                device_id: body.device_id
+            }
+        };
+    },
+    // 刷新短令牌
+    'POST:/douyin/user/refresh': (body) => {
+        const deviceId = body.device_id || 'unknown_device';
+        const timestamp = Date.now();
+        return {
+            code: 0,
+            msg: '令牌刷新成功',
+            data: {
+                // 新的短令牌
+                short_token: 'mock_short_token_refreshed_' + deviceId + '_' + timestamp,
+                // 短令牌过期时间（2小时后）
+                short_token_expire: timestamp + 2 * 60 * 60 * 1000
             }
         };
     },
@@ -801,11 +862,13 @@ async function apiRequest(url, options = {}) {
         ...options.headers
     };
 
-    if (state.token) {
-        headers['Access-Token'] = state.token;
+    // 携带长短令牌（除登录、注册接口外）
+    const isAuthEndpoint = url.includes('/login') || url.includes('/register');
+    if (!isAuthEndpoint && state.longToken) {
+        headers['Long-Token'] = state.longToken;
     }
-    if (state.refreshToken) {
-        headers['Refresh-Token'] = state.refreshToken;
+    if (!isAuthEndpoint && state.shortToken) {
+        headers['Short-Token'] = state.shortToken;
     }
 
     try {
@@ -823,23 +886,32 @@ async function apiRequest(url, options = {}) {
 
         const data = await response.json();
 
+        // 检查响应头中的 Short-Token-Refresh 字段，如果存在说明短令牌已更新
+        const newShortToken = response.headers.get('Short-Token-Refresh');
+        if (newShortToken) {
+            console.log('Short token refreshed automatically');
+            state.shortToken = newShortToken;
+            // 从响应中获取新的过期时间
+            const newExpire = response.headers.get('Short-Token-Expire');
+            if (newExpire) {
+                state.shortTokenExpire = parseInt(newExpire);
+            }
+            saveToStorage();
+        }
+
         // 兼容 Gateway (statusCode) 和 API (code)
         const code = data.code !== undefined ? data.code : data.statusCode;
         const msg = data.msg || data.statusMsg || '请求失败';
 
-        // 令牌续期成功，更新令牌并重试
+        // 短令牌过期，自动重试（服务端返回了新的短令牌）
         if (code === 10004) {
-            console.log('Token renewed, updating tokens...');
-            state.token = data.data?.access_token || data.accessToken || data.access_token;
-            state.refreshToken = data.data?.refresh_token || data.refreshToken || data.refresh_token;
-            saveToStorage();
-
+            console.log('Token renewed, retrying request...');
             // 重试原请求
             return apiRequest(url, options);
         }
 
         if (code !== 0 && code !== undefined) {
-            // 如果认证失效，且不是续期成功，则清除状态
+            // 令牌非法或Session不存在，清除状态并跳转登录页
             if (code === 10001 || code === 10003) {
                 logout();
             }
@@ -877,10 +949,7 @@ async function handleRegister(event) {
             body: JSON.stringify({ email, password, confirmPassword })
         });
 
-        // 兼容 Gateway 和 API
-        state.token = data.accessToken || data.access_token || data.data?.accessToken || data.data?.access_token;
-        state.refreshToken = data.refreshToken || data.refresh_token || data.data?.refreshToken || data.data?.refresh_token;
-        state.user = { email, user_id: data.userId || data.user_id || data.data?.userId || data.data?.user_id };
+        // 用户信息在 handleLogin 中已处理
         saveToStorage();
         updateNav();
         showToast('注册成功！', 'success');
@@ -897,16 +966,29 @@ async function handleLogin(event) {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
+    // 获取设备ID
+    const deviceId = getDeviceId();
 
     try {
         const data = await apiRequest(`${API_BASE.user}/login`, {
             method: 'POST',
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password, device_id: deviceId })
         });
 
-        // 兼容 Gateway 和 API
-        state.token = data.accessToken || data.access_token || data.data?.accessToken || data.data?.access_token;
-        state.refreshToken = data.refreshToken || data.refresh_token || data.data?.refreshToken || data.data?.refresh_token;
+        // 兼容 Gateway 和 API，提取长短令牌
+        // 长令牌 (long_token): 有效期较长，用于身份验证和刷新短令牌
+        // 短令牌 (short_token): 有效期较短，用于接口访问
+        state.longToken = data.longToken || data.long_token ||
+            data.data?.longToken || data.data?.long_token ||
+            data.accessToken || data.access_token || data.data?.accessToken || data.data?.access_token;
+        state.shortToken = data.shortToken || data.short_token ||
+            data.data?.shortToken || data.data?.short_token ||
+            data.refreshToken || data.refresh_token || data.data?.refreshToken || data.data?.refresh_token;
+        // 从响应中获取短令牌过期时间
+        state.shortTokenExpire = data.shortTokenExpire || data.short_token_expire ||
+            data.data?.shortTokenExpire || data.data?.short_token_expire ||
+            Date.now() + 2 * 60 * 60 * 1000; // 默认2小时
+
         state.user = { email, user_id: data.userId || data.user_id || data.data?.userId || data.data?.user_id };
         saveToStorage();
         updateNav();
@@ -918,10 +1000,24 @@ async function handleLogin(event) {
 }
 
 // 用户登出
-function logout() {
+async function logout() {
+    // 调用登出接口（如果已登录）
+    if (state.longToken) {
+        try {
+            await apiRequest(`${API_BASE.user}/logout`, {
+                method: 'POST',
+                body: JSON.stringify({ device_id: getDeviceId() })
+            });
+        } catch (error) {
+            // 忽略登出接口错误
+            console.log('Logout API error (ignored):', error.message);
+        }
+    }
+
     state.user = null;
-    state.token = null;
-    state.refreshToken = null;
+    state.longToken = null;
+    state.shortToken = null;
+    state.shortTokenExpire = null;
     state.cart = [];
     saveToStorage();
     updateNav();
@@ -1015,7 +1111,7 @@ function showProductDetail(productId) {
 
 // 添加到购物车
 async function addToCart(productId) {
-    if (!state.token) {
+    if (!state.longToken) {
         showToast('请先登录', 'error');
         showPage('login');
         return;
@@ -1050,7 +1146,7 @@ async function loadCart() {
     const cartList = document.getElementById('cartList');
     const cartSummary = document.getElementById('cartSummary');
 
-    if (!state.token) {
+    if (!state.longToken) {
          state.cart = [];
          renderCart();
          return;
@@ -1171,7 +1267,7 @@ async function removeFromCart(productId) {
 
 // 结算
 async function checkout() {
-    if (!state.token) {
+    if (!state.longToken) {
         showToast('请先登录', 'error');
         showPage('login');
         return;
@@ -1236,7 +1332,7 @@ async function checkout() {
 
 // MinIO Upload Function
 async function uploadFile(file) {
-    if (!state.token) {
+    if (!state.longToken) {
         showToast('Please login first', 'error');
         return;
     }
@@ -1289,7 +1385,7 @@ async function loadOrders() {
     const orderList = document.getElementById('orderList');
 
     // 先尝试从后端获取真实的订单数据
-    if (state.token) {
+    if (state.longToken) {
         try {
             const data = await apiRequest(`${API_BASE.order}/list`, {
                 method: 'GET'
