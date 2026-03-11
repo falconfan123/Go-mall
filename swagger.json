@@ -999,6 +999,50 @@
         }
       }
     },
+    "/douyin/user/refresh": {
+      "post": {
+        "tags": [
+          "\u7528\u6237"
+        ],
+        "summary": "\u5237\u65b0\u77ed\u4ee4\u724c",
+        "description": "\u7528\u4e8e\u524d\u7aef\u624b\u52a8\u8c03\u7528\u66f4\u65b0\u77ed\u4ee4\u724c\uff08\u4e5f\u53ef\u4ee5\u901a\u8fc7\u54cd\u5e94\u5934\u81ea\u52a8\u66f4\u65b0\uff09",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6210\u529f",
+            "headers": {
+              "Short-Token-Refresh": {
+                "description": "\u65b0\u7684\u77ed\u4ee4\u724c",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Short-Token-Expire": {
+                "description": "\u65b0\u7684\u77ed\u4ee4\u724c\u8fc7\u671f\u65f6\u95f4",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/douyin/user/register": {
       "post": {
         "tags": [
@@ -2204,28 +2248,58 @@
       },
       "LoginRequest": {
         "type": "object",
+        "description": "用户登录请求",
         "properties": {
           "email": {
-            "type": "string"
+            "type": "string",
+            "description": "用户邮箱"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "用户密码"
+          },
+          "device_id": {
+            "type": "string",
+            "description": "设备唯一标识ID，用于多设备登录管控"
           }
-        }
+        },
+        "required": ["email", "password", "device_id"]
       },
       "LoginResponse": {
         "type": "object",
+        "description": "用户登录响应（长短令牌）",
         "properties": {
-          "access_token": {
-            "type": "string"
+          "long_token": {
+            "type": "string",
+            "description": "长令牌，有效期7天，用于身份验证和刷新短令牌"
           },
-          "refresh_token": {
-            "type": "string"
+          "short_token": {
+            "type": "string",
+            "description": "短令牌，有效期2小时，用于接口访问"
+          },
+          "short_token_expire": {
+            "type": "integer",
+            "description": "短令牌过期时间（Unix时间戳，毫秒）"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "用户ID"
+          },
+          "email": {
+            "type": "string",
+            "description": "用户邮箱"
           }
         }
       },
       "LogoutRequest": {
-        "type": "object"
+        "type": "object",
+        "description": "用户登出请求",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "description": "设备唯一标识ID，用于清除对应设备的登录态"
+          }
+        }
       },
       "LogoutResponse": {
         "type": "object",
@@ -2235,28 +2309,77 @@
           }
         }
       },
-      "RegisterRequest": {
+      "RefreshTokenRequest": {
         "type": "object",
+        "description": "刷新短令牌请求",
         "properties": {
-          "email": {
-            "type": "string"
+          "device_id": {
+            "type": "string",
+            "description": "设备唯一标识ID"
+          }
+        },
+        "required": ["device_id"]
+      },
+      "RefreshTokenResponse": {
+        "type": "object",
+        "description": "刷新短令牌响应",
+        "properties": {
+          "short_token": {
+            "type": "string",
+            "description": "新的短令牌"
           },
-          "password": {
-            "type": "string"
-          },
-          "confirmPassword": {
-            "type": "string"
+          "short_token_expire": {
+            "type": "integer",
+            "description": "新的短令牌过期时间（Unix时间戳，毫秒）"
           }
         }
       },
+      "RegisterRequest": {
+        "type": "object",
+        "description": "用户注册请求",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "用户邮箱"
+          },
+          "password": {
+            "type": "string",
+            "description": "用户密码"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "description": "确认密码"
+          },
+          "device_id": {
+            "type": "string",
+            "description": "设备唯一标识ID，用于多设备登录管控"
+          }
+        },
+        "required": ["email", "password", "confirmPassword", "device_id"]
+      },
       "RegisterResponse": {
         "type": "object",
+        "description": "用户注册响应（长短令牌）",
         "properties": {
-          "access_token": {
-            "type": "string"
+          "long_token": {
+            "type": "string",
+            "description": "长令牌，有效期7天，用于身份验证和刷新短令牌"
           },
-          "refresh_token": {
-            "type": "string"
+          "short_token": {
+            "type": "string",
+            "description": "短令牌，有效期2小时，用于接口访问"
+          },
+          "short_token_expire": {
+            "type": "integer",
+            "description": "短令牌过期时间（Unix时间戳，毫秒）"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "用户ID"
+          },
+          "email": {
+            "type": "string",
+            "description": "用户邮箱"
           }
         }
       },
