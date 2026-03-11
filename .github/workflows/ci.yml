@@ -38,7 +38,9 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
 
       - name: 构建 ${{ matrix.service }} 服务
-        run: go build -o /dev/null github.com/falconfan123/Go-mall/services/${{ matrix.service }}
+        run: |
+          cd services/${{ matrix.service }}
+          go build -o /dev/null .
 
   # 安全扫描
   security:
