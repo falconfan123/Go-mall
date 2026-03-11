@@ -1,5 +1,7 @@
 # Go-mall 项目规范
 
+**【重要】每次代码修改并准备提交前，必须运行 `./scripts/check.sh --skip-tests` 或 `make lint` 确保本地检查通过后再提交。**
+
 The role of this file is to describe common mistakes and confusion points that agents might encounter as they work in this project. If you ever encounter something in the project that surprises you, please alert the developer working with you and indicate that this is the case in the AgentMD file to help prevent future agents from having the same issue
 
 ## go-zero 开发规范
