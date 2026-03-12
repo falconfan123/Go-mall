@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/token"
-	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/pb"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -28,8 +28,8 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 }
 
 // Logout 登出（删除Session）
-func (l *LogoutLogic) Logout(in *auths.LogoutReq) (*auths.LogoutRes, error) {
-	res := new(auths.LogoutRes)
+func (l *LogoutLogic) Logout(in *pb.LogoutReq) (*pb.LogoutRes, error) {
+	res := new(pb.LogoutRes)
 
 	// 1. 验证长令牌获取 SessionID
 	longToken := in.GetLongToken()

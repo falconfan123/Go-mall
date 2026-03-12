@@ -8,7 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/token"
-	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/pb"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,8 +30,8 @@ func NewValidateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 
 // ValidateToken 验证长短令牌
 // 优先验证短令牌，如果短令牌过期或无效，则验证长令牌
-func (l *ValidateTokenLogic) ValidateToken(in *auths.AuthValidateReq) (*auths.AuthValidateRes, error) {
-	res := new(auths.AuthValidateRes)
+func (l *ValidateTokenLogic) ValidateToken(in *pb.AuthValidateReq) (*pb.AuthValidateRes, error) {
+	res := new(pb.AuthValidateRes)
 	tk := in.GetToken()
 
 	// 1. 首先尝试验证短令牌
