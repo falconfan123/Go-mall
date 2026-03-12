@@ -2,7 +2,7 @@ package svc
 
 import (
 	"github.com/falconfan123/Go-mall/dal/model/payment"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	order "github.com/falconfan123/Go-mall/services/order/order"
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/falconfan123/Go-mall/services/payment/internal/mq"
 	"github.com/smartwalle/alipay/v3"
