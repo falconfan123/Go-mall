@@ -28,11 +28,15 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 // 注册方法
 func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResponse, error) {
 	// 调用应用服务处理注册逻辑
+	username := in.Username
+	if username == "" {
+		username = in.Email // 默认用户名为邮箱
+	}
 	req := &dto.RegisterRequest{
 		Email:           in.Email,
+		Username:        username,
 		Password:        in.Password,
 		ConfirmPassword: in.ConfirmPassword,
-		Username:        in.Email, // 默认用户名为邮箱
 		IP:              in.Ip,
 	}
 

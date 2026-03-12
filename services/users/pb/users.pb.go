@@ -113,9 +113,10 @@ func (x *Response) GetPong() string {
 type RegisterRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Email           string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	Password        string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	ConfirmPassword string                 `protobuf:"bytes,3,opt,name=confirm_password,json=confirmPassword,proto3" json:"confirm_password,omitempty"`
-	Ip              string                 `protobuf:"bytes,4,opt,name=ip,proto3" json:"ip,omitempty"`
+	Username        string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Password        string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	ConfirmPassword string                 `protobuf:"bytes,4,opt,name=confirm_password,json=confirmPassword,proto3" json:"confirm_password,omitempty"`
+	Ip              string                 `protobuf:"bytes,5,opt,name=ip,proto3" json:"ip,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -153,6 +154,13 @@ func (*RegisterRequest) Descriptor() ([]byte, []int) {
 func (x *RegisterRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
 	}
 	return ""
 }
@@ -259,8 +267,9 @@ func (x *RegisterResponse) GetRefreshToken() string {
 type LoginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	Ip            string                 `protobuf:"bytes,3,opt,name=ip,proto3" json:"ip,omitempty"`
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	Ip            string                 `protobuf:"bytes,4,opt,name=ip,proto3" json:"ip,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -298,6 +307,13 @@ func (*LoginRequest) Descriptor() ([]byte, []int) {
 func (x *LoginRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
+	}
+	return ""
+}
+
+func (x *LoginRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
 	}
 	return ""
 }

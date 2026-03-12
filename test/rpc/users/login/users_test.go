@@ -37,8 +37,9 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
+	// 测试用户名登录（推荐方式）
 	resp, err := users_client.Login(context.Background(), &users.LoginRequest{
-		Email:    "test9@test.com",
+		Username: "testuser",
 		Password: "1234567",
 	})
 	if err != nil {
@@ -58,7 +59,27 @@ func TestUsersRpc(t *testing.T) {
 		t.Log("login success", resp)
 	} else {
 		fmt.Println("login failed", resp)
-		t.Log("register failed", resp)
+		t.Log("login failed", resp)
 	}
 
+}
+
+// TestLoginWithEmail 测试邮箱登录（兼容模式）
+func TestLoginWithEmail(t *testing.T) {
+	initusers()
+	resp, err := users_client.Login(context.Background(), &users.LoginRequest{
+		Email:    "test9@test.com",
+		Password: "1234567",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp.StatusCode == 0 {
+		fmt.Println("email login success", resp)
+		t.Log("email login success", resp)
+	} else {
+		fmt.Println("email login failed", resp)
+		t.Log("email login failed", resp)
+	}
 }
