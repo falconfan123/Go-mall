@@ -1,14 +1,6 @@
 go 1.25.0
 
 use (
-	./apis/carts
-	./apis/checkout
-	./apis/coupon
-	./apis/flash_sale
-	./apis/order
-	./apis/payment
-	./apis/product
-	./apis/user
 	./common
 	./dal
 	./services/audit
