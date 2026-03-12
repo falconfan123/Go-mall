@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/pb"
+	productpb "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/logx"
