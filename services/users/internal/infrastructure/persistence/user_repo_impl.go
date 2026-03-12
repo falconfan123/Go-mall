@@ -83,6 +83,18 @@ func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, email *valueobject
 	return r.toDomainUser(u), nil
 }
 
+// FindByUsernameOrEmail 根据用户名或邮箱查找用户
+func (r *UserRepositoryImpl) FindByUsernameOrEmail(ctx context.Context, account string) (*aggregate.User, error) {
+	u, err := r.userModel.FindOneByEmailOrUsername(ctx, account)
+	if err != nil {
+		if err == daluser.ErrNotFound {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	return r.toDomainUser(u), nil
+}
+
 // ExistsByEmail 判断邮箱是否存在
 func (r *UserRepositoryImpl) ExistsByEmail(ctx context.Context, email *valueobject.Email) (bool, error) {
 	_, err := r.userModel.FindOneByEmail(ctx, sql.NullString{String: email.Value(), Valid: true})

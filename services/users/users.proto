@@ -32,8 +32,9 @@ message RegisterResponse {
 // 定义登录请求消息
 message LoginRequest {
   string email = 1;
-  string password = 2;
-  string ip=3;
+  string username = 2;
+  string password = 3;
+  string ip=4;
 }
 
 // 定义登录响应消息

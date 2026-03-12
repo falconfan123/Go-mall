@@ -133,17 +133,20 @@ func (s *AuthAppService) Register(ctx context.Context, req *dto.RegisterRequest)
 
 // Login 用户登录
 func (s *AuthAppService) Login(ctx context.Context, req *dto.LoginRequest) (*dto.LoginResponse, error) {
-	// 1. 创建邮箱值对象
-	email, err := valueobject.NewEmail(req.Email)
-	if err != nil {
+	// 1. 确定登录账号（优先使用用户名，其次使用邮箱）
+	account := req.Username
+	if account == "" {
+		account = req.Email
+	}
+	if account == "" {
 		return &dto.LoginResponse{
 			StatusCode: uint32(code.EmailFormatError),
-			StatusMsg:  code.EmailFormatErrorMsg,
+			StatusMsg:  "email or username is required",
 		}, nil
 	}
 
-	// 2. 查询用户
-	user, err := s.userRepo.FindByEmail(ctx, email)
+	// 2. 查询用户（支持用户名或邮箱）
+	user, err := s.userRepo.FindByUsernameOrEmail(ctx, account)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			return &dto.LoginResponse{
@@ -190,7 +193,7 @@ func (s *AuthAppService) Login(ctx context.Context, req *dto.LoginRequest) (*dto
 				OccurredAt: time.Now(),
 			},
 			UserID: user.ID,
-			Email:  email.Value(),
+			Email:  user.Email.Value(),
 			IP:     req.IP,
 		}
 		_ = s.eventPublisher.PublishUserLoggedIn(event)
