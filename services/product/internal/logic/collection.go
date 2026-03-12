@@ -3,11 +3,11 @@ package logic
 import (
 	"context"
 	"github.com/bytedance/gopkg/util/gopool"
+	"github.com/zeromicro/go-zero/core/logx"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
-	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
+	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
-	"github.com/zeromicro/go-zero/core/logx"
 	"sync"
 	"time"
 )

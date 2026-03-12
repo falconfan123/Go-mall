@@ -4,6 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/olivere/elastic/v7"
+	"github.com/qiniu/go-sdk/v7/storage"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
@@ -11,10 +15,6 @@ import (
 	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
-	"github.com/olivere/elastic/v7"
-	"github.com/qiniu/go-sdk/v7/storage"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strconv"
 )
 

@@ -83,8 +83,10 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 	}
 
 	resp = &types.RegisterResponse{
-		AccessToken:  authrespone.AccessToken,
-		RefreshToken: authrespone.RefreshToken,
+		ShortToken:     authrespone.ShortToken,
+		LongToken:      authrespone.LongToken,
+		ShortExpiresIn: authrespone.ShortExpiresIn,
+		LongExpiresIn:  authrespone.LongExpiresIn,
 	}
 
 	return resp, nil

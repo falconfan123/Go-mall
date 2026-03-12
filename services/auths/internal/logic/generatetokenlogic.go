@@ -29,7 +29,9 @@ func NewGenerateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Gen
 	}
 }
 
-// GenerateToken 生成token
+// GenerateToken 生成长短令牌
+// 长令牌：SessionID + HMAC-SHA256签名，30天有效期，存储在Redis中
+// 短令牌：user_id.device_id.expire_time.signature，1天有效期，自包含验证
 func (l *GenerateTokenLogic) GenerateToken(in *auths.AuthGenReq) (*auths.AuthGenRes, error) {
 	res := new(auths.AuthGenRes)
 	clientIP := in.GetClientIp()
@@ -40,48 +42,55 @@ func (l *GenerateTokenLogic) GenerateToken(in *auths.AuthGenReq) (*auths.AuthGen
 		return res, nil
 	}
 
-	// 1. 生成 Access Token (Short Token) - JWT
-	// 有效期较短，如 1 天 (biz.TokenExpire)
-	accessToken, err := token.GenerateJWT(in.UserId, in.Username, clientIP, biz.TokenExpire)
-	if err != nil {
-		l.Logger.Errorw("access token generate failed",
-			logx.Field("err", err),
-			logx.Field("client_ip", clientIP),
-			logx.Field("user_id", in.UserId))
-		return nil, err
+	// 生成设备ID
+	deviceID := in.GetDeviceId()
+	if deviceID == "" {
+		deviceID = token.GenerateDeviceID()
 	}
 
-	// 2. 生成 SessionID (Long Token Base)
+	// 1. 生成 SessionID (用于长令牌)
 	sessionID := token.GenerateSessionID()
 
-	// 3. 存储 Session 到 Redis
-	// 有效期较长，如 30 天
+	// 2. 存储 Session 到 Redis（长令牌）
+	// 有效期：30天
 	sessionData := map[string]interface{}{
 		"user_id":    in.UserId,
 		"username":   in.Username,
+		"device_id":  deviceID,
 		"client_ip":  clientIP,
 		"login_time": time.Now().Unix(),
 	}
 	sessionBytes, _ := json.Marshal(sessionData)
-	sessionKey := fmt.Sprintf("auth:session:%s", sessionID)
+	sessionKey := fmt.Sprintf("%s%s", biz.SessionKeyPrefix, sessionID)
 
 	// 30 days = 30 * 24 * 3600 seconds
-	err = l.svcCtx.Redis.Setex(sessionKey, string(sessionBytes), 30*24*3600)
+	err := l.svcCtx.Redis.Setex(sessionKey, string(sessionBytes), int(biz.LongTokenExpire.Seconds()))
 	if err != nil {
 		l.Logger.Errorw("redis set session failed", logx.Field("err", err))
 		return nil, err
 	}
 
-	// 4. 对 SessionID 签名生成 Long Token (Refresh Token)
-	refreshToken := token.SignSessionID(sessionID, "go-mall")
+	// 3. 生成长令牌 (Long Token) - 格式: sessionID.signature
+	longToken := token.GenerateLongToken(sessionID, biz.TokenSignSecret)
 
-	// 返回 access token 和 refresh token
+	// 4. 生成短令牌 (Short Token) - 格式: user_id.device_id.expire_time.signature
+	shortToken := token.GenerateShortToken(in.UserId, deviceID, biz.ShortTokenExpire, biz.TokenSignSecret)
+
+	// 计算过期时间
+	now := time.Now()
+	shortExpireTime := now.Add(biz.ShortTokenExpire).Unix()
+	longExpireTime := now.Add(biz.LongTokenExpire).Unix()
+
+	// 返回长短令牌
 	l.Logger.Infow("tokens generated successfully (Dual Token Strategy)",
 		logx.Field("user_id", in.UserId),
 		logx.Field("client_ip", clientIP),
-		logx.Field("session_id", sessionID))
+		logx.Field("session_id", sessionID),
+		logx.Field("device_id", deviceID))
 
-	res.AccessToken = accessToken
-	res.RefreshToken = refreshToken
+	res.ShortToken = shortToken
+	res.LongToken = longToken
+	res.ShortExpiresIn = shortExpireTime
+	res.LongExpiresIn = longExpireTime
 	return res, nil
 }

@@ -2,12 +2,12 @@ package logic
 
 import (
 	"context"
+	"github.com/olivere/elastic/v7"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	"github.com/falconfan123/Go-mall/dal/model/products/product_categories"
-	"github.com/olivere/elastic/v7"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strconv"
 	"time"
 

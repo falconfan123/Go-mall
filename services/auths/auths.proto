@@ -11,10 +11,12 @@ message AuthGenReq {
   uint32 user_id = 1;
   string username = 2;
   string client_ip = 3;
+  string device_id = 4;
 }
 message AuthRenewalReq {
-  string refresh_token = 1; // 用户刷新token
-  string client_ip = 2;
+  string long_token = 1; // 用户长令牌
+  string short_token = 2; // 用户短令牌（用于验证设备）
+  string client_ip = 3;
 }
 
 message AuthsRes{
@@ -27,27 +29,56 @@ message AuthGenRes {
   uint32 status_code = 1;
   string status_msg = 2;
 
-  string access_token = 3; // 访问令牌
-  string refresh_token = 4; // 刷新令牌
-  int64 expires_in = 5; // 访问令牌有效期（秒）
+  string short_token = 3; // 短令牌（1天有效期）
+  string long_token = 4; // 长令牌（30天有效期）
+  int64 short_expires_in = 5; // 短令牌过期时间戳
+  int64 long_expires_in = 6; // 长令牌过期时间戳
 }
 message AuthRenewalRes {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
 
-  string access_token = 3; // 新的访问令牌
-  string refresh_token = 4; // 新的刷新令牌
-  int64 expires_in = 5; // 新的访问令牌有效期（秒）
+  string short_token = 3; // 新的短令牌
+  int64 expires_in = 4; // 短令牌过期时间戳
+}
+
+// 用于网关验证的请求
+message AuthValidateReq {
+  string token = 1; // 令牌（短令牌或长令牌）
+  string client_ip = 2;
+}
+
+// 用于网关验证的响应
+message AuthValidateRes {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  uint32 user_id = 3;
+}
+
+// 用于登出的请求
+message LogoutReq {
+  string long_token = 1; // 长令牌
+  string client_ip = 2;
+}
+
+// 用于登出的响应
+message LogoutRes {
+  uint32 status_code = 1;
+  string status_msg = 2;
 }
 
 
 service Auths {
   //  Authentication 验证用户token合法
   rpc Authentication (AuthReq) returns (AuthsRes);
-  // GenerateToken 生成toke
+  // GenerateToken 生成token
   rpc GenerateToken (AuthGenReq) returns (AuthGenRes);
   // RenewToken 续期身份
   rpc RenewToken (AuthRenewalReq) returns (AuthRenewalRes);
+  // ValidateToken 验证长短令牌（用于网关）
+  rpc ValidateToken (AuthValidateReq) returns (AuthValidateRes);
+  // Logout 登出（删除Session）
+  rpc Logout (LogoutReq) returns (LogoutRes);
 }
 
 // goctl rpc protoc auth.proto --go_out=./ --go-grpc_out=./ --zrpc_out=. --client=true
