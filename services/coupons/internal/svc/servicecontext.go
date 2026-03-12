@@ -24,10 +24,10 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:           c,
-		CouponsModel:     coupon.NewCouponsModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
-		UserCouponsModel: user_coupons.NewUserCouponsModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
-		CouponUsageModel: coupon_usage.NewCouponUsageModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
-		Model:            sqlx.NewMysql(c.MysqlConfig.DataSource),
+		CouponsModel:     coupon.NewCouponsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
+		UserCouponsModel: user_coupons.NewUserCouponsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
+		CouponUsageModel: coupon_usage.NewCouponUsageModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
+		Model:            sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),
 		Rdb:              redis.MustNewRedis(c.RedisConf),
 		ProductRpc:       productclient.NewProductCatalog(zrpc.MustNewClient(c.ProductRpc)),
 	}

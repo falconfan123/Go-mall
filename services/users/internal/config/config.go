@@ -9,20 +9,20 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	Mysql       MysqlConfig
-	GorseConfig GorseConfig
-	AuditRpc    zrpc.RpcClientConf
-	AuthsRpc    zrpc.RpcClientConf
-	Consul      consul.Conf
-	Cache       cache.CacheConf
-	RedisConf   redis.RedisConf
-	Salt        string
-	AuthConfig  struct {
+	PostgresConfig PostgresConfig
+	GorseConfig    GorseConfig
+	AuditRpc       zrpc.RpcClientConf
+	AuthsRpc       zrpc.RpcClientConf
+	Consul         consul.Conf
+	Cache          cache.CacheConf
+	RedisConf      redis.RedisConf
+	Salt           string
+	AuthConfig     struct {
 		AccessSecret string
 		AccessExpire int64
 	}
 }
-type MysqlConfig struct {
+type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
 }

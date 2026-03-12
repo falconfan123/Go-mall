@@ -124,12 +124,12 @@ func Init(c config.Config) (*OrderDelayMQ, error) {
 	}
 	orderDelay := &OrderDelayMQ{
 		conn:            conn,
-		OrderModel:      order.NewOrdersModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		OrderModel:      order.NewOrdersModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		CheckoutRpc:     checkoutservice.NewCheckoutService(zrpc.MustNewClient(c.CheckoutRpc)),
 		CouponRpc:       couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponRpc)),
 		InventoryRpc:    inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
-		Model:           sqlx.NewMysql(c.MysqlConfig.DataSource),
-		OrderItemsModel: order.NewOrderItemsModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		Model:           sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),
+		OrderItemsModel: order.NewOrderItemsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 	}
 	go orderDelay.consumer(context.TODO())
 	return orderDelay, nil

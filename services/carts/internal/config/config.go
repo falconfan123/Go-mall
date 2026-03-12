@@ -7,10 +7,10 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	MysqlConfig MysqlConfig
-	Consul      consul.Conf
+	PostgresConfig PostgresConfig
+	Consul         consul.Conf
 }
-type MysqlConfig struct {
+type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
 }

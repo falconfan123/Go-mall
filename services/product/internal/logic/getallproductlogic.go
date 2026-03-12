@@ -34,7 +34,7 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 	var products []*product2.Products
 	var total int64
 	var queryErr error
-	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
+	productModel := product2.NewProductsModel(l.svcCtx.Postgres)
 	wg.Add(2)
 	// 查询商品列表
 	go func() {

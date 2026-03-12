@@ -1,17 +1,15 @@
-
-
--- 优惠券使用记录表
-CREATE TABLE `coupon_usage`
+-- 优惠券使用记录表 (PostgreSQL 版本)
+CREATE TABLE coupon_usage
 (
-    `id`              int unsigned NOT NULL AUTO_INCREMENT,
-    `order_id`        varchar(36)              NOT NULL COMMENT '关联的订单ID',
-    `coupon_id`       varchar(36)              NOT NULL COMMENT '优惠券ID',
-    `user_id`         int unsigned             NOT NULL COMMENT '用户ID',
-    `coupon_type`     tinyint                  NOT NULL COMMENT '当时优惠券类型：1-满减 2-折扣 3-立减',
-    `origin_value`    BIGINT                      NOT NULL COMMENT '当时优惠值（根据类型：分/百分比）',
-    `discount_amount` BIGINT                      NOT NULL COMMENT '抵扣金额（分）',
-    `applied_at`      TIMESTAMP                NOT NULL COMMENT '应用时间',
-    PRIMARY KEY (`id`),
-    KEY `idx_order` (`order_id`),
-    KEY `idx_user` (`user_id`)
-) COMMENT ='优惠券使用明细';
+    id              SERIAL PRIMARY KEY,
+    order_id        VARCHAR(36)              NOT NULL,
+    coupon_id       VARCHAR(36)              NOT NULL,
+    user_id         INTEGER             NOT NULL,
+    coupon_type     SMALLINT                  NOT NULL,
+    origin_value    BIGINT                      NOT NULL,
+    discount_amount BIGINT                      NOT NULL,
+    applied_at      TIMESTAMP                NOT NULL
+);
+
+CREATE INDEX idx_order ON coupon_usage(order_id);
+CREATE INDEX idx_user ON coupon_usage(user_id);

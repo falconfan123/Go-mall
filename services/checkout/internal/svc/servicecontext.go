@@ -15,7 +15,7 @@ import (
 
 type ServiceContext struct {
 	Config             config.Config
-	Mysql              sqlx.SqlConn
+	Postgres           sqlx.SqlConn
 	RedisClient        *redis.Redis
 	CheckoutModel      checkout.CheckoutsModel
 	CheckoutItemsModel checkout.CheckoutItemsModel
@@ -26,18 +26,18 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	mysql := db.NewMysql(c.MysqlConfig)
+	postgres := db.NewPostgres(c.PostgresConfig)
 	redisconf, err := redis.NewRedis(c.RedisConf)
 	if err != nil {
 		panic(err)
 	}
 	return &ServiceContext{
 		Config:             c,
-		Mysql:              mysql,
+		Postgres:           postgres,
 		RedisClient:        redisconf,
-		CartsModel:         cart.NewCartsModel(mysql),
-		CheckoutModel:      checkout.NewCheckoutsModel(mysql),
-		CheckoutItemsModel: checkout.NewCheckoutItemsModel(mysql),
+		CartsModel:         cart.NewCartsModel(postgres),
+		CheckoutModel:      checkout.NewCheckoutsModel(postgres),
+		CheckoutItemsModel: checkout.NewCheckoutItemsModel(postgres),
 		InventoryRpc:       inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		CouponsRpc:         couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponsRpc)),
 		ProductRpc:         productclient.NewProductCatalog(zrpc.MustNewClient(c.ProductRpc)),

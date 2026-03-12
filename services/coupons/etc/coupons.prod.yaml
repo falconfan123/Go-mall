@@ -28,8 +28,8 @@ Log:
   Rotation: size  # 按大小切割日志
   MaxSize: 100    # 每个日志文件最大100MB
 
-MysqlConfig:
-  datasource: ${MYSQL_DATA_SOURCE}
+PostgresConfig:
+  datasource: ${POSTGRES_DATA_SOURCE}
 
 RedisConf:
   Host: ${REDIS_HOST}

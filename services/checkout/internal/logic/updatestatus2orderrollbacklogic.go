@@ -30,7 +30,7 @@ func NewUpdateStatus2OrderRollbackLogic(ctx context.Context, svcCtx *svc.Service
 // UpdateStatus2OrderRollback 补偿操作
 func (l *UpdateStatus2OrderRollbackLogic) UpdateStatus2OrderRollback(in *checkout.UpdateStatusReq) (*checkout.EmptyResp, error) {
 	res := &checkout.EmptyResp{}
-	err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
+	err := l.svcCtx.Postgres.Transact(func(session sqlx.Session) error {
 		checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderIdWithSession(l.ctx, session, in.UserId, in.PreOrderId)
 		if err != nil {
 			if errors.Is(err, sqlx.ErrNotFound) {

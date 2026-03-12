@@ -31,7 +31,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	svcCtx := &ServiceContext{
 		Config:         c,
 		Rdb:            redis.MustNewRedis(c.RedisConf),
-		InventoryModel: inventory.NewInventoryModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		InventoryModel: inventory.NewInventoryModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 	}
 
 	// 执行缓存预热

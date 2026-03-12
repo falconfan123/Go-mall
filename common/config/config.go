@@ -6,6 +6,10 @@ type MysqlConfig struct {
 	DataSource string
 }
 
+type PostgresConfig struct {
+	DataSource string
+}
+
 type RabbitMQConfig struct {
 	Host  string
 	Port  int

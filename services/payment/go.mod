@@ -20,7 +20,7 @@ replace github.com/falconfan123/Go-mall/services/users => ../../services/users
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/falconfan123/Go-mall/common v0.0.0-00010101000000-000000000000
+	github.com/falconfan123/Go-mall/common v0.0.0-20260312153719-88b43b07ae7d
 	github.com/falconfan123/Go-mall/dal v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/order v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0

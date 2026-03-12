@@ -1,14 +1,13 @@
+-- 用户地址表 (PostgreSQL 版本)
 CREATE TABLE user_addresses (
-    address_id INT AUTO_INCREMENT COMMENT '主键，自增，地址ID',
-    user_id INT NOT NULL COMMENT '外键，关联到users表的user_id',
-    detailed_address VARCHAR(255) NOT NULL COMMENT '详细地址',
-    city VARCHAR(100) NOT NULL COMMENT '城市',
-    province VARCHAR(100) DEFAULT NULL COMMENT '州/省',
-    is_default BOOLEAN DEFAULT false COMMENT '是否默认地址',
-    recipient_name VARCHAR(100) NOT NULL COMMENT '收件人姓名',
-    phone_number VARCHAR(50) DEFAULT NULL COMMENT '联系电话',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (address_id)
-   
+    address_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    detailed_address VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    province VARCHAR(100) DEFAULT NULL,
+    is_default BOOLEAN DEFAULT false,
+    recipient_name VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(50) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

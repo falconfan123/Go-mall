@@ -186,7 +186,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 		finalPrice = uint64(resp.FinalAmount)
 	}
 
-	if err := l.svcCtx.Mysql.TransactCtx(ctx, func(context context.Context, session sqlx.Session) error {
+	if err := l.svcCtx.Postgres.TransactCtx(ctx, func(context context.Context, session sqlx.Session) error {
 		// 2. 获取商品信息，计算原始总金额并插入 checkout_items
 		for _, item := range items {
 			if _, err := l.svcCtx.CheckoutItemsModel.WithSession(session).Insert(ctx, item); err != nil {

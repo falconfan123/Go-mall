@@ -62,11 +62,11 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	}
 	res := &product.CreateProductResp{}
 	// 2. 使用 Transact 开启事务
-	if err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
+	if err := l.svcCtx.Postgres.Transact(func(session sqlx.Session) error {
 		// 通过 withSession 生成支持事务的 productModel 实例
-		productModel := product2.NewProductsModel(l.svcCtx.Mysql).WithSession(session)
+		productModel := product2.NewProductsModel(l.svcCtx.Postgres).WithSession(session)
 		// 通过 withSession 生成支持事务的 productCategoriesModel 实例
-		productCategoriesModel := pc.NewProductCategoriesModel(l.svcCtx.Mysql).WithSession(session)
+		productCategoriesModel := pc.NewProductCategoriesModel(l.svcCtx.Postgres).WithSession(session)
 		// 得到图片对应url
 		result, err := productModel.Insert(l.ctx, productRes)
 		if err != nil {

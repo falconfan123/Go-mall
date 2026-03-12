@@ -54,9 +54,9 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 	}
 	res := &product.DeleteProductResp{}
 	// 2. 使用 Transact 开启事务
-	if err = l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
+	if err = l.svcCtx.Postgres.Transact(func(session sqlx.Session) error {
 		// 3. 删除商品记录：通过 withSession 生成支持事务的 deleteModel 实例
-		deleteModel := product2.NewProductsModel(l.svcCtx.Mysql).WithSession(session)
+		deleteModel := product2.NewProductsModel(l.svcCtx.Postgres).WithSession(session)
 		exist, err := deleteModel.FindProductIsExist(l.ctx, in.Id)
 		if err != nil {
 			return err
@@ -70,7 +70,7 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 			return err
 		}
 		// 4. 删除商品分类关系：同样生成基于事务的 deleteCategoryModel 实例
-		deleteCategoryModel := product_categories.NewProductCategoriesModel(l.svcCtx.Mysql).WithSession(session)
+		deleteCategoryModel := product_categories.NewProductCategoriesModel(l.svcCtx.Postgres).WithSession(session)
 		if err := deleteCategoryModel.DeleteByProductId(l.ctx, in.Id); err != nil {
 			return err
 		}

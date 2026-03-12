@@ -21,7 +21,7 @@ import (
 
 type ServiceContext struct {
 	Config          config.Config
-	Mysql           sqlx.SqlConn
+	Postgres        sqlx.SqlConn
 	RedisClient     *redis.Redis
 	CategoriesModel categories.CategoriesModel
 	EsClient        *elastic.Client
@@ -80,13 +80,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	gorseClient := gorse.NewGorseClient(c.GorseConfig.GorseAddr, c.GorseConfig.GorseApikey)
 	return &ServiceContext{
 		Config:          c,
-		Mysql:           sqlx.NewMysql(c.MysqlConfig.DataSource),
+		Postgres:        sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),
 		RedisClient:     redisClient,
 		EsClient:        client,
 		GorseClient:     gorseClient,
-		ProductModel:    product2.NewProductsModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		ProductModel:    product2.NewProductsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		InventoryRpc:    inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
-		CategoriesModel: categories.NewCategoriesModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		CategoriesModel: categories.NewCategoriesModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		MinioClient:     minioClient,
 	}
 }

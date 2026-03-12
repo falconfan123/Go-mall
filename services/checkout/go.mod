@@ -13,7 +13,7 @@ replace github.com/falconfan123/Go-mall/services/inventory => ../../services/inv
 replace github.com/falconfan123/Go-mall/services/product => ../../services/product
 
 require (
-	github.com/falconfan123/Go-mall/common v0.0.0-00010101000000-000000000000
+	github.com/falconfan123/Go-mall/common v0.0.0-20260312153719-88b43b07ae7d
 	github.com/falconfan123/Go-mall/dal v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/coupons v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/inventory v0.0.0-00010101000000-000000000000

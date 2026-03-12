@@ -13,8 +13,8 @@ InventoryRpc:
   Target: consul://${CONSUL_HOST}/inventory.rpc?wait=14s
   NonBlock: true
 
-MysqlConfig:
-  datasource: ${MYSQL_DATA_SOURCE}
+PostgresConfig:
+  datasource: ${POSTGRES_DATA_SOURCE}
   Conntimeout: 5
 
 Log:

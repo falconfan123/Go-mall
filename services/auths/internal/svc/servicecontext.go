@@ -15,7 +15,7 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	conn := sqlx.NewMysql(c.MysqlConfig.DataSource)
+	conn := sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)
 	return &ServiceContext{
 		UserModel: user.NewUsersModel(conn),
 		Config:    c,

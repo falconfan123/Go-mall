@@ -28,7 +28,7 @@ func NewReleaseCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *R
 
 // ReleaseCheckout UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
 func (l *ReleaseCheckoutLogic) ReleaseCheckout(in *checkout.ReleaseReq) (*checkout.EmptyResp, error) {
-	err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
+	err := l.svcCtx.Postgres.Transact(func(session sqlx.Session) error {
 		cacheKey := fmt.Sprintf("checkout:preorder:%d", in.UserId)
 		checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderIdWithSession(l.ctx, session, in.UserId, in.PreOrderId)
 		if err != nil {

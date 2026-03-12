@@ -10,14 +10,14 @@ import (
 type Config struct {
 	// gRPC 配置
 	zrpc.RpcServerConf
-	MysqlConfig   MysqlConfig
-	RedisConf     redis.RedisConf
-	ElasticSearch config.ElasticSearchConfig
-	QiNiu         QiNiu
-	Consul        consul.Conf
-	InventoryRpc  zrpc.RpcClientConf
-	GorseConfig   config.GorseConfig
-	Minio         Minio
+	PostgresConfig PostgresConfig
+	RedisConf      redis.RedisConf
+	ElasticSearch  config.ElasticSearchConfig
+	QiNiu          QiNiu
+	Consul         consul.Conf
+	InventoryRpc   zrpc.RpcClientConf
+	GorseConfig    config.GorseConfig
+	Minio          Minio
 }
 
 type Minio struct {
@@ -28,7 +28,7 @@ type Minio struct {
 	UseSSL    bool
 }
 
-type MysqlConfig struct {
+type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
 }
