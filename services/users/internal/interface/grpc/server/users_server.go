@@ -9,12 +9,12 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/users/internal/interface/grpc/logic"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	users "github.com/falconfan123/Go-mall/services/users/pb"
+	"github.com/falconfan123/Go-mall/services/users/pb"
 )
 
 type UsersServer struct {
 	svcCtx *svc.ServiceContext
-	users.UnimplementedUsersServer
+	pb.UnimplementedUsersServer
 }
 
 func NewUsersServer(svcCtx *svc.ServiceContext) *UsersServer {
@@ -23,72 +23,72 @@ func NewUsersServer(svcCtx *svc.ServiceContext) *UsersServer {
 	}
 }
 
-func (s *UsersServer) Ping(ctx context.Context, in *users.Request) (*users.Response, error) {
+func (s *UsersServer) Ping(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	l := logic.NewPingLogic(ctx, s.svcCtx)
 	return l.Ping(in)
 }
 
 // 注册方法
-func (s *UsersServer) Register(ctx context.Context, in *users.RegisterRequest) (*users.RegisterResponse, error) {
+func (s *UsersServer) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	l := logic.NewRegisterLogic(ctx, s.svcCtx)
 	return l.Register(in)
 }
 
 // 登录方法
-func (s *UsersServer) Login(ctx context.Context, in *users.LoginRequest) (*users.LoginResponse, error) {
+func (s *UsersServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb.LoginResponse, error) {
 	l := logic.NewLoginLogic(ctx, s.svcCtx)
 	return l.Login(in)
 }
 
 // 登出方法
-func (s *UsersServer) Logout(ctx context.Context, in *users.LogoutRequest) (*users.LogoutResponse, error) {
+func (s *UsersServer) Logout(ctx context.Context, in *pb.LogoutRequest) (*pb.LogoutResponse, error) {
 	l := logic.NewLogoutLogic(ctx, s.svcCtx)
 	return l.Logout(in)
 }
 
 // 删除用户方法
-func (s *UsersServer) DeleteUser(ctx context.Context, in *users.DeleteUserRequest) (*users.DeleteUserResponse, error) {
+func (s *UsersServer) DeleteUser(ctx context.Context, in *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
 	l := logic.NewDeleteUserLogic(ctx, s.svcCtx)
 	return l.DeleteUser(in)
 }
 
 // 更新用户方法
-func (s *UsersServer) UpdateUser(ctx context.Context, in *users.UpdateUserRequest) (*users.UpdateUserResponse, error) {
+func (s *UsersServer) UpdateUser(ctx context.Context, in *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	l := logic.NewUpdateUserLogic(ctx, s.svcCtx)
 	return l.UpdateUser(in)
 }
 
 // 获取用户信息方法
-func (s *UsersServer) GetUser(ctx context.Context, in *users.GetUserRequest) (*users.GetUserResponse, error) {
+func (s *UsersServer) GetUser(ctx context.Context, in *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	l := logic.NewGetUserLogic(ctx, s.svcCtx)
 	return l.GetUser(in)
 }
 
-func (s *UsersServer) AddAddress(ctx context.Context, in *users.AddAddressRequest) (*users.AddAddressResponse, error) {
+func (s *UsersServer) AddAddress(ctx context.Context, in *pb.AddAddressRequest) (*pb.AddAddressResponse, error) {
 	l := logic.NewAddAddressLogic(ctx, s.svcCtx)
 	return l.AddAddress(in)
 }
 
 // 删除用户地址
-func (s *UsersServer) DeleteAddress(ctx context.Context, in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
+func (s *UsersServer) DeleteAddress(ctx context.Context, in *pb.DeleteAddressRequest) (*pb.DeleteAddressResponse, error) {
 	l := logic.NewDeleteAddressLogic(ctx, s.svcCtx)
 	return l.DeleteAddress(in)
 }
 
 // 修改用户地址
-func (s *UsersServer) UpdateAddress(ctx context.Context, in *users.UpdateAddressRequest) (*users.UpdateAddressResponse, error) {
+func (s *UsersServer) UpdateAddress(ctx context.Context, in *pb.UpdateAddressRequest) (*pb.UpdateAddressResponse, error) {
 	l := logic.NewUpdateAddressLogic(ctx, s.svcCtx)
 	return l.UpdateAddress(in)
 }
 
 // 获取所有收货地址
-func (s *UsersServer) ListAddresses(ctx context.Context, in *users.AllAddressLitstRequest) (*users.AddressListResponse, error) {
+func (s *UsersServer) ListAddresses(ctx context.Context, in *pb.AllAddressLitstRequest) (*pb.AddressListResponse, error) {
 	l := logic.NewListAddressesLogic(ctx, s.svcCtx)
 	return l.ListAddresses(in)
 }
 
 // 获取单个收货地址
-func (s *UsersServer) GetAddress(ctx context.Context, in *users.GetAddressRequest) (*users.GetAddressResponse, error) {
+func (s *UsersServer) GetAddress(ctx context.Context, in *pb.GetAddressRequest) (*pb.GetAddressResponse, error) {
 	l := logic.NewGetAddressLogic(ctx, s.svcCtx)
 	return l.GetAddress(in)
 }
