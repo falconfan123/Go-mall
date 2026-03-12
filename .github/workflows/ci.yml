@@ -37,31 +37,13 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: 检查文件位置
+      - name: 验证工作区
         run: |
-          pwd
-          ls -F $GITHUB_WORKSPACE
-
-      - name: 同步工作区依赖
-        run: |
-          echo "GOWORK=${GITHUB_WORKSPACE}/go.work" >> $GITHUB_ENV
-
-          if [ ! -f "$GOWORK" ]; then
-            echo "错误：找不到 go.work 文件！当前目录结构如下："
-            ls -R ${GITHUB_WORKSPACE}
-            exit 1
-          fi
-
           go work sync
-
-      - name: 预理顺公共模块
-        run: |
-          if [ -f common/go.mod ]; then cd common && go mod tidy && cd ..; fi
-          if [ -f dal/go.mod ]; then cd dal && go mod tidy && cd ..; fi
 
       - name: 构建 ${{ matrix.service }} 服务
         run: |
-          go build ./services/${{ matrix.service }}/...
+          go build -o /dev/null ./services/${{ matrix.service }}/...
 
   # 安全扫描
   security:
