@@ -90,7 +90,7 @@ jobs:
           git diff --exit-code
 
       - name: 检查依赖漏洞
-        uses: govulncheck/action@v3
+        uses: google/govulncheck-action@v1
         with:
           go-version: '1.25'
           package: github.com/falconfan123/Go-mall/...
