@@ -23,7 +23,7 @@ func NewOrderServiceServer(svcCtx *svc.ServiceContext) *OrderServiceServer {
 	}
 }
 
-func (s *OrderServiceServer) CreateOrder(ctx context.Context, in *order.CreateOrderRequest) (*order.CreateOrderResponse, error) {
+func (s *OrderServiceServer) CreateOrder(ctx context.Context, in *order.CreateOrderRequest) (*order.OrderDetailResponse, error) {
 	l := logic.NewCreateOrderLogic(ctx, s.svcCtx)
 	return l.CreateOrder(in)
 }

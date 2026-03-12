@@ -26,7 +26,6 @@ require (
 	github.com/falconfan123/Go-mall/services/coupons v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/inventory v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/users v0.0.0-00010101000000-000000000000
-	github.com/google/uuid v1.6.0
 	github.com/streadway/amqp v1.1.0
 	github.com/zeromicro/go-zero v1.10.0
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20251020121907-c2e4c4911576
@@ -59,6 +58,7 @@ require (
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/grafana/pyroscope-go v1.2.7 // indirect
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.9 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect

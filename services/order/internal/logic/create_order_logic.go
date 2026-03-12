@@ -23,8 +23,8 @@ func NewCreateOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 	}
 }
 
-func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.CreateOrderResponse, error) {
+func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.OrderDetailResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &order.CreateOrderResponse{}, nil
+	return &order.OrderDetailResponse{}, nil
 }

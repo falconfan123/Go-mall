@@ -2,15 +2,13 @@ package svc
 
 import (
 	"github.com/falconfan123/Go-mall/dal/model/order"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
+	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/delay"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/notify"
-	"github.com/falconfan123/Go-mall/services/users/users"
+	userspb "github.com/falconfan123/Go-mall/services/users/users"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -23,9 +21,9 @@ type ServiceContext struct {
 	OrderItemModel order.OrderItemsModel
 	OrderAddress   order.OrderAddressesModel
 	CheckoutRpc    checkoutservice.CheckoutService
-	CouponRpc      coupons.CouponsClient
-	UserRpc        users.Users
-	InventoryRpc   inventory.InventoryClient
+	CouponRpc      couponsclient.Coupons
+	UserRpc        userspb.UsersClient
+	InventoryRpc   inventoryclient.Inventory
 	Model          sqlx.SqlConn
 	OrderDelayMQ   *delay.OrderDelayMQ
 	OrderNotifyMQ  *notify.OrderNotifyMQ
@@ -56,7 +54,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Model:          sqlx.NewMysql(c.MysqlConfig.DataSource),
 		CheckoutRpc:    checkoutservice.NewCheckoutService(zrpc.MustNewClient(c.CheckoutRpc)),
 		CouponRpc:      couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponRpc)),
-		UserRpc:        users.NewUsers(zrpc.MustNewClient(c.UserRpc)),
+		UserRpc:        userspb.NewUsersClient(zrpc.MustNewClient(c.UserRpc).Conn()),
 		InventoryRpc:   inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		OrderDelayMQ:   orderDelayMQ,
 		OrderNotifyMQ:  notifyMQ,
