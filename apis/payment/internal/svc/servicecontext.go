@@ -3,8 +3,8 @@ package svc
 import (
 	"github.com/falconfan123/Go-mall/apis/payment/internal/config"
 	"github.com/falconfan123/Go-mall/common/middleware"
-	"github.com/falconfan123/Go-mall/services/payment/payment"
-	"github.com/falconfan123/Go-mall/services/payment/paymentclient"
+	"github.com/falconfan123/Go-mall/services/payment/payment_client"
+	"github.com/falconfan123/Go-mall/services/payment/pb"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 )

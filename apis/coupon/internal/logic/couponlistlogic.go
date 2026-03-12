@@ -6,7 +6,7 @@ import (
 	"github.com/falconfan123/Go-mall/apis/coupon/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/zeromicro/x/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"

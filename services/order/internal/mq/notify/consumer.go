@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
 	order2 "github.com/falconfan123/Go-mall/dal/model/order"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -55,15 +55,15 @@ func (a *OrderNotifyMQ) consumer(ctx context.Context) {
 			}
 			orderModelRes = orderRes
 			//只进行处理待付款的订单
-			if order.OrderStatus(orderRes.OrderStatus) == order.OrderStatus_ORDER_STATUS_PAID {
+			if ordertypes.OrderStatus(orderRes.OrderStatus) == ordertypes.OrderStatusPaid {
 				return nil
 			}
 
-			if err := orderModel.UpdateOrder2Payment(ctx, msg.OrderId, msg.UserID, &order.PaymentResult{
+			if err := orderModel.UpdateOrder2Payment(ctx, msg.OrderId, msg.UserID, &ordertypes.PaymentResult{
 				PaidAmount:    msg.PaidAmount,
 				PaidAt:        msg.PaidAt,
 				TransactionId: msg.TransactionId,
-			}, order.OrderStatus_ORDER_STATUS_PAID, order.PaymentStatus_PAYMENT_STATUS_PAID); err != nil {
+			}, ordertypes.OrderStatusPaid, ordertypes.PaymentStatusPaid); err != nil {
 				return err
 			}
 
@@ -84,14 +84,14 @@ func (a *OrderNotifyMQ) consumer(ctx context.Context) {
 			}
 			continue
 		}
-		ItemsReq := make([]*inventory.InventoryReq_Items, len(orderItems))
+		ItemsReq := make([]*inventoryclient.InventoryReq_Items, len(orderItems))
 		for i, orderItem := range orderItems {
-			ItemsReq[i] = &inventory.InventoryReq_Items{
+			ItemsReq[i] = &inventoryclient.InventoryReq_Items{
 				ProductId: int32(orderItem.ProductId),
 				Quantity:  int32(orderItem.Quantity),
 			}
 		}
-		inventoryResp, err := a.InventoryRpc.DecreaseInventory(ctx, &inventory.InventoryReq{
+		inventoryResp, err := a.InventoryRpc.DecreaseInventory(ctx, &inventoryclient.InventoryReq{
 			Items:      ItemsReq,
 			PreOrderId: orderModelRes.PreOrderId,
 			UserId:     msg.UserID,
@@ -109,7 +109,7 @@ func (a *OrderNotifyMQ) consumer(ctx context.Context) {
 		}
 		if orderModelRes.CouponId != "" {
 			// 使用优惠券
-			couponRes, err := a.CouponRpc.UseCoupon(ctx, &coupons.UseCouponReq{
+			couponRes, err := a.CouponRpc.UseCoupon(ctx, &couponsclient.UseCouponReq{
 				CouponId:       orderModelRes.CouponId,
 				UserId:         msg.UserID,
 				OrderId:        orderModelRes.OrderId,

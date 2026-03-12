@@ -8,8 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/response"
-	"github.com/falconfan123/Go-mall/services/auths/auths"
-	"github.com/falconfan123/Go-mall/services/auths/authsclient"
+	authsclient "github.com/falconfan123/Go-mall/services/auths/authsclient"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -66,7 +65,7 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf, whitePaths, optionPaths [
 				return
 			}
 			// 执行认证流程
-			authRes, err := authRpc.Authentication(r.Context(), &auths.AuthReq{Token: token, ClientIp: clientIP})
+			authRes, err := authRpc.Authentication(r.Context(), &authsclient.AuthReq{Token: token, ClientIp: clientIP})
 			if err != nil {
 				logx.Errorw("back err", logx.Field("err", err),
 					logx.Field("client_ip", clientIP),
@@ -101,7 +100,7 @@ func handleTokenExpiration(w http.ResponseWriter, r *http.Request, client authsc
 		return
 	}
 
-	renewRes, err := client.RenewToken(r.Context(), &auths.AuthRenewalReq{RefreshToken: refreshToken, ClientIp: clientIP})
+	renewRes, err := client.RenewToken(r.Context(), &authsclient.AuthRenewalReq{RefreshToken: refreshToken, ClientIp: clientIP})
 	if err != nil {
 		logx.Errorw("refresh token err",
 			logx.Field("err", err),

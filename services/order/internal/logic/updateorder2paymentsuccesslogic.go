@@ -5,13 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/notify"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -53,22 +54,26 @@ func (l *UpdateOrder2PaymentSuccessLogic) UpdateOrder2PaymentSuccess(in *order.U
 
 		// --------------- check ---------------
 		// check order is pending payment
-		if order.OrderStatus(orderRes.OrderStatus) != order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT {
+		if ordertypes.OrderStatus(orderRes.OrderStatus) != ordertypes.OrderStatusPendingPayment {
 			res.StatusCode = code.OrderStatusInvalid
 			res.StatusMsg = code.OrderStatusInvalidMsg
 			l.Logger.Infow("order status error", logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId), logx.Field("order_status", orderRes.OrderStatus))
 			return nil
 		}
 		// check payment status
-		if order.PaymentStatus(orderRes.PaymentStatus) != order.PaymentStatus_PAYMENT_STATUS_PAYING {
+		if ordertypes.PaymentStatus(orderRes.PaymentStatus) != ordertypes.PaymentStatusPaying {
 			res.StatusCode = code.PaymentStatusInvalid
 			res.StatusMsg = code.PaymentStatusInvalidMsg
 			l.Logger.Infow("payment status error", logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId), logx.Field("payment_status", orderRes.PaymentStatus))
 			return nil
 		}
 		if err := l.svcCtx.OrderModel.WithSession(session).UpdateOrder2Payment(l.ctx,
-			in.OrderId, in.UserId, in.PaymentResult, order.OrderStatus_ORDER_STATUS_PAID,
-			order.PaymentStatus_PAYMENT_STATUS_PAID); err != nil {
+			in.OrderId, in.UserId, &ordertypes.PaymentResult{
+				TransactionId: in.PaymentResult.TransactionId,
+				PaidAmount:    in.PaymentResult.PaidAmount,
+				PaidAt:        in.PaymentResult.PaidAt,
+			}, ordertypes.OrderStatusPaid,
+			ordertypes.PaymentStatusPaid); err != nil {
 			l.Logger.Errorw("update order status error", logx.Field("err", err),
 				logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 			return err

@@ -6,34 +6,34 @@ package couponsclient
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	CalculateCouponReq   = coupons.CalculateCouponReq
-	CalculateCouponResp  = coupons.CalculateCouponResp
-	ClaimCouponReq       = coupons.ClaimCouponReq
-	ClaimCouponResp      = coupons.ClaimCouponResp
-	Coupon               = coupons.Coupon
-	CouponUsage          = coupons.CouponUsage
-	EmptyResp            = coupons.EmptyResp
-	GetCouponReq         = coupons.GetCouponReq
-	GetCouponResp        = coupons.GetCouponResp
-	Items                = coupons.Items
-	ListCouponUsagesReq  = coupons.ListCouponUsagesReq
-	ListCouponUsagesResp = coupons.ListCouponUsagesResp
-	ListCouponsReq       = coupons.ListCouponsReq
-	ListCouponsResp      = coupons.ListCouponsResp
-	ListUserCouponsReq   = coupons.ListUserCouponsReq
-	ListUserCouponsResp  = coupons.ListUserCouponsResp
-	LockCouponReq        = coupons.LockCouponReq
-	PaginationReq        = coupons.PaginationReq
-	ReleaseCouponReq     = coupons.ReleaseCouponReq
-	UseCouponReq         = coupons.UseCouponReq
-	UserCoupon           = coupons.UserCoupon
+	CalculateCouponReq   = pb.CalculateCouponReq
+	CalculateCouponResp  = pb.CalculateCouponResp
+	ClaimCouponReq       = pb.ClaimCouponReq
+	ClaimCouponResp      = pb.ClaimCouponResp
+	Coupon               = pb.Coupon
+	CouponUsage          = pb.CouponUsage
+	EmptyResp            = pb.EmptyResp
+	GetCouponReq         = pb.GetCouponReq
+	GetCouponResp        = pb.GetCouponResp
+	Items                = pb.Items
+	ListCouponUsagesReq  = pb.ListCouponUsagesReq
+	ListCouponUsagesResp = pb.ListCouponUsagesResp
+	ListCouponsReq       = pb.ListCouponsReq
+	ListCouponsResp      = pb.ListCouponsResp
+	ListUserCouponsReq   = pb.ListUserCouponsReq
+	ListUserCouponsResp  = pb.ListUserCouponsResp
+	LockCouponReq        = pb.LockCouponReq
+	PaginationReq        = pb.PaginationReq
+	ReleaseCouponReq     = pb.ReleaseCouponReq
+	UseCouponReq         = pb.UseCouponReq
+	UserCoupon           = pb.UserCoupon
 
 	Coupons interface {
 		// ListCoupons 获取优惠券列表
@@ -69,54 +69,54 @@ func NewCoupons(cli zrpc.Client) Coupons {
 
 // ListCoupons 获取优惠券列表
 func (m *defaultCoupons) ListCoupons(ctx context.Context, in *ListCouponsReq, opts ...grpc.CallOption) (*ListCouponsResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.ListCoupons(ctx, in, opts...)
 }
 
 // GetCoupon 获取单个优惠券
 func (m *defaultCoupons) GetCoupon(ctx context.Context, in *GetCouponReq, opts ...grpc.CallOption) (*GetCouponResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.GetCoupon(ctx, in, opts...)
 }
 
 // ClaimCoupon 用户领取优惠券
 func (m *defaultCoupons) ClaimCoupon(ctx context.Context, in *ClaimCouponReq, opts ...grpc.CallOption) (*ClaimCouponResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.ClaimCoupon(ctx, in, opts...)
 }
 
 // ListUserCoupons 获取用户优惠券列表
 func (m *defaultCoupons) ListUserCoupons(ctx context.Context, in *ListUserCouponsReq, opts ...grpc.CallOption) (*ListUserCouponsResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.ListUserCoupons(ctx, in, opts...)
 }
 
 // CalculateCoupon 计算优惠券
 func (m *defaultCoupons) CalculateCoupon(ctx context.Context, in *CalculateCouponReq, opts ...grpc.CallOption) (*CalculateCouponResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.CalculateCoupon(ctx, in, opts...)
 }
 
 // CalculateCouponByItems 计算优惠券通过商品列表。
 func (m *defaultCoupons) ListCouponUsages(ctx context.Context, in *ListCouponUsagesReq, opts ...grpc.CallOption) (*ListCouponUsagesResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.ListCouponUsages(ctx, in, opts...)
 }
 
 // --------------- 使用优惠券 --------------- pre_order_id来进行使用
 func (m *defaultCoupons) LockCoupon(ctx context.Context, in *LockCouponReq, opts ...grpc.CallOption) (*EmptyResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.LockCoupon(ctx, in, opts...)
 }
 
 // 释放优惠券（订单取消/超时释放）
 func (m *defaultCoupons) ReleaseCoupon(ctx context.Context, in *ReleaseCouponReq, opts ...grpc.CallOption) (*EmptyResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.ReleaseCoupon(ctx, in, opts...)
 }
 
 // 使用优惠券（支付成功确认后）
 func (m *defaultCoupons) UseCoupon(ctx context.Context, in *UseCouponReq, opts ...grpc.CallOption) (*EmptyResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
+	client := pb.NewCouponsClient(m.cli.Conn())
 	return client.UseCoupon(ctx, in, opts...)
 }

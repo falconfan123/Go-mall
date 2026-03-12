@@ -6,15 +6,15 @@ package auditclient
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/audit/audit"
+	"github.com/falconfan123/Go-mall/services/audit/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	CreateAuditLogReq = audit.CreateAuditLogReq
-	CreateAuditLogRes = audit.CreateAuditLogRes
+	CreateAuditLogReq = pb.CreateAuditLogReq
+	CreateAuditLogRes = pb.CreateAuditLogRes
 
 	Audit interface {
 		// CreateAuditLog 创建审计日志
@@ -34,6 +34,6 @@ func NewAudit(cli zrpc.Client) Audit {
 
 // CreateAuditLog 创建审计日志
 func (m *defaultAudit) CreateAuditLog(ctx context.Context, in *CreateAuditLogReq, opts ...grpc.CallOption) (*CreateAuditLogRes, error) {
-	client := audit.NewAuditClient(m.cli.Conn())
+	client := pb.NewAuditClient(m.cli.Conn())
 	return client.CreateAuditLog(ctx, in, opts...)
 }

@@ -4,9 +4,7 @@ import (
 	"context"
 	"github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/streadway/amqp"
@@ -23,8 +21,8 @@ type OrderNotifyMQ struct {
 	conn           *amqp.Connection
 	OrderModel     order.OrdersModel
 	CheckoutRpc    checkoutservice.CheckoutService
-	CouponRpc      coupons.CouponsClient
-	InventoryRpc   inventory.InventoryClient
+	CouponRpc      couponsclient.Coupons
+	InventoryRpc   inventoryclient.Inventory
 	Model          sqlx.SqlConn
 	OrderItemModel order.OrderItemsModel
 }

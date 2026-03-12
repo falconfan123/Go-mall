@@ -6,9 +6,9 @@ import (
 	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
-	"github.com/falconfan123/Go-mall/services/order/order"
-	"github.com/falconfan123/Go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/services/checkout/pb"
+	"github.com/falconfan123/Go-mall/services/order/pb"
+	"github.com/falconfan123/Go-mall/services/users/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	xerrors "github.com/zeromicro/x/errors"

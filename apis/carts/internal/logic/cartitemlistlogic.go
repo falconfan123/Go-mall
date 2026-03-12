@@ -6,8 +6,8 @@ import (
 	"github.com/falconfan123/Go-mall/apis/carts/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/carts/carts"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/services/carts/pb"
+	"github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/x/errors"
 )

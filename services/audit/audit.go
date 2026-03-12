@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/falconfan123/Go-mall/services/audit/audit"
 	"github.com/falconfan123/Go-mall/services/audit/internal/config"
 	"github.com/falconfan123/Go-mall/services/audit/internal/server"
 	"github.com/falconfan123/Go-mall/services/audit/internal/svc"
+	audit "github.com/falconfan123/Go-mall/services/audit/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 

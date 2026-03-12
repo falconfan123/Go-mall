@@ -6,7 +6,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	inventory2 "github.com/falconfan123/Go-mall/dal/model/inventory"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
+	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

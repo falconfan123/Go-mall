@@ -9,21 +9,21 @@ import (
 type OrderStatus int
 
 const (
-	OrderStatusPending   OrderStatus = 1 // 待支付
-	OrderStatusPaid      OrderStatus = 2 // 已支付
-	OrderStatusShipped   OrderStatus = 3 // 已发货
-	OrderStatusCompleted OrderStatus = 4 // 已完成
-	OrderStatusCanceled  OrderStatus = 5 // 已取消
+	OrderStatusPending                 OrderStatus = 1 // 待支付
+	OrderStatus_ORDER_STATUS_PAID      OrderStatus = 2 // 已支付
+	OrderStatusShipped                 OrderStatus = 3 // 已发货
+	OrderStatus_ORDER_STATUS_COMPLETED OrderStatus = 4 // 已完成
+	OrderStatusCanceled                OrderStatus = 5 // 已取消
 )
 
 // PaymentStatus 支付状态
 type PaymentStatus int
 
 const (
-	PaymentStatusUnpaid   PaymentStatus = 0 // 未支付
-	PaymentStatusPaying   PaymentStatus = 1 // 支付中
-	PaymentStatusPaid     PaymentStatus = 2 // 已支付
-	PaymentStatusRefunded PaymentStatus = 3 // 已退款
+	PaymentStatusUnpaid                   PaymentStatus = 0 // 未支付
+	PaymentStatus_PAYMENT_STATUS_PAYING   PaymentStatus = 1 // 支付中
+	PaymentStatus_PAYMENT_STATUS_PAID     PaymentStatus = 2 // 已支付
+	PaymentStatus_PAYMENT_STATUS_REFUNDed PaymentStatus = 3 // 已退款
 )
 
 var (
@@ -110,7 +110,7 @@ func (o *Order) Pay(paymentMethod int, transactionID string) error {
 	if o.OrderStatus != OrderStatusPending {
 		return ErrInvalidOrderStatus
 	}
-	if o.PaymentStatus == PaymentStatusPaid {
+	if o.PaymentStatus == PaymentStatus_PAYMENT_STATUS_PAID {
 		return ErrOrderAlreadyPaid
 	}
 
@@ -119,15 +119,15 @@ func (o *Order) Pay(paymentMethod int, transactionID string) error {
 	o.TransactionID = transactionID
 	o.PaidAt = &now
 	o.PaidAmount = o.PayableAmount
-	o.PaymentStatus = PaymentStatusPaid
-	o.OrderStatus = OrderStatusPaid
+	o.PaymentStatus = PaymentStatus_PAYMENT_STATUS_PAID
+	o.OrderStatus = OrderStatus_ORDER_STATUS_PAID
 	o.UpdatedAt = time.Now()
 	return nil
 }
 
 // Ship 发货
 func (o *Order) Ship() error {
-	if o.OrderStatus != OrderStatusPaid {
+	if o.OrderStatus != OrderStatus_ORDER_STATUS_PAID {
 		return ErrOrderNotPaid
 	}
 	o.OrderStatus = OrderStatusShipped
@@ -140,14 +140,14 @@ func (o *Order) Complete() error {
 	if o.OrderStatus != OrderStatusShipped {
 		return ErrInvalidOrderStatus
 	}
-	o.OrderStatus = OrderStatusCompleted
+	o.OrderStatus = OrderStatus_ORDER_STATUS_COMPLETED
 	o.UpdatedAt = time.Now()
 	return nil
 }
 
 // Cancel 取消
 func (o *Order) Cancel(reason string) error {
-	if o.OrderStatus == OrderStatusPaid || o.OrderStatus == OrderStatusShipped || o.OrderStatus == OrderStatusCompleted {
+	if o.OrderStatus == OrderStatus_ORDER_STATUS_PAID || o.OrderStatus == OrderStatusShipped || o.OrderStatus == OrderStatus_ORDER_STATUS_COMPLETED {
 		return ErrInvalidOrderStatus
 	}
 	o.OrderStatus = OrderStatusCanceled
@@ -158,10 +158,10 @@ func (o *Order) Cancel(reason string) error {
 
 // Refund 退款
 func (o *Order) Refund() error {
-	if o.PaymentStatus != PaymentStatusPaid {
+	if o.PaymentStatus != PaymentStatus_PAYMENT_STATUS_PAID {
 		return ErrOrderNotPaid
 	}
-	o.PaymentStatus = PaymentStatusRefunded
+	o.PaymentStatus = PaymentStatus_PAYMENT_STATUS_REFUNDed
 	o.OrderStatus = OrderStatusCanceled
 	o.UpdatedAt = time.Now()
 	return nil

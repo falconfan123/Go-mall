@@ -5,7 +5,7 @@ import (
 	"github.com/falconfan123/Go-mall/dal/model/coupons/coupon_usage"
 	"github.com/falconfan123/Go-mall/dal/model/coupons/user_coupons"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/config"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	productclient "github.com/falconfan123/Go-mall/services/product/productclient"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -18,7 +18,7 @@ type ServiceContext struct {
 	CouponUsageModel coupon_usage.CouponUsageModel
 	Model            sqlx.SqlConn
 	Rdb              *redis.Redis
-	ProductRpc       product.ProductCatalogService
+	ProductRpc       productclient.ProductCatalog
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -29,6 +29,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CouponUsageModel: coupon_usage.NewCouponUsageModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
 		Model:            sqlx.NewMysql(c.MysqlConfig.DataSource),
 		Rdb:              redis.MustNewRedis(c.RedisConf),
-		ProductRpc:       product.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
+		ProductRpc:       productclient.NewProductCatalog(zrpc.MustNewClient(c.ProductRpc)),
 	}
 }

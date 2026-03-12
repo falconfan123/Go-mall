@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/auths/auths"
-	"github.com/falconfan123/Go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/services/auths/pb"
+	"github.com/falconfan123/Go-mall/services/users/pb"
 	"sync"
 	"testing"
 

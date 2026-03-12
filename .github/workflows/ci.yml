@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
 
 env:
-  GO_VERSION: '1.25'
+  GO_VERSION: '1.25.8'
 
 jobs:
   # 构建验证
@@ -37,25 +37,13 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: 下载依赖
-        run: go mod download
+      - name: 验证工作区
+        run: |
+          go work sync
 
       - name: 构建 ${{ matrix.service }} 服务
         run: |
-          case "${{ matrix.service }}" in
-            auths) cd services/auths ;;
-            audit) cd services/audit ;;
-            carts) cd services/carts ;;
-            checkout) cd services/checkout ;;
-            coupons) cd services/coupons ;;
-            inventory) cd services/inventory ;;
-            order) cd services/order ;;
-            payment) cd services/payment ;;
-            product) cd services/product ;;
-            users) cd services/users ;;
-            gateway) cd services/gateway ;;
-          esac
-          go build -o /dev/null .
+          go build -o /dev/null ./services/${{ matrix.service }}/...
 
   # 安全扫描
   security:
@@ -71,10 +59,10 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
 
       - name: 下载依赖
-        run: go mod download
+        run: go work sync
 
       - name: 运行 go vet
-        run: go vet -unsafeptr=false ./...
+        run: go vet -unsafeptr=false github.com/falconfan123/Go-mall/...
 
       - name: 检查敏感信息
         run: |
@@ -96,13 +84,14 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: 安装 govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
       - name: 检查 go.mod 一致性
         run: |
-          go mod tidy
-          git diff --exit-code go.mod go.sum
+          go work sync
+          git diff --exit-code
 
-      - name: 检查依赖漏洞
-        uses: govulncheck/action@v3
-        with:
-          go-version: '1.25'
-          package: ./...
+      - name: 扫描所有模块漏洞
+        run: |
+          find . -name "go.mod" -not -path "*/node_modules/*" -execdir govulncheck ./... \;

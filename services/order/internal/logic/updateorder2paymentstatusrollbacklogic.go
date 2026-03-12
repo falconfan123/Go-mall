@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -51,8 +52,8 @@ func (l *UpdateOrder2PaymentStatusRollbackLogic) UpdateOrder2PaymentStatusRollba
 		}
 
 		// 只允许回滚PENDING_PAYMENT状态的订单
-		if order.OrderStatus(orderRes.OrderStatus) != order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT ||
-			order.PaymentStatus(orderRes.PaymentStatus) != order.PaymentStatus_PAYMENT_STATUS_PAYING {
+		if ordertypes.OrderStatus(orderRes.OrderStatus) != ordertypes.OrderStatusPendingPayment ||
+			ordertypes.PaymentStatus(orderRes.PaymentStatus) != ordertypes.PaymentStatusPaying {
 			res.StatusCode = code.OrderStatusInvalid
 			res.StatusMsg = code.OrderStatusInvalidMsg
 			l.Logger.Infow("invalid status for rollback",
@@ -64,7 +65,7 @@ func (l *UpdateOrder2PaymentStatusRollbackLogic) UpdateOrder2PaymentStatusRollba
 
 		// --------------- 执行状态回滚 ---------------
 		if err := l.svcCtx.OrderModel.WithSession(session).UpdateOrderStatusByOrderIDAndUserID(ctx, in.OrderId, in.UserId,
-			order.OrderStatus_ORDER_STATUS_CREATED, order.PaymentStatus_PAYMENT_STATUS_NOT_PAID); err != nil {
+			ordertypes.OrderStatusCreated, ordertypes.PaymentStatusNotPaid); err != nil {
 			l.Logger.Errorw("rollback order status failed",
 				logx.Field("error", err),
 				logx.Field("order_id", in.OrderId))

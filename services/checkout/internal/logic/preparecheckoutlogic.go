@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	checkout2 "github.com/falconfan123/Go-mall/dal/model/checkout"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
-	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	checkout "github.com/falconfan123/Go-mall/services/checkout/pb"
+	couponsclient "github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
+	productclient "github.com/falconfan123/Go-mall/services/product/productclient"
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -95,15 +95,15 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 		}, nil
 	}
 	// 4. 调用库存预扣接口
-	inventoryItems := make([]*inventory.InventoryReq_Items, 0)
+	inventoryItems := make([]*inventoryclient.InventoryReq_Items, 0)
 	for _, item := range in.OrderItems {
-		inventoryItems = append(inventoryItems, &inventory.InventoryReq_Items{
+		inventoryItems = append(inventoryItems, &inventoryclient.InventoryReq_Items{
 			ProductId: item.ProductId,
 			Quantity:  item.Quantity,
 		})
 	}
 	res := &checkout.CheckoutResp{}
-	inventoryRes, err := l.svcCtx.InventoryRpc.DecreasePreInventory(l.ctx, &inventory.InventoryReq{
+	inventoryRes, err := l.svcCtx.InventoryRpc.DecreasePreInventory(l.ctx, &inventoryclient.InventoryReq{
 		Items:      inventoryItems,
 		PreOrderId: preOrderId,
 		UserId:     int32(in.UserId),
@@ -137,7 +137,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	couponsItems := make([]*couponsclient.Items, len(in.OrderItems))
 	expireTime := time.Now().Add(10 * time.Minute).Unix()
 	for i, item := range in.OrderItems {
-		productResp, err := l.svcCtx.ProductRpc.GetProduct(ctx, &product.GetProductReq{
+		productResp, err := l.svcCtx.ProductRpc.GetProduct(ctx, &productclient.GetProductReq{
 			Id: uint32(item.ProductId),
 		})
 		if err != nil {
@@ -221,7 +221,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	}, nil
 }
 
-func (l *PrepareCheckoutLogic) rollback(preOrderId string, userId int32, items []*inventory.InventoryReq_Items, cacheKey string) {
+func (l *PrepareCheckoutLogic) rollback(preOrderId string, userId int32, items []*inventoryclient.InventoryReq_Items, cacheKey string) {
 	// 释放 Redis 锁
 	if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
 		l.Logger.Errorw("删除 Redis 锁失败",
@@ -230,7 +230,7 @@ func (l *PrepareCheckoutLogic) rollback(preOrderId string, userId int32, items [
 	}
 
 	// 回滚库存
-	_, errRollback := l.svcCtx.InventoryRpc.ReturnPreInventory(l.ctx, &inventory.InventoryReq{
+	_, errRollback := l.svcCtx.InventoryRpc.ReturnPreInventory(l.ctx, &inventoryclient.InventoryReq{
 		Items:      items,
 		PreOrderId: preOrderId,
 		UserId:     userId,

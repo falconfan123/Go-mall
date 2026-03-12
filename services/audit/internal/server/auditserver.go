@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/audit/audit"
 	"github.com/falconfan123/Go-mall/services/audit/internal/logic"
 	"github.com/falconfan123/Go-mall/services/audit/internal/svc"
+	audit "github.com/falconfan123/Go-mall/services/audit/pb"
 )
 
 type AuditServer struct {

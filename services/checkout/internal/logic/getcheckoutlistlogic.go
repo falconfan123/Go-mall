@@ -3,8 +3,9 @@ package logic
 import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	checkouttypes "github.com/falconfan123/Go-mall/common/types/checkout"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
+	checkout "github.com/falconfan123/Go-mall/services/checkout/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -86,6 +87,20 @@ func (l *GetCheckoutListLogic) GetCheckoutList(in *checkout.CheckoutListReq) (*c
 	// 6. 组装数据
 	var checkoutOrders []*checkout.CheckoutOrder
 	for _, c := range checkouts {
+		// 转换 items 类型
+		var items []*checkouttypes.CheckoutItem
+		items = itemsMap[c.PreOrderId]
+		pbItems := make([]*checkout.CheckoutItem, 0, len(items))
+		for _, item := range items {
+			it := item // 避免循环变量捕获
+			pbItems = append(pbItems, &checkout.CheckoutItem{
+				ProductId:   int32(it.ProductId),
+				Quantity:    int32(it.Quantity),
+				ProductName: it.ProductName,
+				ProductDesc: it.ProductDesc,
+				Price:       it.Price,
+			})
+		}
 		order := &checkout.CheckoutOrder{
 			PreOrderId:     c.PreOrderId,
 			UserId:         int64(c.UserId),
@@ -93,7 +108,7 @@ func (l *GetCheckoutListLogic) GetCheckoutList(in *checkout.CheckoutListReq) (*c
 			ExpireTime:     c.ExpireTime,
 			CreatedAt:      c.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:      c.UpdatedAt.Format("2006-01-02 15:04:05"),
-			Items:          itemsMap[c.PreOrderId],
+			Items:          pbItems,
 			OriginalAmount: c.OriginalAmount,
 			FinalAmount:    c.FinalAmount,
 		}
