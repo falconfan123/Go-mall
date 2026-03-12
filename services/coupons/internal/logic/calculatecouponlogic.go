@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/coupons/pb"
+	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 	"github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"

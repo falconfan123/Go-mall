@@ -11,7 +11,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/inventory/internal/config"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/server"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
-	"github.com/falconfan123/Go-mall/services/inventory/pb"
+	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"

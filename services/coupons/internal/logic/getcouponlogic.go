@@ -6,7 +6,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
-	"github.com/falconfan123/Go-mall/services/coupons/pb"
+	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"

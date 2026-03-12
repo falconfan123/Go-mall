@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/checkout/pb"
+	checkout "github.com/falconfan123/Go-mall/services/checkout/pb"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"

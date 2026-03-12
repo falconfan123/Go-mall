@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/pb"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/olivere/elastic/v7"
 	"github.com/zeromicro/go-zero/core/logx"
 )

@@ -12,7 +12,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/falconfan123/Go-mall/services/payment/internal/server"
 	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
-	"github.com/falconfan123/Go-mall/services/payment/pb"
+	payment "github.com/falconfan123/Go-mall/services/payment/pb"
 	"github.com/smartwalle/alipay/v3"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"

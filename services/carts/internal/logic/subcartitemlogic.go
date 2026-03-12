@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/dal/model/cart"
-	"github.com/falconfan123/Go-mall/services/carts/pb"
+	carts "github.com/falconfan123/Go-mall/services/carts/pb"
 	"github.com/falconfan123/Go-mall/services/carts/internal/svc"
 	"strconv"
 

@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/users/internal/config"
 	"github.com/falconfan123/Go-mall/services/users/internal/interface/grpc/server"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/pb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
 
 	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"strings"

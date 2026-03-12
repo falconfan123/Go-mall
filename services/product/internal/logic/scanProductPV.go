@@ -6,7 +6,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/pb"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 	"strconv"
 )

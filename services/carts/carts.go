@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/falconfan123/Go-mall/common/utils/ip"
-	"github.com/falconfan123/Go-mall/services/carts/pb"
+	carts "github.com/falconfan123/Go-mall/services/carts/pb"
 	"github.com/falconfan123/Go-mall/services/carts/internal/config"
 	"github.com/falconfan123/Go-mall/services/carts/internal/server"
 	"github.com/falconfan123/Go-mall/services/carts/internal/svc"

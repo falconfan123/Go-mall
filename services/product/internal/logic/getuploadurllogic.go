@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/pb"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"

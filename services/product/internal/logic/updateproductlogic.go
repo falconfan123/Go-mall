@@ -10,7 +10,7 @@ import (
 	"github.com/falconfan123/Go-mall/dal/model/products/product_categories"
 	"github.com/falconfan123/Go-mall/services/inventory/pb"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/pb"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/olivere/elastic/v7"
 	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/zeromicro/go-zero/core/logx"

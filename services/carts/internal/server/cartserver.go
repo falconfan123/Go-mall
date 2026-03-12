@@ -7,7 +7,7 @@ package server
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/carts/pb"
+	carts "github.com/falconfan123/Go-mall/services/carts/pb"
 	"github.com/falconfan123/Go-mall/services/carts/internal/logic"
 	"github.com/falconfan123/Go-mall/services/carts/internal/svc"
 )

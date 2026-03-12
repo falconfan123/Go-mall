@@ -8,7 +8,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/pb"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
