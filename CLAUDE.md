@@ -8,6 +8,24 @@ The role of this file is to describe common mistakes and confusion points that a
 1. 必须使用 go-zero 的模板生成代码，禁止手写 handler 层代码
 2. 编写 go-zero 相关代码时，必须调用 mcp-zero 工具进行代码生成和相关操作
 
+## gRPC Protobuf 代码生成规范
+
+**所有服务的 protobuf 生成的 gRPC 代码必须放在 `pb` 子目录**（工业界标准做法）：
+
+```
+services/
+  order/
+    pb/              # ← gRPC 生成的代码放这里
+      order.pb.go
+      order_grpc.pb.go
+    internal/
+    order.go
+```
+
+- **原因**：避免 Go 导入路径解析歧义（避免与模块名 `services/order` 冲突）
+- **导入路径**：`import "github.com/falconfan123/Go-mall/services/order/pb"`
+- **proto 配置**：确保 proto 文件的 `option go_package = "github.com/falconfan123/Go-mall/services/服务名/pb";`
+
 ## 基础服务地址（OrbStack 部署，禁止修改）
 | 服务名称 | 地址 | 端口 | 说明 |
 |---------|------|------|------|
@@ -100,7 +118,7 @@ GitHub Actions 会运行标准 CI 检查：
 - 解决：确保 proto 文件的 `option go_package = ".";` 配置正确，所有导入路径应为 `github.com/falconfan123/Go-mall/services/服务名`，而不是 `.../services/服务名/服务名`
 
 **错误3：子模块遗留的 go.mod**
-- 问题：旧代码可能残留子模块目录（如 services/order/order/），包含独立的 go.mod
+- 问题：旧代码可能残留子模块目录，包含独立的 go.mod
 - 解决：删除这些遗留目录，确保 proto 生成的文件在正确位置
 
 ### 正确配置步骤
