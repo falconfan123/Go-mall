@@ -1,18 +1,17 @@
--- 用户优惠券关联表
-CREATE TABLE `user_coupons`
+-- 用户优惠券关联表 (PostgreSQL 版本)
+CREATE TABLE user_coupons
 (
-    `id`        int unsigned NOT NULL AUTO_INCREMENT,
-    `user_id`   int unsigned NOT NULL COMMENT '用户ID',
-    `coupon_id` varchar(36)  NOT NULL COMMENT '优惠券ID',
-    `status`    tinyint      NOT NULL DEFAULT 0 COMMENT '状态：0-未使用 1-已使用 2-已过期',
-    `order_id`  varchar(36)           DEFAULT NULL COMMENT '使用的订单ID',
+    id        SERIAL PRIMARY KEY,
+    user_id   INTEGER NOT NULL,
+    coupon_id VARCHAR(36)  NOT NULL,
+    status    SMALLINT NOT NULL DEFAULT 0,
+    order_id  VARCHAR(36)  DEFAULT NULL,
+    used_at   TIMESTAMP DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, coupon_id),
+    UNIQUE (order_id)
+);
 
-    `used_at`   TIMESTAMP             DEFAULT NULL COMMENT '使用时间',
-    created_at  TIMESTAMP             DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at  TIMESTAMP             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uniq_user_coupon` (`user_id`, `coupon_id`),
-    UNIQUE KEY `uniq_order_id` (`order_id`),
-    KEY `idx_user_status` (`user_id`, `status`),
-    KEY `idx_order` (`order_id`)
-) COMMENT ='用户持有优惠券';
+CREATE INDEX idx_user_status ON user_coupons(user_id, status);
+CREATE INDEX idx_order ON user_coupons(order_id);

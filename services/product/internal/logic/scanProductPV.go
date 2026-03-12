@@ -20,7 +20,7 @@ func ScanHotProducts(svcCtx *svc.ServiceContext, ctx context.Context) (err error
 		)
 		return err
 	}
-	productModel := product2.NewProductsModel(svcCtx.Mysql)
+	productModel := product2.NewProductsModel(svcCtx.Postgres)
 	// 打印或处理获取到的商品 ID
 	for _, productID := range products {
 		productId, err := strconv.ParseInt(productID, 10, 64)

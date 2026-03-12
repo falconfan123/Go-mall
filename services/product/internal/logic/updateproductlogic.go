@@ -64,8 +64,8 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 	}
 	res := &product.UpdateProductResp{}
 	// 2. 使用 Transact 开启事务
-	if err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
-		updateModel := product2.NewProductsModel(l.svcCtx.Mysql).WithSession(session)
+	if err := l.svcCtx.Postgres.Transact(func(session sqlx.Session) error {
+		updateModel := product2.NewProductsModel(l.svcCtx.Postgres).WithSession(session)
 		if err := updateModel.Update(l.ctx, productRes); err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 			return nil
 		}
 		// 4. 删除全部商品id的关联信息：生成基于事务的 product_categoriesModel 实例
-		productCategoriesmodel := product_categories.NewProductCategoriesModel(l.svcCtx.Mysql).WithSession(session)
+		productCategoriesmodel := product_categories.NewProductCategoriesModel(l.svcCtx.Postgres).WithSession(session)
 		if err := productCategoriesmodel.DeleteByProductId(l.ctx, in.Id); err != nil {
 			return err
 		}

@@ -1,15 +1,14 @@
-
+-- 用户表 (PostgreSQL 版本)
 CREATE TABLE users
 (
-    user_id       INT AUTO_INCREMENT COMMENT '主键，自增，用户 ID',
-    username      VARCHAR(255) DEFAULT NULL COMMENT '用户名，可空',
-    email         VARCHAR(255) UNIQUE COMMENT '邮箱，唯一',
-    password_hash VARCHAR(512) COMMENT '密码哈希值',
-    avatar_url    VARCHAR(255) DEFAULT NULL COMMENT '头像图片 URL',
-    created_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    user_deleted  BOOLEAN DEFAULT FALSE COMMENT '用户是否已删除',
-    logout_at      TIMESTAMP     DEFAULT NULL COMMENT '最近一次登出时间',
-    login_at       TIMESTAMP     DEFAULT NULL COMMENT '最近一次登录时间',
-    updated_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (user_id)
+    user_id       SERIAL PRIMARY KEY,
+    username      VARCHAR(255) DEFAULT NULL,
+    email         VARCHAR(255) UNIQUE,
+    password_hash VARCHAR(512),
+    avatar_url    VARCHAR(255) DEFAULT NULL,
+    created_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    user_deleted  BOOLEAN DEFAULT FALSE,
+    logout_at     TIMESTAMP     DEFAULT NULL,
+    login_at      TIMESTAMP     DEFAULT NULL,
+    updated_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 );

@@ -31,7 +31,7 @@ Log:
   Path: "./logs/users-rpc"
 
 Mysql:
-  DataSource: "root:fht3825099@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  DataSource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
   Conntimeout: 5
 
 Salt: "J1j1zH4zH4"

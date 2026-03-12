@@ -44,10 +44,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:       c,
 		Rdb:          redis.MustNewRedis(c.RedisConf),
-		PaymentModel: payment.NewPaymentsModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		PaymentModel: payment.NewPaymentsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		OrderRpc:     order.NewOrderServiceClient(zrpc.MustNewClient(c.OrderRpc).Conn()),
 		Alipay:       client,
 		PaymentMQ:    nil, // 暂时设置为nil
-		Model:        sqlx.NewMysql(c.MysqlConfig.DataSource),
+		Model:        sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),
 	}
 }

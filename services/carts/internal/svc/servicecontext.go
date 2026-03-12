@@ -12,21 +12,21 @@ import (
 
 type ServiceContext struct {
 	Config         config.Config
-	Mysql          sqlx.SqlConn
+	Postgres       sqlx.SqlConn
 	CartsModel     cart.CartsModel
 	CartRepo       repository.CartRepository
 	CartAppService *service.CartAppService
 }
 
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
-	mysql := db.NewMysql(c.MysqlConfig)
-	cartsModel := cart.NewCartsModel(mysql)
+	postgres := db.NewPostgres(c.PostgresConfig)
+	cartsModel := cart.NewCartsModel(postgres)
 	cartRepo := persistence.NewCartRepositoryImpl(cartsModel)
 	cartAppService := service.NewCartAppService(cartRepo)
 
 	return &ServiceContext{
 		Config:         c,
-		Mysql:          mysql,
+		Postgres:       postgres,
 		CartsModel:     cartsModel,
 		CartRepo:       cartRepo,
 		CartAppService: cartAppService,

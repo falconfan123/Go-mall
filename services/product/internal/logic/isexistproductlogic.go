@@ -29,7 +29,7 @@ func NewIsExistProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Is
 
 // IsExistProduct 判断商品是否存在
 func (l *IsExistProductLogic) IsExistProduct(in *product.IsExistProductReq) (*product.IsExistProductResp, error) {
-	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
+	productModel := product2.NewProductsModel(l.svcCtx.Postgres)
 	exist, err := productModel.FindProductIsExist(l.ctx, in.Id)
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {

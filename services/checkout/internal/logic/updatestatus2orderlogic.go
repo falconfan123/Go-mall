@@ -32,7 +32,7 @@ func NewUpdateStatus2OrderLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 func (l *UpdateStatus2OrderLogic) UpdateStatus2Order(in *checkout.UpdateStatusReq) (*checkout.EmptyResp, error) {
 	l.Logger.Infof("UpdateStatus2Order called. UserId: %d, PreOrderId: %s", in.UserId, in.PreOrderId)
 	res := &checkout.EmptyResp{}
-	if err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
+	if err := l.svcCtx.Postgres.Transact(func(session sqlx.Session) error {
 		checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderIdWithSession(l.ctx, session, in.UserId, in.PreOrderId)
 		if err != nil {
 			l.Logger.Errorw("FindOneByUserIdAndPreOrderIdWithSession failed", logx.Field("err", err))

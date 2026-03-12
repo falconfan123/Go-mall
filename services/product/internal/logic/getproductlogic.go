@@ -76,7 +76,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 
 	// 如果Redis中没有数据，从数据库中获取
 
-	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
+	productModel := product2.NewProductsModel(l.svcCtx.Postgres)
 	// 4. 从数据库获取
 	productData, err := productModel.FindOne(l.ctx, int64(in.Id))
 	if err != nil {

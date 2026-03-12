@@ -8,16 +8,16 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	MysqlConfig MysqlConfig
-	RedisConf   redis.RedisConf
-	Consul      consul.Conf
+	PostgresConfig PostgresConfig
+	RedisConf      redis.RedisConf
+	Consul         consul.Conf
 
 	InventoryRpc zrpc.RpcClientConf
 	CouponsRpc   zrpc.RpcClientConf
 	ProductRpc   zrpc.RpcClientConf
 }
 
-type MysqlConfig struct {
+type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
 }

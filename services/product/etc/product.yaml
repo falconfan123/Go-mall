@@ -15,9 +15,9 @@ InventoryRpc:
   NonBlock: true
 
 # MySQL 配置
-MysqlConfig:
+PostgresConfig:
 #  datasource: "root:123@tcp(127.0.0.1:3306)/douyinmall?charset=utf8mb4&parseTime=True&loc=Local"
-  datasource: "root:fht3825099@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
   conntimeout: 5
 RedisConf:
   Host: localhost:6379

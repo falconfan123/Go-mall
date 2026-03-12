@@ -13,8 +13,8 @@ Consul:
   Tag:
     - grpc
 
-MysqlConfig:
-  datasource: ${MYSQL_DATA_SOURCE}
+PostgresConfig:
+  datasource: ${POSTGRES_DATA_SOURCE}
 
 Log:
   ServiceName: inventory-rpc

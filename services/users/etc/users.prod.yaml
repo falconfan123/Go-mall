@@ -11,8 +11,8 @@ Consul:
     - "grpc"  # api服务就是api，rpc是grpc
 
 
-MysqlConfig:
-  datasource: ${MYSQL_DATA_SOURCE}
+PostgresConfig:
+  datasource: ${POSTGRES_DATA_SOURCE}
   Conntimeout: 5
 Cache:
 - Host: ${REDIS_HOST} #缓存地址

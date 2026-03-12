@@ -23,8 +23,8 @@ Log:
   Encoding: "json"
   Path: "./logs/auths-rpc"
 
-MysqlConfig:
-  datasource: "root:fht3825099@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+PostgresConfig:
+  datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
 
 SessionRedis:
   Host: localhost:6379

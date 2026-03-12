@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	Consul      consul.Conf
-	MysqlConfig config.MysqlConfig
-	RedisConf   redis.RedisConf
+	Consul         consul.Conf
+	PostgresConfig config.PostgresConfig
+	RedisConf      redis.RedisConf
 }

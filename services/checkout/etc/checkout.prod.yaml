@@ -11,8 +11,8 @@ Consul:
   Tag:
     - "grpc"  # api服务就是api，rpc是grpc
 
-MysqlConfig:
-  datasource: ${MYSQL_DATA_SOURCE}
+PostgresConfig:
+  datasource: ${POSTGRES_DATA_SOURCE}
   conntimeout: 5
 
 Log:
