@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"strings"
-
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/utils/token"
 
 	"github.com/zeromicro/go-zero/core/conf"
@@ -32,7 +31,7 @@ func main() {
 			} else {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 			}
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Access-Token, Refresh-Token, user_id, x-requested-with")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Short-Token, Long-Token, user_id, x-requested-with")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 
@@ -41,21 +40,54 @@ func main() {
 				return
 			}
 
-			// Extract token and inject user_id header for RPC
-			authHeader := r.Header.Get("Authorization")
-			fmt.Printf("Auth header: %s\n", authHeader)
-			if authHeader != "" {
-				parts := strings.Split(authHeader, " ")
-				if len(parts) == 2 && parts[0] == "Bearer" {
-					tokenStr := parts[1]
-					claims, err := token.ParseJWT(tokenStr)
-					if err == nil {
-						// Inject user_id header
-						r.Header.Set("user_id", fmt.Sprintf("%d", claims.UserID))
-						r.Header.Set("Grpc-Metadata-User-Id", fmt.Sprintf("%d", claims.UserID))
-						fmt.Printf("Injected user_id: %d\n", claims.UserID)
+			// 提取并验证长短令牌
+			shortToken := r.Header.Get("Short-Token")
+			longToken := r.Header.Get("Long-Token")
+
+			var userID uint32
+			var needRefresh bool
+
+			// 1. 首先尝试验证短令牌
+			if shortToken != "" {
+				uid, _, _, err := token.VerifyShortToken(shortToken, biz.TokenSignSecret)
+				if err == nil {
+					// 短令牌验证成功
+					userID = uid
+					needRefresh = false
+					fmt.Printf("Short token validated, user_id: %d\n", userID)
+				} else {
+					// 短令牌过期或无效，尝试长令牌
+					fmt.Printf("Short token validation failed: %v, trying long token\n", err)
+					if longToken != "" {
+						sessionID, err := token.VerifyLongToken(longToken, biz.TokenSignSecret)
+						if err == nil {
+							fmt.Printf("Long token validated, session_id: %s\n", sessionID)
+							// 长令牌验证成功，但需要刷新短令牌
+							// 注意：这里需要调用 auths 服务来获取完整的用户信息和刷新短令牌
+							// 为简化处理，我们这里先设置一个标记，在实际生产环境中应该调用 RPC
+							needRefresh = true
+						}
 					}
 				}
+			} else if longToken != "" {
+				// 没有短令牌，直接验证长令牌
+				sessionID, err := token.VerifyLongToken(longToken, biz.TokenSignSecret)
+				if err == nil {
+					fmt.Printf("Long token validated, session_id: %s\n", sessionID)
+					needRefresh = true
+				}
+			}
+
+			// 如果验证成功，注入 user_id header
+			if userID > 0 {
+				r.Header.Set("user_id", fmt.Sprintf("%d", userID))
+				r.Header.Set("Grpc-Metadata-User-Id", fmt.Sprintf("%d", userID))
+			}
+
+			// 如果需要刷新短令牌，在响应头中设置标记
+			// 实际生产环境中应该调用 auths 服务的 ValidateToken 接口来获取新的短令牌
+			if needRefresh {
+				w.Header().Set("X-Need-Token-Refresh", "true")
 			}
 
 			next(w, r)

@@ -101,7 +101,7 @@ func handleTokenExpiration(w http.ResponseWriter, r *http.Request, client authsc
 		return
 	}
 
-	renewRes, err := client.RenewToken(r.Context(), &auths.AuthRenewalReq{RefreshToken: refreshToken, ClientIp: clientIP})
+	renewRes, err := client.RenewToken(r.Context(), &auths.AuthRenewalReq{LongToken: refreshToken, ClientIp: clientIP})
 	if err != nil {
 		logx.Errorw("refresh token err",
 			logx.Field("err", err),
