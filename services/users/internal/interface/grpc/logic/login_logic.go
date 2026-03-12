@@ -30,6 +30,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	// 调用应用服务处理登录逻辑
 	req := &dto.LoginRequest{
 		Email:    in.Email,
+		Username: in.Username,
 		Password: in.Password,
 		IP:       in.Ip,
 	}

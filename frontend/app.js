@@ -934,7 +934,8 @@ async function apiRequest(url, options = {}) {
 async function handleRegister(event) {
     event.preventDefault();
 
-    const email = document.getElementById('registerEmail').value;
+    const username = document.getElementById('registerEmail').value;
+    const email = username; // 使用用户名作为邮箱（兼容后端）
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('registerConfirmPassword').value;
 
@@ -946,7 +947,7 @@ async function handleRegister(event) {
     try {
         const data = await apiRequest(`${API_BASE.user}/register`, {
             method: 'POST',
-            body: JSON.stringify({ email, password, confirmPassword })
+            body: JSON.stringify({ username, email, password, confirmPassword, device_id: getDeviceId() })
         });
 
         // 用户信息在 handleLogin 中已处理
@@ -963,7 +964,7 @@ async function handleRegister(event) {
 async function handleLogin(event) {
     event.preventDefault();
 
-    const email = document.getElementById('loginEmail').value;
+    const username = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
     // 获取设备ID
@@ -972,7 +973,7 @@ async function handleLogin(event) {
     try {
         const data = await apiRequest(`${API_BASE.user}/login`, {
             method: 'POST',
-            body: JSON.stringify({ email, password, device_id: deviceId })
+            body: JSON.stringify({ username, password, device_id: deviceId })
         });
 
         // 兼容 Gateway 和 API，提取长短令牌
@@ -989,7 +990,7 @@ async function handleLogin(event) {
             data.data?.shortTokenExpire || data.data?.short_token_expire ||
             Date.now() + 2 * 60 * 60 * 1000; // 默认2小时
 
-        state.user = { email, user_id: data.userId || data.user_id || data.data?.userId || data.data?.user_id };
+        state.user = { username, user_id: data.userId || data.user_id || data.data?.userId || data.data?.user_id };
         saveToStorage();
         updateNav();
         showToast('登录成功！', 'success');

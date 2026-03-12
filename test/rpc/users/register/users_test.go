@@ -25,8 +25,10 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
+	// 测试用户名注册
 	resp, err := users_client.Register(context.Background(), &users.RegisterRequest{
-		Email:           "djj126555q@example.com",
+		Username:        "testuser123",
+		Email:           "testuser123@example.com",
 		Password:        "password123",
 		ConfirmPassword: "password123",
 	})
