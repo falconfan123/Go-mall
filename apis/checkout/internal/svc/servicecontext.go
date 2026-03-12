@@ -3,7 +3,7 @@ package svc
 import (
 	"github.com/falconfan123/Go-mall/apis/checkout/internal/config"
 	"github.com/falconfan123/Go-mall/common/middleware"
-	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
+	"github.com/falconfan123/Go-mall/services/checkout/pb"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 )

@@ -1,0 +1,17 @@
+go 1.25.0
+
+use (
+	./common
+	./dal
+	./services/audit
+	./services/auths
+	./services/carts
+	./services/checkout
+	./services/coupons
+	./services/gateway
+	./services/inventory
+	./services/order
+	./services/payment
+	./services/product
+	./services/users
+)

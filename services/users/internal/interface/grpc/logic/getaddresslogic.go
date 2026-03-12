@@ -6,7 +6,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/dal/model/user_address"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/userspb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,33 +26,33 @@ func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdd
 }
 
 // 获取单个收货地址
-func (l *GetAddressLogic) GetAddress(in *userspb.GetAddressRequest) (*userspb.GetAddressResponse, error) {
+func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAddressResponse, error) {
 	address, err := l.svcCtx.UserAddressesModel.FindOne(l.ctx, in.AddressId)
 	if err != nil {
 		if err == user_address.ErrNotFound {
-			return &userspb.GetAddressResponse{
+			return &users.GetAddressResponse{
 				StatusCode: int32(code.AddressNotExist),
 				StatusMsg:  code.AddressNotExistMsg,
 			}, nil
 		}
 		l.Logger.Errorw("get address failed", logx.Field("err", err))
-		return &userspb.GetAddressResponse{
+		return &users.GetAddressResponse{
 			StatusCode: int32(code.ServerError),
 			StatusMsg:  code.ServerErrorMsg,
 		}, nil
 	}
 
 	if uint32(address.UserId) != in.UserId {
-		return &userspb.GetAddressResponse{
+		return &users.GetAddressResponse{
 			StatusCode: int32(code.AddressNotExist), // Or PermissionDenied
 			StatusMsg:  code.AddressNotExistMsg,
 		}, nil
 	}
 
-	return &userspb.GetAddressResponse{
+	return &users.GetAddressResponse{
 		StatusCode: 0,
 		StatusMsg:  "success",
-		Data: &userspb.AddressData{
+		Data: &users.AddressData{
 			AddressId:       uint64(address.AddressId),
 			RecipientName:   address.RecipientName,
 			PhoneNumber:     address.PhoneNumber.String,

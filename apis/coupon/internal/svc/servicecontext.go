@@ -3,7 +3,7 @@ package svc
 import (
 	"github.com/falconfan123/Go-mall/apis/coupon/internal/config"
 	"github.com/falconfan123/Go-mall/common/middleware"
-	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 )

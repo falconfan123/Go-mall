@@ -15,7 +15,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/product/internal/logic"
 	"github.com/falconfan123/Go-mall/services/product/internal/server"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"

@@ -8,6 +8,24 @@ The role of this file is to describe common mistakes and confusion points that a
 1. 必须使用 go-zero 的模板生成代码，禁止手写 handler 层代码
 2. 编写 go-zero 相关代码时，必须调用 mcp-zero 工具进行代码生成和相关操作
 
+## gRPC Protobuf 代码生成规范
+
+**所有服务的 protobuf 生成的 gRPC 代码必须放在 `pb` 子目录**（工业界标准做法）：
+
+```
+services/
+  order/
+    pb/              # ← gRPC 生成的代码放这里
+      order.pb.go
+      order_grpc.pb.go
+    internal/
+    order.go
+```
+
+- **原因**：避免 Go 导入路径解析歧义（避免与模块名 `services/order` 冲突）
+- **导入路径**：`import "github.com/falconfan123/Go-mall/services/order/pb"`
+- **proto 配置**：确保 proto 文件的 `option go_package = "github.com/falconfan123/Go-mall/services/服务名/pb";`
+
 ## 基础服务地址（OrbStack 部署，禁止修改）
 | 服务名称 | 地址 | 端口 | 说明 |
 |---------|------|------|------|
@@ -86,6 +104,48 @@ GitHub Actions 会运行标准 CI 检查：
 - **deps** - 依赖一致性 + 漏洞扫描
 
 注意：由于项目使用了 `replace` 本地模块替换，某些本地检查工具可能无法在 CI 环境中运行，因此本地检查只应在本地执行。
+
+## Go Workspace (go.work) 规范
+
+### 常见错误与避免方法
+
+**错误1：在 go.work 中同时使用 use 和 replace**
+- 问题：`go work` 中对同一模块不能同时使用 `use` 和 `replace`，会导致 "workspace module is replaced at all versions" 错误
+- 解决：go.work 只使用 `use` 指令，replace 指令放在各服务的 go.mod 中
+
+**错误2：子模块导入路径错误**
+- 问题：proto 文件生成的 go_package 配置错误，导致导入路径多了一个 `/order` 后缀
+- 解决：确保 proto 文件的 `option go_package = ".";` 配置正确，所有导入路径应为 `github.com/falconfan123/Go-mall/services/服务名`，而不是 `.../services/服务名/服务名`
+
+**错误3：子模块遗留的 go.mod**
+- 问题：旧代码可能残留子模块目录，包含独立的 go.mod
+- 解决：删除这些遗留目录，确保 proto 生成的文件在正确位置
+
+### 正确配置步骤
+
+1. **清理阶段**：删除根目录的 go.mod（如果有）
+2. **go.work 配置**：只使用 `use` 指令
+   ```go
+   go 1.25.0
+
+   use (
+       ./common
+       ./dal
+       ./services/checkout
+       ...
+   )
+   ```
+3. **各服务 go.mod**：添加需要的 replace 指令
+   ```go
+   module github.com/falconfan123/Go-mall/services/order
+
+   go 1.25.0
+
+   replace github.com/falconfan123/Go-mall/common => ../../common
+   replace github.com/falconfan123/Go-mall/dal => ../../dal
+   ...
+   ```
+4. **修复导入路径**：确保所有导入路径与 module name 匹配
 
 ## 单元测试规范
 

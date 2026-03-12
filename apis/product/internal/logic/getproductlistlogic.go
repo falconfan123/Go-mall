@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/x/errors"
 
 	"github.com/falconfan123/Go-mall/apis/product/internal/svc"

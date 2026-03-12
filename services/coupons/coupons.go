@@ -7,10 +7,10 @@ import (
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
 	"github.com/falconfan123/Go-mall/common/utils/ip"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/config"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/server"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
+	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"

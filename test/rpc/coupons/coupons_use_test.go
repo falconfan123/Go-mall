@@ -3,7 +3,7 @@ package coupons
 import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"testing"

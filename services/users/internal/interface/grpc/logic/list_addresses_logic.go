@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/userspb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,8 +24,8 @@ func NewListAddressesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Lis
 }
 
 // 获取所有收货地址
-func (l *ListAddressesLogic) ListAddresses(in *userspb.AllAddressLitstRequest) (*userspb.AddressListResponse, error) {
+func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*users.AddressListResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &userspb.AddressListResponse{}, nil
+	return &users.AddressListResponse{}, nil
 }

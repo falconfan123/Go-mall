@@ -8,11 +8,11 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/ip"
 	paymentM "github.com/falconfan123/Go-mall/dal/model/payment"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/falconfan123/Go-mall/services/payment/internal/server"
 	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
-	"github.com/falconfan123/Go-mall/services/payment/payment"
+	payment "github.com/falconfan123/Go-mall/services/payment/pb"
 	"github.com/smartwalle/alipay/v3"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -81,7 +81,7 @@ func (s *PaymentService) handleAlipayNotification(writer http.ResponseWriter, re
 		return
 	}
 	// DecodeNotification 内部已调用 VerifySign 方法验证签名
-	var notify, err = s.ctx.Alipay.DecodeNotification(request.Form)
+	var notify, err = s.ctx.Alipay.DecodeNotification(request.Context(), request.Form)
 	if err != nil {
 		logx.Errorw("Failed to decode notification", logx.Field("err", err))
 		return

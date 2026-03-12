@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/dal/model/user_address"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/userspb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,7 +26,7 @@ func NewAddAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddAdd
 	}
 }
 
-func (l *AddAddressLogic) AddAddress(in *userspb.AddAddressRequest) (*userspb.AddAddressResponse, error) {
+func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAddressResponse, error) {
 	newAddress := &user_address.UserAddresses{
 		UserId:          int64(in.UserId),
 		RecipientName:   in.RecipientName,
@@ -40,7 +40,7 @@ func (l *AddAddressLogic) AddAddress(in *userspb.AddAddressRequest) (*userspb.Ad
 	res, err := l.svcCtx.UserAddressesModel.Insert(l.ctx, newAddress)
 	if err != nil {
 		l.Logger.Errorw("add address failed", logx.Field("err", err))
-		return &userspb.AddAddressResponse{
+		return &users.AddAddressResponse{
 			StatusCode: uint32(code.ServerError),
 			StatusMsg:  code.ServerErrorMsg,
 		}, nil
@@ -48,10 +48,10 @@ func (l *AddAddressLogic) AddAddress(in *userspb.AddAddressRequest) (*userspb.Ad
 
 	id, _ := res.LastInsertId()
 
-	return &userspb.AddAddressResponse{
+	return &users.AddAddressResponse{
 		StatusCode: 0,
 		StatusMsg:  "success",
-		Data: &userspb.AddressData{
+		Data: &users.AddressData{
 			AddressId:       uint64(id),
 			RecipientName:   in.RecipientName,
 			PhoneNumber:     in.PhoneNumber,

@@ -9,7 +9,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/inventory/internal/logic"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
+	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
 )
 
 type InventoryServer struct {

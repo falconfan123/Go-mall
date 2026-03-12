@@ -3,7 +3,7 @@ package order
 import (
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/dal/es/product"
 	"github.com/falconfan123/Go-mall/dal/model/products/categories"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
-	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
+	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/application/service"
 	"github.com/falconfan123/Go-mall/services/product/internal/config"
 	"github.com/falconfan123/Go-mall/services/product/internal/infrastructure/persistence"

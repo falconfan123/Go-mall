@@ -9,9 +9,9 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	gorse "github.com/falconfan123/Go-mall/common/utils/gorse"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
+	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 	"strconv"
 	"time"
@@ -160,7 +160,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 func (l *GetProductLogic) getRealTimeStockAndSold(productId int64) (int64, int64, error) {
 	ctx, cancel := context.WithTimeout(l.ctx, 500*time.Millisecond)
 	defer cancel()
-	inventoryResp, err := l.svcCtx.InventoryRpc.GetInventory(ctx, &inventory.GetInventoryReq{
+	inventoryResp, err := l.svcCtx.InventoryRpc.GetInventory(ctx, &inventoryclient.GetInventoryReq{
 		ProductId: int32(productId),
 	})
 	if err != nil {

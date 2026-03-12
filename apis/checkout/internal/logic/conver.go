@@ -3,7 +3,7 @@ package logic
 import (
 	"github.com/falconfan123/Go-mall/apis/checkout/internal/types"
 	"github.com/falconfan123/Go-mall/common/utils/shopping"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/pb"
 	"time"
 )
 

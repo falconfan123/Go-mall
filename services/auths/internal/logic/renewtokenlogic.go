@@ -10,8 +10,8 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/token"
 
-	"github.com/falconfan123/Go-mall/services/auths/auths"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
+	auths "github.com/falconfan123/Go-mall/services/auths/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

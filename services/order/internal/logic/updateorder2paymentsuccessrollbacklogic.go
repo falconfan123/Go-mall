@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -52,8 +53,8 @@ func (l *UpdateOrder2PaymentSuccessRollbackLogic) UpdateOrder2PaymentSuccessRoll
 		}
 
 		// 2. 状态检查（检查是否处于可回滚状态）
-		if order.OrderStatus(orderRes.OrderStatus) != order.OrderStatus_ORDER_STATUS_PAID ||
-			order.PaymentStatus(orderRes.PaymentStatus) != order.PaymentStatus_PAYMENT_STATUS_PAID {
+		if ordertypes.OrderStatus(orderRes.OrderStatus) != ordertypes.OrderStatusPaid ||
+			ordertypes.PaymentStatus(orderRes.PaymentStatus) != ordertypes.PaymentStatusPaid {
 			res.StatusCode = code.OrderStatusInvalid
 			res.StatusMsg = code.OrderStatusInvalidMsg
 			l.Logger.Infow("invalid status for rollback",

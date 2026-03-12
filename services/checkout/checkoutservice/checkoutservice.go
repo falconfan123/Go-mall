@@ -7,26 +7,26 @@ package checkoutservice
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	CheckoutDetailReq       = checkout.CheckoutDetailReq
-	CheckoutDetailResp      = checkout.CheckoutDetailResp
-	CheckoutItem            = checkout.CheckoutItem
-	CheckoutListReq         = checkout.CheckoutListReq
-	CheckoutListResp        = checkout.CheckoutListResp
-	CheckoutOrder           = checkout.CheckoutOrder
-	CheckoutReq             = checkout.CheckoutReq
-	CheckoutReq_OrderItem   = checkout.CheckoutReq_OrderItem
-	CheckoutResp            = checkout.CheckoutResp
-	EmptyResp               = checkout.EmptyResp
-	ReleaseReq              = checkout.ReleaseReq
-	UpdateCheckoutStatusReq = checkout.UpdateCheckoutStatusReq
-	UpdateStatusReq         = checkout.UpdateStatusReq
+	CheckoutDetailReq       = pb.CheckoutDetailReq
+	CheckoutDetailResp      = pb.CheckoutDetailResp
+	CheckoutItem            = pb.CheckoutItem
+	CheckoutListReq         = pb.CheckoutListReq
+	CheckoutListResp        = pb.CheckoutListResp
+	CheckoutOrder           = pb.CheckoutOrder
+	CheckoutReq             = pb.CheckoutReq
+	CheckoutReq_OrderItem   = pb.CheckoutReq_OrderItem
+	CheckoutResp            = pb.CheckoutResp
+	EmptyResp               = pb.EmptyResp
+	ReleaseReq              = pb.ReleaseReq
+	UpdateCheckoutStatusReq = pb.UpdateCheckoutStatusReq
+	UpdateStatusReq         = pb.UpdateStatusReq
 
 	CheckoutService interface {
 		// PrepareCheckout 预结算)生成预订单）
@@ -56,36 +56,36 @@ func NewCheckoutService(cli zrpc.Client) CheckoutService {
 
 // PrepareCheckout 预结算)生成预订单）
 func (m *defaultCheckoutService) PrepareCheckout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutResp, error) {
-	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	client := pb.NewCheckoutServiceClient(m.cli.Conn())
 	return client.PrepareCheckout(ctx, in, opts...)
 }
 
 // UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
 func (m *defaultCheckoutService) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*EmptyResp, error) {
-	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	client := pb.NewCheckoutServiceClient(m.cli.Conn())
 	return client.ReleaseCheckout(ctx, in, opts...)
 }
 
 // GetCheckoutList 获取结算列表
 func (m *defaultCheckoutService) GetCheckoutList(ctx context.Context, in *CheckoutListReq, opts ...grpc.CallOption) (*CheckoutListResp, error) {
-	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	client := pb.NewCheckoutServiceClient(m.cli.Conn())
 	return client.GetCheckoutList(ctx, in, opts...)
 }
 
 // GetCheckoutDetail 获取结算详情
 func (m *defaultCheckoutService) GetCheckoutDetail(ctx context.Context, in *CheckoutDetailReq, opts ...grpc.CallOption) (*CheckoutDetailResp, error) {
-	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	client := pb.NewCheckoutServiceClient(m.cli.Conn())
 	return client.GetCheckoutDetail(ctx, in, opts...)
 }
 
 // UpdateStatus2Order 由订单服务调用，更新结算状态为已确认
 func (m *defaultCheckoutService) UpdateStatus2Order(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error) {
-	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	client := pb.NewCheckoutServiceClient(m.cli.Conn())
 	return client.UpdateStatus2Order(ctx, in, opts...)
 }
 
 // UpdateStatus2OrderRollback 补偿操作
 func (m *defaultCheckoutService) UpdateStatus2OrderRollback(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error) {
-	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	client := pb.NewCheckoutServiceClient(m.cli.Conn())
 	return client.UpdateStatus2OrderRollback(ctx, in, opts...)
 }

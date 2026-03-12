@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/userspb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,8 +24,8 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 }
 
 // 删除用户地址
-func (l *DeleteAddressLogic) DeleteAddress(in *userspb.DeleteAddressRequest) (*userspb.DeleteAddressResponse, error) {
+func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &userspb.DeleteAddressResponse{}, nil
+	return &users.DeleteAddressResponse{}, nil
 }

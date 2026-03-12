@@ -8,7 +8,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/payment/internal/logic"
 	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
-	"github.com/falconfan123/Go-mall/services/payment/payment"
+	payment "github.com/falconfan123/Go-mall/services/payment/pb"
 )
 
 type PaymentServer struct {

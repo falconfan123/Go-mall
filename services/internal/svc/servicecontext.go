@@ -1,6 +1,6 @@
 package svc
 
-import "github.com/falconfan123/Go-mall/services/internal/config"
+import "services/internal/config"
 
 type ServiceContext struct {
 	Config config.Config

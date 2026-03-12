@@ -7,23 +7,23 @@ package authsclient
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	AuthGenReq      = auths.AuthGenReq
-	AuthGenRes      = auths.AuthGenRes
-	AuthRenewalReq  = auths.AuthRenewalReq
-	AuthRenewalRes  = auths.AuthRenewalRes
-	AuthReq         = auths.AuthReq
-	AuthValidateReq = auths.AuthValidateReq
-	AuthValidateRes = auths.AuthValidateRes
-	AuthsRes        = auths.AuthsRes
-	LogoutReq       = auths.LogoutReq
-	LogoutRes       = auths.LogoutRes
+	AuthGenReq     = pb.AuthGenReq
+	AuthGenRes     = pb.AuthGenRes
+	AuthRenewalReq = pb.AuthRenewalReq
+	AuthRenewalRes = pb.AuthRenewalRes
+	AuthReq        = pb.AuthReq
+	AuthValidateReq = pb.AuthValidateReq
+	AuthValidateRes = pb.AuthValidateRes
+	AuthsRes       = pb.AuthsRes
+	LogoutReq       = pb.LogoutReq
+	LogoutRes       = pb.LogoutRes
 
 	Auths interface {
 		// Authentication 验证用户token合法
@@ -51,30 +51,30 @@ func NewAuths(cli zrpc.Client) Auths {
 
 // Authentication 验证用户token合法
 func (m *defaultAuths) Authentication(ctx context.Context, in *AuthReq, opts ...grpc.CallOption) (*AuthsRes, error) {
-	client := auths.NewAuthsClient(m.cli.Conn())
+	client := pb.NewAuthsClient(m.cli.Conn())
 	return client.Authentication(ctx, in, opts...)
 }
 
 // GenerateToken 生成token
 func (m *defaultAuths) GenerateToken(ctx context.Context, in *AuthGenReq, opts ...grpc.CallOption) (*AuthGenRes, error) {
-	client := auths.NewAuthsClient(m.cli.Conn())
+	client := pb.NewAuthsClient(m.cli.Conn())
 	return client.GenerateToken(ctx, in, opts...)
 }
 
 // RenewToken 续期身份
 func (m *defaultAuths) RenewToken(ctx context.Context, in *AuthRenewalReq, opts ...grpc.CallOption) (*AuthRenewalRes, error) {
-	client := auths.NewAuthsClient(m.cli.Conn())
+	client := pb.NewAuthsClient(m.cli.Conn())
 	return client.RenewToken(ctx, in, opts...)
 }
 
 // ValidateToken 验证长短令牌（用于网关）
 func (m *defaultAuths) ValidateToken(ctx context.Context, in *AuthValidateReq, opts ...grpc.CallOption) (*AuthValidateRes, error) {
-	client := auths.NewAuthsClient(m.cli.Conn())
+	client := pb.NewAuthsClient(m.cli.Conn())
 	return client.ValidateToken(ctx, in, opts...)
 }
 
 // Logout 登出（删除Session）
 func (m *defaultAuths) Logout(ctx context.Context, in *LogoutReq, opts ...grpc.CallOption) (*LogoutRes, error) {
-	client := auths.NewAuthsClient(m.cli.Conn())
+	client := pb.NewAuthsClient(m.cli.Conn())
 	return client.Logout(ctx, in, opts...)
 }

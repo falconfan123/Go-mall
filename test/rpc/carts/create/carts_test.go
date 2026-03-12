@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/carts/carts"
+	"github.com/falconfan123/Go-mall/services/carts/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"testing"

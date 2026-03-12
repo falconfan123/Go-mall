@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	coupons "github.com/falconfan123/Go-mall/common/types/coupons"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -46,7 +46,7 @@ func (m *customUserCouponsModel) CheckUserCouponStatus(ctx context.Context, sess
 
 func (m *customUserCouponsModel) LockUserCoupon(ctx context.Context, session sqlx.Session, uCouponID uint64) error {
 	query := fmt.Sprintf("update %s set `status` = ? where `id` = ?", m.table)
-	_, err := session.ExecCtx(ctx, query, coupons.CouponStatus_COUPON_STATUS_LOCKED, uCouponID)
+	_, err := session.ExecCtx(ctx, query, coupons.CouponStatusLocked, uCouponID)
 	return err
 }
 

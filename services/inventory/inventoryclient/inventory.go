@@ -7,22 +7,22 @@ package inventoryclient
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/services/inventory/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	BatchGetInventoryReq     = inventory.BatchGetInventoryReq
-	GetInventoryReq          = inventory.GetInventoryReq
-	GetInventoryResp         = inventory.GetInventoryResp
-	InventoryReq             = inventory.InventoryReq
-	InventoryReq_Items       = inventory.InventoryReq_Items
-	InventoryResp            = inventory.InventoryResp
-	PreInventoryRecord       = inventory.PreInventoryRecord
-	UpdateInventoryReq       = inventory.UpdateInventoryReq
-	UpdateInventoryReq_Items = inventory.UpdateInventoryReq_Items
+	BatchGetInventoryReq     = pb.BatchGetInventoryReq
+	GetInventoryReq          = pb.GetInventoryReq
+	GetInventoryResp         = pb.GetInventoryResp
+	InventoryReq             = pb.InventoryReq
+	InventoryReq_Items       = pb.InventoryReq_Items
+	InventoryResp            = pb.InventoryResp
+	PreInventoryRecord       = pb.PreInventoryRecord
+	UpdateInventoryReq       = pb.UpdateInventoryReq
+	UpdateInventoryReq_Items = pb.UpdateInventoryReq_Items
 
 	Inventory interface {
 		// GetInventory 查询库存，缓存不在，再去数据库查
@@ -52,36 +52,36 @@ func NewInventory(cli zrpc.Client) Inventory {
 
 // GetInventory 查询库存，缓存不在，再去数据库查
 func (m *defaultInventory) GetInventory(ctx context.Context, in *GetInventoryReq, opts ...grpc.CallOption) (*GetInventoryResp, error) {
-	client := inventory.NewInventoryClient(m.cli.Conn())
+	client := pb.NewInventoryClient(m.cli.Conn())
 	return client.GetInventory(ctx, in, opts...)
 }
 
 // UpdateInventory 增加库存，修改库存数量（直接修改）
 func (m *defaultInventory) UpdateInventory(ctx context.Context, in *UpdateInventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
-	client := inventory.NewInventoryClient(m.cli.Conn())
+	client := pb.NewInventoryClient(m.cli.Conn())
 	return client.UpdateInventory(ctx, in, opts...)
 }
 
 // DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
 func (m *defaultInventory) DecreasePreInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
-	client := inventory.NewInventoryClient(m.cli.Conn())
+	client := pb.NewInventoryClient(m.cli.Conn())
 	return client.DecreasePreInventory(ctx, in, opts...)
 }
 
 // DecreaseInventory 真实扣减库存（支付成功时）
 func (m *defaultInventory) DecreaseInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
-	client := inventory.NewInventoryClient(m.cli.Conn())
+	client := pb.NewInventoryClient(m.cli.Conn())
 	return client.DecreaseInventory(ctx, in, opts...)
 }
 
 // ReturnPreInventory 退还预扣减的库存（）
 func (m *defaultInventory) ReturnPreInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
-	client := inventory.NewInventoryClient(m.cli.Conn())
+	client := pb.NewInventoryClient(m.cli.Conn())
 	return client.ReturnPreInventory(ctx, in, opts...)
 }
 
 // ReturnInventory 退还库存（支付失败时）
 func (m *defaultInventory) ReturnInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
-	client := inventory.NewInventoryClient(m.cli.Conn())
+	client := pb.NewInventoryClient(m.cli.Conn())
 	return client.ReturnInventory(ctx, in, opts...)
 }

@@ -3,7 +3,7 @@ package payment
 import (
 	"context"
 	"fmt"
-	"github.com/falconfan123/Go-mall/services/payment/payment"
+	"github.com/falconfan123/Go-mall/services/payment/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"testing"

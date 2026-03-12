@@ -3,7 +3,7 @@ package audit
 import (
 	"context"
 	"fmt"
-	"github.com/falconfan123/Go-mall/services/audit/audit"
+	"github.com/falconfan123/Go-mall/services/audit/pb"
 	"sync"
 	"testing"
 	"time"

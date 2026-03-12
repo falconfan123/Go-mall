@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/pb"
 
 	"github.com/stretchr/testify/assert"
 )

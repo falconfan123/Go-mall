@@ -7,9 +7,9 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	pc "github.com/falconfan123/Go-mall/dal/model/products/product_categories"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
+	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strconv"
@@ -109,8 +109,8 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	}
 
 	// 4. Update Inventory
-	if _, err := l.svcCtx.InventoryRpc.UpdateInventory(l.ctx, &inventory.UpdateInventoryReq{
-		Items: []*inventory.UpdateInventoryReq_Items{
+	if _, err := l.svcCtx.InventoryRpc.UpdateInventory(l.ctx, &inventoryclient.UpdateInventoryReq{
+		Items: []*inventoryclient.UpdateInventoryReq_Items{
 			{
 				ProductId: int32(productId),
 				Quantity:  int32(in.Stock),

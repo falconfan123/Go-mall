@@ -7,9 +7,9 @@ package server
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/carts/carts"
 	"github.com/falconfan123/Go-mall/services/carts/internal/logic"
 	"github.com/falconfan123/Go-mall/services/carts/internal/svc"
+	carts "github.com/falconfan123/Go-mall/services/carts/pb"
 )
 
 type CartServer struct {
