@@ -390,7 +390,7 @@ function showToast(message, type = 'info') {
 }
 
 // Mock 数据配置
-const MOCK_ENABLED = true; // 开启mock模式
+const MOCK_ENABLED = false; // 关闭mock模式
 const MOCK_DELAY = 500; // mock请求延迟毫秒
 
 // Mock 响应数据

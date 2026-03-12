@@ -13,7 +13,7 @@ Consul:
 Telemetry:
   Name: auths.rpc
   Endpoint: http://localhost:14268/api/traces
-  Batcher: jaeger
+  Batcher: zipkin
   Sampler: 1.0
 # localhost
 

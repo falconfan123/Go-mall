@@ -2,13 +2,6 @@ package svc
 
 import (
 	"context"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/olivere/elastic/v7"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/redis"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	gorse "github.com/falconfan123/Go-mall/common/utils/gorse"
 	"github.com/falconfan123/Go-mall/dal/es/product"
@@ -16,6 +9,13 @@ import (
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/config"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/olivere/elastic/v7"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/zeromicro/go-zero/zrpc"
 	"time"
 )
 
@@ -50,7 +50,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		// For development, let's panic to ensure we know it's broken.
 		panic(err)
 	}
-	
+
 	// Ensure bucket exists
 	ctx := context.Background()
 	exists, err := minioClient.BucketExists(ctx, c.Minio.Bucket)

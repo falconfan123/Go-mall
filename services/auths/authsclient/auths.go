@@ -14,14 +14,14 @@ import (
 )
 
 type (
-	AuthGenReq     = pb.AuthGenReq
-	AuthGenRes     = pb.AuthGenRes
-	AuthRenewalReq = pb.AuthRenewalReq
-	AuthRenewalRes = pb.AuthRenewalRes
-	AuthReq        = pb.AuthReq
+	AuthGenReq      = pb.AuthGenReq
+	AuthGenRes      = pb.AuthGenRes
+	AuthRenewalReq  = pb.AuthRenewalReq
+	AuthRenewalRes  = pb.AuthRenewalRes
+	AuthReq         = pb.AuthReq
 	AuthValidateReq = pb.AuthValidateReq
 	AuthValidateRes = pb.AuthValidateRes
-	AuthsRes       = pb.AuthsRes
+	AuthsRes        = pb.AuthsRes
 	LogoutReq       = pb.LogoutReq
 	LogoutRes       = pb.LogoutRes
 
