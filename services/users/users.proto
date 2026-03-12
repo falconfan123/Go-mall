@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package users;
-option go_package="./users";
+option go_package="github.com/falconfan123/Go-mall/services/users/pb";
 
 message Request {
   string ping = 1;
@@ -14,9 +14,10 @@ message Response {
 // 定义注册请求消息
 message RegisterRequest {
   string email = 1;
-  string password = 2;
-  string confirm_password = 3;
-  string ip=4;
+  string username = 2;
+  string password = 3;
+  string confirm_password = 4;
+  string ip=5;
 }
 
 // 定义注册响应消息
