@@ -947,7 +947,7 @@ async function handleRegister(event) {
     try {
         const data = await apiRequest(`${API_BASE.user}/register`, {
             method: 'POST',
-            body: JSON.stringify({ username, email, password, confirmPassword, device_id: getDeviceId() })
+            body: JSON.stringify({ username, email, password, confirm_password: confirmPassword, device_id: getDeviceId() })
         });
 
         // 用户信息在 handleLogin 中已处理
