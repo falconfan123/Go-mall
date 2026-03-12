@@ -15,8 +15,12 @@ proxy.on('error', (err, req, res) => {
 
 // 创建HTTP服务器
 const server = http.createServer((req, res) => {
+    // 解析 URL，去掉查询参数
+    const urlObj = new URL(req.url, `http://localhost:${PORT}`);
+    const pathname = urlObj.pathname;
+
     // 如果请求的是API路径，转发到网关
-    if (req.url.startsWith('/douyin/')) {
+    if (pathname.startsWith('/douyin/')) {
         proxy.web(req, res, {
             target: 'http://localhost:8888',
             changeOrigin: true,
@@ -29,7 +33,7 @@ const server = http.createServer((req, res) => {
         });
     } else {
         // 否则返回静态文件
-        let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
+        let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
 
         // 检查文件是否存在
         fs.access(filePath, fs.constants.F_OK, (err) => {
