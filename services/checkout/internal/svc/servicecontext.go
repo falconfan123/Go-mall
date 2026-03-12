@@ -5,9 +5,9 @@ import (
 	"github.com/falconfan123/Go-mall/dal/model/checkout"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/config"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/db"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	couponsclient "github.com/falconfan123/Go-mall/services/coupons/couponsclient"
+	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
+	productclient "github.com/falconfan123/Go-mall/services/product/productclient"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -20,9 +20,9 @@ type ServiceContext struct {
 	CheckoutModel      checkout.CheckoutsModel
 	CheckoutItemsModel checkout.CheckoutItemsModel
 	CartsModel         cart.CartsModel
-	InventoryRpc       inventory.InventoryClient
-	CouponsRpc         coupons.CouponsClient
-	ProductRpc         product.ProductCatalogClient
+	InventoryRpc       inventoryclient.Inventory
+	CouponsRpc         couponsclient.Coupons
+	ProductRpc         productclient.ProductCatalog
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
