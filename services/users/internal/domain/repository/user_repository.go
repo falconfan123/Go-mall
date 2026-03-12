@@ -23,6 +23,8 @@ type UserRepository interface {
 	FindByID(ctx context.Context, userID int64) (*aggregate.User, error)
 	// FindByEmail 根据邮箱查找用户
 	FindByEmail(ctx context.Context, email *valueobject.Email) (*aggregate.User, error)
+	// FindByUsernameOrEmail 根据用户名或邮箱查找用户
+	FindByUsernameOrEmail(ctx context.Context, account string) (*aggregate.User, error)
 	// ExistsByEmail 判断邮箱是否存在
 	ExistsByEmail(ctx context.Context, email *valueobject.Email) (bool, error)
 	// UpdateLogoutTime 更新登出时间
