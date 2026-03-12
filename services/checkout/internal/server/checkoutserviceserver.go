@@ -7,9 +7,9 @@ package server
 import (
 	"context"
 
-	checkout "github.com/falconfan123/Go-mall/services/checkout/pb"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/logic"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
+	checkout "github.com/falconfan123/Go-mall/services/checkout/pb"
 )
 
 type CheckoutServiceServer struct {

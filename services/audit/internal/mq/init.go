@@ -146,7 +146,7 @@ func initEsIndex(ctx context.Context, client *elasticsearch.Client) error {
 func Init(c config.Config) (*AuditMQ, error) {
 	//mysql conn
 
-	model := pb.NewAuditModel(sqlx.NewMysql(c.MysqlConfig.DataSource))
+	model := audit.NewAuditModel(sqlx.NewMysql(c.MysqlConfig.DataSource))
 	// es client
 
 	cfg := elasticsearch.Config{

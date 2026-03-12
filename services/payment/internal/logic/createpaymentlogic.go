@@ -35,11 +35,11 @@ func ConvertModelToPaymentItem(p *paymentM.Payments) *payment.PaymentItem {
 	var method payment.PaymentMethod
 	switch p.PaymentMethod {
 	case "alipay":
-		method = pb.PaymentMethod_ALIPAY
+		method = payment.PaymentMethod_ALIPAY
 	case "wx_pay":
-		method = pb.PaymentMethod_WECHAT_PAY
+		method = payment.PaymentMethod_WECHAT_PAY
 	default:
-		method = pb.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
+		method = payment.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
 	}
 	return &payment.PaymentItem{
 		PaymentId:      p.PaymentId,
@@ -96,7 +96,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 	paymentId := generateUUID()
 	fmt.Printf("Receive PaymentMethod: %v\n", in.PaymentMethod)
 	// 4. 调用第三方支付生成支付链接（此处根据不同渠道简单模拟返回 URL）
-	if in.PaymentMethod == pb.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED {
+	if in.PaymentMethod == payment.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED {
 		res.StatusCode = code.PaymentMethodNotSupport
 		res.StatusMsg = code.PaymentMethodNotSupportMsg
 		return res, nil

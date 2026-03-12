@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	auths "github.com/falconfan123/Go-mall/services/auths/pb"
 	"github.com/falconfan123/Go-mall/services/auths/internal/config"
 	"github.com/falconfan123/Go-mall/services/auths/internal/server"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
+	auths "github.com/falconfan123/Go-mall/services/auths/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"

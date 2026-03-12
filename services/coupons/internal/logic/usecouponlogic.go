@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	"github.com/falconfan123/Go-mall/common/types/coupons"
 	"github.com/falconfan123/Go-mall/dal/model/coupons/coupon_usage"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"time"
 
-	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
+	couponspb "github.com/falconfan123/Go-mall/services/coupons/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,8 +30,8 @@ func NewUseCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UseCoup
 }
 
 // UseCoupon 使用优惠券（支付成功确认）
-func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp, error) {
-	res := &coupons.EmptyResp{}
+func (l *UseCouponLogic) UseCoupon(in *couponspb.UseCouponReq) (*couponspb.EmptyResp, error) {
+	res := &couponspb.EmptyResp{}
 	// 修改用户优惠券状态，记录优惠券使用记录
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		// --------------- check ---------------
@@ -49,7 +50,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 			return err
 		}
 		// 2. 状态校验
-		if coupons.CouponStatus(status.Status) != pb.CouponStatus_COUPON_STATUS_LOCKED {
+		if coupons.CouponStatus(status.Status) != coupons.CouponStatusLocked {
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg
 			l.Logger.Infow("coupon status invalid", logx.Field("user_id", in.UserId),
@@ -76,7 +77,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 		// --------------- update and record ---------------
 		// update
 		if err := l.svcCtx.UserCouponsModel.WithSession(session).UpdateStatusOrderById(ctx,
-			in.OrderId, int(status.ID), coupons.CouponStatus_COUPON_STATUS_USED); err != nil {
+			in.OrderId, int(status.ID), coupons.CouponStatusUsed); err != nil {
 			l.Logger.Errorw("update user coupon status error", logx.Field("err", err),
 				logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId),
 				logx.Field("order_id", in.OrderId), logx.Field("pre_order_id", in.PreOrderId))

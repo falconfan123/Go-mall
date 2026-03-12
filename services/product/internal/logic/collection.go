@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/bytedance/gopkg/util/gopool"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
-	"github.com/falconfan123/Go-mall/services/inventory/pb"
+	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -57,7 +57,7 @@ func populateProductDetails(ctx context.Context, svcCtx *svc.ServiceContext, pro
 
 // 库存处理逻辑
 func handleInventory(ctx context.Context, svcCtx *svc.ServiceContext, result []*product.Product, index int, productId int64) {
-	inventoryResp, err := svcCtx.InventoryRpc.GetInventory(ctx, &inventory.GetInventoryReq{
+	inventoryResp, err := svcCtx.InventoryRpc.GetInventory(ctx, &inventoryclient.GetInventoryReq{
 		ProductId: int32(productId),
 	})
 	if err != nil {

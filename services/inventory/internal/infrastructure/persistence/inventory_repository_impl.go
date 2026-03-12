@@ -38,7 +38,7 @@ func (r *InventoryRepositoryImpl) Save(ctx context.Context, inv *aggregate.Inven
 
 	// 检查是否存在
 	existing, err := r.inventoryModel.FindOne(ctx, inv.ProductID)
-	if err != nil && err != pb.ErrNotFound {
+	if err != nil && err != sqlx.ErrNotFound {
 		return err
 	}
 
@@ -56,7 +56,7 @@ func (r *InventoryRepositoryImpl) Save(ctx context.Context, inv *aggregate.Inven
 func (r *InventoryRepositoryImpl) GetByProductID(ctx context.Context, productID int64) (*aggregate.Inventory, error) {
 	invData, err := r.inventoryModel.FindOne(ctx, productID)
 	if err != nil {
-		if err == pb.ErrNotFound {
+		if err == sqlx.ErrNotFound {
 			// 如果不存在，返回0库存
 			stock, _ := valueobject.NewStock(0)
 			return aggregate.NewInventory(productID, stock), nil

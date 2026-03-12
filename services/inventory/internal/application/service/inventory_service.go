@@ -79,7 +79,7 @@ func (s *InventoryAppService) PreDecreaseInventory(ctx context.Context, req *dto
 		}
 
 		// 3. 领域层处理预扣
-		if err := pb.PreDecrease(record); err != nil {
+		if err := inventory.PreDecrease(record); err != nil {
 			return &dto.InventoryResponse{
 				StatusCode: code.Fail,
 				StatusMsg:  fmt.Sprintf("product %d pre decrease failed: %v", item.ProductID, err),
@@ -130,10 +130,10 @@ func (s *InventoryAppService) DecreaseInventory(ctx context.Context, req *dto.De
 		}
 
 		// 2. 确认扣减
-		if err := pb.ConfirmDecrease(req.PreOrderID, int64(item.ProductID)); err != nil {
+		if err := inventory.ConfirmDecrease(req.PreOrderID, int64(item.ProductID)); err != nil {
 			// 如果没有预扣记录，尝试直接扣减
 			if err.Error() == "pre inventory record not found" {
-				if err := pb.DirectDecrease(int64(item.Quantity)); err != nil {
+				if err := inventory.DirectDecrease(int64(item.Quantity)); err != nil {
 					return &dto.InventoryResponse{
 						StatusCode: code.Fail,
 						StatusMsg:  fmt.Sprintf("product %d decrease failed: %v", item.ProductID, err),
@@ -190,7 +190,7 @@ func (s *InventoryAppService) ReturnPreInventory(ctx context.Context, req *dto.R
 		}
 
 		// 2. 退还预扣
-		if err := pb.ReturnPreInventory(req.PreOrderID, int64(item.ProductID)); err != nil {
+		if err := inventory.ReturnPreInventory(req.PreOrderID, int64(item.ProductID)); err != nil {
 			return &dto.InventoryResponse{
 				StatusCode: code.Fail,
 				StatusMsg:  fmt.Sprintf("product %d return pre inventory failed: %v", item.ProductID, err),
@@ -240,7 +240,7 @@ func (s *InventoryAppService) ReturnInventory(ctx context.Context, req *dto.Retu
 		}
 
 		// 2. 退还库存
-		if err := pb.ReturnInventory(int64(item.Quantity)); err != nil {
+		if err := inventory.ReturnInventory(int64(item.Quantity)); err != nil {
 			return &dto.InventoryResponse{
 				StatusCode: code.Fail,
 				StatusMsg:  fmt.Sprintf("product %d return inventory failed: %v", item.ProductID, err),
@@ -301,7 +301,7 @@ func (s *InventoryAppService) UpdateInventory(ctx context.Context, req *dto.Upda
 					StatusMsg:  err.Error(),
 				}, err
 			}
-			oldStock := pb.TotalStock.Value()
+			oldStock := inventory.TotalStock.Value()
 			inventory.UpdateStock(newStock)
 
 			// 发布更新事件

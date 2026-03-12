@@ -3,8 +3,9 @@ package logic
 import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
+	"github.com/falconfan123/Go-mall/common/types/coupons"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
+	couponspb "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -27,9 +28,9 @@ func NewReleaseCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Rel
 }
 
 // ReleaseCoupon 释放优惠券（Saga补偿操作）
-func (l *ReleaseCouponLogic) ReleaseCoupon(in *coupons.ReleaseCouponReq) (*coupons.EmptyResp, error) {
+func (l *ReleaseCouponLogic) ReleaseCoupon(in *couponspb.ReleaseCouponReq) (*couponspb.EmptyResp, error) {
 
-	res := &coupons.EmptyResp{}
+	res := &couponspb.EmptyResp{}
 	// --------------- check ---------------
 	if in.UserId == 0 || len(in.UserCouponId) == 0 || len(in.PreOrderId) == 0 {
 		res.StatusCode = code.NotWithParam
@@ -46,7 +47,7 @@ func (l *ReleaseCouponLogic) ReleaseCoupon(in *coupons.ReleaseCouponReq) (*coupo
 		}
 
 		// 2. 状态校验（幂等性保障）
-		if coupons.CouponStatus(state) != pb.CouponStatus_COUPON_STATUS_LOCKED {
+		if coupons.CouponStatus(state) != coupons.CouponStatusLocked {
 			l.Logger.Infow("coupon status is not locked", logx.Field("userId", in.UserId), logx.Field("couponId", in.UserCouponId))
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg
@@ -58,7 +59,7 @@ func (l *ReleaseCouponLogic) ReleaseCoupon(in *coupons.ReleaseCouponReq) (*coupo
 			l.ctx,
 			"", // 清空ID
 			int(in.UserId),
-			coupons.CouponStatus_COUPON_STATUS_AVAILABLE,
+			coupons.CouponStatusAvailable,
 		); err != nil {
 			l.Logger.Errorw("update coupon status failed", logx.Field("error", err))
 			return err

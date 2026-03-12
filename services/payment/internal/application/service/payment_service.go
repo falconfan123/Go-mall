@@ -156,7 +156,7 @@ func (s *PaymentAppService) generatePaymentID() string {
 func (s *PaymentAppService) convertPaymentToDTO(payment *entity.Payment) *dto.PaymentDTO {
 	var paidAt *int64
 	if payment.PaidAt != nil {
-		pt := pb.PaidAt.Unix()
+		pt := payment.PaidAt.Unix()
 		paidAt = &pt
 	}
 

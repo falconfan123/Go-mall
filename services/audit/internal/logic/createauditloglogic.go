@@ -3,9 +3,9 @@ package logic
 import (
 	"context"
 	"errors"
-	audit "github.com/falconfan123/Go-mall/services/audit/pb"
 	"github.com/falconfan123/Go-mall/services/audit/internal/mq"
 	"github.com/falconfan123/Go-mall/services/audit/internal/svc"
+	audit "github.com/falconfan123/Go-mall/services/audit/pb"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/zeromicro/go-zero/core/logx"

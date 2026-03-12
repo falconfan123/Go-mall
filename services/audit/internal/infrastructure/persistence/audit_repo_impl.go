@@ -28,7 +28,7 @@ func NewAuditRepositoryImpl(conn sqlx.SqlConn) repository.AuditRepository {
 func (r *AuditRepositoryImpl) GetByID(ctx context.Context, id uint64) (*entity.AuditLog, error) {
 	a, err := r.auditModel.FindOne(ctx, id)
 	if err != nil {
-		if err == pb.ErrNotFound {
+		if err == sqlx.ErrNotFound {
 			return nil, entity.ErrAuditNotFound
 		}
 		return nil, err
@@ -41,7 +41,7 @@ func (r *AuditRepositoryImpl) GetByID(ctx context.Context, id uint64) (*entity.A
 func (r *AuditRepositoryImpl) GetByTraceID(ctx context.Context, traceID string) (*entity.AuditLog, error) {
 	a, err := r.auditModel.FindOneByTraceId(ctx, traceID)
 	if err != nil {
-		if err == pb.ErrNotFound {
+		if err == sqlx.ErrNotFound {
 			return nil, entity.ErrAuditNotFound
 		}
 		return nil, err

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
-	productpb "github.com/falconfan123/Go-mall/services/product/pb"
+	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
+	productclient "github.com/falconfan123/Go-mall/services/product/productclient"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -48,7 +48,7 @@ func (l *CalculateCouponLogic) CalculateCoupon(in *coupons.CalculateCouponReq) (
 	// 计算总价
 	var totalPrice int64
 	for _, item := range in.Items {
-		product, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
+		product, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &productclient.GetProductReq{
 			Id: uint32(item.ProductId),
 		})
 		if err != nil {
@@ -61,7 +61,7 @@ func (l *CalculateCouponLogic) CalculateCoupon(in *coupons.CalculateCouponReq) (
 			res.StatusMsg = code.ProductNotFoundInventoryMsg
 			return res, nil
 		}
-		totalPrice += pb.Product.Price * int64(item.Quantity)
+		totalPrice += product.Product.Price * int64(item.Quantity)
 	}
 	// 根据优惠卷类型计算优惠
 	var discountAmount int64 // 分
