@@ -109,7 +109,7 @@ make build         # 通过 Makefile 构建
 
 ### 4. update_configs.sh
 
-**用途**: 批量更新数据库配置文件
+**用途**: 批量更新数据库配置文件（Shell 版本）
 
 **功能**:
 - 更新 MySQL 连接信息（从 jjzzchtt:jjzzchtt 改为 root:fht3825099）
@@ -123,6 +123,22 @@ make build         # 通过 Makefile 构建
 **使用方法**:
 ```bash
 ./scripts/update_configs.sh
+```
+
+---
+
+### 5. update_configs.py
+
+**用途**: 批量更新数据库配置文件（Python 版本）
+
+**功能**:
+- 与 update_configs.sh 相同，但使用 Python 实现
+- 更新 MySQL 连接信息
+- 移除 Redis 密码配置
+
+**使用方法**:
+```bash
+python3 ./scripts/update_configs.py
 ```
 
 ---

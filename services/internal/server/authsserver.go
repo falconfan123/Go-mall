@@ -7,9 +7,9 @@ package server
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/auths/internal/logic"
-	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
-	auths "github.com/falconfan123/Go-mall/services/auths/pb"
+	"github.com/falconfan123/Go-mall/services/auths/auths/auths"
+	"github.com/falconfan123/Go-mall/services/internal/logic"
+	"github.com/falconfan123/Go-mall/services/internal/svc"
 )
 
 type AuthsServer struct {

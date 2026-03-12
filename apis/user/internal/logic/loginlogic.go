@@ -67,8 +67,10 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 	}
 
 	resp = &types.LoginResponse{
-		AccessToken:  authrespone.AccessToken,
-		RefreshToken: authrespone.RefreshToken,
+		ShortToken:     authrespone.ShortToken,
+		LongToken:      authrespone.LongToken,
+		ShortExpiresIn: authrespone.ShortExpiresIn,
+		LongExpiresIn:  authrespone.LongExpiresIn,
 	}
 
 	return resp, nil

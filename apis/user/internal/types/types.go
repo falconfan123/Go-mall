@@ -87,8 +87,10 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	ShortToken     string `json:"short_token"`
+	LongToken      string `json:"long_token"`
+	ShortExpiresIn int64  `json:"short_expires_in"`
+	LongExpiresIn  int64  `json:"long_expires_in"`
 }
 
 type LogoutRequest struct {
@@ -105,8 +107,10 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	ShortToken     string `json:"short_token"`
+	LongToken      string `json:"long_token"`
+	ShortExpiresIn int64  `json:"short_expires_in"`
+	LongExpiresIn  int64  `json:"long_expires_in"`
 }
 
 type UpdateAddressRequest struct {
