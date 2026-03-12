@@ -2,17 +2,19 @@ package response
 
 import (
 	"context"
+	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"github.com/falconfan123/Go-mall/common/consts/code"
 	"net/http"
 )
 
+// Response a represents standard API response.
 type Response struct {
 	StatusCode int    `json:"code"`
 	StatusMsg  string `json:"msg"`
 }
 
+// NewResponse creates a new Response.
 func NewResponse(statusCode int, statusMsg string) *Response {
 	return &Response{
 		StatusCode: statusCode,
@@ -20,6 +22,7 @@ func NewResponse(statusCode int, statusMsg string) *Response {
 	}
 }
 
+// Fail writes a failure response to the http.ResponseWriter.
 func Fail(w http.ResponseWriter, statusCode int) {
 	var msg string
 	switch statusCode {
@@ -35,6 +38,7 @@ func Fail(w http.ResponseWriter, statusCode int) {
 	httpx.OkJson(w, NewResponse(statusCode, msg))
 }
 
+// NewParamError writes a parameter error response to the http.ResponseWriter.
 func NewParamError(ctx context.Context, w http.ResponseWriter, err error) {
 	logx.Infow("params invalid", logx.Field("err", err))
 	httpx.OkJsonCtx(ctx, w, NewResponse(code.Fail, code.FailMsg))

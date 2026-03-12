@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main, develop]
+
+env:
+  GO_VERSION: '1.25'
+
+jobs:
+  # 构建验证
+  build:
+    name: 构建验证
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - auths
+          - audit
+          - carts
+          - checkout
+          - coupons
+          - inventory
+          - order
+          - payment
+          - product
+          - users
+          - gateway
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: 下载依赖
+        run: go mod download
+
+      - name: 构建 ${{ matrix.service }} 服务
+        run: |
+          case "${{ matrix.service }}" in
+            auths) cd services/auths ;;
+            audit) cd services/audit ;;
+            carts) cd services/carts ;;
+            checkout) cd services/checkout ;;
+            coupons) cd services/coupons ;;
+            inventory) cd services/inventory ;;
+            order) cd services/order ;;
+            payment) cd services/payment ;;
+            product) cd services/product ;;
+            users) cd services/users ;;
+            gateway) cd services/gateway ;;
+          esac
+          go build -o /dev/null .
+
+  # 安全扫描
+  security:
+    name: 安全扫描
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: 下载依赖
+        run: go mod download
+
+      - name: 运行 go vet
+        run: go vet -unsafeptr=false ./...
+
+      - name: 检查敏感信息
+        run: |
+          # 检查是否有硬编码的密钥等
+          git diff --staged --name-only | xargs grep -l "password\|secret\|key\|token" 2>/dev/null || true
+          grep -r "password\s*=\s*['\"]" . --include="*.go" 2>/dev/null | grep -v "_test.go" || true
+          grep -r "api[_-]key\s*[:=]\s*['\"]" . --include="*.go" 2>/dev/null | grep -v "_test.go" || true
+
+  # 依赖检查
+  deps:
+    name: 依赖检查
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: 检查 go.mod 一致性
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod go.sum
+
+      - name: 检查依赖漏洞
+        uses: govulncheck/action@v3
+        with:
+          go-version: '1.25'
+          package: ./...

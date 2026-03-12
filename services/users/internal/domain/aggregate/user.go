@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrAddressNotFound = errors.New("address not found")
+	ErrAddressNotFound  = errors.New("address not found")
 	ErrTooManyAddresses = errors.New("address count exceeds limit (max 10)")
 )
 
@@ -18,19 +18,19 @@ const (
 
 // User 用户聚合根
 type User struct {
-	ID           int64                     // 用户ID
-	Email        *valueobject.Email        // 邮箱
-	PasswordHash *valueobject.PasswordHash // 密码哈希
-	Username     string                    // 用户名
-	Nickname     string                    // 昵称
-	Avatar       string                    // 头像
-	Phone        string                    // 手机号
-	Status       int                       // 用户状态 0:正常 1:禁用
-	Addresses    []*entity.Address         // 收货地址列表
-	CreateTime   time.Time                 // 创建时间
-	UpdateTime   time.Time                 // 更新时间
-	LastLoginTime time.Time                // 最后登录时间
-	LastLoginIP  string                    // 最后登录IP
+	ID            int64                     // 用户ID
+	Email         *valueobject.Email        // 邮箱
+	PasswordHash  *valueobject.PasswordHash // 密码哈希
+	Username      string                    // 用户名
+	Nickname      string                    // 昵称
+	Avatar        string                    // 头像
+	Phone         string                    // 手机号
+	Status        int                       // 用户状态 0:正常 1:禁用
+	Addresses     []*entity.Address         // 收货地址列表
+	CreateTime    time.Time                 // 创建时间
+	UpdateTime    time.Time                 // 更新时间
+	LastLoginTime time.Time                 // 最后登录时间
+	LastLoginIP   string                    // 最后登录IP
 }
 
 // NewUser 创建新用户

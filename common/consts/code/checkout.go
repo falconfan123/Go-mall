@@ -17,6 +17,8 @@ const (
 	QuerySettlementRecordFailed  = 60012
 	UpdateSettlementStatusFailed = 60013
 	OutOfRecord                  = 60014
+	CheckoutNotFound             = 60015
+	CheckoutExpired              = 60016
 )
 
 // 状态码描述
@@ -36,4 +38,6 @@ const (
 	QuerySettlementRecordFailedMsg  = "查询结算记录失败"
 	UpdateSettlementStatusFailedMsg = "更新结算状态失败"
 	OutOfRecordMsg                  = "查询的结果记录不存在"
+	CheckoutNotFoundMsg             = "预订单不存在"
+	CheckoutExpiredMsg              = "预订单已过期"
 )

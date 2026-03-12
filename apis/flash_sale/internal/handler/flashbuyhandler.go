@@ -4,10 +4,10 @@ import (
 	xhttp "github.com/zeromicro/x/http"
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/logic"
 	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/svc"
 	"github.com/falconfan123/Go-mall/apis/flash_sale/internal/types"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func FlashBuyHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

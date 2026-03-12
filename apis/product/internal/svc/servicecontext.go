@@ -1,11 +1,11 @@
 package svc
 
 import (
-	"github.com/zeromicro/go-zero/rest"
-	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/falconfan123/Go-mall/apis/product/internal/config"
 	"github.com/falconfan123/Go-mall/common/middleware"
 	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/zeromicro/go-zero/rest"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {

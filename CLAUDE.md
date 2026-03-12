@@ -1,3 +1,7 @@
+# Go-mall 项目规范
+
+**【重要】每次代码修改并准备提交前，必须运行 `./scripts/check.sh --skip-tests` 或 `make lint` 确保本地检查通过后再提交。**
+
 The role of this file is to describe common mistakes and confusion points that agents might encounter as they work in this project. If you ever encounter something in the project that surprises you, please alert the developer working with you and indicate that this is the case in the AgentMD file to help prevent future agents from having the same issue
 
 ## go-zero 开发规范
@@ -30,3 +34,66 @@ The role of this file is to describe common mistakes and confusion points that a
 ### Apifox 配置信息
 - API Key: `afxp_1bd4b5Je1OTIXl6b6AlwXgwQ7qxzzttqqTlk`
 - 项目 ID: `7907732`
+
+## CI/CD 检查规范
+
+### 检查流程
+项目有两套独立的检查机制，**各管各的**：
+
+| 检查类型 | 运行位置 | 检查内容 |
+|---------|---------|---------|
+| **本地检查** | 本地电脑 (`./scripts/check.sh`) | staticcheck, golint, revive, gofmt 等 |
+| **GitHub Actions CI** | GitHub 自动流程 | build, test, security, deps |
+
+### 本地检查（每次 PR 前必运行）
+
+**重要**：每次提交 PR 前，必须先运行本地检查，确保没有问题后再提交。
+
+```bash
+# 运行本地 CI 检查（跳过测试，加快检查速度）
+./scripts/check.sh --skip-tests
+
+# 或使用 Makefile
+make lint
+```
+
+本地检查包含：
+1. 代码格式 (`gofmt`)
+2. 静态分析 (`go vet`, `staticcheck`)
+3. 代码风格 (`golint`, `revive`)
+4. 编译检查
+5. 单元测试（可选）
+
+### 快速格式化
+如果格式检查失败，可以自动修复：
+```bash
+./scripts/check.sh --auto-fix
+# 或
+make fmt
+```
+
+### 工具安装
+首次使用需要安装检查工具：
+```bash
+make install-tools
+```
+
+### GitHub Actions CI
+GitHub Actions 会运行标准 CI 检查：
+- **build** - 验证各服务编译
+- **test** - 单元测试
+- **security** - go vet + 敏感信息检查
+- **deps** - 依赖一致性 + 漏洞扫描
+
+注意：由于项目使用了 `replace` 本地模块替换，某些本地检查工具可能无法在 CI 环境中运行，因此本地检查只应在本地执行。
+
+## 单元测试规范
+
+**重要原则**：单元测试应当依附于 Swagger 文档，不能随便乱测。
+
+具体要求：
+1. 测试用例必须基于 API 规范（Swagger/OpenAPI 文档）编写
+2. 测试输入输出应与 API 定义保持一致
+3. 测试场景应覆盖 API 文档中声明的所有端点和参数
+4. 禁止编写与 API 文档无关的随机测试用例
+5. 在编写测试前，应先查阅对应的 Swagger 文档或 API 定义

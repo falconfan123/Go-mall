@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/falconfan123/Go-mall/services/product/internal/config"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
-	"github.com/falconfan123/Go-mall/services/product/internal/config"
 	"time"
 )
 

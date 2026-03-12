@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"strings"
 	"github.com/falconfan123/Go-mall/apis/product/internal/config"
 	"github.com/falconfan123/Go-mall/apis/product/internal/handler"
 	"github.com/falconfan123/Go-mall/apis/product/internal/svc"
 	"github.com/falconfan123/Go-mall/common/utils/ip"
+	"strings"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"

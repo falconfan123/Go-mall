@@ -41,7 +41,7 @@ type (
 	}
 
 	UserAddresses struct {
-		AddressId       uint64          `db:"address_id"`       // 主键，自增，地址ID
+		AddressId       uint64         `db:"address_id"`       // 主键，自增，地址ID
 		UserId          int64          `db:"user_id"`          // 外键，关联到users表的user_id
 		DetailedAddress string         `db:"detailed_address"` // 详细地址
 		City            string         `db:"city"`             // 城市

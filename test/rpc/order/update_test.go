@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/dtm-labs/client/dtmgrpc"
 	_ "github.com/dtm-labs/driver-gozero"
+	"github.com/falconfan123/Go-mall/services/order/order"
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/zrpc"
-	"github.com/falconfan123/Go-mall/services/order/order"
 	"testing"
 	"time"
 )

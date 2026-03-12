@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
-	"github.com/streadway/amqp"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"io"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/dal/model/audit"
 	"github.com/falconfan123/Go-mall/services/audit/internal/config"
 	"github.com/falconfan123/Go-mall/services/audit/model/es"
+	"github.com/streadway/amqp"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"io"
 	"strings"
 )
 

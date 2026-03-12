@@ -1,15 +1,15 @@
 package handler
 
 import (
+	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/zeromicro/x/errors"
 	xhttp "github.com/zeromicro/x/http"
-	"github.com/falconfan123/Go-mall/common/consts/code"
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/falconfan123/Go-mall/apis/coupon/internal/logic"
 	"github.com/falconfan123/Go-mall/apis/coupon/internal/svc"
 	"github.com/falconfan123/Go-mall/apis/coupon/internal/types"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func CouponRecordHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

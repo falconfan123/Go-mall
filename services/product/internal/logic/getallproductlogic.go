@@ -3,10 +3,10 @@ package logic
 import (
 	"context"
 	"errors"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"sync"
 
 	"github.com/zeromicro/go-zero/core/logx"

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	gorse "github.com/falconfan123/Go-mall/common/utils/gorse"
@@ -13,6 +12,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/zeromicro/go-zero/core/logx"
 	"strconv"
 	"time"
 )

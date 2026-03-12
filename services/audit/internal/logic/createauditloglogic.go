@@ -3,10 +3,10 @@ package logic
 import (
 	"context"
 	"errors"
-	"go.opentelemetry.io/otel/trace"
 	"github.com/falconfan123/Go-mall/services/audit/audit"
 	"github.com/falconfan123/Go-mall/services/audit/internal/mq"
 	"github.com/falconfan123/Go-mall/services/audit/internal/svc"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

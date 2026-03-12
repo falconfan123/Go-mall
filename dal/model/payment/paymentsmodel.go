@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -20,6 +22,7 @@ type (
 		FindPage(ctx context.Context, userId uint32, offset, limit int) ([]*Payments, error)
 		FindOneByOrderId(ctx context.Context, pre_order_id string) (*Payments, error)
 		CheckExistByOrderId(ctx context.Context, orderID string) (bool, error)
+		FindExpired(ctx context.Context, limit int) ([]*Payments, error)
 	}
 
 	customPaymentsModel struct {
@@ -95,4 +98,15 @@ func (m *defaultPaymentsModel) FindOneByOrderId(ctx context.Context, orderID str
 	default:
 		return nil, err
 	}
+}
+
+// FindExpired 查找已过期的支付单
+func (m *defaultPaymentsModel) FindExpired(ctx context.Context, limit int) ([]*Payments, error) {
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE `status` = ? AND `expire_time` < ? LIMIT ?", paymentsRows, m.table)
+	var payments []*Payments
+	err := m.conn.QueryRowsCtx(ctx, &payments, query, 1, time.Now().Unix(), limit)
+	if err != nil {
+		return nil, err
+	}
+	return payments, nil
 }

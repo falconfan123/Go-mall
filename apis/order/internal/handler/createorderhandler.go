@@ -18,10 +18,9 @@ func CreateOrderHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		fmt.Println("CreateOrderHandler: REACHED!")
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status": "handler_reached_raw"}`))
-		return 
 
 		// httpx.OkJsonCtx(r.Context(), w, map[string]string{"status": "handler_reached"})
-		// return 
+		// return
 
 		// var req types.CreateOrderReq
 		// if err := httpx.Parse(r, &req); err != nil {

@@ -17,6 +17,7 @@ require (
 	github.com/smartwalle/alipay/v3 v3.2.25
 	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.11.1
+	github.com/zeromicro/go-queue v1.2.2
 	github.com/zeromicro/go-zero v1.7.6
 	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f
@@ -26,24 +27,25 @@ require (
 	google.golang.org/protobuf v1.36.1
 )
 
-replace github.com/falconfan123/Go-mall/services/auths/auths => ./services/auths/auths
+replace github.com/falconfan123/Go-mall/services/auths/auths => ./services/auths
 
+replace github.com/falconfan123/Go-mall/services/product/product => ./services/product
 
-replace github.com/falconfan123/Go-mall/services/product/product => ./services/product/product
+replace github.com/falconfan123/Go-mall/services/carts/carts => ./services/carts
 
-replace github.com/falconfan123/Go-mall/services/carts/carts => ./services/carts/carts
+replace github.com/falconfan123/Go-mall/services/order/order => ./services/order
 
-replace github.com/falconfan123/Go-mall/services/order/order => ./services/order/order
+replace github.com/falconfan123/Go-mall/services/checkout/checkout => ./services/checkout
 
-replace github.com/falconfan123/Go-mall/services/checkout/checkout => ./services/checkout/checkout
+replace github.com/falconfan123/Go-mall/services/payment/payment => ./services/payment
 
-replace github.com/falconfan123/Go-mall/services/payment/payment => ./services/payment/payment
+replace github.com/falconfan123/Go-mall/services/coupons/coupons => ./services/coupons
 
-replace github.com/falconfan123/Go-mall/services/coupons/coupons => ./services/coupons/coupons
+replace github.com/falconfan123/Go-mall/services/inventory/inventory => ./services/inventory
 
-replace github.com/falconfan123/Go-mall/services/inventory/inventory => ./services/inventory/inventory
+replace github.com/falconfan123/Go-mall/services/audit/audit => ./services/audit
 
-replace github.com/falconfan123/Go-mall/services/audit/audit => ./services/audit/audit
+replace github.com/falconfan123/Go-mall/services/users/users => ./services/users
 
 require (
 	github.com/bufbuild/protocompile v0.14.1 // indirect
@@ -60,6 +62,7 @@ require (
 	github.com/minio/crc64nvme v1.1.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/smartwalle/ncrypto v1.0.4 // indirect
 	github.com/smartwalle/ngx v1.0.9 // indirect

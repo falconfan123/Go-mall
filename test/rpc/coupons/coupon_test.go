@@ -3,8 +3,8 @@ package coupons
 import (
 	"context"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 

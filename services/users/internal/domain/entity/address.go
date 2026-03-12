@@ -7,14 +7,14 @@ import (
 
 // Address 收货地址实体
 type Address struct {
-	ID         int64                   // 地址ID
-	UserID     int64                   // 所属用户ID
-	Receiver   string                  // 收货人
-	Phone      string                  // 联系电话
+	ID         int64                    // 地址ID
+	UserID     int64                    // 所属用户ID
+	Receiver   string                   // 收货人
+	Phone      string                   // 联系电话
 	Address    *valueobject.AddressInfo // 地址详情
-	IsDefault  bool                    // 是否默认地址
-	CreateTime time.Time               // 创建时间
-	UpdateTime time.Time               // 更新时间
+	IsDefault  bool                     // 是否默认地址
+	CreateTime time.Time                // 创建时间
+	UpdateTime time.Time                // 更新时间
 }
 
 // NewAddress 创建新地址

@@ -5,15 +5,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	paymentM "github.com/falconfan123/Go-mall/dal/model/payment"
 	"github.com/falconfan123/Go-mall/services/order/order"
 	"github.com/falconfan123/Go-mall/services/payment/internal/mq"
 	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
 	"github.com/falconfan123/Go-mall/services/payment/payment"
+	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"time"
 )
 

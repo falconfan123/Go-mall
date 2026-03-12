@@ -5,9 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	checkout2 "github.com/falconfan123/Go-mall/dal/model/checkout"
 	"github.com/falconfan123/Go-mall/services/checkout/checkout"
@@ -15,6 +12,9 @@ import (
 	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
 	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"time"
 )
 

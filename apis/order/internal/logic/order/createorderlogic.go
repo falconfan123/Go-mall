@@ -5,9 +5,6 @@ import (
 	"strings"
 
 	"github.com/dtm-labs/client/dtmgrpc"
-	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/core/logx"
-	xerrors "github.com/zeromicro/x/errors"
 	"github.com/falconfan123/Go-mall/apis/order/internal/svc"
 	"github.com/falconfan123/Go-mall/apis/order/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
@@ -15,6 +12,9 @@ import (
 	"github.com/falconfan123/Go-mall/services/checkout/checkout"
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
 	orderpb "github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logx"
+	xerrors "github.com/zeromicro/x/errors"
 )
 
 type CreateOrderLogic struct {
@@ -38,29 +38,14 @@ func (l *CreateOrderLogic) CreateOrder(req *types.CreateOrderReq) (resp *types.C
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
 
-	orderTarget, err := l.svcCtx.Config.OrderRpc.BuildTarget()
-	if err != nil {
-		l.Logger.Errorw("build order rpc target failed", logx.Field("err", err))
-		return nil, xerrors.New(code.ServerError, code.ServerErrorMsg)
-	}
 	// DTM在docker容器内，无法访问localhost:8500，需要替换为consul:8500
 	// 并且由于RPC服务在宿主机，DTM需要通过host.docker.internal访问
 	// 这里直接使用直连方式，绕过Consul解析
-	orderTarget = "host.docker.internal:10004"
+	orderTarget := "host.docker.internal:10004"
 
-	checkoutTarget, err := l.svcCtx.Config.CheckoutRpc.BuildTarget()
-	if err != nil {
-		l.Logger.Errorw("build checkout rpc target failed", logx.Field("err", err))
-		return nil, xerrors.New(code.ServerError, code.ServerErrorMsg)
-	}
-	checkoutTarget = "host.docker.internal:10005"
+	checkoutTarget := "host.docker.internal:10005"
 
-	couponTarget, err := l.svcCtx.Config.CouponsRpc.BuildTarget()
-	if err != nil {
-		l.Logger.Errorw("build coupon rpc target failed", logx.Field("err", err))
-		return nil, xerrors.New(code.ServerError, code.ServerErrorMsg)
-	}
-	couponTarget = "host.docker.internal:10009"
+	couponTarget := "host.docker.internal:10009"
 
 	// --------------- saga ---------------
 	// 去掉direct://前缀

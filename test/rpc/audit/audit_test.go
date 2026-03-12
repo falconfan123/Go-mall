@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"github.com/falconfan123/Go-mall/common/consts/biz"
 )
 
 var auditClient audit.AuditClient
