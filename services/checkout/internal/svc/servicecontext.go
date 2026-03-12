@@ -38,8 +38,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CartsModel:         cart.NewCartsModel(mysql),
 		CheckoutModel:      checkout.NewCheckoutsModel(mysql),
 		CheckoutItemsModel: checkout.NewCheckoutItemsModel(mysql),
-		InventoryRpc:       inventory.NewInventoryClient(zrpc.MustNewClient(c.InventoryRpc)),
-		CouponsRpc:         coupons.NewCouponsClient(zrpc.MustNewClient(c.CouponsRpc)),
-		ProductRpc:         product.NewProductCatalogClient(zrpc.MustNewClient(c.ProductRpc)),
+		InventoryRpc:       inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
+		CouponsRpc:         couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponsRpc)),
+		ProductRpc:         productclient.NewProductCatalog(zrpc.MustNewClient(c.ProductRpc)),
 	}
 }

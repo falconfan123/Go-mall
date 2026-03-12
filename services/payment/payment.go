@@ -81,7 +81,7 @@ func (s *PaymentService) handleAlipayNotification(writer http.ResponseWriter, re
 		return
 	}
 	// DecodeNotification 内部已调用 VerifySign 方法验证签名
-	var notify, err = s.ctx.Alipay.DecodeNotification(request.Form)
+	var notify, err = s.ctx.Alipay.DecodeNotification(request.Context(), request.Form)
 	if err != nil {
 		logx.Errorw("Failed to decode notification", logx.Field("err", err))
 		return
