@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
 	order2 "github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/inventory/inventory"
-	"github.com/falconfan123/Go-mall/services/order/order"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -57,7 +57,7 @@ func (a *OrderDelayMQ) consumer(ctx context.Context) {
 			orderModelRes = orderRes
 
 			// 只进行处理创建订单的订单
-			if order.OrderStatus(orderRes.OrderStatus) != order.OrderStatus_ORDER_STATUS_CREATED {
+			if ordertypes.OrderStatus(orderRes.OrderStatus) != ordertypes.OrderStatusCreated {
 				isContinue = false
 				return nil
 			}
@@ -65,8 +65,8 @@ func (a *OrderDelayMQ) consumer(ctx context.Context) {
 				ctx,
 				msg.OrderId,
 				msg.UserID,
-				order.OrderStatus_ORDER_STATUS_CLOSED,
-				order.PaymentStatus_PAYMENT_STATUS_EXPIRED,
+				ordertypes.OrderStatusClosed,
+				ordertypes.PaymentStatusExpired,
 			); err != nil {
 				return err
 			}

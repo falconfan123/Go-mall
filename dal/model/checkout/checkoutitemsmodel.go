@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	checkout "github.com/falconfan123/Go-mall/common/types/checkout"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strings"
 )
@@ -69,8 +69,8 @@ func (m *customCheckoutItemsModel) FindItemsByPreOrderIds(ctx context.Context, p
 
 		// 组装返回对象
 		itemsMap[item.PreOrderId] = append(itemsMap[item.PreOrderId], &checkout.CheckoutItem{
-			ProductId:   int32(item.ProductId),
-			Quantity:    int32(item.Quantity),
+			ProductId:   item.ProductId,
+			Quantity:    item.Quantity,
 			ProductName: productName,
 			ProductDesc: productDesc,
 			Price:       item.Price,

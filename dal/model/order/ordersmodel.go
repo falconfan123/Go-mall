@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	order "github.com/falconfan123/Go-mall/common/types/order"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -35,7 +35,7 @@ type (
 
 func (m *customOrdersModel) CancelOrder(ctx context.Context, userID int32, orderId string, reason string) error {
 	query := fmt.Sprintf("update %s set `order_status` = ?,`payment_status` = ?,`reason` = ? where `order_id` = ? and `user_id` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatus_ORDER_STATUS_CANCELLED, order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT, reason, orderId, userID)
+	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatusCancelled, order.OrderStatusPendingPayment, reason, orderId, userID)
 	return err
 
 }
@@ -100,7 +100,7 @@ func (m *customOrdersModel) UpdateOrder2Payment(ctx context.Context, orderID str
 }
 func (m *customOrdersModel) UpdateOrder2PaymentRollback(ctx context.Context, orderID string, userId int32) error {
 	query := fmt.Sprintf("update %s set `order_status` = ? , `payment_status` = ? where `order_id` = ? and `user_id` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT, order.PaymentStatus_PAYMENT_STATUS_PAYING, orderID, userId)
+	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatusPendingPayment, order.PaymentStatusPaying, orderID, userId)
 	return err
 }
 func (m *customOrdersModel) GetOrderByOrderIDAndUserIDWithLock(ctx context.Context, orderId string, userId int32) (*Orders, error) {

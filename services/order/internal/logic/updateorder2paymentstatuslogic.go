@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -45,8 +46,8 @@ func (l *UpdateOrder2PaymentStatusLogic) UpdateOrder2PaymentStatus(in *order.Upd
 				logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 			return err
 		}
-		if order.OrderStatus(orderRes.OrderStatus) != order.OrderStatus_ORDER_STATUS_CREATED ||
-			order.PaymentStatus(orderRes.PaymentStatus) != order.PaymentStatus_PAYMENT_STATUS_NOT_PAID {
+		if ordertypes.OrderStatus(orderRes.OrderStatus) != ordertypes.OrderStatusCreated ||
+			ordertypes.PaymentStatus(orderRes.PaymentStatus) != ordertypes.PaymentStatusNotPaid {
 			res.StatusCode = code.OrderStatusInvalid
 			res.StatusMsg = code.OrderStatusInvalidMsg
 			l.Logger.Infow("order status error", logx.Field("order_id", in.OrderId),
@@ -56,7 +57,7 @@ func (l *UpdateOrder2PaymentStatusLogic) UpdateOrder2PaymentStatus(in *order.Upd
 		}
 		// 修改为订单和支付为待支付
 		if err := l.svcCtx.OrderModel.WithSession(session).UpdateOrderStatusByOrderIDAndUserID(ctx,
-			in.OrderId, in.UserId, order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT, order.PaymentStatus_PAYMENT_STATUS_PAYING); err != nil {
+			in.OrderId, in.UserId, ordertypes.OrderStatusPendingPayment, ordertypes.PaymentStatusPaying); err != nil {
 			l.Logger.Errorw("update order status error", logx.Field("err", err),
 				logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 			return err
