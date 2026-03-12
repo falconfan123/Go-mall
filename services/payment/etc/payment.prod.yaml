@@ -14,7 +14,7 @@ Consul:
 Telemetry:
   Name: payment.rpc
   Endpoint: ${TRACES_ENDPOINT}
-  Batcher: jaeger
+  Batcher: zipkin
   Sampler: 0.1  # 采样率，1.0表示全部采集, 0.1表示10%
 Log:
   ServiceName: "payment-rpc"

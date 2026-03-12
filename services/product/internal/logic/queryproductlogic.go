@@ -3,11 +3,11 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"github.com/olivere/elastic/v7"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
+	"github.com/olivere/elastic/v7"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type QueryProductLogic struct {
