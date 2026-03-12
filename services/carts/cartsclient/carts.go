@@ -7,20 +7,20 @@ package cartsclient
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/carts/carts"
+	"github.com/falconfan123/Go-mall/services/carts/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	CartInfoResponse     = carts.CartInfoResponse
-	CartItemListResponse = carts.CartItemListResponse
-	CreateCartResponse   = carts.CreateCartResponse
-	SubCartResponse      = carts.SubCartResponse
-	CartItemRequest      = carts.CartItemRequest
-	EmptyCartResponse    = carts.EmptyCartResponse
-	UserInfo             = carts.UserInfo
+	CartInfoResponse     = pb.CartInfoResponse
+	CartItemListResponse = pb.CartItemListResponse
+	CreateCartResponse   = pb.CreateCartResponse
+	SubCartResponse      = pb.SubCartResponse
+	CartItemRequest      = pb.CartItemRequest
+	EmptyCartResponse    = pb.EmptyCartResponse
+	UserInfo             = pb.UserInfo
 
 	Cart interface {
 		CartItemList(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*CartItemListResponse, error)
@@ -41,20 +41,20 @@ func NewCart(cli zrpc.Client) Cart {
 }
 
 func (m *defaultCart) CartItemList(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*CartItemListResponse, error) {
-	client := carts.NewCartClient(m.cli.Conn())
+	client := pb.NewCartClient(m.cli.Conn())
 	return client.CartItemList(ctx, in, opts...)
 }
 
 func (m *defaultCart) CreateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*CreateCartResponse, error) {
-	client := carts.NewCartClient(m.cli.Conn())
+	client := pb.NewCartClient(m.cli.Conn())
 	return client.CreateCartItem(ctx, in, opts...)
 }
 func (m *defaultCart) SubCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*SubCartResponse, error) {
-	client := carts.NewCartClient(m.cli.Conn())
+	client := pb.NewCartClient(m.cli.Conn())
 	return client.SubCartItem(ctx, in, opts...)
 }
 
 func (m *defaultCart) DeleteCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*EmptyCartResponse, error) {
-	client := carts.NewCartClient(m.cli.Conn())
+	client := pb.NewCartClient(m.cli.Conn())
 	return client.DeleteCartItem(ctx, in, opts...)
 }

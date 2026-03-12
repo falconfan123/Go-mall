@@ -4,7 +4,7 @@ import (
 	"github.com/falconfan123/Go-mall/apis/order/internal/config"
 	"github.com/falconfan123/Go-mall/apis/order/internal/middleware"
 	commonmiddleware "github.com/falconfan123/Go-mall/common/middleware"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
 )

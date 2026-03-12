@@ -4,7 +4,7 @@
 // 	protoc        v6.33.1
 // source: order.proto
 
-package order
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

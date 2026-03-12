@@ -14,9 +14,9 @@ import (
 )
 
 type (
-	CreateOrderRequest  = order.CreateOrderRequest
-	CreateOrderResponse = order.OrderDetailResponse
-	PaymentMethod       = order.PaymentMethod
+	CreateOrderRequest  = pb.CreateOrderRequest
+	CreateOrderResponse = pb.OrderDetailResponse
+	PaymentMethod       = pb.PaymentMethod
 
 	OrderService interface {
 		CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
@@ -34,6 +34,6 @@ func NewOrderService(cli zrpc.Client) OrderService {
 }
 
 func (m *defaultOrderService) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error) {
-	client := order.NewOrderServiceClient(m.cli.Conn())
+	client := pb.NewOrderServiceClient(m.cli.Conn())
 	return client.CreateOrder(ctx, in, opts...)
 }

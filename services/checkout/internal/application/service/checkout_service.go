@@ -158,7 +158,7 @@ func (s *CheckoutAppService) ConfirmCheckout(ctx context.Context, req *dto.Confi
 	}
 
 	// 2. 确认预订单
-	if err := checkout.Confirm(); err != nil {
+	if err := pb.Confirm(); err != nil {
 		return &dto.ConfirmCheckoutResp{
 			StatusCode: code.Fail,
 			StatusMsg:  err.Error(),
@@ -194,7 +194,7 @@ func (s *CheckoutAppService) CancelCheckout(ctx context.Context, req *dto.Cancel
 	}
 
 	// 2. 取消预订单
-	if err := checkout.Cancel(); err != nil {
+	if err := pb.Cancel(); err != nil {
 		return &dto.CancelCheckoutResp{
 			StatusCode: code.Fail,
 			StatusMsg:  err.Error(),

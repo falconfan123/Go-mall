@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"

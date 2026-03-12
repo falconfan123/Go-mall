@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/pb"
 	"github.com/falconfan123/Go-mall/services/auths/internal/config"
 	"github.com/falconfan123/Go-mall/services/auths/internal/server"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"

@@ -9,7 +9,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/users/internal/interface/grpc/logic"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/services/users/pb"
 )
 
 type UsersServer struct {

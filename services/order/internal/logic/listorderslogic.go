@@ -10,7 +10,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/token"
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
-	"github.com/falconfan123/Go-mall/services/order/pb"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/metadata"

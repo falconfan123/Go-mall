@@ -8,7 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/delay"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/notify"
-	userspb "github.com/falconfan123/Go-mall/services/users/users"
+	userspb "github.com/falconfan123/Go-mall/services/users/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"

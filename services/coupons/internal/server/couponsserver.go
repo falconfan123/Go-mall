@@ -6,7 +6,7 @@ package server
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/logic"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 )

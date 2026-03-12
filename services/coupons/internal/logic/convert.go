@@ -3,7 +3,7 @@ package logic
 import (
 	"github.com/falconfan123/Go-mall/dal/model/coupons/coupon"
 	"github.com/falconfan123/Go-mall/dal/model/coupons/user_coupons"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/shopspring/decimal"
 	"time"
 )

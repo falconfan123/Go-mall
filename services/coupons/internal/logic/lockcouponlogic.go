@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -66,7 +66,7 @@ func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyR
 			return err
 		}
 		// 校验优惠券状态是否可用
-		if coupons.CouponStatus(userCoupon.Status) != coupons.CouponStatus_COUPON_STATUS_AVAILABLE {
+		if coupons.CouponStatus(userCoupon.Status) != pb.CouponStatus_COUPON_STATUS_AVAILABLE {
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg
 			return nil

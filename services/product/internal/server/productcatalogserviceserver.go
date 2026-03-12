@@ -9,7 +9,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/product/internal/logic"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/services/product/pb"
 )
 
 type ProductCatalogServiceServer struct {

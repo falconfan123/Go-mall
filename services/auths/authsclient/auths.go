@@ -6,19 +6,19 @@ package authsclient
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/auths/auths"
+	"github.com/falconfan123/Go-mall/services/auths/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	AuthGenReq     = auths.AuthGenReq
-	AuthGenRes     = auths.AuthGenRes
-	AuthRenewalReq = auths.AuthRenewalReq
-	AuthRenewalRes = auths.AuthRenewalRes
-	AuthReq        = auths.AuthReq
-	AuthsRes       = auths.AuthsRes
+	AuthGenReq     = pb.AuthGenReq
+	AuthGenRes     = pb.AuthGenRes
+	AuthRenewalReq = pb.AuthRenewalReq
+	AuthRenewalRes = pb.AuthRenewalRes
+	AuthReq        = pb.AuthReq
+	AuthsRes       = pb.AuthsRes
 
 	Auths interface {
 		// Authentication 验证用户token合法
@@ -42,18 +42,18 @@ func NewAuths(cli zrpc.Client) Auths {
 
 // Authentication 验证用户token合法
 func (m *defaultAuths) Authentication(ctx context.Context, in *AuthReq, opts ...grpc.CallOption) (*AuthsRes, error) {
-	client := auths.NewAuthsClient(m.cli.Conn())
+	client := pb.NewAuthsClient(m.cli.Conn())
 	return client.Authentication(ctx, in, opts...)
 }
 
 // GenerateToken 生成toke
 func (m *defaultAuths) GenerateToken(ctx context.Context, in *AuthGenReq, opts ...grpc.CallOption) (*AuthGenRes, error) {
-	client := auths.NewAuthsClient(m.cli.Conn())
+	client := pb.NewAuthsClient(m.cli.Conn())
 	return client.GenerateToken(ctx, in, opts...)
 }
 
 // RenewToken 续期身份
 func (m *defaultAuths) RenewToken(ctx context.Context, in *AuthRenewalReq, opts ...grpc.CallOption) (*AuthRenewalRes, error) {
-	client := auths.NewAuthsClient(m.cli.Conn())
+	client := pb.NewAuthsClient(m.cli.Conn())
 	return client.RenewToken(ctx, in, opts...)
 }

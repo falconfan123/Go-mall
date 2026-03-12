@@ -7,7 +7,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/falconfan123/Go-mall/services/order/internal/server"
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
-	"github.com/falconfan123/Go-mall/services/order/pb"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"strings"

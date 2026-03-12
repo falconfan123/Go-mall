@@ -6,19 +6,19 @@ package paymentclient
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/payment/payment"
+	"github.com/falconfan123/Go-mall/services/payment/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	PaymentItem               = payment.PaymentItem
-	PaymentListReq            = payment.PaymentListReq
-	PaymentListReq_Pagination = payment.PaymentListReq_Pagination
-	PaymentListResp           = payment.PaymentListResp
-	PaymentReq                = payment.PaymentReq
-	PaymentResp               = payment.PaymentResp
+	PaymentItem               = pb.PaymentItem
+	PaymentListReq            = pb.PaymentListReq
+	PaymentListReq_Pagination = pb.PaymentListReq_Pagination
+	PaymentListResp           = pb.PaymentListResp
+	PaymentReq                = pb.PaymentReq
+	PaymentResp               = pb.PaymentResp
 
 	Payment interface {
 		CreatePayment(ctx context.Context, in *PaymentReq, opts ...grpc.CallOption) (*PaymentResp, error)
@@ -37,11 +37,11 @@ func NewPayment(cli zrpc.Client) Payment {
 }
 
 func (m *defaultPayment) CreatePayment(ctx context.Context, in *PaymentReq, opts ...grpc.CallOption) (*PaymentResp, error) {
-	client := payment.NewPaymentClient(m.cli.Conn())
+	client := pb.NewPaymentClient(m.cli.Conn())
 	return client.CreatePayment(ctx, in, opts...)
 }
 
 func (m *defaultPayment) ListPayments(ctx context.Context, in *PaymentListReq, opts ...grpc.CallOption) (*PaymentListResp, error) {
-	client := payment.NewPaymentClient(m.cli.Conn())
+	client := pb.NewPaymentClient(m.cli.Conn())
 	return client.ListPayments(ctx, in, opts...)
 }

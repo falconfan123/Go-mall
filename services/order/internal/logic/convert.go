@@ -2,23 +2,23 @@ package logic
 
 import (
 	order2 "github.com/falconfan123/Go-mall/dal/model/order"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
-	"github.com/falconfan123/Go-mall/services/order/pb"
+	checkoutpb "github.com/falconfan123/Go-mall/services/checkout/pb"
+	couponspb "github.com/falconfan123/Go-mall/services/coupons/pb"
+	orderpb "github.com/falconfan123/Go-mall/services/order/pb"
 	"time"
 )
 
-func convertToCouponItems(items []*checkout.CheckoutItem) []*coupons.Items {
-	couponItems := make([]*coupons.Items, len(items))
+func convertToCouponItems(items []*checkoutpb.CheckoutItem) []*couponspb.Items {
+	couponItems := make([]*couponspb.Items, len(items))
 	for i, item := range items {
-		couponItems[i] = &coupons.Items{
+		couponItems[i] = &couponspb.Items{
 			ProductId: item.ProductId,
 			Quantity:  item.Quantity,
 		}
 	}
 	return couponItems
 }
-func convertToOrderItems(orderID string, items []*checkout.CheckoutItem) []*order2.OrderItems {
+func convertToOrderItems(orderID string, items []*checkoutpb.CheckoutItem) []*order2.OrderItems {
 	orderItems := make([]*order2.OrderItems, len(items))
 	for i, item := range items {
 		orderItems[i] = &order2.OrderItems{
@@ -32,12 +32,12 @@ func convertToOrderItems(orderID string, items []*checkout.CheckoutItem) []*orde
 }
 
 // --------------- resp ---------------
-func convertToOrderResp(orderModelRes *order2.Orders) *order.Order {
-	resp := &order.Order{
+func convertToOrderResp(orderModelRes *order2.Orders) *orderpb.Order {
+	resp := &orderpb.Order{
 		OrderId:        orderModelRes.OrderId,
-		OrderStatus:    order.OrderStatus(orderModelRes.OrderStatus),
-		PaymentStatus:  order.PaymentStatus(orderModelRes.PaymentStatus),
-		PaymentMethod:  order.PaymentMethod(orderModelRes.PaymentMethod.Int64),
+		OrderStatus:    orderpb.OrderStatus(orderModelRes.OrderStatus),
+		PaymentStatus:  orderpb.PaymentStatus(orderModelRes.PaymentStatus),
+		PaymentMethod:  orderpb.PaymentMethod(orderModelRes.PaymentMethod.Int64),
 		OriginalAmount: orderModelRes.OriginalAmount,
 		PayableAmount:  orderModelRes.PayableAmount,
 		PaidAmount:     orderModelRes.PaidAmount.Int64,
@@ -50,17 +50,17 @@ func convertToOrderResp(orderModelRes *order2.Orders) *order.Order {
 		Reason:         orderModelRes.Reason.String,
 		TransactionId:  orderModelRes.TransactionId.String,
 		UserId:         uint32(orderModelRes.UserId),
-		Items:          []*order.OrderItem{}, // 初始化订单项切片
+		Items:          []*orderpb.OrderItem{}, // 初始化订单项切片
 	}
 
 	return resp
 }
 
-func convertToOrderItemResp(orderItems []*order2.OrderItems) []*order.OrderItem {
-	resp := make([]*order.OrderItem, len(orderItems))
+func convertToOrderItemResp(orderItems []*order2.OrderItems) []*orderpb.OrderItem {
+	resp := make([]*orderpb.OrderItem, len(orderItems))
 	for i, item := range orderItems {
 
-		resp[i] = &order.OrderItem{
+		resp[i] = &orderpb.OrderItem{
 			ProductId:   item.ProductId,
 			ProductName: item.ProductName,
 			UnitPrice:   item.Price,
@@ -70,8 +70,8 @@ func convertToOrderItemResp(orderItems []*order2.OrderItems) []*order.OrderItem 
 	}
 	return resp
 }
-func convertToOrderAddressResp(address *order2.OrderAddresses) *order.OrderAddress {
-	return &order.OrderAddress{
+func convertToOrderAddressResp(address *order2.OrderAddresses) *orderpb.OrderAddress {
+	return &orderpb.OrderAddress{
 		AddressId:       address.AddressId,
 		RecipientName:   address.RecipientName,
 		PhoneNumber:     address.PhoneNumber.String,

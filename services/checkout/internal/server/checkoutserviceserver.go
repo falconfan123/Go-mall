@@ -7,7 +7,7 @@ package server
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/pb"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/logic"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
 )

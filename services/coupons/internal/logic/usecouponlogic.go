@@ -8,7 +8,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"time"
 
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -49,7 +49,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 			return err
 		}
 		// 2. 状态校验
-		if coupons.CouponStatus(status.Status) != coupons.CouponStatus_COUPON_STATUS_LOCKED {
+		if coupons.CouponStatus(status.Status) != pb.CouponStatus_COUPON_STATUS_LOCKED {
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg
 			l.Logger.Infow("coupon status invalid", logx.Field("user_id", in.UserId),

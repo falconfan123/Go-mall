@@ -9,7 +9,7 @@ import (
 	"github.com/falconfan123/Go-mall/apis/order/internal/types"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/x/errors"
 )

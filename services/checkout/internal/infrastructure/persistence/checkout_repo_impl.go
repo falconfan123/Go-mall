@@ -182,7 +182,7 @@ func (r *CheckoutRepositoryImpl) convertToDomain(data *checkoutmodel.Checkouts, 
 // convertToData 将领域模型转换为数据模型
 func (r *CheckoutRepositoryImpl) convertToData(checkout *entity.Checkout) *checkoutmodel.Checkouts {
 	// 转换过期时间
-	expireTime := checkout.ExpireTime.Unix()
+	expireTime := pb.ExpireTime.Unix()
 
 	// 转换优惠券ID
 	var couponID sql.NullString

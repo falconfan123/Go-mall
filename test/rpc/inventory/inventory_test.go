@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/inventory/inventory"
+	"github.com/falconfan123/Go-mall/services/inventory/pb"
 	"sync"
 	"testing"
 	"time"

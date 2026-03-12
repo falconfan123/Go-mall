@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
-	"github.com/falconfan123/Go-mall/services/order/pb"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"

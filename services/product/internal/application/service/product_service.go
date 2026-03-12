@@ -163,7 +163,7 @@ func (s *ProductAppService) UpdateProduct(ctx context.Context, req *dto.UpdatePr
 	}
 
 	// 3. 更新商品信息
-	oldPrice := product.Price.Value()
+	oldPrice := pb.Price.Value()
 	product.UpdateInfo(
 		req.Name,
 		req.Description,
@@ -331,8 +331,8 @@ func (s *ProductAppService) DecreaseStock(ctx context.Context, productID int64, 
 	}
 
 	// 2. 领域层检查库存是否足够
-	oldStock := product.Stock.Value()
-	if err := product.AdjustStock(-quantity); err != nil {
+	oldStock := pb.Stock.Value()
+	if err := pb.AdjustStock(-quantity); err != nil {
 		return err
 	}
 

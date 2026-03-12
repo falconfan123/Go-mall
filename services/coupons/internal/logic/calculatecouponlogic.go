@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -61,7 +61,7 @@ func (l *CalculateCouponLogic) CalculateCoupon(in *coupons.CalculateCouponReq) (
 			res.StatusMsg = code.ProductNotFoundInventoryMsg
 			return res, nil
 		}
-		totalPrice += product.Product.Price * int64(item.Quantity)
+		totalPrice += pb.Product.Price * int64(item.Quantity)
 	}
 	// 根据优惠卷类型计算优惠
 	var discountAmount int64 // 分

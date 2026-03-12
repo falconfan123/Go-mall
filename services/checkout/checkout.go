@@ -7,7 +7,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/pb"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/config"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/server"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"

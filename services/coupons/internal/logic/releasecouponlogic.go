@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/coupons/coupons"
+	"github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
@@ -46,7 +46,7 @@ func (l *ReleaseCouponLogic) ReleaseCoupon(in *coupons.ReleaseCouponReq) (*coupo
 		}
 
 		// 2. 状态校验（幂等性保障）
-		if coupons.CouponStatus(state) != coupons.CouponStatus_COUPON_STATUS_LOCKED {
+		if coupons.CouponStatus(state) != pb.CouponStatus_COUPON_STATUS_LOCKED {
 			l.Logger.Infow("coupon status is not locked", logx.Field("userId", in.UserId), logx.Field("couponId", in.UserCouponId))
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg

@@ -5,7 +5,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
-	"github.com/falconfan123/Go-mall/services/users/users"
+	"github.com/falconfan123/Go-mall/services/users/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

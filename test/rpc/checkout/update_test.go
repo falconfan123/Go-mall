@@ -2,7 +2,7 @@ package checkout
 
 import (
 	"context"
-	"github.com/falconfan123/Go-mall/services/checkout/checkout"
+	"github.com/falconfan123/Go-mall/services/checkout/pb"
 	"testing"
 )
 

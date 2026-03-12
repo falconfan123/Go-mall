@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
-	"github.com/falconfan123/Go-mall/services/product/product"
+	"github.com/falconfan123/Go-mall/services/product/pb"
 	"strconv"
 
 	"github.com/zeromicro/go-zero/core/logx"

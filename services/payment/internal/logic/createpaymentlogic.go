@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	paymentM "github.com/falconfan123/Go-mall/dal/model/payment"
-	order "github.com/falconfan123/Go-mall/services/order/order"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/falconfan123/Go-mall/services/payment/internal/mq"
 	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
-	"github.com/falconfan123/Go-mall/services/payment/payment"
+	"github.com/falconfan123/Go-mall/services/payment/pb"
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -35,11 +35,11 @@ func ConvertModelToPaymentItem(p *paymentM.Payments) *payment.PaymentItem {
 	var method payment.PaymentMethod
 	switch p.PaymentMethod {
 	case "alipay":
-		method = payment.PaymentMethod_ALIPAY
+		method = pb.PaymentMethod_ALIPAY
 	case "wx_pay":
-		method = payment.PaymentMethod_WECHAT_PAY
+		method = pb.PaymentMethod_WECHAT_PAY
 	default:
-		method = payment.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
+		method = pb.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
 	}
 	return &payment.PaymentItem{
 		PaymentId:      p.PaymentId,
@@ -96,7 +96,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 	paymentId := generateUUID()
 	fmt.Printf("Receive PaymentMethod: %v\n", in.PaymentMethod)
 	// 4. 调用第三方支付生成支付链接（此处根据不同渠道简单模拟返回 URL）
-	if in.PaymentMethod == payment.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED {
+	if in.PaymentMethod == pb.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED {
 		res.StatusCode = code.PaymentMethodNotSupport
 		res.StatusMsg = code.PaymentMethodNotSupportMsg
 		return res, nil

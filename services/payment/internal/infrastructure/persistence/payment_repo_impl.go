@@ -34,7 +34,7 @@ func NewPaymentRepositoryImpl(conn sqlx.SqlConn) repository.PaymentRepository {
 func (r *PaymentRepositoryImpl) GetByID(ctx context.Context, paymentID string) (*entity.Payment, error) {
 	p, err := r.paymentsModel.FindOne(ctx, paymentID)
 	if err != nil {
-		if err == payment.ErrNotFound {
+		if err == pb.ErrNotFound {
 			return nil, entity.ErrPaymentNotFound
 		}
 		return nil, err
@@ -47,7 +47,7 @@ func (r *PaymentRepositoryImpl) GetByID(ctx context.Context, paymentID string) (
 func (r *PaymentRepositoryImpl) GetByOrderID(ctx context.Context, orderID string) (*entity.Payment, error) {
 	p, err := r.paymentsModel.FindOneByOrderId(ctx, orderID)
 	if err != nil {
-		if err == payment.ErrNotFound {
+		if err == pb.ErrNotFound {
 			return nil, entity.ErrPaymentNotFound
 		}
 		return nil, err
