@@ -44,7 +44,7 @@ jobs:
 
       - name: 同步工作区依赖
         run: |
-          export GOWORK="${GITHUB_WORKSPACE}/go.work"
+          echo "GOWORK=${GITHUB_WORKSPACE}/go.work" >> $GITHUB_ENV
 
           if [ ! -f "$GOWORK" ]; then
             echo "错误：找不到 go.work 文件！当前目录结构如下："
@@ -61,9 +61,7 @@ jobs:
 
       - name: 构建 ${{ matrix.service }} 服务
         run: |
-          cd services/${{ matrix.service }}
-          go mod tidy
-          go build -o /dev/null .
+          go build ./services/${{ matrix.service }}/...
 
   # 安全扫描
   security:
