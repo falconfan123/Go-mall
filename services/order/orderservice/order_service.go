@@ -14,8 +14,8 @@ import (
 )
 
 type (
-	CreateOrderRequest   = order.CreateOrderRequest
-	CreateOrderResponse  = order.OrderDetailResponse
+	CreateOrderRequest  = order.CreateOrderRequest
+	CreateOrderResponse = order.OrderDetailResponse
 	PaymentMethod       = order.PaymentMethod
 
 	OrderService interface {

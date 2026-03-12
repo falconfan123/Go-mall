@@ -11,22 +11,22 @@ import (
 )
 
 type (
-	GetProductReq         = product.GetProductReq
-	GetProductResp        = product.GetProductResp
-	GetAllProductsReq     = product.GetAllProductsReq
-	GetAllProductsResp    = product.GetAllProductsResp
-	CreateProductReq     = product.CreateProductReq
-	CreateProductResp    = product.CreateProductResp
-	UpdateProductReq     = product.UpdateProductReq
-	UpdateProductResp    = product.UpdateProductResp
-	DeleteProductReq     = product.DeleteProductReq
-	DeleteProductResp    = product.DeleteProductResp
-	IsExistProductReq    = product.IsExistProductReq
-	IsExistProductResp   = product.IsExistProductResp
-	QueryProductReq      = product.QueryProductReq
-	ListProductsReq      = product.ListProductsReq
-	ListProductsResp     = product.ListProductsResp
-	RecommendProductReq  = product.RecommendProductReq
+	GetProductReq       = product.GetProductReq
+	GetProductResp      = product.GetProductResp
+	GetAllProductsReq   = product.GetAllProductsReq
+	GetAllProductsResp  = product.GetAllProductsResp
+	CreateProductReq    = product.CreateProductReq
+	CreateProductResp   = product.CreateProductResp
+	UpdateProductReq    = product.UpdateProductReq
+	UpdateProductResp   = product.UpdateProductResp
+	DeleteProductReq    = product.DeleteProductReq
+	DeleteProductResp   = product.DeleteProductResp
+	IsExistProductReq   = product.IsExistProductReq
+	IsExistProductResp  = product.IsExistProductResp
+	QueryProductReq     = product.QueryProductReq
+	ListProductsReq     = product.ListProductsReq
+	ListProductsResp    = product.ListProductsResp
+	RecommendProductReq = product.RecommendProductReq
 	GetUploadURLReq     = product.GetUploadURLReq
 	GetUploadURLResp    = product.GetUploadURLResp
 	Product             = product.Product
