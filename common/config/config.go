@@ -2,10 +2,6 @@ package config
 
 import "fmt"
 
-type MysqlConfig struct {
-	DataSource string
-}
-
 type PostgresConfig struct {
 	DataSource string
 }
