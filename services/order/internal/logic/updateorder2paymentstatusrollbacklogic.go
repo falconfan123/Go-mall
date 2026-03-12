@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

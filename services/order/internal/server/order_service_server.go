@@ -9,7 +9,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/order/internal/logic"
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/pb"
 )
 
 type OrderServiceServer struct {

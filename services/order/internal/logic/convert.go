@@ -4,7 +4,7 @@ import (
 	order2 "github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/checkout/checkout"
 	"github.com/falconfan123/Go-mall/services/coupons/coupons"
-	"github.com/falconfan123/Go-mall/services/order/order"
+	"github.com/falconfan123/Go-mall/services/order/pb"
 	"time"
 )
 
