@@ -30,7 +30,7 @@ Log:
   Encoding: "json"
   Path: "./logs/users-rpc"
 
-Mysql:
+PostgresConfig:
   DataSource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
   Conntimeout: 5
 
