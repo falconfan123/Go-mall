@@ -12,18 +12,18 @@ import (
 
 type ServiceContext struct {
 	Config                config.Config
-	UserRpc               users.Users
-	AuthsRpc              authsclient.Auths
+	UserRPC               users.Users
+	AuthsRPC              authsclient.Auths
 	WrapperAuthMiddleware rest.Middleware
 	WithClientMiddleware  rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
-		UserRpc:               users.NewUsers(zrpc.MustNewClient(c.UserRpc)),
-		AuthsRpc:              authsclient.NewAuths(zrpc.MustNewClient(c.AuthsRpc)),
+		UserRPC:               users.NewUsers(zrpc.MustNewClient(c.UserRPC)),
+		AuthsRPC:              authsclient.NewAuths(zrpc.MustNewClient(c.AuthsRPC)),
 		Config:                c,
-		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, c.WhitePathList, c.OptionPathList), // # 需要指定认证rpc地址
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRPC, c.WhitePathList, c.OptionPathList), // # 需要指定认证rpc地址
 
 		WithClientMiddleware: middleware.WithClientMiddleware,
 	}

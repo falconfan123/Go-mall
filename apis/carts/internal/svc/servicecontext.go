@@ -9,20 +9,22 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
+// ServiceContext is the service context containing dependencies.
 type ServiceContext struct {
 	Config                config.Config
-	CartsRpc              cartsclient.Cart
-	ProductRpc            product.ProductCatalogService
+	CartsRPC              cartsclient.Cart
+	ProductRPC            product.ProductCatalogService
 	WithClientMiddleware  rest.Middleware
 	WrapperAuthMiddleware rest.Middleware
 }
 
+// NewServiceContext creates a new service context.
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:                c,
-		CartsRpc:              cartsclient.NewCart(zrpc.MustNewClient(c.CartsRpc)),
-		ProductRpc:            product.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
-		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, nil, nil),
+		CartsRPC:              cartsclient.NewCart(zrpc.MustNewClient(c.CartsRPC)),
+		ProductRPC:            product.NewProductCatalogService(zrpc.MustNewClient(c.ProductRPC)),
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRPC, nil, nil),
 		WithClientMiddleware:  middleware.WithClientMiddleware,
 	}
 }

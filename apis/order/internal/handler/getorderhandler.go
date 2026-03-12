@@ -12,6 +12,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
+// GetOrderHandler handles HTTP requests.
 func GetOrderHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.GetOrderReq

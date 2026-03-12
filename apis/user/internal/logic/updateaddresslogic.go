@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// UpdateAddressLogic is the business logic for updateaddress operations.
+// UpdateAddressLogic is the business logic for UpdateAddressLogic operations.
 type UpdateAddressLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewUpdateAddressLogic creates a new instance.
+// NewUpdateAddressLogic creates a new UpdateAddressLogic instance.
 func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateAddressLogic {
 	return &UpdateAddressLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,6 +31,9 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 	}
 }
 
+// UpdateAddress is a function.
+//
+//	does something.
 func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (resp *types.UpdateAddressResponse, err error) {
 
 	if req.City == "" || req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
@@ -35,10 +42,10 @@ func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (res
 
 	}
 
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
-	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
-	updateAddressresp, err := l.svcCtx.UserRpc.UpdateAddress(l.ctx, &users.UpdateAddressRequest{
-		Ip:              user_ip,
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
+	userIP := l.ctx.Value(biz.ClientIPKey).(string)
+	updateAddressresp, err := l.svcCtx.UserRPC.UpdateAddress(l.ctx, &users.UpdateAddressRequest{
+		Ip:              userIP,
 		RecipientName:   req.RecipientName,
 		PhoneNumber:     req.PhoneNumber,
 		Province:        req.Province,
@@ -46,7 +53,7 @@ func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (res
 		DetailedAddress: req.DetailedAddress,
 		IsDefault:       req.IsDefault,
 		AddressId:       req.AddressID,
-		UserId:          user_id,
+		UserId:          userID,
 	})
 	if err != nil {
 

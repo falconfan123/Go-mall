@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// ListPaymentsLogic is the business logic for listpayments operations.
+// ListPaymentsLogic is the business logic for ListPaymentsLogic operations.
 type ListPaymentsLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewListPaymentsLogic creates a new instance.
+// NewListPaymentsLogic creates a new ListPaymentsLogic instance.
 func NewListPaymentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListPaymentsLogic {
 	return &ListPaymentsLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,13 +31,16 @@ func NewListPaymentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *List
 	}
 }
 
+// ListPayments is a function.
+//
+//	does something.
 func (l *ListPaymentsLogic) ListPayments(req *types.PaymentListReq) (resp *types.PaymentListResponse, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
 
-	res, err := l.svcCtx.PaymentRpc.ListPayments(l.ctx, &payment.PaymentListReq{
+	res, err := l.svcCtx.PaymentRPC.ListPayments(l.ctx, &payment.PaymentListReq{
 		UserId: userID,
 		Pagination: &payment.PaymentListReq_Pagination{
 			Page:     req.Page,

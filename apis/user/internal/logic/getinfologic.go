@@ -14,12 +14,16 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// GetInfoLogic is the business logic for getinfo operations.
+// GetInfoLogic is the business logic for GetInfoLogic operations.
 type GetInfoLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewGetInfoLogic creates a new instance.
+// NewGetInfoLogic creates a new GetInfoLogic instance.
 func NewGetInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetInfoLogic {
 	return &GetInfoLogic{
 		Logger: logx.WithContext(ctx),
@@ -28,12 +32,15 @@ func NewGetInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetInfoLo
 	}
 }
 
+// GetInfo is a function.
+//
+//	does something.
 func (l *GetInfoLogic) GetInfo(req *types.GetInfoRequest) (resp *types.GetInfoResponse, err error) {
 
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
 
-	getresp, err := l.svcCtx.UserRpc.GetUser(l.ctx, &users.GetUserRequest{
-		UserId: user_id,
+	getresp, err := l.svcCtx.UserRPC.GetUser(l.ctx, &users.GetUserRequest{
+		UserId: userID,
 	})
 	if err != nil {
 

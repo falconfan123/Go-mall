@@ -13,12 +13,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// ClaimCouponLogic is the business logic for ClaimCouponLogic operations.
 type ClaimCouponLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewClaimCouponLogic creates a new ClaimCouponLogic instance.
 func NewClaimCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ClaimCouponLogic {
 	return &ClaimCouponLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,6 +29,7 @@ func NewClaimCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Claim
 	}
 }
 
+// does something.
 func (l *ClaimCouponLogic) ClaimCoupon(req *types.CouponItemReq) (resp *types.CouponItemResp, err error) {
 
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
@@ -34,7 +37,7 @@ func (l *ClaimCouponLogic) ClaimCoupon(req *types.CouponItemReq) (resp *types.Co
 		return nil, errors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
 
-	res, err := l.svcCtx.CouponRpc.ClaimCoupon(l.ctx, &couponsclient.ClaimCouponReq{
+	res, err := l.svcCtx.CouponRPC.ClaimCoupon(l.ctx, &couponsclient.ClaimCouponReq{
 		UserId:   int32(userID),
 		CouponId: req.CouponID,
 	})

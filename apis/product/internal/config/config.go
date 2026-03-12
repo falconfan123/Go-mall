@@ -6,10 +6,11 @@ import (
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 )
 
+// Config is the configuration struct for the service.
 type Config struct {
 	rest.RestConf
-	ProductRpc     zrpc.RpcClientConf
-	AuthsRpc       zrpc.RpcClientConf
+	ProductRPC     zrpc.RpcClientConf
+	AuthsRPC       zrpc.RpcClientConf
 	Consul         consul.Conf
 	OptionPathList []string
 }

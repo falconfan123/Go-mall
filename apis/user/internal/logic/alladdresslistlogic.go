@@ -13,12 +13,14 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// AllAddressListLogic is the business logic for AllAddressListLogic operations.
 type AllAddressListLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewAllAddressListLogic creates a new AllAddressListLogic instance.
 func NewAllAddressListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AllAddressListLogic {
 	return &AllAddressListLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,11 +29,12 @@ func NewAllAddressListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Al
 	}
 }
 
+// does something.
 func (l *AllAddressListLogic) AllAddressList(req *types.AllAddressListRequest) (resp *types.AddressListResponse, err error) {
 	// 调用用户 RPC 获取地址列表
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
-	listaddressresp, err := l.svcCtx.UserRpc.ListAddresses(l.ctx, &users.AllAddressLitstRequest{
-		UserId: user_id,
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
+	listaddressresp, err := l.svcCtx.UserRPC.ListAddresses(l.ctx, &users.AllAddressLitstRequest{
+		UserId: userID,
 	})
 
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	xhttp "github.com/zeromicro/x/http"
 )
 
+// ListOrdersHandler handles HTTP requests.
 func ListOrdersHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ListOrdersReq

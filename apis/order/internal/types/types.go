@@ -67,7 +67,7 @@ type OrderItemResp struct {
 type OrderResp struct {
 	OrderID        string          `json:"order_id"`
 	PreOrderID     string          `json:"pre_order_id"`
-	UserID         uint32          `json:"user_id"`
+	UserID         uint32          `json:"userID"`
 	PaymentMethod  int32           `json:"payment_method"`
 	TransactionID  string          `json:"transaction_id"`
 	PaidAt         int64           `json:"paid_at"`

@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// DeleteAddressLogic is the business logic for deleteaddress operations.
+// DeleteAddressLogic is the business logic for DeleteAddressLogic operations.
 type DeleteAddressLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewDeleteAddressLogic creates a new instance.
+// NewDeleteAddressLogic creates a new DeleteAddressLogic instance.
 func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteAddressLogic {
 	return &DeleteAddressLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,12 +31,15 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 	}
 }
 
+// DeleteAddress is a function.
+//
+//	does something.
 func (l *DeleteAddressLogic) DeleteAddress(req *types.DeleteAddressRequest) (resp *types.DeleteAddressResponse, err error) {
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
-	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
-	DeleteAddResp, err := l.svcCtx.UserRpc.DeleteAddress(l.ctx, &users.DeleteAddressRequest{
-		Ip:        user_ip,
-		UserId:    user_id,
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
+	userIP := l.ctx.Value(biz.ClientIPKey).(string)
+	DeleteAddResp, err := l.svcCtx.UserRPC.DeleteAddress(l.ctx, &users.DeleteAddressRequest{
+		Ip:        userIP,
+		UserId:    userID,
 		AddressId: req.AddressID,
 	})
 

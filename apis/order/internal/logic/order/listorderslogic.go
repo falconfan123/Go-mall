@@ -14,12 +14,16 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// ListOrdersLogic is the business logic for listorders operations.
+// ListOrdersLogic is the business logic for ListOrdersLogic operations.
 type ListOrdersLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewListOrdersLogic creates a new instance.
+// NewListOrdersLogic creates a new ListOrdersLogic instance.
 func NewListOrdersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListOrdersLogic {
 	return &ListOrdersLogic{
 		Logger: logx.WithContext(ctx),
@@ -28,6 +32,9 @@ func NewListOrdersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListOr
 	}
 }
 
+// ListOrders is a function.
+//
+//	does something.
 func (l *ListOrdersLogic) ListOrders(req *types.ListOrdersReq) (resp *types.ListOrdersResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
@@ -51,7 +58,7 @@ func (l *ListOrdersLogic) ListOrders(req *types.ListOrdersReq) (resp *types.List
 		rpcReq.StatusFilter = statusFilter
 	}
 
-	rpcResp, err := l.svcCtx.OrderRpc.ListOrders(l.ctx, rpcReq)
+	rpcResp, err := l.svcCtx.OrderRPC.ListOrders(l.ctx, rpcReq)
 	if err != nil {
 		l.Logger.Errorf("ListOrders rpc failed: %v", err)
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)

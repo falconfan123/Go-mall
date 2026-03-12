@@ -12,6 +12,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
+// CheckoutHandler handles HTTP requests.
 func CheckoutHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.CheckoutReq

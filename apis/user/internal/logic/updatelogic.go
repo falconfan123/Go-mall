@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// UpdateLogic is the business logic for update operations.
+// UpdateLogic is the business logic for UpdateLogic operations.
 type UpdateLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewUpdateLogic creates a new instance.
+// NewUpdateLogic creates a new UpdateLogic instance.
 func NewUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateLogic {
 	return &UpdateLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,18 +31,21 @@ func NewUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateLogi
 	}
 }
 
+// Update is a function.
+//
+//	does something.
 func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateResponse, err error) {
 
 	if req.UserName == "" && req.Avatar == "" {
 		return nil, errors.New(code.Fail, "用户名和头像不能都空")
 	}
 
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
-	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
+	userIP := l.ctx.Value(biz.ClientIPKey).(string)
 
-	updateresp, err := l.svcCtx.UserRpc.UpdateUser(l.ctx, &users.UpdateUserRequest{
-		Ip:        user_ip,
-		UserId:    user_id,
+	updateresp, err := l.svcCtx.UserRPC.UpdateUser(l.ctx, &users.UpdateUserRequest{
+		Ip:        userIP,
+		UserId:    userID,
 		UsrName:   req.UserName,
 		AvatarUrl: req.Avatar,
 	})

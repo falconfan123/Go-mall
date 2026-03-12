@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// DetailLogic is the business logic for detail operations.
+// DetailLogic is the business logic for DetailLogic operations.
 type DetailLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewDetailLogic creates a new instance.
+// NewDetailLogic creates a new DetailLogic instance.
 func NewDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DetailLogic {
 	return &DetailLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,13 +31,16 @@ func NewDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DetailLogi
 	}
 }
 
+// Detail is a function.
+//
+//	does something.
 func (l *DetailLogic) Detail(req *types.CheckoutDetailReq) (resp *types.CheckoutDetailResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
 
-	res, err := l.svcCtx.CheckoutRpc.GetCheckoutDetail(l.ctx, &checkout.CheckoutDetailReq{
+	res, err := l.svcCtx.CheckoutRPC.GetCheckoutDetail(l.ctx, &checkout.CheckoutDetailReq{
 		PreOrderId: req.PreOrderID,
 		UserId:     int32(userID),
 	})

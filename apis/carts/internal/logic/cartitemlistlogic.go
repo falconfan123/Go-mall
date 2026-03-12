@@ -13,6 +13,7 @@ import (
 )
 
 // CartItemListLogic handles the logic of listing cart items.
+// CartItemListLogic is the business logic for CartItemListLogic operations.
 type CartItemListLogic struct {
 	logx.Logger
 	ctx    context.Context
@@ -20,6 +21,7 @@ type CartItemListLogic struct {
 }
 
 // NewCartItemListLogic creates a new CartItemListLogic.
+// NewCartItemListLogic creates a new CartItemListLogic instance.
 func NewCartItemListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CartItemListLogic {
 	return &CartItemListLogic{
 		Logger: logx.WithContext(ctx),
@@ -29,32 +31,34 @@ func NewCartItemListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cart
 }
 
 // CartItemList retrieves the list of cart items for a user.
+//
+//	does something.
 func (l *CartItemListLogic) CartItemList(req *types.UserInfo) (resp *types.CartItemListResp, err error) {
 	// 获取购物车信息
-	userId := l.ctx.Value(biz.UserIDKey).(uint32)
-	res, err := l.svcCtx.CartsRpc.CartItemList(l.ctx, &carts.UserInfo{
-		Id: int32(userId),
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
+	res, err := l.svcCtx.CartsRPC.CartItemList(l.ctx, &carts.UserInfo{
+		Id: int32(userID),
 	})
 
 	// 处理 RPC 失败
 	if err != nil {
 		l.Logger.Errorw("call rpc CartItemList failed",
 			logx.Field("err", err),
-			logx.Field("user_id", userId))
+			logx.Field("userID", userID))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
 
 	// 处理 RPC 返回结果为空的情况
 	if res == nil {
 		l.Logger.Errorw("rpc CartItemList returned nil response",
-			logx.Field("user_id", userId))
+			logx.Field("userID", userID))
 		return nil, errors.New(code.ServerError, "RPC response is nil")
 	}
 
 	// 处理业务错误
 	if res.StatusCode != code.Success {
 		l.Logger.Debugw("rpc CartItemList returned business error",
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("status_code", res.StatusCode),
 			logx.Field("status_msg", res.StatusMsg))
 		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
@@ -69,7 +73,7 @@ func (l *CartItemListLogic) CartItemList(req *types.UserInfo) (resp *types.CartI
 	// 如果购物车为空，返回空商品列表
 	if len(ids) == 0 {
 		l.Logger.Infow("no product item in cart",
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("total", res.Total))
 		return &types.CartItemListResp{
 			Total:    res.Total,
@@ -80,7 +84,7 @@ func (l *CartItemListLogic) CartItemList(req *types.UserInfo) (resp *types.CartI
 	// 获取商品详细信息
 	productsList := make([]*types.CartInfoResponse, 0)
 	for _, id := range ids {
-		res_info, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
+		resInfo, err := l.svcCtx.ProductRPC.GetProduct(l.ctx, &product.GetProductReq{
 			Id: uint32(id),
 		})
 		if err != nil {
@@ -89,8 +93,8 @@ func (l *CartItemListLogic) CartItemList(req *types.UserInfo) (resp *types.CartI
 		}
 
 		// 获取商品详细信息
-		if res_info != nil && res_info.Product != nil {
-			product := res_info.Product
+		if resInfo != nil && resInfo.Product != nil {
+			product := resInfo.Product
 
 			// 处理每个购物车商品的详细信息
 			for _, item := range res.Data {
@@ -117,7 +121,7 @@ func (l *CartItemListLogic) CartItemList(req *types.UserInfo) (resp *types.CartI
 
 	// 正常返回
 	l.Logger.Infow("Cart item list retrieved successfully",
-		logx.Field("user_id", userId),
+		logx.Field("userID", userID),
 		logx.Field("total", res.Total))
 
 	return &types.CartItemListResp{

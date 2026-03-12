@@ -11,6 +11,7 @@ import (
 	xhttp "github.com/zeromicro/x/http"
 )
 
+// DeleteHandler handles HTTP requests.
 func DeleteHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.DeleteRequest

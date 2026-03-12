@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// MyCouponListLogic is the business logic for mycouponlist operations.
+// MyCouponListLogic is the business logic for MyCouponListLogic operations.
 type MyCouponListLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewMyCouponListLogic creates a new instance.
+// NewMyCouponListLogic creates a new MyCouponListLogic instance.
 func NewMyCouponListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MyCouponListLogic {
 	return &MyCouponListLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,6 +31,9 @@ func NewMyCouponListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MyCo
 	}
 }
 
+// MyCouponList is a function.
+//
+//	does something.
 func (l *MyCouponListLogic) MyCouponList(req *types.CouponListReq) (resp *types.CouponMyListResp, err error) {
 
 	if req.Page <= 0 {
@@ -40,7 +47,7 @@ func (l *MyCouponListLogic) MyCouponList(req *types.CouponListReq) (resp *types.
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
 
-	res, err := l.svcCtx.CouponRpc.ListUserCoupons(l.ctx, &couponsclient.ListUserCouponsReq{
+	res, err := l.svcCtx.CouponRPC.ListUserCoupons(l.ctx, &couponsclient.ListUserCouponsReq{
 		Pagination: &couponsclient.PaginationReq{
 			Page: req.Page,
 			Size: req.PageSize,

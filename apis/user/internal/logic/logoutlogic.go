@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// LogoutLogic is the business logic for logout operations.
+// LogoutLogic is the business logic for LogoutLogic operations.
 type LogoutLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewLogoutLogic creates a new instance.
+// NewLogoutLogic creates a new LogoutLogic instance.
 func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogic {
 	return &LogoutLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,13 +31,16 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 	}
 }
 
+// Logout is a function.
+//
+//	does something.
 func (l *LogoutLogic) Logout(req *types.LogoutRequest) (resp *types.LogoutResponse, err error) {
 
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
 
-	logoutrep, err := l.svcCtx.UserRpc.Logout(l.ctx, &users.LogoutRequest{
+	logoutrep, err := l.svcCtx.UserRPC.Logout(l.ctx, &users.LogoutRequest{
 
-		UserId: user_id,
+		UserId: userID,
 	})
 	if err != nil {
 

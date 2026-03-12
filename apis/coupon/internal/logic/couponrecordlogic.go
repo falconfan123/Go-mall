@@ -12,12 +12,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// CouponRecordLogic is the business logic for couponrecord operations.
+// CouponRecordLogic is the business logic for CouponRecordLogic operations.
 type CouponRecordLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCouponRecordLogic creates a new instance.
+// NewCouponRecordLogic creates a new CouponRecordLogic instance.
 func NewCouponRecordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CouponRecordLogic {
 	return &CouponRecordLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,6 +30,9 @@ func NewCouponRecordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Coup
 	}
 }
 
+// CouponRecord is a function.
+//
+//	does something.
 func (l *CouponRecordLogic) CouponRecord(req *types.CouponListReq) (resp *types.CouponUsageListResp, err error) {
 	if req.Page <= 0 {
 		req.Page = 1
@@ -37,7 +44,7 @@ func (l *CouponRecordLogic) CouponRecord(req *types.CouponListReq) (resp *types.
 	if !ok {
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
-	couponUsages, err := l.svcCtx.CouponRpc.ListCouponUsages(l.ctx, &couponsclient.ListCouponUsagesReq{
+	couponUsages, err := l.svcCtx.CouponRPC.ListCouponUsages(l.ctx, &couponsclient.ListCouponUsagesReq{
 		UserId: userID,
 		Pagination: &couponsclient.PaginationReq{
 			Page: req.Page,

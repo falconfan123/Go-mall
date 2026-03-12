@@ -62,7 +62,7 @@ type CouponUsage struct {
 	PreOrderID     string `json:"pre_order_id"`
 	OrderID        string `json:"order_id"`
 	CouponID       string `json:"coupon_id"`
-	UserID         int32  `json:"user_id"`
+	UserID         int32  `json:"userID"`
 	CouponType     string `json:"coupon_type"`
 	OriginValue    string `json:"origin_value"`
 	DiscountAmount string `json:"discount_amount"`

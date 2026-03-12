@@ -13,12 +13,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// CheckoutLogic is the business logic for CheckoutLogic operations.
 type CheckoutLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCheckoutLogic creates a new CheckoutLogic instance.
 func NewCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CheckoutLogic {
 	return &CheckoutLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,6 +29,7 @@ func NewCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Checkout
 	}
 }
 
+// does something.
 func (l *CheckoutLogic) Checkout(req *types.CheckoutReq) (resp *types.CheckoutResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
@@ -39,7 +42,7 @@ func (l *CheckoutLogic) Checkout(req *types.CheckoutReq) (resp *types.CheckoutRe
 		addressID = uint64(req.AddressID)
 	}
 
-	res, err := l.svcCtx.CheckoutRpc.PrepareCheckout(l.ctx, &checkout.CheckoutReq{
+	res, err := l.svcCtx.CheckoutRPC.PrepareCheckout(l.ctx, &checkout.CheckoutReq{
 		UserId:     userID,
 		CouponId:   req.CouponID,
 		OrderItems: convertCheckoutItem2Req(req.OrderItems),

@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// CancelOrderLogic is the business logic for cancelorder operations.
+// CancelOrderLogic is the business logic for CancelOrderLogic operations.
 type CancelOrderLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCancelOrderLogic creates a new instance.
+// NewCancelOrderLogic creates a new CancelOrderLogic instance.
 func NewCancelOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CancelOrderLogic {
 	return &CancelOrderLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,12 +31,15 @@ func NewCancelOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cance
 	}
 }
 
+// CancelOrder is a function.
+//
+//	does something.
 func (l *CancelOrderLogic) CancelOrder(req *types.CancelOrderReq) (resp *types.CancelOrderResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
-	res, err := l.svcCtx.OrderRpc.CancelOrder(l.ctx, &order.CancelOrderRequest{
+	res, err := l.svcCtx.OrderRPC.CancelOrder(l.ctx, &order.CancelOrderRequest{
 		OrderId:      req.OrderID,
 		UserId:       userID,
 		CancelReason: req.CancelReason,

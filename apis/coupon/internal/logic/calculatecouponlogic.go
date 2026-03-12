@@ -12,12 +12,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// CalculateCouponLogic is the business logic for calculatecoupon operations.
+// CalculateCouponLogic is the business logic for CalculateCouponLogic operations.
 type CalculateCouponLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCalculateCouponLogic creates a new instance.
+// NewCalculateCouponLogic creates a new CalculateCouponLogic instance.
 func NewCalculateCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CalculateCouponLogic {
 	return &CalculateCouponLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,13 +30,16 @@ func NewCalculateCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 	}
 }
 
+// CalculateCoupon is a function.
+//
+//	does something.
 func (l *CalculateCouponLogic) CalculateCoupon(req *types.CalculateCouponReq) (resp *types.CalculateCouponResp, err error) {
 
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
-	calculateCouponResp, err := l.svcCtx.CouponRpc.CalculateCoupon(l.ctx, &coupons.CalculateCouponReq{
+	calculateCouponResp, err := l.svcCtx.CouponRPC.CalculateCoupon(l.ctx, &coupons.CalculateCouponReq{
 		CouponId: req.CouponID,
 		Items:    convertToCouponItems(req.Items),
 		UserId:   int32(userID),

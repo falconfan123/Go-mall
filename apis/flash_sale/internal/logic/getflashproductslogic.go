@@ -10,12 +10,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// GetFlashProductsLogic is the business logic for GetFlashProductsLogic operations.
 type GetFlashProductsLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewGetFlashProductsLogic creates a new GetFlashProductsLogic instance.
 func NewGetFlashProductsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFlashProductsLogic {
 	return &GetFlashProductsLogic{
 		Logger: logx.WithContext(ctx),
@@ -24,6 +26,7 @@ func NewGetFlashProductsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	}
 }
 
+// does something.
 func (l *GetFlashProductsLogic) GetFlashProducts(req *types.GetFlashProductsReq) (resp *types.GetFlashProductsResp, err error) {
 	// 模拟秒杀商品数据
 	products := []*types.FlashProduct{

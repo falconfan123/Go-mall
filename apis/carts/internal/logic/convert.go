@@ -5,6 +5,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/carts/pb"
 )
 
+// ConvertCartInfoResponse is a function.
 func ConvertCartInfoResponse(res []*carts.CartInfoResponse) []*types.CartInfoResponse {
 	var result []*types.CartInfoResponse
 	for _, item := range res {

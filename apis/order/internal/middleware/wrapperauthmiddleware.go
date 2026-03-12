@@ -18,6 +18,7 @@ func NewWrapperAuthMiddleware() *WrapperAuthMiddleware {
 	return &WrapperAuthMiddleware{}
 }
 
+// Handle does something.
 func (m *WrapperAuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logx.Info("WrapperAuthMiddleware: Start handling request")

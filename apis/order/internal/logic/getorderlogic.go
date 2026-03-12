@@ -14,12 +14,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// GetOrderLogic is the business logic for GetOrderLogic operations.
 type GetOrderLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewGetOrderLogic creates a new GetOrderLogic instance.
 func NewGetOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetOrderLogic {
 	return &GetOrderLogic{
 		Logger: logx.WithContext(ctx),
@@ -28,12 +30,13 @@ func NewGetOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetOrder
 	}
 }
 
+// does something.
 func (l *GetOrderLogic) GetOrder(req *types.GetOrderReq) (resp *types.OrderDetailResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
-	res, err := l.svcCtx.OrderRpc.GetOrder(l.ctx, &order.GetOrderRequest{
+	res, err := l.svcCtx.OrderRPC.GetOrder(l.ctx, &order.GetOrderRequest{
 		OrderId: req.OrderID,
 		UserId:  userID,
 	})

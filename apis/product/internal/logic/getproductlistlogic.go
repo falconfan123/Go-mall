@@ -13,12 +13,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// GetProductListLogic is the business logic for GetProductListLogic operations.
 type GetProductListLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewGetProductListLogic creates a new GetProductListLogic instance.
 func NewGetProductListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetProductListLogic {
 	return &GetProductListLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,6 +29,7 @@ func NewGetProductListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 	}
 }
 
+// does something.
 func (l *GetProductListLogic) GetProductList(req *types.GetProductListReq) (resp *types.GetProductListResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
@@ -35,7 +38,7 @@ func (l *GetProductListLogic) GetProductList(req *types.GetProductListReq) (resp
 	var res *product.GetAllProductsResp
 	if userID == 0 {
 		// 调用 RPC 服务获取分页商品列表
-		res, err = l.svcCtx.ProductRpc.GetAllProduct(l.ctx, &product.GetAllProductsReq{
+		res, err = l.svcCtx.ProductRPC.GetAllProduct(l.ctx, &product.GetAllProductsReq{
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		})
@@ -44,17 +47,17 @@ func (l *GetProductListLogic) GetProductList(req *types.GetProductListReq) (resp
 			l.Logger.Errorw("recommend product failed, fallback to normal list",
 				logx.Field("err", err),
 				logx.Field("status_code", res.GetStatusCode()),
-				logx.Field("user_id", userID))
+				logx.Field("userID", userID))
 
 			// 使用普通查询作为兜底
-			res, err = l.svcCtx.ProductRpc.GetAllProduct(l.ctx, &product.GetAllProductsReq{
+			res, err = l.svcCtx.ProductRPC.GetAllProduct(l.ctx, &product.GetAllProductsReq{
 				Page:     req.Page,
 				PageSize: req.PageSize,
 			})
 		}
 	} else {
 		// 尝试调用推荐服务
-		res, err = l.svcCtx.ProductRpc.RecommendProduct(l.ctx, &product.RecommendProductReq{
+		res, err = l.svcCtx.ProductRPC.RecommendProduct(l.ctx, &product.RecommendProductReq{
 			UserId: int32(userID),
 			Paginator: &product.RecommendProductReq_Paginator{
 				Page:     req.Page,
@@ -66,10 +69,10 @@ func (l *GetProductListLogic) GetProductList(req *types.GetProductListReq) (resp
 			l.Logger.Errorw("recommend product failed, fallback to normal list",
 				logx.Field("err", err),
 				logx.Field("status_code", res.GetStatusCode()),
-				logx.Field("user_id", userID))
+				logx.Field("userID", userID))
 
 			// 使用普通查询作为兜底
-			res, err = l.svcCtx.ProductRpc.GetAllProduct(l.ctx, &product.GetAllProductsReq{
+			res, err = l.svcCtx.ProductRPC.GetAllProduct(l.ctx, &product.GetAllProductsReq{
 				Page:     req.Page,
 				PageSize: req.PageSize,
 			})
@@ -77,7 +80,7 @@ func (l *GetProductListLogic) GetProductList(req *types.GetProductListReq) (resp
 	}
 	// 处理 RPC 调用失败
 	if err != nil {
-		l.Logger.Errorw("call rpc ProductRpc failed",
+		l.Logger.Errorw("call rpc ProductRPC failed",
 			logx.Field("err", err),
 			logx.Field("page", req.Page),
 			logx.Field("page_size", req.PageSize))

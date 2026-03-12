@@ -5,9 +5,10 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
+// Config is the configuration struct for the service.
 type Config struct {
 	rest.RestConf
-	AuthsRpc   zrpc.RpcClientConf
-	CartsRpc   zrpc.RpcClientConf
-	ProductRpc zrpc.RpcClientConf
+	AuthsRPC   zrpc.RpcClientConf
+	CartsRPC   zrpc.RpcClientConf
+	ProductRPC zrpc.RpcClientConf
 }

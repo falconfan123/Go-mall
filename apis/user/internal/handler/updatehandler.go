@@ -11,6 +11,7 @@ import (
 	xhttp "github.com/zeromicro/x/http"
 )
 
+// UpdateHandler handles HTTP requests.
 func UpdateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.UpdateRequest

@@ -10,6 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
+// GetProductListHandler handles HTTP requests.
 func GetProductListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.GetProductListReq

@@ -16,12 +16,14 @@ import (
 	"strings"
 )
 
+// CreateOrderLogic is the business logic for CreateOrderLogic operations.
 type CreateOrderLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCreateOrderLogic creates a new CreateOrderLogic instance.
 func NewCreateOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateOrderLogic {
 	return &CreateOrderLogic{
 		Logger: logx.WithContext(ctx),
@@ -30,6 +32,7 @@ func NewCreateOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 	}
 }
 
+// does something.
 func (l *CreateOrderLogic) CreateOrder(req *types.CreateOrderReq) (resp *types.CreateOrderResp, err error) {
 	l.Logger.Infof("CreateOrder called. Req: %+v", req)
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
@@ -48,7 +51,7 @@ func (l *CreateOrderLogic) CreateOrder(req *types.CreateOrderReq) (resp *types.C
 
 	// --------------- saga ---------------
 	// 去掉direct://前缀
-	dtmTarget := strings.TrimPrefix(l.svcCtx.Config.DtmRpc.Target, "direct://")
+	dtmTarget := strings.TrimPrefix(l.svcCtx.Config.DtmRPC.Target, "direct://")
 	sagaGrpc := dtmgrpc.NewSagaGrpc(dtmTarget, uuid.New().String())
 	orderID := uuid.New().String()
 	if req.CouponID != "" {

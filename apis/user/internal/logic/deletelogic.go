@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// DeleteLogic is the business logic for delete operations.
+// DeleteLogic is the business logic for DeleteLogic operations.
 type DeleteLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewDeleteLogic creates a new instance.
+// NewDeleteLogic creates a new DeleteLogic instance.
 func NewDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteLogic {
 	return &DeleteLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,15 +31,18 @@ func NewDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteLogi
 	}
 }
 
+// Delete is a function.
+//
+//	does something.
 func (l *DeleteLogic) Delete(req *types.DeleteRequest) (resp *types.DeleteResponse, err error) {
 
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
-	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
+	userIP := l.ctx.Value(biz.ClientIPKey).(string)
 
-	deleteresp, err := l.svcCtx.UserRpc.DeleteUser(l.ctx, &users.DeleteUserRequest{
+	deleteresp, err := l.svcCtx.UserRPC.DeleteUser(l.ctx, &users.DeleteUserRequest{
 
-		UserId: uint32(user_id),
-		Ip:     user_ip,
+		UserId: uint32(userID),
+		Ip:     userIP,
 	})
 	if err != nil {
 

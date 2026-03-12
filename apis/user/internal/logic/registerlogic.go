@@ -16,12 +16,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// RegisterLogic is the business logic for RegisterLogic operations.
 type RegisterLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewRegisterLogic creates a new RegisterLogic instance.
 func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RegisterLogic {
 	return &RegisterLogic{
 		Logger: logx.WithContext(ctx),
@@ -30,6 +32,7 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 	}
 }
 
+// does something.
 func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.RegisterResponse, err error) {
 	// todo: add your logic here and delete this line
 
@@ -50,10 +53,10 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 
 	}
 
-	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
+	userIP := l.ctx.Value(biz.ClientIPKey).(string)
 
-	response, err := l.svcCtx.UserRpc.Register(l.ctx, &users.RegisterRequest{
-		Ip:              user_ip,
+	response, err := l.svcCtx.UserRPC.Register(l.ctx, &users.RegisterRequest{
+		Ip:              userIP,
 		Email:           req.Email,
 		Password:        req.Password,
 		ConfirmPassword: req.ConfirmPassword,
@@ -69,12 +72,12 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 
 	}
 
-	client_IP := l.ctx.Value(biz.ClientIPKey).(string)
+	clientIP := l.ctx.Value(biz.ClientIPKey).(string)
 
-	authrespone, err := l.svcCtx.AuthsRpc.GenerateToken(l.ctx, &authsclient.AuthGenReq{
+	authrespone, err := l.svcCtx.AuthsRPC.GenerateToken(l.ctx, &authsclient.AuthGenReq{
 		UserId:   response.UserId,
 		Username: "",
-		ClientIp: client_IP,
+		ClientIp: clientIP,
 	})
 	if err != nil {
 		l.Logger.Errorw("call rpc generate token failed", logx.Field("err", err))

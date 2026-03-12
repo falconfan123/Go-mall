@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// ListOrdersLogic is the business logic for listorders operations.
+// ListOrdersLogic is the business logic for ListOrdersLogic operations.
 type ListOrdersLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewListOrdersLogic creates a new instance.
+// NewListOrdersLogic creates a new ListOrdersLogic instance.
 func NewListOrdersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListOrdersLogic {
 	return &ListOrdersLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,12 +31,15 @@ func NewListOrdersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListOr
 	}
 }
 
+// ListOrders is a function.
+//
+//	does something.
 func (l *ListOrdersLogic) ListOrders(req *types.ListOrdersReq) (resp *types.ListOrdersResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
-	res, err := l.svcCtx.OrderRpc.ListOrders(l.ctx, &order.ListOrdersRequest{
+	res, err := l.svcCtx.OrderRPC.ListOrders(l.ctx, &order.ListOrdersRequest{
 		Pagination: &order.ListOrdersRequest_Pagination{
 			Page:     req.Page,
 			PageSize: req.PageSize,

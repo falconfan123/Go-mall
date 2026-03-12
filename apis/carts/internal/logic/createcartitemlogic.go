@@ -14,12 +14,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// CreateCartItemLogic is the business logic for CreateCartItemLogic operations.
 type CreateCartItemLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCreateCartItemLogic creates a new CreateCartItemLogic instance.
 func NewCreateCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateCartItemLogic {
 	return &CreateCartItemLogic{
 		Logger: logx.WithContext(ctx),
@@ -28,11 +30,12 @@ func NewCreateCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 	}
 }
 
+// does something.
 func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *types.CreateCartResp, err error) {
-	userId := l.ctx.Value(biz.UserIDKey).(uint32)
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
 
 	// 1. 先检查商品是否存在
-	exist, err := l.svcCtx.ProductRpc.IsExistProduct(l.ctx, &product.IsExistProductReq{
+	exist, err := l.svcCtx.ProductRPC.IsExistProduct(l.ctx, &product.IsExistProductReq{
 		Id: int64(req.ProductId),
 	})
 	if err != nil {
@@ -48,7 +51,7 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 	}
 
 	// 2. 调用 GetProduct RPC 获取商品详情
-	productRes, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
+	productRes, err := l.svcCtx.ProductRPC.GetProduct(l.ctx, &product.GetProductReq{
 		Id: uint32(req.ProductId),
 	})
 	if err != nil {
@@ -67,14 +70,14 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 	}
 
 	// 4. 调用 CreateCartItem RPC 添加到购物车
-	res, err := l.svcCtx.CartsRpc.CreateCartItem(l.ctx, &carts.CartItemRequest{
-		UserId:    int32(userId),
+	res, err := l.svcCtx.CartsRPC.CreateCartItem(l.ctx, &carts.CartItemRequest{
+		UserId:    int32(userID),
 		ProductId: req.ProductId,
 	})
 	if err != nil {
 		l.Logger.Errorw("call rpc CreateCartItem failed",
 			logx.Field("err", err),
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.CartCreationFailed, code.CartCreationFailedMsg)
 	}
@@ -82,7 +85,7 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 	// 5. 处理 RPC 返回 nil 的情况
 	if res == nil {
 		l.Logger.Errorw("rpc CreateCartItem returned nil response",
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
@@ -90,7 +93,7 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 	// 6. 处理业务错误
 	if res.StatusCode != code.Success {
 		l.Logger.Debugw("rpc CreateCartItem returned business error",
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("product_id", req.ProductId),
 			logx.Field("status_code", res.StatusCode),
 			logx.Field("status_msg", res.StatusMsg))
@@ -99,7 +102,7 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 
 	// 7. 记录成功日志并返回结果
 	l.Logger.Infow("Cart item created successfully",
-		logx.Field("user_id", userId),
+		logx.Field("userID", userID),
 		logx.Field("product_id", req.ProductId))
 
 	return &types.CreateCartResp{

@@ -10,6 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
+// GetFlashProductsHandler handles HTTP requests.
 func GetFlashProductsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.GetFlashProductsReq

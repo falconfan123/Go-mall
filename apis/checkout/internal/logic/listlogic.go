@@ -13,12 +13,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// ListLogic is the business logic for list operations.
+// ListLogic is the business logic for ListLogic operations.
 type ListLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewListLogic creates a new instance.
+// NewListLogic creates a new ListLogic instance.
 func NewListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListLogic {
 	return &ListLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,6 +31,9 @@ func NewListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListLogic {
 	}
 }
 
+// List is a function.
+//
+//	does something.
 func (l *ListLogic) List(req *types.CheckoutListReq) (resp *types.CheckoutListResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
@@ -35,7 +42,7 @@ func (l *ListLogic) List(req *types.CheckoutListReq) (resp *types.CheckoutListRe
 	if req.PageSize <= 0 || req.PageSize > biz.MaxPageSize {
 		req.PageSize = biz.MaxPageSize
 	}
-	res, err := l.svcCtx.CheckoutRpc.GetCheckoutList(l.ctx, &checkout.CheckoutListReq{
+	res, err := l.svcCtx.CheckoutRPC.GetCheckoutList(l.ctx, &checkout.CheckoutListReq{
 		UserId:   userID,
 		Page:     req.Page,
 		PageSize: req.PageSize,

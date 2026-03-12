@@ -17,12 +17,14 @@ import (
 	xerrors "github.com/zeromicro/x/errors"
 )
 
+// CreateOrderLogic is the business logic for CreateOrderLogic operations.
 type CreateOrderLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCreateOrderLogic creates a new CreateOrderLogic instance.
 func NewCreateOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateOrderLogic {
 	return &CreateOrderLogic{
 		Logger: logx.WithContext(ctx),
@@ -31,6 +33,7 @@ func NewCreateOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 	}
 }
 
+// does something.
 func (l *CreateOrderLogic) CreateOrder(req *types.CreateOrderReq) (resp *types.CreateOrderResp, err error) {
 	l.Logger.Infof("CreateOrder called. Req: %+v", req)
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
@@ -49,7 +52,7 @@ func (l *CreateOrderLogic) CreateOrder(req *types.CreateOrderReq) (resp *types.C
 
 	// --------------- saga ---------------
 	// 去掉direct://前缀
-	dtmTarget := l.svcCtx.Config.DtmRpc.Target
+	dtmTarget := l.svcCtx.Config.DtmRPC.Target
 	if strings.HasPrefix(dtmTarget, "direct://") {
 		dtmTarget = dtmTarget[len("direct://"):]
 	}

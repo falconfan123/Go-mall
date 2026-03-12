@@ -13,12 +13,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// DeleteCartItemLogic is the business logic for DeleteCartItemLogic operations.
 type DeleteCartItemLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewDeleteCartItemLogic creates a new DeleteCartItemLogic instance.
 func NewDeleteCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteCartItemLogic {
 	return &DeleteCartItemLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,12 +29,13 @@ func NewDeleteCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 	}
 }
 
+// does something.
 func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *types.DeleteCartResp, err error) {
-	userId := l.ctx.Value(biz.UserIDKey).(uint32)
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
 
 	// 调用 DeleteCartItem RPC
-	res, err := l.svcCtx.CartsRpc.DeleteCartItem(l.ctx, &carts.CartItemRequest{
-		UserId:    int32(userId),
+	res, err := l.svcCtx.CartsRPC.DeleteCartItem(l.ctx, &carts.CartItemRequest{
+		UserId:    int32(userID),
 		ProductId: req.ProductId,
 	})
 
@@ -40,7 +43,7 @@ func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *ty
 	if err != nil {
 		l.Logger.Errorw("call rpc DeleteCartItem failed",
 			logx.Field("err", err),
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
@@ -54,7 +57,7 @@ func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *ty
 	// 处理 "商品不存在" 的业务错误
 	if res.StatusCode == code.CartItemNotFound {
 		l.Logger.Errorw("Cart item not found",
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("product_id", req.ProductId))
 		return &types.DeleteCartResp{Success: false}, nil
 	}
@@ -69,7 +72,7 @@ func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *ty
 
 	// 删除成功
 	l.Logger.Infow("Cart item deleted successfully",
-		logx.Field("user_id", userId),
+		logx.Field("userID", userID),
 		logx.Field("product_id", req.ProductId))
 
 	return &types.DeleteCartResp{Success: true}, nil

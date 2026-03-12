@@ -9,6 +9,7 @@ func NewWithClientMiddleware() *WithClientMiddleware {
 	return &WithClientMiddleware{}
 }
 
+// Handle does something.
 func (m *WithClientMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO generate middleware implement function, delete after code implementation

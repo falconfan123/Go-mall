@@ -16,12 +16,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// LoginLogic is the business logic for LoginLogic operations.
 type LoginLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewLoginLogic creates a new LoginLogic instance.
 func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic {
 	return &LoginLogic{
 		Logger: logx.WithContext(ctx),
@@ -30,6 +32,7 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 	}
 }
 
+// does something.
 func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, err error) {
 	// todo: add your logic here and delete this line
 
@@ -37,7 +40,7 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 		return nil, errors.New(code.LoginMessageEmpty, code.LoginMessageEmptyMsg)
 	}
 
-	loginres, err := l.svcCtx.UserRpc.Login(l.ctx, &users.LoginRequest{
+	loginres, err := l.svcCtx.UserRPC.Login(l.ctx, &users.LoginRequest{
 		Email:    req.Email,
 		Password: req.Password,
 	})
@@ -53,12 +56,12 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 
 	}
 
-	client_IP := l.ctx.Value(biz.ClientIPKey).(string)
+	clientIP := l.ctx.Value(biz.ClientIPKey).(string)
 
-	authrespone, err := l.svcCtx.AuthsRpc.GenerateToken(l.ctx, &authsclient.AuthGenReq{
+	authrespone, err := l.svcCtx.AuthsRPC.GenerateToken(l.ctx, &authsclient.AuthGenReq{
 		UserId:   loginres.UserId,
 		Username: loginres.UserName,
-		ClientIp: client_IP,
+		ClientIp: clientIP,
 	})
 	if err != nil {
 		l.Logger.Errorw("call rpc  auth token failed", logx.Field("err", err))

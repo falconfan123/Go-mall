@@ -13,12 +13,14 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// GetAddressLogic is the business logic for GetAddressLogic operations.
 type GetAddressLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewGetAddressLogic creates a new GetAddressLogic instance.
 func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAddressLogic {
 	return &GetAddressLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,11 +29,12 @@ func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdd
 	}
 }
 
+// does something.
 func (l *GetAddressLogic) GetAddress(req *types.GetAddressRequest) (resp *types.GetAddressResponse, err error) {
 
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
-	getaddressresp, err := l.svcCtx.UserRpc.GetAddress(l.ctx, &users.GetAddressRequest{
-		UserId:    user_id,
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
+	getaddressresp, err := l.svcCtx.UserRPC.GetAddress(l.ctx, &users.GetAddressRequest{
+		UserId:    userID,
 		AddressId: req.AddressID,
 	})
 

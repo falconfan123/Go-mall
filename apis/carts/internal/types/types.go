@@ -5,7 +5,7 @@ package types
 
 type CartInfoResponse struct {
 	Id        int32         `json:"id"`
-	UserId    int32         `json:"user_id"`
+	UserId    int32         `json:"userID"`
 	ProductId int32         `json:"product_id"`
 	Quantity  int32         `json:"quantity"`
 	Product   []interface{} `json:"product"`

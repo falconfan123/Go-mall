@@ -12,12 +12,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// CouponListLogic is the business logic for CouponListLogic operations.
 type CouponListLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCouponListLogic creates a new CouponListLogic instance.
 func NewCouponListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CouponListLogic {
 	return &CouponListLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,6 +28,7 @@ func NewCouponListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Coupon
 	}
 }
 
+// does something.
 func (l *CouponListLogic) CouponList(req *types.CouponListReq) (resp *types.CouponListResp, err error) {
 
 	if req.Page <= 0 {
@@ -34,7 +37,7 @@ func (l *CouponListLogic) CouponList(req *types.CouponListReq) (resp *types.Coup
 	if req.PageSize <= 0 || req.PageSize > biz.MaxPageSize {
 		req.PageSize = biz.MaxPageSize
 	}
-	res, err := l.svcCtx.CouponRpc.ListCoupons(l.ctx, &couponsclient.ListCouponsReq{
+	res, err := l.svcCtx.CouponRPC.ListCoupons(l.ctx, &couponsclient.ListCouponsReq{
 		Pagination: &couponsclient.PaginationReq{
 			Page: req.Page,
 			Size: req.PageSize,

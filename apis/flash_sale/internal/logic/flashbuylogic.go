@@ -14,12 +14,14 @@ import (
 	xerrors "github.com/zeromicro/x/errors"
 )
 
+// FlashBuyLogic is the business logic for FlashBuyLogic operations.
 type FlashBuyLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewFlashBuyLogic creates a new FlashBuyLogic instance.
 func NewFlashBuyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FlashBuyLogic {
 	return &FlashBuyLogic{
 		Logger: logx.WithContext(ctx),
@@ -28,6 +30,7 @@ func NewFlashBuyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FlashBuy
 	}
 }
 
+// does something.
 func (l *FlashBuyLogic) FlashBuy(req *types.FlashBuyReq) (resp *types.FlashBuyResp, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
@@ -35,7 +38,7 @@ func (l *FlashBuyLogic) FlashBuy(req *types.FlashBuyReq) (resp *types.FlashBuyRe
 	}
 
 	// 0. 获取用户地址
-	addressListResp, err := l.svcCtx.UsersRpc.ListAddresses(l.ctx, &users.AllAddressLitstRequest{
+	addressListResp, err := l.svcCtx.UsersRPC.ListAddresses(l.ctx, &users.AllAddressLitstRequest{
 		UserId: userID,
 	})
 	if err != nil {
@@ -72,7 +75,7 @@ func (l *FlashBuyLogic) FlashBuy(req *types.FlashBuyReq) (resp *types.FlashBuyRe
 		AddressId: uint64(addressID),
 	}
 
-	checkoutResp, err := l.svcCtx.CheckoutRpc.PrepareCheckout(l.ctx, checkoutReq)
+	checkoutResp, err := l.svcCtx.CheckoutRPC.PrepareCheckout(l.ctx, checkoutReq)
 	if err != nil {
 		l.Logger.Errorw("prepare checkout failed", logx.Field("err", err))
 		return nil, xerrors.New(code.ServerError, code.ServerErrorMsg)
@@ -90,7 +93,7 @@ func (l *FlashBuyLogic) FlashBuy(req *types.FlashBuyReq) (resp *types.FlashBuyRe
 		CouponId:      "",
 	}
 
-	createOrderResp, err := l.svcCtx.OrderRpc.CreateOrder(l.ctx, createOrderReq)
+	createOrderResp, err := l.svcCtx.OrderRPC.CreateOrder(l.ctx, createOrderReq)
 	if err != nil {
 		l.Logger.Errorw("create order failed", logx.Field("err", err))
 		return nil, xerrors.New(code.ServerError, code.ServerErrorMsg)

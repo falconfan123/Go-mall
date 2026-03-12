@@ -34,7 +34,7 @@ type CheckoutListResp struct {
 
 type CheckoutOrder struct {
 	PreOrderID     string         `json:"pre_order_id"`
-	UserID         int64          `json:"user_id"`
+	UserID         int64          `json:"userID"`
 	Status         int32          `json:"status"` // 对应枚举值
 	ExpireTime     string         `json:"expire_time"`
 	CreatedAt      string         `json:"created_at"`

@@ -8,6 +8,7 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
+// RegisterHandlers registers the HTTP handlers.
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(

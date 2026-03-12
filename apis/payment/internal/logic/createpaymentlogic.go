@@ -12,12 +12,16 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// CreatePaymentLogic is the business logic for createpayment operations.
+// CreatePaymentLogic is the business logic for CreatePaymentLogic operations.
 type CreatePaymentLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewCreatePaymentLogic creates a new instance.
+// NewCreatePaymentLogic creates a new CreatePaymentLogic instance.
 func NewCreatePaymentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreatePaymentLogic {
 	return &CreatePaymentLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,12 +30,15 @@ func NewCreatePaymentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 	}
 }
 
+// CreatePayment is a function.
+//
+//	does something.
 func (l *CreatePaymentLogic) CreatePayment(req *types.PaymentReq) (resp *types.PaymentResponse, err error) {
 	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
 	if !ok {
 		return nil, xerrors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
-	res, err := l.svcCtx.PaymentRpc.CreatePayment(l.ctx, &payment.PaymentReq{
+	res, err := l.svcCtx.PaymentRPC.CreatePayment(l.ctx, &payment.PaymentReq{
 		UserId:        userID,
 		OrderId:       req.OrderID,
 		PaymentMethod: payment.PaymentMethod(req.PaymentMethod),

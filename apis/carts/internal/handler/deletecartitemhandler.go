@@ -11,6 +11,7 @@ import (
 	"net/http"
 )
 
+// DeleteCartItemHandler handles HTTP requests.
 func DeleteCartItemHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.DeleteCartReq

@@ -72,7 +72,7 @@ type GetInfoRequest struct {
 }
 
 type GetInfoResponse struct {
-	UserId    int64  `json:"user_id"`
+	UserId    int64  `json:"userID"`
 	LogoutAt  string `json:"logout_at"`
 	CreatedAt string `json:"created_at"`
 	UpdateAt  string `json:"update_at"`
@@ -133,7 +133,7 @@ type UpdateRequest struct {
 }
 
 type UpdateResponse struct {
-	UserId   int64  `json:"user_id"`
+	UserId   int64  `json:"userID"`
 	UserName string `json:"user_name"`
 	Avatar   string `json:"avatar"`
 }

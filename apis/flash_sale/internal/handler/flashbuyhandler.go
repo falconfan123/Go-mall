@@ -10,6 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
+// FlashBuyHandler handles HTTP requests.
 func FlashBuyHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.FlashBuyReq

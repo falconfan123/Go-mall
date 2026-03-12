@@ -12,12 +12,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// GetCouponLogic is the business logic for GetCouponLogic operations.
 type GetCouponLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewGetCouponLogic creates a new GetCouponLogic instance.
 func NewGetCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCouponLogic {
 	return &GetCouponLogic{
 		Logger: logx.WithContext(ctx),
@@ -26,8 +28,9 @@ func NewGetCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCoup
 	}
 }
 
+// does something.
 func (l *GetCouponLogic) GetCoupon(req *types.CouponItemReq) (resp *types.CouponItemResp, err error) {
-	res, err := l.svcCtx.CouponRpc.GetCoupon(l.ctx, &couponsclient.GetCouponReq{
+	res, err := l.svcCtx.CouponRPC.GetCoupon(l.ctx, &couponsclient.GetCouponReq{
 		Id: req.CouponID,
 	})
 	if err != nil {

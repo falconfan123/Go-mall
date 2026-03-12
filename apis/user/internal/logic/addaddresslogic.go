@@ -13,12 +13,14 @@ import (
 	"github.com/zeromicro/x/errors"
 )
 
+// AddAddressLogic is the business logic for AddAddressLogic operations.
 type AddAddressLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewAddAddressLogic creates a new AddAddressLogic instance.
 func NewAddAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddAddressLogic {
 	return &AddAddressLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,6 +29,7 @@ func NewAddAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddAdd
 	}
 }
 
+// does something.
 func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.AddAddressResponse, err error) {
 
 	//校验
@@ -37,13 +40,13 @@ func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.
 
 	}
 
-	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
+	userIP := l.ctx.Value(biz.ClientIPKey).(string)
 
-	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
-	addaddressresp, err := l.svcCtx.UserRpc.AddAddress(l.ctx, &users.AddAddressRequest{
-		Ip: user_ip,
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
+	addaddressresp, err := l.svcCtx.UserRPC.AddAddress(l.ctx, &users.AddAddressRequest{
+		Ip: userIP,
 
-		UserId:          user_id,
+		UserId:          userID,
 		RecipientName:   req.RecipientName,
 		Province:        req.Province,
 		City:            req.City,

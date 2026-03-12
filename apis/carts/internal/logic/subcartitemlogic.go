@@ -13,12 +13,14 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+// SubCartItemLogic is the business logic for SubCartItemLogic operations.
 type SubCartItemLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
+// NewSubCartItemLogic creates a new SubCartItemLogic instance.
 func NewSubCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SubCartItemLogic {
 	return &SubCartItemLogic{
 		Logger: logx.WithContext(ctx),
@@ -27,11 +29,12 @@ func NewSubCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SubCa
 	}
 }
 
+// does something.
 func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCartResp, err error) {
-	userId := l.ctx.Value(biz.UserIDKey).(uint32)
+	userID := l.ctx.Value(biz.UserIDKey).(uint32)
 
 	// 1. 先检查商品是否存在
-	exist, err := l.svcCtx.ProductRpc.IsExistProduct(l.ctx, &product.IsExistProductReq{
+	exist, err := l.svcCtx.ProductRPC.IsExistProduct(l.ctx, &product.IsExistProductReq{
 		Id: int64(req.ProductId),
 	})
 	if err != nil {
@@ -47,14 +50,14 @@ func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCa
 	}
 
 	// 2. 调用 SubCartItem RPC 从购物车减少商品数量
-	res, err := l.svcCtx.CartsRpc.SubCartItem(l.ctx, &carts.CartItemRequest{
-		UserId:    int32(userId),
+	res, err := l.svcCtx.CartsRPC.SubCartItem(l.ctx, &carts.CartItemRequest{
+		UserId:    int32(userID),
 		ProductId: req.ProductId,
 	})
 	if err != nil {
 		l.Logger.Errorw("call rpc SubCartItem failed",
 			logx.Field("err", err),
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.CartSubFailed, code.CartSubFailedMsg)
 	}
@@ -62,7 +65,7 @@ func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCa
 	// 3. 处理 RPC 返回 nil 的情况
 	if res == nil {
 		l.Logger.Errorw("rpc SubCartItem returned nil response",
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
@@ -70,7 +73,7 @@ func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCa
 	// 4. 处理业务错误
 	if res.StatusCode != code.Success {
 		l.Logger.Debugw("rpc SubCartItem returned business error",
-			logx.Field("user_id", userId),
+			logx.Field("userID", userID),
 			logx.Field("product_id", req.ProductId),
 			logx.Field("status_code", res.StatusCode),
 			logx.Field("status_msg", res.StatusMsg))
@@ -79,7 +82,7 @@ func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCa
 
 	// 5. 记录成功日志并返回结果
 	l.Logger.Infow("Cart item subtracted successfully",
-		logx.Field("user_id", userId),
+		logx.Field("userID", userID),
 		logx.Field("product_id", req.ProductId))
 
 	return &types.SubCartResp{
