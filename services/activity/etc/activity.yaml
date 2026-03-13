@@ -1,0 +1,28 @@
+Name: activity.rpc
+ListenOn: 0.0.0.0:10011
+Mode: dev
+
+# 服务发现
+Consul:
+  Host: localhost:8500
+  Key: activity.rpc
+  Meta:
+    Protocol: grpc
+
+# 日志配置
+Log:
+  ServiceName: "activity-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Path: "./logs/activity-rpc"
+
+# Redis 配置
+RedisConf:
+  Host: localhost:6379
+  Pass: ""
+  Tls: false
+
+# 活动配置
+Activity:
+  TokenExpire: 60 # token 有效期（秒）
+  AdvanceSeconds: 5 # 提前获取 token 的秒数

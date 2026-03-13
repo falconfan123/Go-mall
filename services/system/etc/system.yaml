@@ -1,0 +1,17 @@
+Name: system.rpc
+ListenOn: 0.0.0.0:10010
+Mode: dev
+
+# 服务发现
+Consul:
+  Host: localhost:8500
+  Key: system.rpc
+  Meta:
+    Protocol: grpc
+
+# 日志配置
+Log:
+  ServiceName: "system-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Path: "./logs/system-rpc"

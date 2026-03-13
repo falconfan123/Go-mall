@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package activity;
+
+option go_package = "./pb";
+
+// 获取下单动态路径
+message TokenReq {
+  int64 activity_id = 1; // 活动ID
+}
+
+message TokenResp {
+  string path_key = 1; // 动态路径密钥
+  int64 expires_at = 2; // 过期时间
+}
+
+service Activity {
+  // Token 获取下单动态路径
+  rpc Token (TokenReq) returns (TokenResp);
+}

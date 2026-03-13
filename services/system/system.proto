@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package system;
+
+option go_package = "./pb";
+
+// 获取服务器当前时间
+message TimeReq {}
+
+message TimeResp {
+  int64 now = 1; // 服务器当前 Unix 时间戳（毫秒）
+}
+
+service System {
+  // Time 获取服务器当前时间戳
+  rpc Time (TimeReq) returns (TimeResp);
+}
