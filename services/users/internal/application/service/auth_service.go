@@ -134,6 +134,10 @@ func (s *AuthAppService) Register(ctx context.Context, req *dto.RegisterRequest)
 
 	// 8. 发布用户注册事件
 	go func() {
+		var emailValue string
+		if email != nil {
+			emailValue = email.Value()
+		}
 		event := &domainevent.UserRegisteredEvent{
 			BaseEvent: domainevent.BaseEvent{
 				EventID:    uuid.NewString(),
@@ -141,7 +145,7 @@ func (s *AuthAppService) Register(ctx context.Context, req *dto.RegisterRequest)
 				OccurredAt: time.Now(),
 			},
 			UserID:   userID,
-			Email:    email.Value(),
+			Email:    emailValue,
 			Username: username,
 			IP:       req.IP,
 		}

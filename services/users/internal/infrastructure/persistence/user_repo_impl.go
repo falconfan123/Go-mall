@@ -30,8 +30,14 @@ func NewUserRepositoryImpl(userModel daluser.UsersModel) repository.UserReposito
 
 // Save 保存用户
 func (r *UserRepositoryImpl) Save(ctx context.Context, user *aggregate.User) (int64, error) {
+	var emailStr string
+	var emailValid bool
+	if user.Email != nil {
+		emailStr = user.Email.Value()
+		emailValid = true
+	}
 	u := &daluser.Users{
-		Email:        sql.NullString{String: user.Email.Value(), Valid: true},
+		Email:        sql.NullString{String: emailStr, Valid: emailValid},
 		PasswordHash: sql.NullString{String: user.PasswordHash.Value(), Valid: true},
 		Username:     sql.NullString{String: user.Username, Valid: true},
 		AvatarUrl:    sql.NullString{String: user.Avatar, Valid: user.Avatar != ""},
@@ -47,9 +53,15 @@ func (r *UserRepositoryImpl) Save(ctx context.Context, user *aggregate.User) (in
 
 // Update 更新用户
 func (r *UserRepositoryImpl) Update(ctx context.Context, user *aggregate.User) error {
+	var emailStr string
+	var emailValid bool
+	if user.Email != nil {
+		emailStr = user.Email.Value()
+		emailValid = true
+	}
 	u := &daluser.Users{
 		UserId:       user.ID,
-		Email:        sql.NullString{String: user.Email.Value(), Valid: true},
+		Email:        sql.NullString{String: emailStr, Valid: emailValid},
 		PasswordHash: sql.NullString{String: user.PasswordHash.Value(), Valid: true},
 		Username:     sql.NullString{String: user.Username, Valid: true},
 		AvatarUrl:    sql.NullString{String: user.Avatar, Valid: user.Avatar != ""},
