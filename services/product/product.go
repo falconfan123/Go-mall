@@ -4,6 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+
+	_ "github.com/lib/pq"
+
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"

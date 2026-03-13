@@ -9,6 +9,7 @@ replace github.com/falconfan123/Go-mall/dal => ../../dal
 require (
 	github.com/falconfan123/Go-mall/common v0.0.0-20260312153719-88b43b07ae7d
 	github.com/falconfan123/Go-mall/dal v0.0.0-00010101000000-000000000000
+	github.com/lib/pq v1.11.2
 	github.com/zeromicro/go-zero v1.10.0
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20251020121907-c2e4c4911576
 	google.golang.org/grpc v1.79.2

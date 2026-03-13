@@ -22,7 +22,7 @@ const server = http.createServer((req, res) => {
     // 如果请求的是API路径，转发到网关
     if (pathname.startsWith('/douyin/')) {
         proxy.web(req, res, {
-            target: 'http://localhost:8888',
+            target: 'http://localhost:8080',
             changeOrigin: true,
             // 添加CORS头
             onProxyRes: (proxyRes) => {
@@ -66,5 +66,5 @@ const server = http.createServer((req, res) => {
 const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`前端代理服务器运行在 http://localhost:${PORT}`);
-    console.log('API请求将自动转发到 http://localhost:8888 (APISIX网关)');
+    console.log('API请求将自动转发到 http://localhost:8080');
 });

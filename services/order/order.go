@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 
+	_ "github.com/lib/pq"
+
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/falconfan123/Go-mall/services/order/internal/server"
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"

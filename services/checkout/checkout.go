@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 
+	_ "github.com/lib/pq"
+
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 

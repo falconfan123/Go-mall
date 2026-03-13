@@ -1,6 +1,6 @@
 Name: gateway
 Host: 0.0.0.0
-Port: 8888
+Port: 8080
 Auth:
   AccessSecret: "u666" # Matches auths service secret
   AccessExpire: 86400
@@ -8,8 +8,6 @@ Auth:
 Upstreams:
   - Grpc:
       Target: 127.0.0.1:10001
-    ProtoSets:
-      - proto/users.pb
     Mappings:
       - Method: post
         Path: /douyin/user/login
@@ -28,24 +26,7 @@ Upstreams:
         RpcPath: users.Users/ListAddresses
 
   - Grpc:
-      Target: 127.0.0.1:10004
-    ProtoSets:
-      - proto/order.pb
-    Mappings:
-      - Method: get
-        Path: /douyin/order/list
-        RpcPath: order.OrderService/ListOrders
-      - Method: post
-        Path: /douyin/order/create
-        RpcPath: order.OrderService/CreateOrder
-      - Method: get
-        Path: /douyin/order/detail
-        RpcPath: order.OrderService/GetOrder
-
-  - Grpc:
       Target: 127.0.0.1:10002
-    ProtoSets:
-      - proto/product.pb
     Mappings:
       - Method: get
         Path: /douyin/product/list
@@ -62,8 +43,6 @@ Upstreams:
 
   - Grpc:
       Target: 127.0.0.1:10003
-    ProtoSets:
-      - proto/carts.pb
     Mappings:
       - Method: post
         Path: /douyin/cart/add
@@ -79,18 +58,7 @@ Upstreams:
         RpcPath: carts.Cart/SubCartItem
 
   - Grpc:
-      Target: 127.0.0.1:10005
-    ProtoSets:
-      - proto/checkout.pb
-    Mappings:
-      - Method: post
-        Path: /douyin/checkout/prepare
-        RpcPath: checkout.CheckoutService/PrepareCheckout
-
-  - Grpc:
       Target: 127.0.0.1:10006
-    ProtoSets:
-      - proto/payment.pb
     Mappings:
       - Method: post
         Path: /douyin/payment/create
