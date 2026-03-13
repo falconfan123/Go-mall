@@ -935,7 +935,8 @@ async function handleRegister(event) {
     event.preventDefault();
 
     const username = document.getElementById('registerEmail').value;
-    const email = username; // 使用用户名作为邮箱（兼容后端）
+    // 只有当输入包含 @ 符号时才作为邮箱，否则email为空（支持纯用户名注册）
+    const email = username.includes('@') ? username : '';
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('registerConfirmPassword').value;
 
