@@ -8,6 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/delay"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/notify"
+	"github.com/falconfan123/Go-mall/services/order/internal/mq/seckill"
 	userspb "github.com/falconfan123/Go-mall/services/users/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -27,6 +28,7 @@ type ServiceContext struct {
 	Model          sqlx.SqlConn
 	OrderDelayMQ   *delay.OrderDelayMQ
 	OrderNotifyMQ  *notify.OrderNotifyMQ
+	SeckillMQ      *seckill.SeckillMQ
 	RedisClient    *redis.Redis
 }
 
@@ -37,6 +39,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 	notifyMQ, err := notify.Init(c)
+	if err != nil {
+		logx.Error(err)
+		panic(err)
+	}
+	seckillMQ, err := seckill.Init(c)
 	if err != nil {
 		logx.Error(err)
 		panic(err)
@@ -58,6 +65,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		InventoryRpc:   inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		OrderDelayMQ:   orderDelayMQ,
 		OrderNotifyMQ:  notifyMQ,
+		SeckillMQ:      seckillMQ,
 		RedisClient:    redisClient,
 	}
 }

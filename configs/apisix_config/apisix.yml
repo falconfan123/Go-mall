@@ -1,5 +1,55 @@
 # APISIX 声明式配置文件 - 路由配置
 routes:
+  # ==================== 秒杀系统路由 ====================
+
+  # 时间同步服务 - 无需认证，公共接口
+  - id: 100
+    uri: /api/v1/system/time
+    methods: ["GET"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:10010": 1
+
+  # 活动 Token 服务 - 需要认证
+  - id: 101
+    uri: /api/v1/activity/token
+    methods: ["GET"]
+    plugins:
+      limit-req:
+        rate: 5
+        burst: 10
+        key: remote_addr
+      proxy-rewrite:
+        headers:
+          X-User-Id: $http_user_id
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:10011": 1
+
+  # 秒杀下单接口 - 需要认证，严格限流
+  - id: 102
+    uri: /api/v1/order/seckill
+    methods: ["POST"]
+    plugins:
+      limit-req:
+        rate: 10
+        burst: 20
+        key: remote_addr
+      limit-conn:
+        connections: 100
+        key: remote_addr
+      proxy-rewrite:
+        headers:
+          X-User-Id: $http_user_id
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:10004": 1
+
+  # ==================== 原有路由 ====================
+
   - id: 1
     uri: /douyin/user/login
     methods: ["POST"]

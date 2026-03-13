@@ -7,16 +7,16 @@ package orderservice
 import (
 	"context"
 
-	"github.com/falconfan123/Go-mall/services/order/pb"
+	orderpb "github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	CreateOrderRequest  = pb.CreateOrderRequest
-	CreateOrderResponse = pb.OrderDetailResponse
-	PaymentMethod       = pb.PaymentMethod
+	CreateOrderRequest  = orderpb.CreateOrderRequest
+	CreateOrderResponse = orderpb.OrderDetailResponse
+	PaymentMethod       = orderpb.PaymentMethod
 
 	OrderService interface {
 		CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
@@ -34,6 +34,6 @@ func NewOrderService(cli zrpc.Client) OrderService {
 }
 
 func (m *defaultOrderService) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error) {
-	client := pb.NewOrderServiceClient(m.cli.Conn())
+	client := orderpb.NewOrderServiceClient(m.cli.Conn())
 	return client.CreateOrder(ctx, in, opts...)
 }

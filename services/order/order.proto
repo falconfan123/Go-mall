@@ -1,6 +1,6 @@
 syntax = "proto3";
 package order;
-option go_package = "./order";
+option go_package = "github.com/falconfan123/Go-mall/services/order/pb;order";
 
 
 // ================== 状态枚举定义 ==================
@@ -89,6 +89,20 @@ message PaymentResult {
 
 
 // --------------- 请求 ---------------
+message SeckillRequest {
+  string path_key = 1;         // 动态路径密钥
+  uint64 product_id = 2;       // 商品ID
+  uint32 user_id = 3;          // 用户ID
+  uint64 address_id = 4;       // 收货地址ID
+}
+
+message SeckillResponse {
+  int32 status_code = 1;
+  string status_msg = 2;
+  string order_id = 3;         // 订单ID（如果成功）
+  string message = 4;          // 额外信息
+}
+
 message CancelOrderRequest {
   string order_id = 1;
   uint32 user_id = 2;            // 用于权限校验
@@ -157,6 +171,9 @@ message EmptyRes {
 
 // // --------------- 服务接口定义 ---------------
 service OrderService {
+  //  Seckill 秒杀下单
+  rpc Seckill(SeckillRequest) returns (SeckillResponse);
+
   //  CreateOrder 创建订单
   rpc CreateOrder(CreateOrderRequest) returns (OrderDetailResponse);
   //  CreateOrderRollback 补偿操作

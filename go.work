@@ -3,6 +3,7 @@ go 1.25.0
 use (
 	./common
 	./dal
+	./services/activity
 	./services/audit
 	./services/auths
 	./services/carts
@@ -13,5 +14,6 @@ use (
 	./services/order
 	./services/payment
 	./services/product
+	./services/system
 	./services/users
 )
