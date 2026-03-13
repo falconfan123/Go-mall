@@ -131,4 +131,18 @@ func (m *customUsersModel) FindOneByEmailOrUsername(ctx context.Context, account
 	}
 }
 
+func (m *customUsersModel) FindOneByUsername(ctx context.Context, username string) (*Users, error) {
+	var resp Users
+	query := fmt.Sprintf("select %s from %s where `username` = ? limit 1", usersRows, m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query, username)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlx.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
 // 从数据库中获取登出时间
