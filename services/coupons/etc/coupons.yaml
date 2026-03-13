@@ -20,7 +20,7 @@ Log:
   ServiceName: "coupons-rpc"
   Mode: 'console'
   Encoding: "json"
-  Path: "./logs/coupons-rpc"
+  Stat: false
 
 PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable

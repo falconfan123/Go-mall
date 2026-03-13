@@ -1,6 +1,13 @@
 Name: gateway
 Host: 0.0.0.0
 Port: 8080
+
+# 日志配置 - 输出到 stdout 由容器收集
+Log:
+  Mode: 'console'
+  Encoding: 'json'
+  Stat: false
+
 Auth:
   AccessSecret: "u666" # Matches auths service secret
   AccessExpire: 86400

@@ -19,7 +19,7 @@ Log:
   ServiceName: inventory-rpc
   Mode: console
   Encoding: json
-  Path: ./logs/inventory-rpc
+  Stat: false
 
 PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable

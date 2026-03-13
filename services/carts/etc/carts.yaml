@@ -8,6 +8,19 @@ Consul:
   Meta:
     Protocol: grpc
 
+# 链路追踪
+Telemetry:
+  Name: carts.rpc
+  Endpoint: http://localhost:14268/api/traces
+  Batcher: zipkin
+  Sampler: 1.0
+
+Log:
+  ServiceName: "carts-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Stat: false
+
 PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
   conntimeout: 5
