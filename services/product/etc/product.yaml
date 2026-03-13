@@ -10,6 +10,19 @@ Consul:
   Meta:
     Protocol: grpc
 
+# 链路追踪
+Telemetry:
+  Name: products.rpc
+  Endpoint: http://localhost:14268/api/traces
+  Batcher: zipkin
+  Sampler: 1.0
+
+Log:
+  ServiceName: "products-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Stat: false
+
 InventoryRpc:
   Target: consul://localhost:8500/inventory.rpc?wait=14s
   NonBlock: true

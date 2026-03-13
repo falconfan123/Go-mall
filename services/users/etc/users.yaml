@@ -28,7 +28,7 @@ Log:
   ServiceName: "users-rpc"
   Mode: 'console'
   Encoding: "json"
-  Path: "./logs/users-rpc"
+  Stat: false
 
 PostgresConfig:
   DataSource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable

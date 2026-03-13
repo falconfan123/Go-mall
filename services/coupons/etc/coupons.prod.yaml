@@ -20,13 +20,9 @@ Telemetry:
 
 Log:
   ServiceName: "coupons-rpc"
-  Mode: 'file'
+  Mode: 'console'
   Encoding: "json"
-  Path: "./logs/coupons-rpc"
-  KeepDays: 30    # 保留30天日志
-  Compress: true  # 启用日志压缩
-  Rotation: size  # 按大小切割日志
-  MaxSize: 100    # 每个日志文件最大100MB
+  Stat: false
 
 PostgresConfig:
   datasource: ${POSTGRES_DATA_SOURCE}
