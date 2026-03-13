@@ -4,7 +4,7 @@
 // - protoc             v6.33.1
 // source: order.proto
 
-package pb
+package order
 
 import (
 	context "context"
@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	OrderService_Seckill_FullMethodName                            = "/order.OrderService/Seckill"
 	OrderService_CreateOrder_FullMethodName                        = "/order.OrderService/CreateOrder"
 	OrderService_CreateOrderRollback_FullMethodName                = "/order.OrderService/CreateOrderRollback"
 	OrderService_CancelOrder_FullMethodName                        = "/order.OrderService/CancelOrder"
@@ -37,6 +38,8 @@ const (
 //
 // // --------------- 服务接口定义 ---------------
 type OrderServiceClient interface {
+	// Seckill 秒杀下单
+	Seckill(ctx context.Context, in *SeckillRequest, opts ...grpc.CallOption) (*SeckillResponse, error)
 	// CreateOrder 创建订单
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error)
 	// CreateOrderRollback 补偿操作
@@ -67,6 +70,16 @@ type orderServiceClient struct {
 
 func NewOrderServiceClient(cc grpc.ClientConnInterface) OrderServiceClient {
 	return &orderServiceClient{cc}
+}
+
+func (c *orderServiceClient) Seckill(ctx context.Context, in *SeckillRequest, opts ...grpc.CallOption) (*SeckillResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SeckillResponse)
+	err := c.cc.Invoke(ctx, OrderService_Seckill_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *orderServiceClient) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error) {
@@ -175,6 +188,8 @@ func (c *orderServiceClient) GetOrder2Payment(ctx context.Context, in *GetOrderR
 //
 // // --------------- 服务接口定义 ---------------
 type OrderServiceServer interface {
+	// Seckill 秒杀下单
+	Seckill(context.Context, *SeckillRequest) (*SeckillResponse, error)
 	// CreateOrder 创建订单
 	CreateOrder(context.Context, *CreateOrderRequest) (*OrderDetailResponse, error)
 	// CreateOrderRollback 补偿操作
@@ -207,6 +222,9 @@ type OrderServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedOrderServiceServer struct{}
 
+func (UnimplementedOrderServiceServer) Seckill(context.Context, *SeckillRequest) (*SeckillResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Seckill not implemented")
+}
 func (UnimplementedOrderServiceServer) CreateOrder(context.Context, *CreateOrderRequest) (*OrderDetailResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateOrder not implemented")
 }
@@ -256,6 +274,24 @@ func RegisterOrderServiceServer(s grpc.ServiceRegistrar, srv OrderServiceServer)
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&OrderService_ServiceDesc, srv)
+}
+
+func _OrderService_Seckill_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SeckillRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).Seckill(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_Seckill_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).Seckill(ctx, req.(*SeckillRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _OrderService_CreateOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -445,6 +481,10 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "order.OrderService",
 	HandlerType: (*OrderServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Seckill",
+			Handler:    _OrderService_Seckill_Handler,
+		},
 		{
 			MethodName: "CreateOrder",
 			Handler:    _OrderService_CreateOrder_Handler,

@@ -26,6 +26,7 @@ require (
 	github.com/falconfan123/Go-mall/services/coupons v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/inventory v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/users v0.0.0-00010101000000-000000000000
+	github.com/lib/pq v1.11.2
 	github.com/streadway/amqp v1.1.0
 	github.com/zeromicro/go-zero v1.10.0
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20251020121907-c2e4c4911576
