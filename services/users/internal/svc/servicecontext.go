@@ -20,7 +20,7 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	// 初始化仓储
-	userRepo := persistence.NewUserRepositoryImpl(user.NewUsersModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)))
+	userRepo := persistence.NewUserRepositoryImpl(user.NewUsersModel(sqlx.NewSqlConn("mysql", c.PostgresConfig.DataSource)))
 
 	// 初始化事件发布器（暂时用空实现，后面可以替换为RabbitMQ实现）
 	var eventPublisher event.EventPublisher = &NoopEventPublisher{}
@@ -35,8 +35,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	return &ServiceContext{
 		Config:             c,
-		UsersModel:         user.NewUsersModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
-		UserAddressesModel: user_address.NewUserAddressesModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource), c.Cache),
+		UsersModel:         user.NewUsersModel(sqlx.NewSqlConn("mysql", c.PostgresConfig.DataSource)),
+		UserAddressesModel: user_address.NewUserAddressesModel(sqlx.NewSqlConn("mysql", c.PostgresConfig.DataSource), c.Cache),
 		AuthAppService:     authAppService,
 	}
 }
