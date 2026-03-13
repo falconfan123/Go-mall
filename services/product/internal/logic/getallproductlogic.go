@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
+	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -65,8 +66,36 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 		return nil, queryErr
 	}
 
-	// 预分配切片容量
-	result := populateProductDetails(l.ctx, l.svcCtx, products)
+	// Convert products to response format - without async processing first
+	result := make([]*product.Product, len(products))
+	for i, p := range products {
+		result[i] = &product.Product{
+			Id:          uint32(p.Id),
+			Name:        p.Name,
+			Description: p.Description.String,
+			Picture:     p.Picture.String,
+			Price:       p.Price,
+			CratedAt:    p.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:   p.UpdatedAt.Format("2006-01-02 15:04:05"),
+		}
+	}
+
+	// Try to get inventory info (sync)
+	for i, p := range products {
+		if result[i] == nil {
+			continue
+		}
+		inventoryResp, err := l.svcCtx.InventoryRpc.GetInventory(l.ctx, &inventoryclient.GetInventoryReq{
+			ProductId: int32(p.Id),
+		})
+		if err != nil {
+			logx.WithContext(l.ctx).Errorw("call InventoryRpc failed", logx.Field("err", err), logx.Field("product_id", p.Id))
+			continue
+		}
+		result[i].Stock = inventoryResp.Inventory
+		result[i].Sold = inventoryResp.SoldCount
+	}
+
 	return &product.GetAllProductsResp{
 		Products: result,
 		Total:    total,
