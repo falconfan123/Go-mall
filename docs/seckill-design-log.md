@@ -160,10 +160,10 @@ return {code = 1, msg = "success"}
 - [ ] 添加限流逻辑
 
 ### Phase 3: Order 服务改造 (秒杀下单)
-- [ ] 新增 /api/v1/order/{path_key} 接口
-- [ ] 集成 Lua 脚本执行
-- [ ] 添加 RabbitMQ 消息生产者
-- [ ] 异步写入 MySQL 订单
+- [x] 新增 /api/v1/order/{path_key} 接口
+- [x] 集成 Lua 脚本执行
+- [ ] 添加 RabbitMQ 消息生产者 (TODO)
+- [ ] 异步写入 MySQL 订单 (TODO)
 
 ### Phase 4: 网关配置
 - [ ] APISIX 路由配置

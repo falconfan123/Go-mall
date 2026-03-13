@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
+	"github.com/falconfan123/Go-mall/services/order/internal/mq/seckill"
 	order "github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -123,8 +124,8 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 	switch retCode {
 	case 1:
 		orderID := l.generateOrderID(userId, productId)
-		// TODO: 发送消息到 RabbitMQ 异步创建订单
-		// l.sendSeckillMessage(userId, productId, activityId, orderID)
+		// 发送消息到 RabbitMQ 异步创建订单
+		l.sendSeckillMessage(userId, productId, activityId, orderID)
 		logx.Infof("Seckill success: order_id=%s, user_id=%d, product_id=%d", orderID, userId, productId)
 		return &order.SeckillResponse{
 			StatusCode: 0,
@@ -147,4 +148,19 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 
 func (l *SeckillLogic) generateOrderID(userId, productId int64) string {
 	return fmt.Sprintf("SK%d%d%d", time.Now().UnixMilli(), userId, productId)
+}
+
+func (l *SeckillLogic) sendSeckillMessage(userId, productId, activityId int64, orderID string) {
+	msg := seckill.SeckillOrder{
+		OrderID:    orderID,
+		UserID:     userId,
+		ProductID:  productId,
+		ActivityID: activityId,
+		Timestamp:  time.Now().UnixMilli(),
+	}
+
+	err := l.svcCtx.SeckillMQ.Publish(msg)
+	if err != nil {
+		logx.Errorf("failed to publish seckill message: %v", err)
+	}
 }
