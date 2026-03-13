@@ -27,6 +27,8 @@ type UserRepository interface {
 	FindByUsernameOrEmail(ctx context.Context, account string) (*aggregate.User, error)
 	// ExistsByEmail 判断邮箱是否存在
 	ExistsByEmail(ctx context.Context, email *valueobject.Email) (bool, error)
+	// ExistsByUsername 判断用户名是否存在
+	ExistsByUsername(ctx context.Context, username string) (bool, error)
 	// UpdateLogoutTime 更新登出时间
 	UpdateLogoutTime(ctx context.Context, userID int64, logoutTime time.Time) error
 	// SaveAddress 保存地址

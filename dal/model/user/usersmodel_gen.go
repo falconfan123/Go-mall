@@ -28,6 +28,7 @@ type (
 		Insert(ctx context.Context, data *Users) (sql.Result, error)
 		FindOne(ctx context.Context, userId int64) (*Users, error)
 		FindOneByEmail(ctx context.Context, email sql.NullString) (*Users, error)
+		FindOneByUsername(ctx context.Context, username string) (*Users, error)
 		Update(ctx context.Context, data *Users) (sql.Result, error)
 		Delete(ctx context.Context, userId int64) error
 	}

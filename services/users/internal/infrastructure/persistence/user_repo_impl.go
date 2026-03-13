@@ -107,6 +107,18 @@ func (r *UserRepositoryImpl) ExistsByEmail(ctx context.Context, email *valueobje
 	return true, nil
 }
 
+// ExistsByUsername 判断用户名是否存在
+func (r *UserRepositoryImpl) ExistsByUsername(ctx context.Context, username string) (bool, error) {
+	_, err := r.userModel.FindOneByUsername(ctx, username)
+	if err != nil {
+		if err == daluser.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
 // UpdateLogoutTime 更新登出时间
 func (r *UserRepositoryImpl) UpdateLogoutTime(ctx context.Context, userID int64, logoutTime time.Time) error {
 	return r.userModel.UpdateLogoutTime(ctx, userID, logoutTime)

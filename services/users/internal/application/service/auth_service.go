@@ -52,28 +52,55 @@ func (s *AuthAppService) Register(ctx context.Context, req *dto.RegisterRequest)
 		}, nil
 	}
 
-	// 2. 创建值对象
-	email, err := valueobject.NewEmail(req.Email)
-	if err != nil {
-		return &dto.RegisterResponse{
-			StatusCode: uint32(code.EmailFormatError),
-			StatusMsg:  code.EmailFormatErrorMsg,
-		}, nil
+	// 2. 处理用户名和邮箱
+	// 支持纯用户名注册（不需要邮箱）
+	var email *valueobject.Email
+	var err error
+
+	if req.Email != "" {
+		// 如果提供了邮箱，验证邮箱格式
+		email, err = valueobject.NewEmail(req.Email)
+		if err != nil {
+			return &dto.RegisterResponse{
+				StatusCode: uint32(code.EmailFormatError),
+				StatusMsg:  code.EmailFormatErrorMsg,
+			}, nil
+		}
 	}
 
-	// 3. 检查邮箱是否存在
-	exists, err := s.userRepo.ExistsByEmail(ctx, email)
-	if err != nil {
-		return &dto.RegisterResponse{
-			StatusCode: uint32(code.ServerError),
-			StatusMsg:  code.ServerErrorMsg,
-		}, err
+	// 3. 检查用户名和邮箱是否存在
+	// 检查用户名是否存在
+	if req.Username != "" {
+		exists, err := s.userRepo.ExistsByUsername(ctx, req.Username)
+		if err != nil {
+			return &dto.RegisterResponse{
+				StatusCode: uint32(code.ServerError),
+				StatusMsg:  code.ServerErrorMsg,
+			}, err
+		}
+		if exists {
+			return &dto.RegisterResponse{
+				StatusCode: uint32(code.UserExistError),
+				StatusMsg:  code.UserExistErrorMsg,
+			}, nil
+		}
 	}
-	if exists {
-		return &dto.RegisterResponse{
-			StatusCode: uint32(code.UserExistError),
-			StatusMsg:  code.UserExistErrorMsg,
-		}, nil
+
+	// 如果提供了邮箱，检查邮箱是否存在
+	if email != nil {
+		exists, err := s.userRepo.ExistsByEmail(ctx, email)
+		if err != nil {
+			return &dto.RegisterResponse{
+				StatusCode: uint32(code.ServerError),
+				StatusMsg:  code.ServerErrorMsg,
+			}, err
+		}
+		if exists {
+			return &dto.RegisterResponse{
+				StatusCode: uint32(code.UserExistError),
+				StatusMsg:  code.UserExistErrorMsg,
+			}, nil
+		}
 	}
 
 	// 4. 创建密码哈希
