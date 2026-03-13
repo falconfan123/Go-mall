@@ -1,0 +1,104 @@
+routes:
+  - id: 1
+    uri: /douyin/user/login
+    methods: ["POST"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 2
+    uri: /douyin/user/register
+    methods: ["POST"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 3
+    uri: /douyin/user
+    methods: ["GET"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 4
+    uri: /douyin/user/address/add
+    methods: ["POST"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 5
+    uri: /douyin/user/address/list
+    methods: ["GET"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 6
+    uri: /douyin/product/list
+    methods: ["GET"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 7
+    uri: /douyin/product
+    methods: ["GET"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 8
+    uri: /douyin/product/upload
+    methods: ["POST"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 9
+    uri: /douyin/cart/add
+    methods: ["POST"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 10
+    uri: /douyin/cart/list
+    methods: ["GET"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 11
+    uri: /douyin/cart/delete
+    methods: ["POST"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 12
+    uri: /douyin/cart/sub
+    methods: ["POST"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
+
+  - id: 13
+    uri: /douyin/payment/create
+    methods: ["POST"]
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1

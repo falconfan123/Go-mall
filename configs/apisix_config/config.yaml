@@ -1,0 +1,27 @@
+# APISIX 主配置文件 - 使用正确的3.x格式
+apisix:
+  node_listen: 9080
+  enable_admin: true
+  allow_admin:
+    - 0.0.0.0/0
+
+deployment:
+  role: traditional
+  role_traditional:
+    config_provider: etcd
+  etcd:
+    host:
+      - "http://etcd:2379"
+    prefix: /apisix
+    timeout: 30
+
+# Admin API 密钥配置
+admin_api:
+  admin_key:
+    - name: "admin"
+      key: "edd1c9f034335f136f97ad3da9f658a9"
+      role: admin
+
+nginx_config:
+  error_log_level: warn
+  worker_rlimit_nofile: 20480

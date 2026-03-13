@@ -63,8 +63,8 @@ const server = http.createServer((req, res) => {
     }
 });
 
-const PORT = 8090;
+const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`前端代理服务器运行在 http://localhost:${PORT}`);
-    console.log('API请求将自动转发到 http://localhost:8888');
+    console.log('API请求将自动转发到 http://localhost:8888 (APISIX网关)');
 });
