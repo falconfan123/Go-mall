@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"github.com/bytedance/gopkg/util/gopool"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
@@ -12,17 +11,17 @@ import (
 	"time"
 )
 
-var pool = gopool.NewPool("product-details-pool", 100, gopool.NewConfig()) // 根据实际情况调整参数
-// 通用并发处理库存和分类信息
+// populateProductDetails populates product details including inventory and categories
 func populateProductDetails(ctx context.Context, svcCtx *svc.ServiceContext, products []*product2.Products) (result []*product.Product) {
-	result = make([]*product.Product, len(products))
-	var wg sync.WaitGroup
-	wg.Add(len(products)) // 每个产品一个任务
+	if len(products) == 0 {
+		return make([]*product.Product, 0)
+	}
 
-	for i := range products {
-		index := i // 创建局部变量避免闭包问题
-		p := products[index]
-		result[index] = &product.Product{
+	result = make([]*product.Product, len(products))
+
+	// Populate basic product info
+	for i, p := range products {
+		result[i] = &product.Product{
 			Id:          uint32(p.Id),
 			Name:        p.Name,
 			Description: p.Description.String,
@@ -30,25 +29,30 @@ func populateProductDetails(ctx context.Context, svcCtx *svc.ServiceContext, pro
 			Price:       p.Price,
 			CratedAt:    p.CreatedAt.Format(time.DateTime),
 			UpdatedAt:   p.UpdatedAt.Format(time.DateTime),
-		} // 初始化结果
-		pool.CtxGo(ctx, func() {
+		}
+	}
+
+	// Process inventory and categories concurrently
+	var wg sync.WaitGroup
+	wg.Add(len(products) * 2)
+
+	for i, p := range products {
+		index := i
+		productID := p.Id
+
+		// Handle inventory
+		wg.Add(1)
+		go func() {
 			defer wg.Done()
-			var innerWg sync.WaitGroup
-			innerWg.Add(2)
-			// 处理库存
-			go func() {
-				defer innerWg.Done()
-				handleInventory(ctx, svcCtx, result, index, p.Id)
-			}()
+			handleInventory(ctx, svcCtx, result, index, productID)
+		}()
 
-			// 处理分类
-			go func() {
-				defer innerWg.Done()
-				handleCategories(ctx, svcCtx, result, index, p.Id)
-			}()
-
-			innerWg.Wait()
-		})
+		// Handle categories
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			handleCategories(ctx, svcCtx, result, index, productID)
+		}()
 	}
 
 	wg.Wait()

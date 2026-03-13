@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	productsFieldNames          = builder.RawFieldNames(&Products{})
+	productsFieldNames          = builder.RawFieldNames(&Products{}, true)
 	productsRows                = strings.Join(productsFieldNames, ",")
-	productsRowsExpectAutoSet   = strings.Join(stringx.Remove(productsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	productsRowsWithPlaceHolder = strings.Join(stringx.Remove(productsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	productsRowsExpectAutoSet   = strings.Join(stringx.Remove(productsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	productsRowsWithPlaceHolder = builder.PostgreSqlJoin(stringx.Remove(productsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"))
 )
 
 type (
@@ -37,32 +37,32 @@ type (
 	}
 
 	Products struct {
-		Id          int64          `db:"id"`          // 主键，自增,商品id
-		Name        string         `db:"name"`        // 商品名称
-		Description sql.NullString `db:"description"` // 商品描述
-		Picture     sql.NullString `db:"picture"`     // 商品图片信息
-		Price       int64          `db:"price"`       // 商品价格（分）
-		Stock       int64          `db:"stock"`       // 库存
-		CreatedAt   time.Time      `db:"created_at"`  // 创建时间
-		UpdatedAt   time.Time      `db:"updated_at"`  // 更新时间
+		Id          int64          `db:"id"`
+		Name        string         `db:"name"`
+		Description sql.NullString `db:"description"`
+		Picture     sql.NullString `db:"picture"`
+		Price       int64          `db:"price"`
+		Stock       int64          `db:"stock"`
+		CreatedAt   time.Time      `db:"created_at"`
+		UpdatedAt   time.Time      `db:"updated_at"`
 	}
 )
 
 func newProductsModel(conn sqlx.SqlConn) *defaultProductsModel {
 	return &defaultProductsModel{
 		conn:  conn,
-		table: "`products`",
+		table: `"public"."products"`,
 	}
 }
 
 func (m *defaultProductsModel) Delete(ctx context.Context, id int64) error {
-	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where id = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
 func (m *defaultProductsModel) FindOne(ctx context.Context, id int64) (*Products, error) {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", productsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where id = $1 limit 1", productsRows, m.table)
 	var resp Products
 	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
 	switch err {
@@ -76,14 +76,14 @@ func (m *defaultProductsModel) FindOne(ctx context.Context, id int64) (*Products
 }
 
 func (m *defaultProductsModel) Insert(ctx context.Context, data *Products) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, productsRowsExpectAutoSet)
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5)", m.table, productsRowsExpectAutoSet)
 	ret, err := m.conn.ExecCtx(ctx, query, data.Name, data.Description, data.Picture, data.Price, data.Stock)
 	return ret, err
 }
 
 func (m *defaultProductsModel) Update(ctx context.Context, data *Products) error {
-	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, productsRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.Name, data.Description, data.Picture, data.Price, data.Stock, data.Id)
+	query := fmt.Sprintf("update %s set %s where id = $1", m.table, productsRowsWithPlaceHolder)
+	_, err := m.conn.ExecCtx(ctx, query, data.Id, data.Name, data.Description, data.Picture, data.Price, data.Stock)
 	return err
 }
 

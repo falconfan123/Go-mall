@@ -36,7 +36,7 @@ func (m *customCategoriesModel) withSession(session sqlx.Session) CategoriesMode
 // FindByProductID 根据商品ID查询商品分类
 func (m *defaultCategoriesModel) FindCategoryNameByProductID(ctx context.Context, productID int64) ([]string, error) {
 	query := fmt.Sprintf(
-		"SELECT c.name FROM %s as c INNER JOIN %s pc ON c.id = pc.category_id WHERE pc.product_id = ?",
+		"SELECT c.name FROM %s c INNER JOIN %s pc ON c.id = pc.category_id WHERE pc.product_id = $1",
 		m.table, "product_categories")
 	var categories []string
 	err := m.conn.QueryRowsCtx(ctx, &categories, query, productID)

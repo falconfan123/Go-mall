@@ -32,10 +32,10 @@ func (m *CustomProductsModel) FindListByCursor(ctx context.Context, cursor int64
 	var query string
 	var args []interface{}
 	if cursor <= 0 {
-		query = fmt.Sprintf("SELECT * FROM %s ORDER BY id DESC LIMIT ?", m.table)
+		query = fmt.Sprintf("SELECT * FROM %s ORDER BY id DESC LIMIT $1", m.table)
 		args = append(args, limit)
 	} else {
-		query = fmt.Sprintf("SELECT * FROM %s WHERE id < ? ORDER BY id DESC LIMIT ?", m.table)
+		query = fmt.Sprintf("SELECT * FROM %s WHERE id < $1 ORDER BY id DESC LIMIT $2", m.table)
 		args = append(args, cursor, limit)
 	}
 
@@ -45,10 +45,17 @@ func (m *CustomProductsModel) FindListByCursor(ctx context.Context, cursor int64
 }
 
 func (m *CustomProductsModel) GetProductByIDs(ctx context.Context, productIDs []string) ([]*Products, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id IN (%s)", m.table, strings.Join(productIDs, ","))
+	if len(productIDs) == 0 {
+		return make([]*Products, 0), nil
+	}
+	ids := make([]string, len(productIDs))
+	for i := range productIDs {
+		ids[i] = fmt.Sprintf("$%d", i+1)
+	}
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id IN (%s)", m.table, strings.Join(ids, ","))
 	products := make([]*Products, 0)
 
-	err := m.conn.QueryRowsCtx(ctx, &products, query)
+	err := m.conn.QueryRowsCtx(ctx, &products, query, strings.Join(productIDs, ","))
 	return products, err
 }
 
@@ -71,7 +78,7 @@ func (m *CustomProductsModel) WithSession(session sqlx.Session) ProductsModel {
 }
 
 func (m *defaultProductsModel) FindPage(ctx context.Context, offset, limit int) ([]*Products, error) {
-	query := fmt.Sprintf("SELECT * FROM %s LIMIT ? OFFSET ?", m.table)
+	query := fmt.Sprintf("SELECT * FROM %s LIMIT $1 OFFSET $2", m.table)
 	var products []*Products
 	err := m.conn.QueryRowsCtx(ctx, &products, query, limit, offset)
 	if err != nil {
@@ -90,7 +97,7 @@ func (m *defaultProductsModel) Count(ctx context.Context) (int64, error) {
 }
 func (m *defaultProductsModel) FindProductIsExist(ctx context.Context, productID int64) (bool, error) {
 	var count int
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE id=?", m.table)
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE id=$1", m.table)
 
 	err := m.conn.QueryRowCtx(ctx, &count, query, productID)
 	if err != nil {
