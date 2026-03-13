@@ -15,7 +15,7 @@ import (
 
 const (
 	SeckillExchangeName = "seckill-order-exchange"
-	SeckillQueueName   = "seckill-order-queue"
+	SeckillQueueName    = "seckill-order-queue"
 )
 
 type SeckillOrder struct {

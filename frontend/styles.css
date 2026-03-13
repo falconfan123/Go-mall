@@ -698,6 +698,40 @@ body {
     box-shadow: none;
 }
 
+/* 秒杀按钮状态 */
+.flash-btn.btn-disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.flash-btn.btn-critical {
+    background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+    animation: pulse 1s infinite;
+    cursor: pointer;
+}
+
+.flash-btn.btn-trigger {
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+    cursor: pointer;
+    animation: none;
+}
+
+.flash-btn.btn-trigger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.5);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
 /* 支付页面 */
 .payment-container {
     background: white;

@@ -7,7 +7,22 @@ const API_BASE = {
     coupon: '/douyin/coupon',
     checkout: '/douyin/checkout',
     payment: '/douyin/payment',
-    flash: '/douyin/flash'
+    flash: '/douyin/flash',
+    // 秒杀系统 API
+    systemTime: '/api/v1/system/time',
+    activityToken: '/api/v1/activity/token',
+    seckill: '/api/v1/order/seckill'
+};
+
+// 秒杀系统状态管理
+const seckillState = {
+    timeOffset: 0,           // 服务器时间偏移量
+    timeLastSync: 0,         // 上次同步时间
+    isSyncing: false,        // 是否正在同步
+    pathKeys: {},            // 缓存的 path_key
+    buttonStates: {},        // 按钮状态缓存
+    lastRequestTime: 0,      // 上次请求时间（防抖）
+    isRequesting: false      // 是否正在请求
 };
 
 // 状态管理
@@ -45,12 +60,226 @@ function getDeviceId() {
     return deviceId;
 }
 
+// ==================== 秒杀系统函数 ====================
+
+// 获取服务器时间（带偏移量校正）
+function getServerTime() {
+    return Date.now() + seckillState.timeOffset;
+}
+
+// 初始化时钟同步
+async function initTimeSync() {
+    await syncServerTime();
+}
+
+// 同步服务器时间
+async function syncServerTime() {
+    if (seckillState.isSyncing) return;
+
+    seckillState.isSyncing = true;
+    const clientTimeBefore = Date.now();
+
+    try {
+        const response = await fetch(API_BASE.systemTime, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error('Time sync failed');
+
+        const clientTimeAfter = Date.now();
+        const roundTrip = clientTimeAfter - clientTimeBefore;
+
+        const data = await response.json();
+        const serverTime = data.time; // 服务器返回的 Unix 毫秒时间
+
+        // 计算偏移量：服务器时间 + 单程延迟 - 客户端当前时间
+        const estimatedServerTime = serverTime + (roundTrip / 2);
+        seckillState.timeOffset = estimatedServerTime - clientTimeAfter;
+        seckillState.timeLastSync = Date.now();
+
+        console.log('[TimeSync] Offset:', seckillState.timeOffset, 'ms');
+    } catch (error) {
+        console.error('[TimeSync] Error:', error);
+    } finally {
+        seckillState.isSyncing = false;
+    }
+}
+
+// 获取秒杀 Token（path_key）
+async function getSeckillToken(productId) {
+    // 检查缓存
+    const cached = seckillState.pathKeys[productId];
+    if (cached && cached.expiresAt > getServerTime()) {
+        return cached.pathKey;
+    }
+
+    try {
+        const response = await fetch(API_BASE.activityToken, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': state.user?.id?.toString() || getDeviceId()
+            }
+        });
+
+        if (!response.ok) throw new Error('Token request failed');
+
+        const data = await response.json();
+        const pathKey = data.path_key;
+
+        // 缓存 token（假设有效期 5 分钟）
+        seckillState.pathKeys[productId] = {
+            pathKey: pathKey,
+            expiresAt: getServerTime() + 5 * 60 * 1000
+        };
+
+        return pathKey;
+    } catch (error) {
+        console.error('[getSeckillToken] Error:', error);
+        return null;
+    }
+}
+
+// 提交秒杀请求
+async function submitSeckillOrder(productId, pathKey) {
+    try {
+        const response = await fetch(API_BASE.seckill, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': state.user?.id?.toString() || getDeviceId()
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                path_key: pathKey,
+                user_id: state.user?.id || 0
+            })
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('[submitSeckillOrder] Error:', error);
+        return { status_code: 1, message: '秒杀请求失败' };
+    }
+}
+
+// 计算按钮状态
+function calculateButtonState(productId, activityStartTime) {
+    const now = getServerTime();
+    const diff = activityStartTime - now;
+
+    // 活动未开始
+    if (diff > 10 * 1000) { // 超过10秒
+        return { status: 'waiting', text: '即将开始', class: 'btn-disabled' };
+    }
+
+    // 即将开始 (10秒内)
+    if (diff > 0) {
+        return { status: 'critical', text: Math.ceil(diff / 1000) + '秒', class: 'btn-critical' };
+    }
+
+    // 可开始秒杀
+    return { status: 'trigger', text: '立即抢购', class: 'btn-trigger' };
+}
+
+// 更新按钮状态（每秒调用）
+function updateButtonStates() {
+    const buttons = document.querySelectorAll('.flash-btn[data-product-id]');
+    if (buttons.length === 0) return;
+
+    // 假设活动开始时间（可以根据后端配置）
+    const activityStartTime = 1739/* TODO: 从后端获取 */;
+
+    buttons.forEach(btn => {
+        const productId = parseInt(btn.dataset.productId);
+        const state = calculateButtonState(productId, activityStartTime);
+
+        // 更新按钮状态
+        if (state.status === 'waiting') {
+            btn.disabled = true;
+            btn.className = 'flash-btn btn-disabled';
+            btn.textContent = state.text;
+        } else if (state.status === 'critical') {
+            btn.disabled = false;
+            btn.className = 'flash-btn btn-critical';
+            btn.textContent = state.text;
+        } else if (state.status === 'trigger') {
+            btn.disabled = false;
+            btn.className = 'flash-btn btn-trigger';
+            btn.textContent = state.text;
+        }
+    });
+}
+
+// 防抖请求
+async function debouncedSeckillRequest(productId) {
+    const now = Date.now();
+
+    // 500ms 防抖
+    if (now - seckillState.lastRequestTime < 500) {
+        showToast('请求过于频繁，请稍后再试', 'error');
+        return;
+    }
+
+    // 检查是否正在请求
+    if (seckillState.isRequesting) {
+        showToast('秒杀处理中，请稍候', 'warning');
+        return;
+    }
+
+    seckillState.isRequesting = true;
+    seckillState.lastRequestTime = now;
+
+    // 添加随机延迟 (0-200ms)，打散请求
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 200));
+
+    try {
+        // 1. 获取 Token
+        const pathKey = await getSeckillToken(productId);
+        if (!pathKey) {
+            showToast('获取秒杀资格失败', 'error');
+            return;
+        }
+
+        // 2. 提交秒杀请求
+        const result = await submitSeckillOrder(productId, pathKey);
+
+        // 3. 处理结果
+        if (result.status_code === 0) {
+            showToast('秒杀成功！订单号: ' + result.order_id, 'success');
+            // 跳转支付页面
+            setTimeout(() => {
+                showPaymentPage({
+                    id: result.order_id,
+                    order_no: result.order_id,
+                    total: 0.01
+                });
+            }, 1500);
+        } else {
+            showToast(result.message || '秒杀失败', 'error');
+        }
+    } catch (error) {
+        console.error('[Seckill] Error:', error);
+        showToast('系统错误，请稍后重试', 'error');
+    } finally {
+        seckillState.isRequesting = false;
+    }
+}
+
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
     updateNav();
     showPage('home');
     loadProducts();
+    // 启动时钟同步
+    initTimeSync();
+    // 启动定时同步（每30秒）
+    setInterval(syncServerTime, 30000);
+    // 启动按钮状态更新（每秒检查）
+    setInterval(updateButtonStates, 1000);
 });
 
 // 从 localStorage 加载状态
@@ -204,8 +433,8 @@ function renderFlashProducts(products) {
                     库存: <span class="stock-number">${product.stock}</span> 件
                 </div>
                 <div class="flash-action">
-                    <button class="flash-btn" onclick="handleFlashBuy(${product.id})" ${product.stock <= 0 ? 'disabled' : ''}>
-                        ${product.stock > 0 ? '立即抢购' : '已售罄'}
+                    <button class="flash-btn" data-product-id="${product.id}" onclick="handleFlashBuy(${product.id})" ${product.stock <= 0 ? 'disabled' : ''}>
+                        ${product.stock > 0 ? '即将开始' : '已售罄'}
                     </button>
                 </div>
             </div>
@@ -218,6 +447,13 @@ async function handleFlashBuy(productId) {
     if (!state.longToken) {
         showToast('请先登录', 'error');
         showPage('login');
+        return;
+    }
+
+    // 检查时钟同步状态
+    if (Math.abs(seckillState.timeOffset) > 5000) {
+        showToast('时钟未同步，请稍后重试', 'warning');
+        await syncServerTime();
         return;
     }
 
@@ -235,35 +471,8 @@ async function handleFlashBuy(productId) {
         return;
     }
 
-    // 真实的秒杀请求
-    try {
-        const data = await apiRequest(`${API_BASE.flash}/buy`, {
-            method: 'POST',
-            body: JSON.stringify({ productId: productId, quantity: 1 })
-        });
-
-        // 创建订单对象
-        const order = {
-            id: data.data.orderId,
-            order_no: data.data.orderNo,
-            product: product,
-            quantity: 1,
-            total: data.data.total / 100, // 转换为元
-            status: 'pending',
-            created_at: new Date().toISOString()
-        };
-
-        state.orders.unshift(order);
-        showToast('秒杀成功！正在跳转支付页面...', 'success');
-
-        // 跳转支付页面
-        setTimeout(() => {
-            showPaymentPage(order);
-        }, 1500);
-
-    } catch (error) {
-        showToast(error.message || '秒杀失败，请重试', 'error');
-    }
+    // 使用新的秒杀流程（防抖 + Token + 随机延迟）
+    await debouncedSeckillRequest(productId);
 }
 
 // 显示支付页面

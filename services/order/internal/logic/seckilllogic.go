@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/falconfan123/Go-mall/services/order/internal/svc"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/seckill"
+	"github.com/falconfan123/Go-mall/services/order/internal/svc"
 	order "github.com/falconfan123/Go-mall/services/order/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -73,8 +73,7 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 
 	result, err := l.svcCtx.RedisClient.EvalCtx(l.ctx, seckillLuaScript,
 		[]string{fmt.Sprintf("%d", userId), fmt.Sprintf("%d", activityId)},
-		fmt.Sprintf("%d", nowTime), pathKey).Result()
-
+		fmt.Sprintf("%d", nowTime), pathKey)
 	if err != nil {
 		logx.Errorf("seckill lua script error: %v", err)
 		return &order.SeckillResponse{
@@ -130,8 +129,8 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 		return &order.SeckillResponse{
 			StatusCode: 0,
 			StatusMsg:  "success",
-			OrderId:   orderID,
-			Message:   "秒杀成功，请尽快完成支付",
+			OrderId:    orderID,
+			Message:    "秒杀成功，请尽快完成支付",
 		}, nil
 	case 0:
 		return &order.SeckillResponse{StatusCode: 1, StatusMsg: msg, Message: "商品已售罄"}, nil
