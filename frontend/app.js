@@ -326,7 +326,7 @@ function updateNav() {
         navAuth.style.display = 'none';
         navUser.style.display = 'flex';
         ordersNav.style.display = 'inline';
-        userName.textContent = state.user.user_name || state.user.email || '用户';
+        userName.textContent = state.user.username || state.user.user_name || state.user.email || '用户';
     } else {
         navAuth.style.display = 'flex';
         navUser.style.display = 'none';
