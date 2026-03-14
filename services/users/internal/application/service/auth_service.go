@@ -217,6 +217,10 @@ func (s *AuthAppService) Login(ctx context.Context, req *dto.LoginRequest) (*dto
 
 	// 6. 发布登录事件
 	go func() {
+		var email string
+		if user.Email != nil {
+			email = user.Email.Value()
+		}
 		event := &domainevent.UserLoggedInEvent{
 			BaseEvent: domainevent.BaseEvent{
 				EventID:    uuid.NewString(),
@@ -224,7 +228,7 @@ func (s *AuthAppService) Login(ctx context.Context, req *dto.LoginRequest) (*dto
 				OccurredAt: time.Now(),
 			},
 			UserID: user.ID,
-			Email:  user.Email.Value(),
+			Email:  email,
 			IP:     req.IP,
 		}
 		_ = s.eventPublisher.PublishUserLoggedIn(event)
