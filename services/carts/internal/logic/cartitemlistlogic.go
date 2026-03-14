@@ -64,10 +64,12 @@ func (l *CartItemListLogic) CartItemList(in *carts.UserInfo) (*carts.CartItemLis
 
 	for _, item := range cartDTO.Items {
 		rsp.Data = append(rsp.Data, &carts.CartInfoResponse{
-			ProductId: int32(item.ProductID),
-			Quantity:  item.Quantity,
-			Checked:   item.Checked,
-			// 注意：原有响应缺少商品名称、图片、价格字段，可根据需要扩展
+			ProductId:    int32(item.ProductID),
+			ProductName:  item.ProductName,
+			ProductImage: item.ProductImage,
+			ProductPrice: float32(item.ProductPrice),
+			Quantity:     item.Quantity,
+			Checked:      item.Checked,
 		})
 	}
 
