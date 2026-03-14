@@ -20,7 +20,7 @@ const server = http.createServer((req, res) => {
     const pathname = urlObj.pathname;
 
     // 如果请求的是API路径，转发到网关
-    if (pathname.startsWith('/douyin/')) {
+    if (pathname.startsWith('/douyin/') || pathname.startsWith('/api/')) {
         proxy.web(req, res, {
             target: 'http://localhost:8080',
             changeOrigin: true,

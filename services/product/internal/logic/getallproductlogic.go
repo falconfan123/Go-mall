@@ -85,15 +85,24 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 		if result[i] == nil {
 			continue
 		}
+		// 默认使用商品表中的库存
+		result[i].Stock = p.Stock
+
 		inventoryResp, err := l.svcCtx.InventoryRpc.GetInventory(l.ctx, &inventoryclient.GetInventoryReq{
 			ProductId: int32(p.Id),
 		})
 		if err != nil {
-			logx.WithContext(l.ctx).Errorw("call InventoryRpc failed", logx.Field("err", err), logx.Field("product_id", p.Id))
+			logx.WithContext(l.ctx).Errorw("call InventoryRpc failed, use stock from products table", logx.Field("err", err), logx.Field("product_id", p.Id))
+			// 使用商品表中的库存作为后备
 			continue
 		}
-		result[i].Stock = inventoryResp.Inventory
-		result[i].Sold = inventoryResp.SoldCount
+		// 如果 inventory 服务返回有效数据，使用它覆盖
+		if inventoryResp.Inventory > 0 {
+			result[i].Stock = inventoryResp.Inventory
+		}
+		if inventoryResp.SoldCount > 0 {
+			result[i].Sold = inventoryResp.SoldCount
+		}
 	}
 
 	return &product.GetAllProductsResp{
