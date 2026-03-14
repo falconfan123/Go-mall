@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 
 	_ "github.com/lib/pq"
 
@@ -25,12 +26,39 @@ import (
 
 var configFile = flag.String("f", "etc/order.yaml", "the config file")
 
+// initSeckillData 初始化秒杀活动数据到 Redis
+func initSeckillData(ctx *svc.ServiceContext) {
+	// 设置秒杀活动开始时间限制（当前时间，允许立即抢购）
+	startTime := time.Now().UnixMilli()
+	err := ctx.RedisClient.Set("act_start_limit", fmt.Sprintf("%d", startTime))
+	if err != nil {
+		logx.Errorf("failed to set act_start_limit: %v", err)
+	} else {
+		logx.Infof("initialized act_start_limit: %d", startTime)
+	}
+
+	// 初始化秒杀商品库存
+	productIds := []int64{1, 2, 3, 4}
+	for _, productId := range productIds {
+		stockKey := fmt.Sprintf("act_%d_stock", productId)
+		err := ctx.RedisClient.Set(stockKey, "10")
+		if err != nil {
+			logx.Errorf("failed to set stock for product %d: %v", productId, err)
+		} else {
+			logx.Infof("initialized stock for product %d: 10", productId)
+		}
+	}
+}
+
 func main() {
 	flag.Parse()
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c, conf.UseEnv())
 	ctx := svc.NewServiceContext(c)
+
+	// 初始化秒杀活动数据
+	initSeckillData(ctx)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		order.RegisterOrderServiceServer(grpcServer, server.NewOrderServiceServer(ctx))

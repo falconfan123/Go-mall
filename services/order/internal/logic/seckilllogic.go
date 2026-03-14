@@ -71,6 +71,8 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 	activityId := productId
 	nowTime := time.Now().UnixMilli()
 
+	logx.Infof("Seckill request: userId=%d, productId=%d, activityId=%d, pathKey=%s", userId, productId, activityId, pathKey)
+
 	result, err := l.svcCtx.RedisClient.EvalCtx(l.ctx, seckillLuaScript,
 		[]string{fmt.Sprintf("%d", userId), fmt.Sprintf("%d", activityId)},
 		fmt.Sprintf("%d", nowTime), pathKey)

@@ -35,18 +35,18 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	orderDelayMQ, err := delay.Init(c)
 	if err != nil {
-		logx.Error(err)
-		panic(err)
+		logx.Errorf("delay mq init failed: %v, continuing without it", err)
+		orderDelayMQ = nil
 	}
 	notifyMQ, err := notify.Init(c)
 	if err != nil {
-		logx.Error(err)
-		panic(err)
+		logx.Errorf("notify mq init failed: %v, continuing without it", err)
+		notifyMQ = nil
 	}
 	seckillMQ, err := seckill.Init(c)
 	if err != nil {
-		logx.Error(err)
-		panic(err)
+		logx.Errorf("seckill mq init failed: %v, continuing without it", err)
+		seckillMQ = nil
 	}
 	redisClient, err := redis.NewRedis(c.RedisConf)
 	if err != nil {
