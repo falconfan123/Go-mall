@@ -115,7 +115,7 @@ async function getSeckillToken(productId) {
     }
 
     try {
-        const response = await fetch(API_BASE.activityToken, {
+        const response = await fetch(`${API_BASE.activityToken}?activity_id=${productId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
