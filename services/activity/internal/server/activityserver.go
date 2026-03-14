@@ -6,10 +6,12 @@ package server
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/falconfan123/Go-mall/services/activity/internal/logic"
 	"github.com/falconfan123/Go-mall/services/activity/internal/svc"
 	"github.com/falconfan123/Go-mall/services/activity/pb"
+	"google.golang.org/grpc/metadata"
 )
 
 type ActivityServer struct {
@@ -25,7 +27,19 @@ func NewActivityServer(svcCtx *svc.ServiceContext) *ActivityServer {
 
 // Token 获取下单动态路径
 func (s *ActivityServer) Token(ctx context.Context, in *pb.TokenReq) (*pb.TokenResp, error) {
+	// 从 gRPC 元数据中获取 user_id
+	userId := int64(1) // 默认值
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		for _, key := range []string{"gateway-user-id", "grpc-metadata-user-id", "user-id", "user_id"} {
+			if userIds := md.Get(key); len(userIds) > 0 {
+				if uid, err := strconv.ParseInt(userIds[0], 10, 64); err == nil {
+					userId = uid
+					break
+				}
+			}
+		}
+	}
 	l := logic.NewTokenLogic(ctx, s.svcCtx)
-	// TODO: 从 ctx 中获取实际的用户 ID
-	return l.Token(in, 1)
+	return l.Token(in, userId)
 }

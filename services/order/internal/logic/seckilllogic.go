@@ -71,6 +71,8 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 	activityId := productId
 	nowTime := time.Now().UnixMilli()
 
+	logx.Infof("Seckill request: userId=%d, productId=%d, activityId=%d, pathKey=%s", userId, productId, activityId, pathKey)
+
 	result, err := l.svcCtx.RedisClient.EvalCtx(l.ctx, seckillLuaScript,
 		[]string{fmt.Sprintf("%d", userId), fmt.Sprintf("%d", activityId)},
 		fmt.Sprintf("%d", nowTime), pathKey)
@@ -150,6 +152,12 @@ func (l *SeckillLogic) generateOrderID(userId, productId int64) string {
 }
 
 func (l *SeckillLogic) sendSeckillMessage(userId, productId, activityId int64, orderID string) {
+	// 如果 SeckillMQ 为 nil（RabbitMQ 连接失败），直接返回
+	if l.svcCtx.SeckillMQ == nil {
+		logx.Infof("SeckillMQ is nil, skipping message publish")
+		return
+	}
+
 	msg := seckill.SeckillOrder{
 		OrderID:    orderID,
 		UserID:     userId,

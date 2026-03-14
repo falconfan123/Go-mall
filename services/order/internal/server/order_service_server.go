@@ -6,10 +6,12 @@ package server
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/falconfan123/Go-mall/services/order/internal/logic"
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
 	order "github.com/falconfan123/Go-mall/services/order/pb"
+	"google.golang.org/grpc/metadata"
 )
 
 type OrderServiceServer struct {
@@ -26,4 +28,22 @@ func NewOrderServiceServer(svcCtx *svc.ServiceContext) *OrderServiceServer {
 func (s *OrderServiceServer) CreateOrder(ctx context.Context, in *order.CreateOrderRequest) (*order.OrderDetailResponse, error) {
 	l := logic.NewCreateOrderLogic(ctx, s.svcCtx)
 	return l.CreateOrder(in)
+}
+
+func (s *OrderServiceServer) Seckill(ctx context.Context, in *order.SeckillRequest) (*order.SeckillResponse, error) {
+	// 从 gRPC 元数据中获取 user_id
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		// 尝试多种可能的元数据键名 (go-zero 网关会转换为 gateway-user-id)
+		for _, key := range []string{"gateway-user-id", "grpc-metadata-user-id", "user-id", "user_id"} {
+			if userIds := md.Get(key); len(userIds) > 0 {
+				if userId, err := strconv.ParseUint(userIds[0], 10, 32); err == nil {
+					in.UserId = uint32(userId)
+					break
+				}
+			}
+		}
+	}
+	l := logic.NewSeckillLogic(ctx, s.svcCtx)
+	return l.Seckill(in)
 }
