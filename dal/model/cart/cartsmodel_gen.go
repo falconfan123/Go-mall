@@ -40,13 +40,16 @@ type (
 		table string
 	}
 	Carts struct {
-		Id        int64         `db:"id" json:"id"`                 // 主键 自增
-		CreatedAt time.Time     `db:"created_at" json:"created_at"` // 创建时间
-		UpdatedAt time.Time     `db:"updated_at" json:"updated_at"` // 更新时间
-		UserId    sql.NullInt64 `db:"user_id" json:"user_id"`       // 用户ID
-		ProductId sql.NullInt64 `db:"product_id" json:"product_id"` // 商品ID
-		Quantity  sql.NullInt64 `db:"quantity" json:"quantity"`     // 商品数量
-		Checked   sql.NullInt64 `db:"checked" json:"checked"`       // 商品是否选中
+		Id           int64           `db:"id" json:"id"`                       // 主键 自增
+		CreatedAt    time.Time       `db:"created_at" json:"created_at"`       // 创建时间
+		UpdatedAt    time.Time       `db:"updated_at" json:"updated_at"`       // 更新时间
+		UserId       sql.NullInt64   `db:"user_id" json:"user_id"`             // 用户ID
+		ProductId    sql.NullInt64   `db:"product_id" json:"product_id"`       // 商品ID
+		ProductName  sql.NullString  `db:"product_name" json:"product_name"`   // 商品名称
+		ProductImage sql.NullString  `db:"product_image" json:"product_image"` // 商品图片
+		ProductPrice sql.NullFloat64 `db:"product_price" json:"product_price"` // 商品价格
+		Quantity     sql.NullInt64   `db:"quantity" json:"quantity"`           // 商品数量
+		Checked      sql.NullInt64   `db:"checked" json:"checked"`             // 商品是否选中
 	}
 )
 
@@ -89,14 +92,14 @@ func (m *defaultCartsModel) FindByUserID(ctx context.Context, userID int64) ([]C
 }
 
 func (m *defaultCartsModel) Insert(ctx context.Context, data *Carts) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4)", m.table, cartsRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.Quantity, data.Checked)
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7)", m.table, cartsRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.ProductName, data.ProductImage, data.ProductPrice, data.Quantity, data.Checked)
 	return ret, err
 }
 
 func (m *defaultCartsModel) Update(ctx context.Context, data *Carts) error {
 	query := fmt.Sprintf("update %s set %s where id = $1", m.table, cartsRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.Quantity, data.Checked, data.Id)
+	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.ProductName, data.ProductImage, data.ProductPrice, data.Quantity, data.Checked, data.Id)
 	return err
 }
 

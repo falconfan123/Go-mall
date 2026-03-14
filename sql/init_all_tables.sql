@@ -134,12 +134,20 @@ CREATE TABLE `carts` (
   `deleted_at` timestamp NULL DEFAULT NULL COMMENT '删除时间',
   `user_id` int NULL DEFAULT NULL COMMENT '用户ID',
   `product_id` int NULL DEFAULT NULL COMMENT '商品ID',
+  `product_name` varchar(255) NULL DEFAULT NULL COMMENT '商品名称',
+  `product_image` varchar(512) NULL DEFAULT NULL COMMENT '商品图片',
+  `product_price` decimal(10,2) NULL DEFAULT NULL COMMENT '商品价格',
   `quantity` int NULL DEFAULT NULL COMMENT '商品数量',
   `checked` tinyint(1) NULL DEFAULT NULL COMMENT '商品是否选中',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_carts_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_carts_product_id`(`product_id` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- If table already exists, run ALTER TABLE:
+-- ALTER TABLE `carts` ADD COLUMN `product_name` varchar(255) NULL DEFAULT NULL COMMENT '商品名称' AFTER `product_id`;
+-- ALTER TABLE `carts` ADD COLUMN `product_image` varchar(512) NULL DEFAULT NULL COMMENT '商品图片' AFTER `product_name`;
+-- ALTER TABLE `carts` ADD COLUMN `product_price` decimal(10,2) NULL DEFAULT NULL COMMENT '商品价格' AFTER `product_image`;
 
 -- Checkout tables
 DROP TABLE IF EXISTS `checkouts`;

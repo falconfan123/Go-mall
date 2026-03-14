@@ -137,8 +137,11 @@ type CartInfoResponse struct {
 	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	UserId        int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	ProductId     int32                  `protobuf:"varint,3,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	Quantity      int32                  `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	Checked       bool                   `protobuf:"varint,5,opt,name=checked,proto3" json:"checked,omitempty"`
+	ProductName   string                 `protobuf:"bytes,4,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
+	ProductImage  string                 `protobuf:"bytes,5,opt,name=product_image,json=productImage,proto3" json:"product_image,omitempty"`
+	ProductPrice  float32                `protobuf:"fixed32,6,opt,name=product_price,json=productPrice,proto3" json:"product_price,omitempty"`
+	Quantity      int32                  `protobuf:"varint,7,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Checked       bool                   `protobuf:"varint,8,opt,name=checked,proto3" json:"checked,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -190,6 +193,27 @@ func (x *CartInfoResponse) GetUserId() int32 {
 func (x *CartInfoResponse) GetProductId() int32 {
 	if x != nil {
 		return x.ProductId
+	}
+	return 0
+}
+
+func (x *CartInfoResponse) GetProductName() string {
+	if x != nil {
+		return x.ProductName
+	}
+	return ""
+}
+
+func (x *CartInfoResponse) GetProductImage() string {
+	if x != nil {
+		return x.ProductImage
+	}
+	return ""
+}
+
+func (x *CartInfoResponse) GetProductPrice() float32 {
+	if x != nil {
+		return x.ProductPrice
 	}
 	return 0
 }

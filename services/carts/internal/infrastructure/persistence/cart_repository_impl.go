@@ -43,6 +43,9 @@ func (r *CartRepositoryImpl) GetByUserID(ctx context.Context, userID int64) (*ag
 		productID := item.ProductId.Int64
 		quantity := item.Quantity.Int64
 		checked := item.Checked.Int64 == 1
+		productName := item.ProductName.String
+		productImage := item.ProductImage.String
+		productPrice := item.ProductPrice.Float64
 
 		// 创建数量值对象
 		qty, err := valueobject.NewQuantity(int32(quantity))
@@ -52,13 +55,11 @@ func (r *CartRepositoryImpl) GetByUserID(ctx context.Context, userID int64) (*ag
 		}
 
 		// 创建购物车项实体
-		// 注意：商品名称、图片、价格需要从商品服务获取，这里暂时留空或者后续补充
-		// 实际项目中，购物车表通常会冗余存储这些信息，避免每次查询商品服务
 		cartItem := entity.NewCartItem(
 			productID,
-			"", // 商品名称，实际应该从数据库读取或者商品服务获取
-			"", // 商品图片
-			0,  // 商品价格
+			productName,  // 商品名称
+			productImage, // 商品图片
+			productPrice, // 商品价格
 			qty,
 		)
 		cartItem.ID = item.Id
@@ -101,6 +102,18 @@ func (r *CartRepositoryImpl) Save(ctx context.Context, cart *aggregate.Cart) err
 					Int64: item.ProductID,
 					Valid: true,
 				},
+				ProductName: sql.NullString{
+					String: item.ProductName,
+					Valid:  true,
+				},
+				ProductImage: sql.NullString{
+					String: item.ProductImage,
+					Valid:  true,
+				},
+				ProductPrice: sql.NullFloat64{
+					Float64: item.ProductPrice,
+					Valid:   true,
+				},
 				Quantity: sql.NullInt64{
 					Int64: int64(item.Quantity.Value()),
 					Valid: true,
@@ -127,6 +140,18 @@ func (r *CartRepositoryImpl) Save(ctx context.Context, cart *aggregate.Cart) err
 				ProductId: sql.NullInt64{
 					Int64: item.ProductID,
 					Valid: true,
+				},
+				ProductName: sql.NullString{
+					String: item.ProductName,
+					Valid:  true,
+				},
+				ProductImage: sql.NullString{
+					String: item.ProductImage,
+					Valid:  true,
+				},
+				ProductPrice: sql.NullFloat64{
+					Float64: item.ProductPrice,
+					Valid:   true,
 				},
 				Quantity: sql.NullInt64{
 					Int64: int64(item.Quantity.Value()),

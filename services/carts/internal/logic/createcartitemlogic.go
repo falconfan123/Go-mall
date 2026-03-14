@@ -42,14 +42,12 @@ func (l *CreateCartItemLogic) CreateCartItem(in *carts.CartItemRequest) (*carts.
 
 	// 1. 转换为DTO
 	req := &dto.AddItemReq{
-		UserID:    int64(in.UserId),
-		ProductID: int64(in.ProductId),
-		Quantity:  in.Quantity + 1, // 兼容原有逻辑，数量+1
-		// 注意：商品名称、图片、价格需要从商品服务获取
-		// 这里简化处理，实际应该调用商品服务获取完整信息
-		ProductName:  "",
-		ProductImage: "",
-		ProductPrice: 0,
+		UserID:       int64(in.UserId),
+		ProductID:    int64(in.ProductId),
+		ProductName:  in.ProductName,
+		ProductImage: in.ProductImage,
+		ProductPrice: float64(in.ProductPrice),
+		Quantity:     in.Quantity + 1, // 兼容原有逻辑，数量+1
 	}
 
 	// 2. 调用应用服务
