@@ -53,7 +53,7 @@ type (
 func newCartsModel(conn sqlx.SqlConn) *defaultCartsModel {
 	return &defaultCartsModel{
 		conn:  conn,
-		table: "`carts`",
+		table: `"public"."carts"`,
 	}
 }
 
