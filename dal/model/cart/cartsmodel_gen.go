@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	cartsFieldNames          = builder.RawFieldNames(&Carts{})
+	cartsFieldNames          = builder.RawFieldNames(&Carts{}, true)
 	cartsRows                = strings.Join(cartsFieldNames, ",")
-	cartsRowsExpectAutoSet   = strings.Join(stringx.Remove(cartsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	cartsRowsWithPlaceHolder = strings.Join(stringx.Remove(cartsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	cartsRowsExpectAutoSet   = strings.Join(stringx.Remove(cartsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	cartsRowsWithPlaceHolder = builder.PostgreSqlJoin(stringx.Remove(cartsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"))
 )
 
 type (
@@ -58,13 +58,13 @@ func newCartsModel(conn sqlx.SqlConn) *defaultCartsModel {
 }
 
 func (m *defaultCartsModel) Delete(ctx context.Context, id int64) error {
-	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where id = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
 func (m *defaultCartsModel) FindOne(ctx context.Context, id int64) (*Carts, error) {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", cartsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where id = $1 limit 1", cartsRows, m.table)
 	var resp Carts
 	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
 	switch err {
@@ -77,7 +77,7 @@ func (m *defaultCartsModel) FindOne(ctx context.Context, id int64) (*Carts, erro
 	}
 }
 func (m *defaultCartsModel) FindByUserID(ctx context.Context, userID int64) ([]Carts, error) {
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE `user_id` = ?", cartsRows, m.table)
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE user_id = $1", cartsRows, m.table)
 	var results []Carts
 
 	err := m.conn.QueryRowsCtx(ctx, &results, query, userID)
@@ -89,13 +89,13 @@ func (m *defaultCartsModel) FindByUserID(ctx context.Context, userID int64) ([]C
 }
 
 func (m *defaultCartsModel) Insert(ctx context.Context, data *Carts) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?)", m.table, cartsRowsExpectAutoSet)
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4)", m.table, cartsRowsExpectAutoSet)
 	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.Quantity, data.Checked)
 	return ret, err
 }
 
 func (m *defaultCartsModel) Update(ctx context.Context, data *Carts) error {
-	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, cartsRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set %s where id = $1", m.table, cartsRowsWithPlaceHolder)
 	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.Quantity, data.Checked, data.Id)
 	return err
 }
@@ -107,7 +107,7 @@ func (m *defaultCartsModel) CheckCartItemExists(ctx context.Context, userId int3
 	}
 
 	// 使用 sqlx 查询购物车中是否存在该 user_id 和 product_id 的记录
-	query := fmt.Sprintf("SELECT id FROM %s WHERE user_id = ? AND product_id = ? LIMIT 1", m.table)
+	query := fmt.Sprintf("SELECT id FROM %s WHERE user_id = $1 AND product_id = $2 LIMIT 1", m.table)
 	err := m.conn.QueryRowCtx(ctx, &existingCart, query, userId, productId)
 
 	if err != nil {
@@ -126,7 +126,7 @@ func (m *defaultCartsModel) GetQuantityByUserIdAndProductId(ctx context.Context,
 	var quantity int32
 
 	// 编写查询语句，查询特定用户和商品的 quantity
-	query := fmt.Sprintf("SELECT quantity FROM %s WHERE user_id = ? AND product_id = ? LIMIT 1", m.table)
+	query := fmt.Sprintf("SELECT quantity FROM %s WHERE user_id = $1 AND product_id = $2 LIMIT 1", m.table)
 
 	// 执行查询并将结果存储到 quantity 变量中
 	err := m.conn.QueryRowCtx(ctx, &quantity, query, userId, productId)
@@ -144,7 +144,7 @@ func (m *defaultCartsModel) GetQuantityByUserIdAndProductId(ctx context.Context,
 
 func (m *defaultCartsModel) DeleteCartItem(ctx context.Context, userId int32, productId int32) error {
 	// 删除特定用户和商品的购物车记录
-	query := fmt.Sprintf("DELETE FROM %s WHERE user_id = ? AND product_id = ?", m.table)
+	query := fmt.Sprintf("DELETE FROM %s WHERE user_id = $1 AND product_id = $2", m.table)
 
 	// 执行删除操作，并获取执行结果
 	result, err := m.conn.ExecCtx(ctx, query, userId, productId)
