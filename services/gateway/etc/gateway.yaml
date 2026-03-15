@@ -88,3 +88,11 @@ Upstreams:
       - Method: get
         Path: /api/v1/activity/token
         RpcPath: activity.Activity/Token
+
+  # Order 订单服务 (端口 10004)
+  - Grpc:
+      Target: 127.0.0.1:10004
+    Mappings:
+      - Method: post
+        Path: /api/v1/order/seckill
+        RpcPath: order.OrderService/Seckill

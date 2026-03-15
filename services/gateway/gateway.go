@@ -82,6 +82,12 @@ func main() {
 			if userID > 0 {
 				r.Header.Set("user_id", fmt.Sprintf("%d", userID))
 				r.Header.Set("Grpc-Metadata-User-Id", fmt.Sprintf("%d", userID))
+				fmt.Printf("Using token user_id: %d\n", userID)
+			} else if xUserId := r.Header.Get("X-User-Id"); xUserId != "" {
+				// 如果没有 token，但有 X-User-Id 头，直接使用它
+				r.Header.Set("user_id", xUserId)
+				r.Header.Set("Grpc-Metadata-User-Id", xUserId)
+				fmt.Printf("Using X-User-Id header: %s\n", xUserId)
 			}
 
 			// 如果需要刷新短令牌，在响应头中设置标记

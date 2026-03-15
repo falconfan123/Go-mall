@@ -44,9 +44,8 @@ func main() {
 
 // initActivityStartTime 初始化活动开始时间到 Redis
 func initActivityStartTime(ctx *svc.ServiceContext) {
-	// 设置活动开始时间为当前时间后 1 小时（方便测试）
-	// 生产环境可以从配置或数据库读取
-	startTime := time.Now().Add(1 * time.Hour).UnixMilli()
+	// 设置活动开始时间为当前时间（方便测试，实际生产环境应从数据库读取）
+	startTime := time.Now().UnixMilli()
 
 	// 为前端定义的秒杀商品初始化活动开始时间
 	productIds := []int64{1, 2, 3, 4}
