@@ -9,6 +9,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/activity/internal/svc"
 	"github.com/falconfan123/Go-mall/services/activity/pb"
+
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -40,9 +41,8 @@ func (l *TokenLogic) Token(in *pb.TokenReq, userId int64) (*pb.TokenResp, error)
 	// 提前 N 秒生成 token
 	now := time.Now().UnixMilli()
 
-	// 从 Redis 获取活动开始时间
-	startTimeKey := fmt.Sprintf("act_%d_start", activityId)
-	startTime, err := l.svcCtx.Redis.Get(startTimeKey)
+	// 从 Redis 获取活动开始时间（使用统一的 key）
+	startTime, err := l.svcCtx.Redis.Get("act_start_limit")
 	if err != nil || startTime == "" {
 		// 如果没有设置活动开始时间，返回错误
 		logx.Errorf("activity %d not found or not started", activityId)
