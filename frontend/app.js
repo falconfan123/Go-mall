@@ -119,7 +119,7 @@ async function getSeckillToken(productId) {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'X-User-Id': state.user?.id?.toString() || getDeviceId()
+                'X-User-Id': state.user?.user_id?.toString() || getDeviceId()
             }
         });
 
@@ -148,12 +148,12 @@ async function submitSeckillOrder(productId, pathKey) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-User-Id': state.user?.id?.toString() || getDeviceId()
+                'X-User-Id': state.user?.user_id?.toString() || getDeviceId()
             },
             body: JSON.stringify({
                 product_id: productId,
                 path_key: pathKey,
-                user_id: state.user?.id || 0
+                user_id: state.user?.user_id || 0
             })
         });
 
