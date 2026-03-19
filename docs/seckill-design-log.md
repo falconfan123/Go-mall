@@ -29,7 +29,7 @@
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                       API Gateway (APISIX)                       │
+│                       API Gateway (Higress)                      │
 │  ┌─────────────────────────────────────────────────────────────┐│
 │  │ 限流：IP 5req/s, UserID 1req/活动期                         ││
 │  └─────────────────────────────────────────────────────────────┘│
@@ -166,7 +166,7 @@ return {code = 1, msg = "success"}
 - [ ] 异步写入 MySQL 订单 (TODO)
 
 ### Phase 4: 网关配置
-- [ ] APISIX 路由配置
+- [ ] Higress 路由配置
 - [ ] 限流策略配置
 - [ ] 熔断降级配置
 
@@ -224,7 +224,7 @@ func (l *SeckillLogic) ExecuteSeckill(ctx context.Context, pathKey string, prodI
 4. System 服务
 5. Activity 服务
 6. Order 服务
-7. Gateway (APISIX)
+7. Gateway (Higress)
 
 ### 5.2 压测要点
 - 单机 QPS 目标: 10000+
