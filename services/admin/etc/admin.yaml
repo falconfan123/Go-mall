@@ -1,0 +1,45 @@
+Name: admin.rpc
+ListenOn: 0.0.0.0:10012
+Mode: dev
+Timeout: 0
+
+# 服务发现配置
+Consul:
+  Host: localhost:8500
+  Key: admin.rpc
+  Meta:
+    Protocol: grpc
+
+# 链路追踪
+Telemetry:
+  Name: admin.rpc
+  Endpoint: http://localhost:14268/api/traces
+  Batcher: zipkin
+  Sampler: 1.0
+
+Log:
+  ServiceName: "admin-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Stat: false
+
+# MySQL 配置
+PostgresConfig:
+  datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
+  conntimeout: 5
+
+RedisConf:
+  Host: localhost:6379
+  Type: node
+  Pass: ""
+  Tls: false
+
+# Product 服务 RPC 配置
+ProductRpc:
+  Target: consul://localhost:8500/products.rpc?wait=14s
+  NonBlock: true
+
+# Inventory 服务 RPC 配置
+InventoryRpc:
+  Target: consul://localhost:8500/inventory.rpc?wait=14s
+  NonBlock: true

@@ -1,0 +1,55 @@
+package logic
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/falconfan123/Go-mall/services/admin/internal/db"
+	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
+	"github.com/falconfan123/Go-mall/services/admin/pb"
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type SetActivityStockLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+func NewSetActivityStockLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SetActivityStockLogic {
+	return &SetActivityStockLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *SetActivityStockLogic) SetActivityStock(in *pb.SetActivityStockRequest) (*pb.SetActivityStockResponse, error) {
+	activity, err := db.GetActivityByID(l.svcCtx.DB, in.Id)
+	if err != nil {
+		return &pb.SetActivityStockResponse{
+			StatusCode: 404,
+			StatusMsg:  "activity not found",
+		}, nil
+	}
+
+	activity.TotalStock = in.Stock
+
+	if err := activity.Update(l.svcCtx.DB); err != nil {
+		logx.Errorf("failed to update activity stock: %v", err)
+		return &pb.SetActivityStockResponse{
+			StatusCode: 500,
+			StatusMsg:  "failed to update activity stock: " + err.Error(),
+		}, nil
+	}
+
+	// Sync to Redis
+	stockKey := fmt.Sprintf("act_%d_stock", activity.ID)
+	l.svcCtx.Redis.Set(stockKey, fmt.Sprintf("%d", activity.TotalStock))
+
+	logx.Infof("updated activity %d stock in Redis: stock=%d",
+		activity.ID, activity.TotalStock)
+
+	return &pb.SetActivityStockResponse{
+		StatusCode: 200,
+		StatusMsg:  "success",
+	}, nil
+}

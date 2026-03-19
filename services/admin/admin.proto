@@ -1,0 +1,297 @@
+syntax = "proto3";
+
+package admin;
+
+option go_package = "github.com/falconfan123/Go-mall/services/admin/pb";
+
+// ==================== 商品管理 ====================
+
+service AdminProductService {
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+}
+
+// ==================== 分类管理 ====================
+
+service AdminCategoryService {
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
+  rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse);
+  rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+}
+
+// ==================== 秒杀活动管理 ====================
+
+service AdminSeckillService {
+  rpc CreateActivity(CreateActivityRequest) returns (CreateActivityResponse);
+  rpc UpdateActivity(UpdateActivityRequest) returns (UpdateActivityResponse);
+  rpc DeleteActivity(DeleteActivityRequest) returns (DeleteActivityResponse);
+  rpc GetActivity(GetActivityRequest) returns (GetActivityResponse);
+  rpc ListActivities(ListActivitiesRequest) returns (ListActivitiesResponse);
+  rpc SetActivityTime(SetActivityTimeRequest) returns (SetActivityTimeResponse);
+  rpc SetActivityStock(SetActivityStockRequest) returns (SetActivityStockResponse);
+}
+
+// ==================== 库存管理 ====================
+
+service AdminInventoryService {
+  rpc AdjustInventory(AdjustInventoryRequest) returns (AdjustInventoryResponse);
+  rpc GetInventory(GetInventoryRequest) returns (GetInventoryResponse);
+}
+
+// ==================== 消息定义 ====================
+
+// 商品相关
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  bytes picture = 3;
+  int64 price = 4;
+  int64 stock = 5;
+  repeated string categories = 6;
+}
+
+message CreateProductResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 product_id = 3;
+}
+
+message UpdateProductRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  bytes picture = 4;
+  int64 price = 5;
+  int64 stock = 6;
+  repeated string categories = 7;
+}
+
+message UpdateProductResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 id = 3;
+}
+
+message DeleteProductRequest {
+  int64 id = 1;
+}
+
+message DeleteProductResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+}
+
+message GetProductRequest {
+  int64 id = 1;
+}
+
+message GetProductResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  Product product = 3;
+}
+
+message ListProductsRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+}
+
+message ListProductsResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 total = 3;
+  repeated Product products = 4;
+}
+
+message Product {
+  uint32 id = 1;
+  string name = 2;
+  string description = 3;
+  string picture = 4;
+  int64 price = 5;
+  int64 stock = 6;
+  int64 sold = 7;
+  repeated string categories = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+// 分类相关
+message CreateCategoryRequest {
+  string name = 1;
+  string description = 2;
+  int64 parent_id = 3;
+}
+
+message CreateCategoryResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 category_id = 3;
+}
+
+message UpdateCategoryRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message UpdateCategoryResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 id = 3;
+}
+
+message DeleteCategoryRequest {
+  int64 id = 1;
+}
+
+message DeleteCategoryResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+}
+
+message ListCategoriesRequest {
+  int64 parent_id = 1;
+}
+
+message ListCategoriesResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  repeated Category categories = 3;
+}
+
+message Category {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 parent_id = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+// 秒杀活动相关
+message CreateActivityRequest {
+  string name = 1;
+  int64 product_id = 2;
+  int64 seckill_price = 3;
+  int64 total_stock = 4;
+  int64 limit_per_user = 5;
+  string start_time = 6;
+  string end_time = 7;
+}
+
+message CreateActivityResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 activity_id = 3;
+}
+
+message UpdateActivityRequest {
+  int64 id = 1;
+  string name = 2;
+  int64 seckill_price = 3;
+  int64 total_stock = 4;
+  int64 limit_per_user = 5;
+}
+
+message UpdateActivityResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 id = 3;
+}
+
+message DeleteActivityRequest {
+  int64 id = 1;
+}
+
+message DeleteActivityResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+}
+
+message GetActivityRequest {
+  int64 id = 1;
+}
+
+message GetActivityResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  Activity activity = 3;
+}
+
+message ListActivitiesRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string status = 3;
+}
+
+message ListActivitiesResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 total = 3;
+  repeated Activity activities = 4;
+}
+
+message SetActivityTimeRequest {
+  int64 id = 1;
+  string start_time = 2;
+  string end_time = 3;
+}
+
+message SetActivityTimeResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+}
+
+message SetActivityStockRequest {
+  int64 id = 1;
+  int64 stock = 2;
+}
+
+message SetActivityStockResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+}
+
+message Activity {
+  int64 id = 1;
+  string name = 2;
+  int64 product_id = 3;
+  int64 seckill_price = 4;
+  int64 total_stock = 5;
+  int64 limit_per_user = 6;
+  string start_time = 7;
+  string end_time = 8;
+  string status = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+// 库存相关
+message AdjustInventoryRequest {
+  int64 product_id = 1;
+  int64 quantity = 2;
+  string reason = 3;
+}
+
+message AdjustInventoryResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 new_stock = 3;
+}
+
+message GetInventoryRequest {
+  int64 product_id = 1;
+}
+
+message GetInventoryResponse {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  int64 product_id = 3;
+  int64 stock = 4;
+  int64 reserved = 5;
+}
