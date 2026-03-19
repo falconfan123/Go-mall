@@ -4,6 +4,7 @@ use (
 	./common
 	./dal
 	./services/activity
+	./services/admin
 	./services/audit
 	./services/auths
 	./services/carts
