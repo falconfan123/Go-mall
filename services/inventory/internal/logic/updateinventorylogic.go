@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	inventory2 "github.com/falconfan123/Go-mall/dal/model/inventory"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
@@ -35,7 +36,8 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.UpdateInventoryReq)
 			return nil, biz.ErrInvalidInventory
 		}
 		tostr := fmt.Sprintf("%d", item.Quantity)
-		err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId), tostr)
+		// 设置库存缓存，TTL 5分钟，确保数据最终一致性
+		err := l.svcCtx.Rdb.Setex(fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId), tostr, int(biz.InventoryCacheTTL.Seconds()))
 
 		if err != nil {
 			l.Logger.Errorw("update inventory failed", logx.Field("product_id", item.ProductId), logx.Field("err", err))

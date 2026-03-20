@@ -4,12 +4,13 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"strconv"
+
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/dal/model/inventory"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/config"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/decreaselua"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/returnlua"
-	"strconv"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -59,11 +60,11 @@ func (s *ServiceContext) PreheatInventoryCache() error {
 	if err != nil {
 		return fmt.Errorf("读取库存数据失败: %v", err)
 	}
-	// 2. 缓存库存数据
+	// 2. 缓存库存数据，TTL 5分钟
 
 	for _, inv := range inventories {
 		productKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, inv.ProductId)
-		if err := s.Rdb.Set(productKey, strconv.Itoa(int(inv.Total))); err != nil {
+		if err := s.Rdb.Setex(productKey, strconv.Itoa(int(inv.Total)), int(biz.InventoryCacheTTL.Seconds())); err != nil {
 			return fmt.Errorf("缓存库存数据失败: %v", err)
 		}
 	}

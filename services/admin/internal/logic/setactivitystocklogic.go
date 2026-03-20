@@ -3,7 +3,9 @@ package logic
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
 	"github.com/falconfan123/Go-mall/services/admin/pb"
@@ -41,12 +43,18 @@ func (l *SetActivityStockLogic) SetActivityStock(in *pb.SetActivityStockRequest)
 		}, nil
 	}
 
-	// Sync to Redis
+	// Sync to Redis with TTL (活动结束后多保留1天)
 	stockKey := fmt.Sprintf("act_%d_stock", activity.ID)
-	l.svcCtx.Redis.Set(stockKey, fmt.Sprintf("%d", activity.TotalStock))
+	expireSeconds := time.Until(activity.EndTime).Seconds()
+	if expireSeconds < 0 {
+		expireSeconds = biz.SeckillCacheTTL.Seconds()
+	} else {
+		expireSeconds += biz.SeckillCacheTTL.Seconds()
+	}
+	l.svcCtx.Redis.Setex(stockKey, fmt.Sprintf("%d", activity.TotalStock), int(expireSeconds))
 
-	logx.Infof("updated activity %d stock in Redis: stock=%d",
-		activity.ID, activity.TotalStock)
+	logx.Infof("updated activity %d stock in Redis: stock=%d, ttl=%d seconds",
+		activity.ID, activity.TotalStock, int(expireSeconds))
 
 	return &pb.SetActivityStockResponse{
 		StatusCode: 200,

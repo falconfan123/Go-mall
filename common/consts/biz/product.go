@@ -10,6 +10,6 @@ const (
 )
 const (
 	ProductIDKey       = "product:%d"
-	ProductIDKeyExpire = 60 * 60 * 2 // 2小时 过期缓存，由回写触发更新
-
+	ProductIDKeyExpire = 60 * 60 * 2   // 2小时 过期缓存，由回写触发更新
+	HotProductCacheTTL = 1 * time.Hour // 热点商品缓存 TTL
 )

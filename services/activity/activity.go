@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/activity/internal/config"
 	"github.com/falconfan123/Go-mall/services/activity/internal/server"
 	"github.com/falconfan123/Go-mall/services/activity/internal/svc"
@@ -47,15 +48,15 @@ func initActivityStartTime(ctx *svc.ServiceContext) {
 	// 设置活动开始时间为当前时间（方便测试，实际生产环境应从数据库读取）
 	startTime := time.Now().UnixMilli()
 
-	// 为前端定义的秒杀商品初始化活动开始时间
+	// 为前端定义的秒杀商品初始化活动开始时间，TTL 1天
 	productIds := []int64{1, 2, 3, 4}
 	for _, productId := range productIds {
 		key := fmt.Sprintf("act_%d_start", productId)
-		err := ctx.Redis.Set(key, fmt.Sprintf("%d", startTime))
+		err := ctx.Redis.Setex(key, fmt.Sprintf("%d", startTime), int(biz.SeckillCacheTTL.Seconds()))
 		if err != nil {
 			logx.Errorf("failed to set activity start time for product %d: %v", productId, err)
 		} else {
-			logx.Infof("initialized activity start time for product %d: %d", productId, startTime)
+			logx.Infof("initialized activity start time for product %d: %d, ttl: %d seconds", productId, startTime, int(biz.SeckillCacheTTL.Seconds()))
 		}
 	}
 }
