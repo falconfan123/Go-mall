@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/falconfan123/Go-mall/services/order/internal/server"
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
@@ -30,22 +31,23 @@ var configFile = flag.String("f", "etc/order.yaml", "the config file")
 func initSeckillData(ctx *svc.ServiceContext) {
 	// 设置秒杀活动开始时间限制（当前时间，允许立即抢购）
 	startTime := time.Now().UnixMilli()
-	err := ctx.RedisClient.Set("act_start_limit", fmt.Sprintf("%d", startTime))
+	// 设置 TTL 为 1 天
+	err := ctx.RedisClient.Setex("act_start_limit", fmt.Sprintf("%d", startTime), int(biz.SeckillCacheTTL.Seconds()))
 	if err != nil {
 		logx.Errorf("failed to set act_start_limit: %v", err)
 	} else {
-		logx.Infof("initialized act_start_limit: %d", startTime)
+		logx.Infof("initialized act_start_limit: %d, ttl: %d seconds", startTime, int(biz.SeckillCacheTTL.Seconds()))
 	}
 
-	// 初始化秒杀商品库存
+	// 初始化秒杀商品库存，TTL 1天
 	productIds := []int64{1, 2, 3, 4}
 	for _, productId := range productIds {
 		stockKey := fmt.Sprintf("act_%d_stock", productId)
-		err := ctx.RedisClient.Set(stockKey, "10")
+		err := ctx.RedisClient.Setex(stockKey, "10", int(biz.SeckillCacheTTL.Seconds()))
 		if err != nil {
 			logx.Errorf("failed to set stock for product %d: %v", productId, err)
 		} else {
-			logx.Infof("initialized stock for product %d: 10", productId)
+			logx.Infof("initialized stock for product %d: 10, ttl: %d seconds", productId, int(biz.SeckillCacheTTL.Seconds()))
 		}
 	}
 }

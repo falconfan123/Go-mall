@@ -3,12 +3,14 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"strconv"
+
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
+
 	"github.com/zeromicro/go-zero/core/logx"
-	"strconv"
 )
 
 func ScanHotProducts(svcCtx *svc.ServiceContext, ctx context.Context) (err error) {
@@ -49,7 +51,7 @@ func ScanHotProducts(svcCtx *svc.ServiceContext, ctx context.Context) (err error
 			Categories:  nil,
 		}
 
-		// 将数据缓存到Redis中
+		// 将数据缓存到Redis中，TTL 1小时
 		data, err := json.Marshal(resp)
 		cacheData := string(data)
 		if err != nil {
@@ -58,7 +60,7 @@ func ScanHotProducts(svcCtx *svc.ServiceContext, ctx context.Context) (err error
 			)
 			return err
 		}
-		if err = svcCtx.RedisClient.Set(productID, cacheData); err != nil {
+		if err = svcCtx.RedisClient.Setex(productID, cacheData, int(biz.HotProductCacheTTL.Seconds())); err != nil {
 			logc.Infow("Failed to set hot product cache",
 				logx.Field("productId", productID),
 				logx.Field("err", err),

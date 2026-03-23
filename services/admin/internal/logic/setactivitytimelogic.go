@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
 	"github.com/falconfan123/Go-mall/services/admin/pb"
@@ -75,12 +76,18 @@ func (l *SetActivityTimeLogic) SetActivityTime(in *pb.SetActivityTimeRequest) (*
 		}, nil
 	}
 
-	// Sync to Redis
+	// Sync to Redis with TTL (活动结束后多保留1天)
 	startKey := fmt.Sprintf("act_start_%d", activity.ID)
-	l.svcCtx.Redis.Set(startKey, fmt.Sprintf("%d", activity.StartTime.UnixMilli()))
+	expireSeconds := time.Until(activity.EndTime).Seconds()
+	if expireSeconds < 0 {
+		expireSeconds = biz.SeckillCacheTTL.Seconds()
+	} else {
+		expireSeconds += biz.SeckillCacheTTL.Seconds()
+	}
+	l.svcCtx.Redis.Setex(startKey, fmt.Sprintf("%d", activity.StartTime.UnixMilli()), int(expireSeconds))
 
-	logx.Infof("updated activity %d time in Redis: start=%d",
-		activity.ID, activity.StartTime.UnixMilli())
+	logx.Infof("updated activity %d time in Redis: start=%d, ttl=%d seconds",
+		activity.ID, activity.StartTime.UnixMilli(), int(expireSeconds))
 
 	return &pb.SetActivityTimeResponse{
 		StatusCode: 200,

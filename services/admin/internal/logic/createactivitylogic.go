@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
 	"github.com/falconfan123/Go-mall/services/admin/pb"
@@ -85,14 +86,20 @@ func (l *CreateActivityLogic) CreateActivity(in *pb.CreateActivityRequest) (*pb.
 }
 
 func (l *CreateActivityLogic) syncActivityToRedis(activity *db.Activity) {
-	// Set activity start time
+	// 计算活动结束后的过期时间，额外多保留一天
+	expireSeconds := int(activity.EndTime.Sub(time.Now()).Seconds()) + int(biz.SeckillCacheTTL.Seconds())
+	if expireSeconds < 0 {
+		expireSeconds = int(biz.SeckillCacheTTL.Seconds())
+	}
+
+	// Set activity start time with TTL
 	startKey := fmt.Sprintf("act_start_%d", activity.ID)
-	l.svcCtx.Redis.Set(startKey, fmt.Sprintf("%d", activity.StartTime.UnixMilli()))
+	l.svcCtx.Redis.Setex(startKey, fmt.Sprintf("%d", activity.StartTime.UnixMilli()), expireSeconds)
 
-	// Set activity stock
+	// Set activity stock with TTL
 	stockKey := fmt.Sprintf("act_%d_stock", activity.ID)
-	l.svcCtx.Redis.Set(stockKey, fmt.Sprintf("%d", activity.TotalStock))
+	l.svcCtx.Redis.Setex(stockKey, fmt.Sprintf("%d", activity.TotalStock), expireSeconds)
 
-	logx.Infof("synced activity %d to Redis: start=%d, stock=%d",
-		activity.ID, activity.StartTime.UnixMilli(), activity.TotalStock)
+	logx.Infof("synced activity %d to Redis: start=%d, stock=%d, ttl=%d seconds",
+		activity.ID, activity.StartTime.UnixMilli(), activity.TotalStock, expireSeconds)
 }
