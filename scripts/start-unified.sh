@@ -40,6 +40,9 @@ frontend:frontend:node proxy.js:3000:frontend
 # 基础设施依赖
 INFRA_DEPS="Consul:8500 MySQL:3306 Redis:6379 Elasticsearch:9200 RabbitMQ:5672"
 
+# Loki + Grafana 日志系统
+LOKI_STACK="infrastructure/docker-compose.yaml"
+
 # --- 核心修改部分：强化清理函数 ---
 cleanup_old_processes() {
     echo "正在强制清理旧进程及占用端口..."
@@ -133,8 +136,33 @@ start_service() {
 # 处理停止逻辑
 if [ "$1" == "stop" ]; then
     cleanup_old_processes
+    # 停止 Loki + Grafana
+    echo "停止 Loki + Grafana..."
+    docker-compose -f "$LOKI_STACK" down 2>/dev/null
     exit 0
 fi
+
+# 启动 Loki + Grafana 日志系统
+start_loki_stack() {
+    echo "启动 Loki + Grafana 日志系统..."
+    cd "$PROJECT_ROOT/$LOKI_STACK"
+
+    # 检查 Docker 是否运行
+    if ! docker info > /dev/null 2>&1; then
+        echo "⚠️  Docker 未运行，跳过 Loki + Grafana 启动"
+        return
+    fi
+
+    # 启动日志系统
+    docker-compose up -d
+    cd "$PROJECT_ROOT"
+
+    # 等待服务启动
+    sleep 3
+    echo "✅ Loki + Grafana 启动完成"
+    echo "   - Loki: http://localhost:3100"
+    echo "   - Grafana: http://localhost:3001 (admin/admin123)"
+}
 
 mkdir -p "$LOG_DIR"
 cleanup_old_processes
@@ -145,4 +173,9 @@ for srv in $START_SERVICES; do
     start_service "$srv"
 done
 
+# 启动日志系统
+start_loki_stack
+
 echo "所有服务处理完毕。"
+echo ""
+echo "📊 日志查询: http://localhost:3001 (admin/admin123)"

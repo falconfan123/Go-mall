@@ -1,0 +1,146 @@
+# Promtail 配置 - 抓取各服务的日志
+# 确保日志目录存在: mkdir -p /Users/fan/go-mall/scripts/logs
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 9081
+
+positions:
+  filename: /tmp/promtail/positions.yaml
+
+clients:
+  # Loki 地址 - 开发环境使用本地
+  - url: http://localhost:3100/loki/api/v1/push
+    # 生产环境可改为:
+    # url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Gateway 日志
+  - job_name: gateway
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: gateway
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/gateway.log
+
+  # Payment 服务日志
+  - job_name: payment
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: payment
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/payment.log
+
+  # Order 服务日志
+  - job_name: order
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: order
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/order.log
+
+  # Product 服务日志
+  - job_name: product
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: product
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/product.log
+
+  # Inventory 服务日志
+  - job_name: inventory
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: inventory
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/inventory.log
+
+  # Users 服务日志
+  - job_name: users
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: users
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/users.log
+
+  # Cart 服务日志
+  - job_name: carts
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: carts
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/carts.log
+
+  # Checkout 服务日志
+  - job_name: checkout
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: checkout
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/checkout.log
+
+  # Auths 服务日志
+  - job_name: auths
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: auths
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/auths.log
+
+  # System 服务日志
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: system
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/system.log
+
+  # Activity 服务日志
+  - job_name: activity
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: activity
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/activity.log
+
+  # Audit 服务日志
+  - job_name: audit
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: audit
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/audit.log
+
+  # Coupons 服务日志
+  - job_name: coupons
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service: coupons
+          env: development
+          __path__: /Users/fan/go-mall/scripts/logs/coupons.log

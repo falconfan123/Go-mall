@@ -1,0 +1,72 @@
+# Loki + Grafana 日志系统 Docker Compose 配置
+# 使用方法: docker-compose -f infrastructure/docker-compose.yaml up -d
+
+version: '3.8'
+
+services:
+  # Loki 日志聚合服务
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: go-mall-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - ./loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - go-mall-network
+    restart: unless-stopped
+    user: "1000:1000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Promtail 日志抓取代理
+  promtail:
+    image: grafana/promtail:2.9.2
+    container_name: go-mall-promtail
+    volumes:
+      - ./promtail/promtail-config.yaml:/etc/promtail/config.yml
+      - /Users/fan/go-mall/scripts/logs:/Users/fan/go-mall/scripts/logs:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - go-mall-network
+    restart: unless-stopped
+
+  # Grafana 可视化平台
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: go-mall-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      # Grafana 配置
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+      # 默认时区
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - loki
+    networks:
+      - go-mall-network
+    restart: unless-stopped
+
+volumes:
+  loki-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  go-mall-network:
+    driver: bridge
