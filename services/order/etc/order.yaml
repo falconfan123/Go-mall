@@ -48,8 +48,8 @@ InventoryRpc:
 RabbitMQConfig:
   Host: "localhost"
   Port: 5672
-  User: "guest"
-  Pass: "guest"
+  User: "admin"
+  Pass: "admin"
   VHost: "/"
 
 RedisConf:

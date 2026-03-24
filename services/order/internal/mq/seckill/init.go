@@ -183,13 +183,15 @@ func (m *SeckillMQ) createOrder(seckillOrder SeckillOrder) error {
 
 	// 创建订单记录
 	orderRecord := &order.Orders{
-		PreOrderId:    orderID,
-		UserId:        uint64(seckillOrder.UserID),
-		OrderStatus:   2, // 待支付
-		PaymentStatus: 1, // 未支付
-		PayableAmount: 1, // 秒杀价 1 分
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
+		OrderId:        orderID,
+		PreOrderId:     orderID,
+		UserId:         uint64(seckillOrder.UserID),
+		OrderStatus:    1, // 创建（待支付）
+		PaymentStatus:  1, // 未支付
+		PayableAmount:  1, // 秒杀价 1 分
+		OriginalAmount: 1, // 秒杀价 1 分
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
 	}
 
 	_, err := m.OrderModel.Insert(context.Background(), orderRecord)

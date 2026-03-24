@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	ordersFieldNames          = builder.RawFieldNames(&Orders{})
+	ordersFieldNames          = builder.RawFieldNames(&Orders{}, true) // PostgreSQL mode
 	ordersRows                = strings.Join(ordersFieldNames, ",")
-	ordersRowsExpectAutoSet   = strings.Join(stringx.Remove(ordersFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	ordersRowsWithPlaceHolder = strings.Join(stringx.Remove(ordersFieldNames, "`order_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	ordersRowsExpectAutoSet   = strings.Join(stringx.Remove(ordersFieldNames, "created_at", "updated_at"), ",")
+	ordersRowsWithPlaceHolder = strings.Join(stringx.Remove(ordersFieldNames, "order_id", "created_at", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -59,18 +59,18 @@ type (
 func newOrdersModel(conn sqlx.SqlConn) *defaultOrdersModel {
 	return &defaultOrdersModel{
 		conn:  conn,
-		table: "`orders`",
+		table: "orders",
 	}
 }
 
 func (m *defaultOrdersModel) Delete(ctx context.Context, orderId string) error {
-	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"order_id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, orderId)
 	return err
 }
 
 func (m *defaultOrdersModel) FindOne(ctx context.Context, orderId string) (*Orders, error) {
-	query := fmt.Sprintf("select %s from %s where `order_id` = ? limit 1", ordersRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"order_id\" = $1 limit 1", ordersRows, m.table)
 	var resp Orders
 	err := m.conn.QueryRowCtx(ctx, &resp, query, orderId)
 	switch err {
@@ -85,7 +85,7 @@ func (m *defaultOrdersModel) FindOne(ctx context.Context, orderId string) (*Orde
 
 func (m *defaultOrdersModel) FindOneByPreOrderId(ctx context.Context, preOrderId string) (*Orders, error) {
 	var resp Orders
-	query := fmt.Sprintf("select %s from %s where `pre_order_id` = ? limit 1", ordersRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"pre_order_id\" = $1 limit 1", ordersRows, m.table)
 	err := m.conn.QueryRowCtx(ctx, &resp, query, preOrderId)
 	switch err {
 	case nil:
@@ -98,13 +98,27 @@ func (m *defaultOrdersModel) FindOneByPreOrderId(ctx context.Context, preOrderId
 }
 
 func (m *defaultOrdersModel) Insert(ctx context.Context, data *Orders) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, ordersRowsExpectAutoSet)
+	// Use PostgreSQL $1, $2, ... placeholders
+	fields := strings.Split(ordersRowsExpectAutoSet, ",")
+	placeholders := make([]string, len(fields))
+	for i := range fields {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+	}
+	query := fmt.Sprintf("insert into %s (%s) values (%s)", m.table, ordersRowsExpectAutoSet, strings.Join(placeholders, ", "))
 	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.PreOrderId, data.UserId, data.CouponId, data.PaymentMethod, data.TransactionId, data.PaidAt, data.OriginalAmount, data.DiscountAmount, data.PayableAmount, data.PaidAmount, data.OrderStatus, data.PaymentStatus, data.Reason, data.ExpireTime)
 	return ret, err
 }
 
 func (m *defaultOrdersModel) Update(ctx context.Context, newData *Orders) error {
-	query := fmt.Sprintf("update %s set %s where `order_id` = ?", m.table, ordersRowsWithPlaceHolder)
+	// Use PostgreSQL $1, $2, ... placeholders
+	fields := strings.Split(ordersRowsWithPlaceHolder, "=?")
+	setClauses := make([]string, 0, len(fields))
+	for i, f := range fields {
+		if f != "" {
+			setClauses = append(setClauses, fmt.Sprintf("%s = $%d", f, i+1))
+		}
+	}
+	query := fmt.Sprintf("update %s set %s where \"order_id\" = $%d", m.table, strings.Join(setClauses, ", "), len(fields)+1)
 	_, err := m.conn.ExecCtx(ctx, query, newData.PreOrderId, newData.UserId, newData.CouponId, newData.PaymentMethod, newData.TransactionId, newData.PaidAt, newData.OriginalAmount, newData.DiscountAmount, newData.PayableAmount, newData.PaidAmount, newData.OrderStatus, newData.PaymentStatus, newData.Reason, newData.ExpireTime, newData.OrderId)
 	return err
 }

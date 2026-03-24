@@ -22,7 +22,7 @@ type (
 		UpdateOrder2Payment(context.Context, string, int32, *order.PaymentResult, order.OrderStatus, order.PaymentStatus) error
 		UpdateOrder2PaymentRollback(context.Context, string, int32) error
 		UpdateOrderStatusByOrderIDAndUserID(context.Context, string, int32, order.OrderStatus, order.PaymentStatus) error
-		CheckOrderExistByPreOrderId(context.Context, string, int32) (bool, error)
+		checkOrderExistByPreOrderId(context.Context, string, int32) (bool, error)
 		GetOrderIDByPreID(context.Context, string, int32) (string, error)
 		DeleteOrderByOrderID(ctx context.Context, session sqlx.Session, orderID string) error
 		CancelOrder(ctx context.Context, userID int32, orderId string, reason string) error
@@ -34,20 +34,20 @@ type (
 )
 
 func (m *customOrdersModel) CancelOrder(ctx context.Context, userID int32, orderId string, reason string) error {
-	query := fmt.Sprintf("update %s set `order_status` = ?,`payment_status` = ?,`reason` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	query := fmt.Sprintf("update %s set \"order_status\" = $1, \"payment_status\" = $2, \"reason\" = $3 where \"order_id\" = $4 and \"user_id\" = $5", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatusCancelled, order.OrderStatusPendingPayment, reason, orderId, userID)
 	return err
 
 }
 
 func (m *customOrdersModel) DeleteOrderByOrderID(ctx context.Context, session sqlx.Session, orderID string) error {
-	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"order_id\" = $1", m.table)
 	_, err := session.ExecCtx(ctx, query, orderID)
 	return err
 }
 
 func (m *customOrdersModel) GetOrdersByUserID(ctx context.Context, userId int32, page, size int32) ([]*Orders, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ?", ordersRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"user_id\" = $1", ordersRows, m.table)
 	var resp []*Orders
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId)
 	switch {
@@ -60,8 +60,7 @@ func (m *customOrdersModel) GetOrdersByUserID(ctx context.Context, userId int32,
 	}
 }
 func (m *customOrdersModel) GetOrderIDByPreID(ctx context.Context, preOrderId string, userID int32) (string, error) {
-	query := fmt.Sprintf("select `order_id` from %s where `pre_order_id` = ? and `user_id` = ? LIMIT 1 FOR SHARE ",
-		m.table)
+	query := fmt.Sprintf("select \"order_id\" from %s where \"pre_order_id\" = $1 and \"user_id\" = $2 limit 1", m.table)
 	var orderId string
 	err := m.conn.QueryRowCtx(ctx, &orderId, query, preOrderId, userID)
 	switch {
@@ -74,8 +73,8 @@ func (m *customOrdersModel) GetOrderIDByPreID(ctx context.Context, preOrderId st
 	}
 }
 
-func (m *customOrdersModel) CheckOrderExistByPreOrderId(ctx context.Context, preOrderId string, userID int32) (bool, error) {
-	query := fmt.Sprintf("select count(*) from %s where `pre_order_id` = ? and `user_id` = ? limit 1 for share", m.table)
+func (m *customOrdersModel) checkOrderExistByPreOrderId(ctx context.Context, preOrderId string, userID int32) (bool, error) {
+	query := fmt.Sprintf("select count(*) from %s where \"pre_order_id\" = $1 and \"user_id\" = $2 limit 1", m.table)
 	var cnt int8
 	err := m.conn.QueryRowCtx(ctx, &cnt, query, preOrderId, userID)
 	switch {
@@ -91,7 +90,7 @@ func (m *customOrdersModel) CheckOrderExistByPreOrderId(ctx context.Context, pre
 
 func (m *customOrdersModel) UpdateOrder2Payment(ctx context.Context, orderID string, userId int32,
 	paymentResult *order.PaymentResult, orderStatus order.OrderStatus, paymentStatus order.PaymentStatus) error {
-	query := fmt.Sprintf("update %s set `order_status` = ? , `payment_status` = ? ,`transaction_id` = ?, `paid_amount` = ?, `paid_at` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	query := fmt.Sprintf("update %s set \"order_status\" = $1, \"payment_status\" = $2, \"transaction_id\" = $3, \"paid_amount\" = $4, \"paid_at\" = $5 where \"order_id\" = $6 and \"user_id\" = $7", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, orderStatus,
 		paymentStatus,
 		paymentResult.TransactionId, paymentResult.PaidAmount,
@@ -99,29 +98,27 @@ func (m *customOrdersModel) UpdateOrder2Payment(ctx context.Context, orderID str
 	return err
 }
 func (m *customOrdersModel) UpdateOrder2PaymentRollback(ctx context.Context, orderID string, userId int32) error {
-	query := fmt.Sprintf("update %s set `order_status` = ? , `payment_status` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	query := fmt.Sprintf("update %s set \"order_status\" = $1, \"payment_status\" = $2 where \"order_id\" = $3 and \"user_id\" = $4", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatusPendingPayment, order.PaymentStatusPaying, orderID, userId)
 	return err
 }
 func (m *customOrdersModel) GetOrderByOrderIDAndUserIDWithLock(ctx context.Context, orderId string, userId int32) (*Orders, error) {
 	var resp Orders
-	query := fmt.Sprintf("select %s from %s where `order_id` = ? and `user_id` = ? LIMIT 1 FOR SHARE ",
-		ordersRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"order_id\" = $1 and \"user_id\" = $2 limit 1", ordersRows, m.table)
 	err := m.conn.QueryRowCtx(ctx, &resp, query, orderId, userId)
 	return &resp, err
 }
 
 func (m *customOrdersModel) UpdateOrderStatusByOrderIDAndUserID(ctx context.Context, orderId string,
 	userId int32, orderStatus order.OrderStatus, paymentStatus order.PaymentStatus) error {
-	query := fmt.Sprintf("update %s set `order_status` = ?,`payment_status` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	query := fmt.Sprintf("update %s set \"order_status\" = $1, \"payment_status\" = $2 where \"order_id\" = $3 and \"user_id\" = $4", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, orderStatus, paymentStatus, orderId, userId)
 	return err
 }
 
 func (m *customOrdersModel) GetOrderStatusByOrderIDAndUserIDWithLock(ctx context.Context, orderId string, userId int32) (int64, error) {
 	var orderStatus int64
-	query := fmt.Sprintf("select `order_status` from %s where `order_id` = ? and `user_id` = ? LIMIT 1 FOR SHARE ",
-		m.table)
+	query := fmt.Sprintf("select \"order_status\" from %s where \"order_id\" = $1 and \"user_id\" = $2 limit 1", m.table)
 	err := m.conn.QueryRowCtx(ctx, &orderStatus, query, orderId, userId)
 	switch {
 	case err == nil:

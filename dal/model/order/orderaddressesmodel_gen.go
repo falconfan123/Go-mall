@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	orderAddressesFieldNames          = builder.RawFieldNames(&OrderAddresses{})
+	orderAddressesFieldNames          = builder.RawFieldNames(&OrderAddresses{}, true) // PostgreSQL mode
 	orderAddressesRows                = strings.Join(orderAddressesFieldNames, ",")
-	orderAddressesRowsExpectAutoSet   = strings.Join(stringx.Remove(orderAddressesFieldNames, "`address_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	orderAddressesRowsWithPlaceHolder = strings.Join(stringx.Remove(orderAddressesFieldNames, "`address_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	orderAddressesRowsExpectAutoSet   = strings.Join(stringx.Remove(orderAddressesFieldNames, "created_at", "updated_at"), ",")
+	orderAddressesRowsWithPlaceHolder = strings.Join(stringx.Remove(orderAddressesFieldNames, "address_id", "created_at", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -51,18 +51,18 @@ type (
 func newOrderAddressesModel(conn sqlx.SqlConn) *defaultOrderAddressesModel {
 	return &defaultOrderAddressesModel{
 		conn:  conn,
-		table: "`order_addresses`",
+		table: "order_addresses",
 	}
 }
 
 func (m *defaultOrderAddressesModel) Delete(ctx context.Context, addressId uint64) error {
-	query := fmt.Sprintf("delete from %s where `address_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"address_id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, addressId)
 	return err
 }
 
 func (m *defaultOrderAddressesModel) FindOne(ctx context.Context, addressId uint64) (*OrderAddresses, error) {
-	query := fmt.Sprintf("select %s from %s where `address_id` = ? limit 1", orderAddressesRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"address_id\" = $1 limit 1", orderAddressesRows, m.table)
 	var resp OrderAddresses
 	err := m.conn.QueryRowCtx(ctx, &resp, query, addressId)
 	switch err {
@@ -77,7 +77,7 @@ func (m *defaultOrderAddressesModel) FindOne(ctx context.Context, addressId uint
 
 func (m *defaultOrderAddressesModel) FindOneByOrderId(ctx context.Context, orderId string) (*OrderAddresses, error) {
 	var resp OrderAddresses
-	query := fmt.Sprintf("select %s from %s where `order_id` = ? limit 1", orderAddressesRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"order_id\" = $1 limit 1", orderAddressesRows, m.table)
 	err := m.conn.QueryRowCtx(ctx, &resp, query, orderId)
 	switch err {
 	case nil:
@@ -90,13 +90,27 @@ func (m *defaultOrderAddressesModel) FindOneByOrderId(ctx context.Context, order
 }
 
 func (m *defaultOrderAddressesModel) Insert(ctx context.Context, data *OrderAddresses) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, orderAddressesRowsExpectAutoSet)
+	// Use PostgreSQL $1, $2, ... placeholders
+	fields := strings.Split(orderAddressesRowsExpectAutoSet, ",")
+	placeholders := make([]string, len(fields))
+	for i := range fields {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+	}
+	query := fmt.Sprintf("insert into %s (%s) values (%s)", m.table, orderAddressesRowsExpectAutoSet, strings.Join(placeholders, ", "))
 	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress)
 	return ret, err
 }
 
 func (m *defaultOrderAddressesModel) Update(ctx context.Context, newData *OrderAddresses) error {
-	query := fmt.Sprintf("update %s set %s where `address_id` = ?", m.table, orderAddressesRowsWithPlaceHolder)
+	// Use PostgreSQL $1, $2, ... placeholders
+	fields := strings.Split(orderAddressesRowsWithPlaceHolder, "=?")
+	setClauses := make([]string, 0, len(fields))
+	for i, f := range fields {
+		if f != "" {
+			setClauses = append(setClauses, fmt.Sprintf("%s = $%d", f, i+1))
+		}
+	}
+	query := fmt.Sprintf("update %s set %s where \"address_id\" = $%d", m.table, strings.Join(setClauses, ", "), len(setClauses)+1)
 	_, err := m.conn.ExecCtx(ctx, query, newData.OrderId, newData.RecipientName, newData.PhoneNumber, newData.Province, newData.City, newData.DetailedAddress, newData.AddressId)
 	return err
 }

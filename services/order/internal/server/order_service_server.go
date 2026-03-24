@@ -47,3 +47,13 @@ func (s *OrderServiceServer) Seckill(ctx context.Context, in *order.SeckillReque
 	l := logic.NewSeckillLogic(ctx, s.svcCtx)
 	return l.Seckill(in)
 }
+
+func (s *OrderServiceServer) GetOrder2Payment(ctx context.Context, in *order.GetOrderRequest) (*order.OrderDetail2PaymentResponse, error) {
+	l := logic.NewGetOrder2PaymentLogic(ctx, s.svcCtx)
+	return l.GetOrder2Payment(in)
+}
+
+func (s *OrderServiceServer) UpdateOrder2PaymentStatus(ctx context.Context, in *order.UpdateOrder2PaymentRequest) (*order.EmptyRes, error) {
+	l := logic.NewUpdateOrder2PaymentStatusLogic(ctx, s.svcCtx)
+	return l.UpdateOrder2PaymentStatus(in)
+}
