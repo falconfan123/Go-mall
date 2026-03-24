@@ -21,6 +21,7 @@ enum PaymentMethod {
   PAYMENT_METHOD_UNSPECIFIED = 0; // 未指定或默认状态
   WECHAT_PAY = 1;                 // 微信支付
   ALIPAY = 2;                     // 支付宝支付
+  STRIPE = 3;                     // Stripe 支付
 }
 
 message PaymentItem {
