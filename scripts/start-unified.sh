@@ -13,6 +13,8 @@ LOG_DIR="${PROJECT_ROOT}/scripts/logs"
 
 # 服务定义
 ALL_SERVICES="
+system:services/system:system.go:10010:rpc
+activity:services/activity:activity.go:10011:rpc
 auths:services/auths:auths.go:10000:rpc
 audit:services/audit:audit.go:10008:rpc
 users:services/users:users.go:10001:rpc
@@ -23,14 +25,14 @@ coupons:services/coupons:coupons.go:10009:rpc
 order:services/order:order.go:10004:rpc
 checkout:services/checkout:checkout.go:10005:rpc
 payment:services/payment:payment.go:10006:rpc
-user-api:apis/user:user.go:8001:api
-product-api:apis/product:product.go:8002:api
-carts-api:apis/carts:carts.go:8003:api
-order-api:apis/order:order.go:8004:api
-checkout-api:apis/checkout:checkout.go:8005:api
-payment-api:apis/payment:payment.go:8006:api
-coupon-api:apis/coupon:coupon.go:8009:api
-flash-api:apis/flash_sale:flash.go:8008:api
+# user-api:apis/user:user.go:8001:api
+# product-api:apis/product:product.go:8002:api
+# carts-api:apis/carts:carts.go:8003:api
+# order-api:apis/order:order.go:8004:api
+# checkout-api:apis/checkout:checkout.go:8005:api
+# payment-api:apis/payment:payment.go:8006:api
+# coupon-api:apis/coupon:coupon.go:8009:api
+# flash-api:apis/flash_sale:flash.go:8008:api
 gateway:services/gateway:gateway.go:8888:gateway
 frontend:frontend:python3 -m http.server 3000:3000:frontend
 "
@@ -135,7 +137,7 @@ mkdir -p "$LOG_DIR"
 cleanup_old_processes
 
 # 默认启动核心服务
-START_SERVICES="auths audit users inventory product carts order checkout payment gateway"
+START_SERVICES="system activity auths audit users inventory product carts order checkout payment gateway"
 for srv in $START_SERVICES; do
     start_service "$srv"
 done

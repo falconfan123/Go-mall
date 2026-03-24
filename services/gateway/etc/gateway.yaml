@@ -71,21 +71,21 @@ Upstreams:
         Path: /douyin/payment/create
         RpcPath: payment.Payment/CreatePayment
 
-  # ==================== System 系统服务 (端口 10010) - 未启动，禁用 ====================
-  # - Grpc:
-  #     Target: 127.0.0.1:10010
-  #   Mappings:
-  #     - Method: get
-  #       Path: /api/v1/system/time
-  #       RpcPath: system.System/Time
+  # ==================== System 系统服务 (端口 10010) ====================
+  - Grpc:
+      Target: 127.0.0.1:10010
+    Mappings:
+      - Method: get
+        Path: /api/v1/system/time
+        RpcPath: system.System/Time
 
-  # ==================== Activity 秒杀活动服务 (端口 10011) - 未启动，禁用 ====================
-  # - Grpc:
-  #     Target: 127.0.0.1:10011
-  #   Mappings:
-  #     - Method: get
-  #       Path: /api/v1/activity/token
-  #       RpcPath: activity.Activity/Token
+  # ==================== Activity 秒杀活动服务 (端口 10011) ====================
+  - Grpc:
+      Target: 127.0.0.1:10011
+    Mappings:
+      - Method: get
+        Path: /api/v1/activity/token
+        RpcPath: activity.Activity/Token
 
   # ==================== Order 订单服务 (端口 10004) ====================
   - Grpc:
