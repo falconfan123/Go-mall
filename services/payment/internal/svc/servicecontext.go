@@ -1,6 +1,8 @@
 package svc
 
 import (
+	_ "github.com/lib/pq"
+
 	"github.com/falconfan123/Go-mall/dal/model/payment"
 	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
