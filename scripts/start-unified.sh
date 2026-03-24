@@ -34,7 +34,7 @@ payment:services/payment:payment.go:10006:rpc
 # coupon-api:apis/coupon:coupon.go:8009:api
 # flash-api:apis/flash_sale:flash.go:8008:api
 gateway:services/gateway:gateway.go:8888:gateway
-frontend:frontend:python3 -m http.server 3000:3000:frontend
+frontend:frontend:node proxy.js:3000:frontend
 "
 
 # 基础设施依赖
