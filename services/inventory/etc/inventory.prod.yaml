@@ -1,6 +1,6 @@
 # 详细配置见：go-zero@v1.7.6\zrpc\config.go
 Name: inventory.rpc
-ListenOn: 0.0.0.0:10011 # 端口见接口文档
+ListenOn: 0.0.0.0:10007 # 端口见接口文档
 Mode: pro
 Timeout: 5000
 
@@ -26,7 +26,7 @@ Log:
 DevServer:
   Enabled: true
   Host: 0.0.0.0
-  Port: 11011
+  Port: 11007
   EnablePprof: false
 
 # 链路追踪

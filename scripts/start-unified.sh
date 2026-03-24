@@ -16,7 +16,7 @@ ALL_SERVICES="
 auths:services/auths:auths.go:10000:rpc
 audit:services/audit:audit.go:10008:rpc
 users:services/users:users.go:10001:rpc
-inventory:services/inventory:inventory.go:10011:rpc
+inventory:services/inventory:inventory.go:10007:rpc
 product:services/product:product.go:10002:rpc
 carts:services/carts:carts.go:10003:rpc
 coupons:services/coupons:coupons.go:10009:rpc
