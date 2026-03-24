@@ -119,12 +119,12 @@ start_service() {
 
     echo "$srv_name:$pid:$srv_port" >> "$PID_FILE"
 
-    # 快速检查
-    sleep 1.5
-    if kill -0 $pid 2>/dev/null; then
-        echo "✅ $srv_name 启动成功 (PID: $pid)"
+    # 等待服务启动 (air 需要更长时间编译)
+    sleep 5
+    if port_in_use $srv_port; then
+        echo "✅ $srv_name 启动成功 (端口 $srv_port)"
     else
-        echo "❌ $srv_name 启动失败，查看: $log_file"
+        echo "⚠️  $srv_name 可能正在启动，查看: $log_file"
     fi
 }
 
