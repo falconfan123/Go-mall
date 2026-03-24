@@ -3,13 +3,13 @@
 # Go-Mall 统一启动脚本 (增强版 - 强制清理端口)
 # ==============================================
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # 全局变量
 MODE="core"
 PID_FILE="/tmp/go-mall-pids.txt"
-LOG_DIR="${PROJECT_ROOT}/logs"
+LOG_DIR="${PROJECT_ROOT}/scripts/logs"
 
 # 服务定义
 ALL_SERVICES="
@@ -135,7 +135,7 @@ mkdir -p "$LOG_DIR"
 cleanup_old_processes
 
 # 默认启动核心服务
-START_SERVICES="auths audit users inventory product user-api product-api gateway"
+START_SERVICES="auths audit users inventory product carts order checkout payment gateway"
 for srv in $START_SERVICES; do
     start_service "$srv"
 done
