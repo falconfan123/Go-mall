@@ -13,6 +13,7 @@ type Config struct {
 	PostgresConfig config.PostgresConfig
 	RedisConf      redis.RedisConf
 	Alipay         AlipayConfig
+	Stripe         StripeConfig
 	OrderRpc       zrpc.RpcClientConf
 	RabbitMQConfig config.RabbitMQConfig
 }
@@ -25,4 +26,11 @@ type AlipayConfig struct {
 	NotifyPath      string
 	NotifyPort      int
 	ReturnURL       string
+}
+
+type StripeConfig struct {
+	APIKey        string
+	SuccessURL    string
+	CancelURL     string
+	WebhookSecret string
 }
