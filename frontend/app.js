@@ -126,7 +126,12 @@ async function getSeckillToken(productId) {
         if (!response.ok) throw new Error('Token request failed');
 
         const data = await response.json();
-        const pathKey = data.path_key;
+        // 兼容驼峰和下划线命名
+        const pathKey = data.pathKey || data.path_key;
+
+        if (!pathKey) {
+            throw new Error('Invalid token response');
+        }
 
         // 缓存 token（假设有效期 5 分钟）
         seckillState.pathKeys[productId] = {

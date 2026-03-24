@@ -1,5 +1,5 @@
 Name: inventory.rpc
-ListenOn: 0.0.0.0:10011
+ListenOn: 0.0.0.0:10007
 Mode: dev
 
 # 服务发现

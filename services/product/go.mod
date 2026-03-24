@@ -13,7 +13,7 @@ require (
 	github.com/falconfan123/Go-mall/dal v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/inventory v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
-	github.com/lib/pq v1.11.2
+	github.com/lib/pq v1.12.0
 	github.com/minio/minio-go/v7 v7.0.99
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/qiniu/go-sdk/v7 v7.26.4

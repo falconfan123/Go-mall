@@ -71,16 +71,152 @@ Upstreams:
         Path: /douyin/payment/create
         RpcPath: payment.Payment/CreatePayment
 
-  # ==================== 秒杀系统服务 ====================
-  # 秒杀系统服务 (端口 10010, 10011) - 禁用，未启动
+  # ==================== System 系统服务 (端口 10010) ====================
+  - Grpc:
+      Target: 127.0.0.1:10010
+    Mappings:
+      - Method: get
+        Path: /api/v1/system/time
+        RpcPath: system.System/Time
 
-  # Order 订单服务 (端口 10004)
+  # ==================== Activity 秒杀活动服务 (端口 10011) ====================
+  - Grpc:
+      Target: 127.0.0.1:10011
+    Mappings:
+      - Method: get
+        Path: /api/v1/activity/token
+        RpcPath: activity.Activity/Token
+
+  # ==================== Order 订单服务 (端口 10004) ====================
   - Grpc:
       Target: 127.0.0.1:10004
     Mappings:
       - Method: post
         Path: /api/v1/order/create
         RpcPath: order.OrderService/CreateOrder
+      - Method: post
+        Path: /api/v1/order/seckill
+        RpcPath: order.OrderService/Seckill
+      - Method: get
+        Path: /api/v1/order/detail
+        RpcPath: order.OrderService/GetOrder
+      - Method: get
+        Path: /api/v1/order/list
+        RpcPath: order.OrderService/ListOrders
+      - Method: post
+        Path: /api/v1/order/cancel
+        RpcPath: order.OrderService/CancelOrder
 
-  # ==================== Admin 管理服务 ====================
-  # Admin 服务 (端口 10012) - 禁用，未启动
+  # ==================== Auths 认证服务 (端口 10000) ====================
+  - Grpc:
+      Target: 127.0.0.1:10000
+    Mappings:
+      - Method: post
+        Path: /api/v1/auth/token
+        RpcPath: auths.Auths/GenerateToken
+      - Method: post
+        Path: /api/v1/auth/validate
+        RpcPath: auths.Auths/ValidateToken
+      - Method: post
+        Path: /api/v1/auth/renewal
+        RpcPath: auths.Auths/RenewToken
+      - Method: post
+        Path: /api/v1/auth/logout
+        RpcPath: auths.Auths/Logout
+
+  # ==================== Checkout 结算服务 (端口 10005) ====================
+  - Grpc:
+      Target: 127.0.0.1:10005
+    Mappings:
+      - Method: post
+        Path: /api/v1/checkout/prepare
+        RpcPath: checkout.CheckoutService/PrepareCheckout
+      - Method: post
+        Path: /api/v1/checkout/release
+        RpcPath: checkout.CheckoutService/ReleaseCheckout
+      - Method: get
+        Path: /api/v1/checkout/list
+        RpcPath: checkout.CheckoutService/GetCheckoutList
+      - Method: get
+        Path: /api/v1/checkout/detail
+        RpcPath: checkout.CheckoutService/GetCheckoutDetail
+
+  # ==================== Inventory 库存服务 (端口 10007) ====================
+  - Grpc:
+      Target: 127.0.0.1:10007
+    Mappings:
+      - Method: get
+        Path: /api/v1/inventory/detail
+        RpcPath: inventory.Inventory/GetInventory
+      - Method: post
+        Path: /api/v1/inventory/update
+        RpcPath: inventory.Inventory/UpdateInventory
+      - Method: post
+        Path: /api/v1/inventory/decrease
+        RpcPath: inventory.Inventory/DecreaseInventory
+      - Method: post
+        Path: /api/v1/inventory/return
+        RpcPath: inventory.Inventory/ReturnInventory
+
+  # ==================== Admin 管理服务 (端口 10012) ====================
+  - Grpc:
+      Target: 127.0.0.1:10012
+    Mappings:
+      # 商品管理
+      - Method: post
+        Path: /api/v1/admin/product/create
+        RpcPath: admin.AdminProductService/CreateProduct
+      - Method: post
+        Path: /api/v1/admin/product/update
+        RpcPath: admin.AdminProductService/UpdateProduct
+      - Method: post
+        Path: /api/v1/admin/product/delete
+        RpcPath: admin.AdminProductService/DeleteProduct
+      - Method: get
+        Path: /api/v1/admin/product/detail
+        RpcPath: admin.AdminProductService/GetProduct
+      - Method: get
+        Path: /api/v1/admin/product/list
+        RpcPath: admin.AdminProductService/ListProducts
+      # 分类管理
+      - Method: post
+        Path: /api/v1/admin/category/create
+        RpcPath: admin.AdminCategoryService/CreateCategory
+      - Method: post
+        Path: /api/v1/admin/category/update
+        RpcPath: admin.AdminCategoryService/UpdateCategory
+      - Method: post
+        Path: /api/v1/admin/category/delete
+        RpcPath: admin.AdminCategoryService/DeleteCategory
+      - Method: get
+        Path: /api/v1/admin/category/list
+        RpcPath: admin.AdminCategoryService/ListCategories
+      # 秒杀活动管理
+      - Method: post
+        Path: /api/v1/admin/activity/create
+        RpcPath: admin.AdminSeckillService/CreateActivity
+      - Method: post
+        Path: /api/v1/admin/activity/update
+        RpcPath: admin.AdminSeckillService/UpdateActivity
+      - Method: post
+        Path: /api/v1/admin/activity/delete
+        RpcPath: admin.AdminSeckillService/DeleteActivity
+      - Method: get
+        Path: /api/v1/admin/activity/detail
+        RpcPath: admin.AdminSeckillService/GetActivity
+      - Method: get
+        Path: /api/v1/admin/activity/list
+        RpcPath: admin.AdminSeckillService/ListActivities
+      - Method: post
+        Path: /api/v1/admin/activity/settime
+        RpcPath: admin.AdminSeckillService/SetActivityTime
+      - Method: post
+        Path: /api/v1/admin/activity/setstock
+        RpcPath: admin.AdminSeckillService/SetActivityStock
+      # 库存管理
+      - Method: post
+        Path: /api/v1/admin/inventory/adjust
+        RpcPath: admin.AdminInventoryService/AdjustInventory
+      - Method: get
+        Path: /api/v1/admin/inventory/detail
+        RpcPath: admin.AdminInventoryService/GetInventory
