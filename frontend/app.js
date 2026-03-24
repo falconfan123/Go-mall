@@ -251,14 +251,16 @@ async function debouncedSeckillRequest(productId) {
         // 2. 提交秒杀请求
         const result = await submitSeckillOrder(productId, pathKey);
 
-        // 3. 处理结果
-        if (result.status_code === 0) {
-            showToast('秒杀成功！订单号: ' + result.order_id, 'success');
+        // 3. 处理结果 (兼容 statusCode 和 status_code)
+        const statusCode = result.statusCode || result.status_code;
+        const orderId = result.orderId || result.order_id;
+        if (statusCode === 0) {
+            showToast('秒杀成功！订单号: ' + orderId, 'success');
             // 跳转支付页面
             setTimeout(() => {
                 showPaymentPage({
-                    id: result.order_id,
-                    order_no: result.order_id,
+                    id: orderId,
+                    order_no: orderId,
                     total: 0.01
                 });
             }, 1500);
