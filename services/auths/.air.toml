@@ -1,0 +1,18 @@
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  bin = "./tmp/main"
+  cmd = "go build -o ./tmp/main ."
+  delay = 1000
+  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  include_ext = ["go"]
+
+[color]
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+
+[misc]
+  clean_on_exit = false

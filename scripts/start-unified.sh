@@ -107,9 +107,12 @@ start_service() {
 
     cd "$srv_dir"
     if [[ "$srv_type" == "frontend" ]]; then
-        python3 -m http.server 3000 > "$log_file" 2>&1 &
+        node proxy.js > "$log_file" 2>&1 &
+    elif [[ "$srv_type" == "api" ]]; then
+        air -c .air.toml > "$log_file" 2>&1 &
     else
-        go run "$srv_cmd" > "$log_file" 2>&1 &
+        # RPC 服务使用 air 热加载
+        air -c .air.toml > "$log_file" 2>&1 &
     fi
     local pid=$!
     cd "$PROJECT_ROOT"
