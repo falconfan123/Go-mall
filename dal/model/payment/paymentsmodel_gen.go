@@ -17,8 +17,8 @@ import (
 var (
 	paymentsFieldNames          = builder.RawFieldNames(&Payments{})
 	paymentsRows                = strings.Join(paymentsFieldNames, ",")
-	paymentsRowsExpectAutoSet   = strings.Join(stringx.Remove(paymentsFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	paymentsRowsWithPlaceHolder = strings.Join(stringx.Remove(paymentsFieldNames, "`payment_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	paymentsRowsExpectAutoSet   = strings.Join(stringx.Remove(paymentsFieldNames, "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	paymentsRowsWithPlaceHolder = strings.Join(stringx.Remove(paymentsFieldNames, "payment_id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -55,18 +55,18 @@ type (
 func newPaymentsModel(conn sqlx.SqlConn) *defaultPaymentsModel {
 	return &defaultPaymentsModel{
 		conn:  conn,
-		table: "`payments`",
+		table: `payments`,
 	}
 }
 
 func (m *defaultPaymentsModel) Delete(ctx context.Context, paymentId string) error {
-	query := fmt.Sprintf("delete from %s where `payment_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"payment_id\" = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, paymentId)
 	return err
 }
 
 func (m *defaultPaymentsModel) FindOne(ctx context.Context, paymentId string) (*Payments, error) {
-	query := fmt.Sprintf("select %s from %s where `payment_id` = ? limit 1", paymentsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"payment_id\" = ? limit 1", paymentsRows, m.table)
 	var resp Payments
 	err := m.conn.QueryRowCtx(ctx, &resp, query, paymentId)
 	switch err {
@@ -86,7 +86,7 @@ func (m *defaultPaymentsModel) Insert(ctx context.Context, data *Payments) (sql.
 }
 
 func (m *defaultPaymentsModel) Update(ctx context.Context, data *Payments) error {
-	query := fmt.Sprintf("update %s set %s where `payment_id` = ?", m.table, paymentsRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set %s where \"payment_id\" = ?", m.table, paymentsRowsWithPlaceHolder)
 	_, err := m.conn.ExecCtx(ctx, query, data.PreOrderId, data.OrderId, data.UserId, data.OriginalAmount, data.PaidAmount, data.PaymentMethod, data.TransactionId, data.PayUrl, data.ExpireTime, data.Status, data.PaidAt, data.PaymentId)
 	return err
 }

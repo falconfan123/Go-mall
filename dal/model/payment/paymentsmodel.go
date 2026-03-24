@@ -31,7 +31,7 @@ type (
 )
 
 func (m *customPaymentsModel) CheckExistByOrderId(ctx context.Context, orderID string) (bool, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE `pre_order_id` = ?", m.table)
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE \"pre_order_id\" = ?", m.table)
 	var count int64
 	err := m.conn.QueryRowCtx(ctx, &count, query, orderID)
 	if err != nil {
@@ -52,10 +52,10 @@ func (m *customPaymentsModel) WithSession(session sqlx.Session) PaymentsModel {
 }
 func (m *defaultPaymentsModel) UpdateInfoByOrderId(ctx context.Context, newData *Payments) error {
 	// 定义需要更新的字段
-	paymentsRowsWithHolder := "`transaction_id`=?, `status`=?, `paid_at`=?"
+	paymentsRowsWithHolder := "\"transaction_id\"=?, \"status\"=?, \"paid_at\"=?"
 
 	// 构造 SQL 更新语句
-	query := fmt.Sprintf("update %s set %s where `order_id` = ?", m.table, paymentsRowsWithHolder)
+	query := fmt.Sprintf("update %s set %s where \"order_id\" = ?", m.table, paymentsRowsWithHolder)
 
 	// 执行更新操作
 	_, err := m.conn.ExecCtx(ctx, query,
@@ -69,7 +69,7 @@ func (m *defaultPaymentsModel) UpdateInfoByOrderId(ctx context.Context, newData 
 
 // 查询支付记录
 func (m *defaultPaymentsModel) FindPage(ctx context.Context, userId uint32, offset, limit int) ([]*Payments, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE `user_id` = ? LIMIT ? OFFSET ?", m.table)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE \"user_id\" = ? LIMIT ? OFFSET ?", m.table)
 	var payments []*Payments
 	err := m.conn.QueryRowsCtx(ctx, &payments, query, userId, limit, offset)
 	if err != nil {
@@ -87,7 +87,7 @@ func (m *defaultPaymentsModel) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 func (m *defaultPaymentsModel) FindOneByOrderId(ctx context.Context, orderID string) (*Payments, error) {
-	query := fmt.Sprintf("select %s from %s where `order_id` = ? limit 1 for share", paymentsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"order_id\" = ? limit 1 for share", paymentsRows, m.table)
 	var resp Payments
 	err := m.conn.QueryRowCtx(ctx, &resp, query, orderID)
 	switch {
@@ -102,7 +102,7 @@ func (m *defaultPaymentsModel) FindOneByOrderId(ctx context.Context, orderID str
 
 // FindExpired 查找已过期的支付单
 func (m *defaultPaymentsModel) FindExpired(ctx context.Context, limit int) ([]*Payments, error) {
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE `status` = ? AND `expire_time` < ? LIMIT ?", paymentsRows, m.table)
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE \"status\" = ? AND \"expire_time\" < ? LIMIT ?", paymentsRows, m.table)
 	var payments []*Payments
 	err := m.conn.QueryRowsCtx(ctx, &payments, query, 1, time.Now().Unix(), limit)
 	if err != nil {

@@ -9,10 +9,8 @@ positions:
   filename: /tmp/promtail/positions.yaml
 
 clients:
-  # Loki 地址 - 开发环境使用本地
-  - url: http://localhost:3100/loki/api/v1/push
-    # 生产环境可改为:
-    # url: http://loki:3100/loki/api/v1/push
+  # Loki 地址 - Docker 网络内使用服务名
+  - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
   # Gateway 日志
