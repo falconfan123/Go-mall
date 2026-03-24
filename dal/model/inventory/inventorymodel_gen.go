@@ -45,21 +45,21 @@ type (
 func newInventoryModel(conn sqlx.SqlConn) *defaultInventoryModel {
 	return &defaultInventoryModel{
 		conn:              conn,
-		table:             "`inventory`",
-		lockdecreasetable: "`inventory_lock`",
-		lockreturntable:   "`return_lock`",
+		table:             `"inventory"`,
+		lockdecreasetable: `"inventory_lock"`,
+		lockreturntable:   `"return_lock"`,
 	}
 }
 
 func (m *defaultInventoryModel) Delete(ctx context.Context, productId int64) error {
-	query := fmt.Sprintf("delete from %s where `product_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"product_id\" = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, productId)
 	return err
 }
 
 func (m *defaultInventoryModel) FindOne(ctx context.Context, productId int64) (*Inventory, error) {
 
-	query := fmt.Sprintf("select %s from %s where `product_id` = ? limit 1", inventoryRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"product_id\" = ? limit 1", inventoryRows, m.table)
 	var resp Inventory
 	err := m.conn.QueryRowCtx(ctx, &resp, query, productId)
 	switch err {
@@ -79,7 +79,7 @@ func (m *defaultInventoryModel) Insert(ctx context.Context, data *Inventory) (sq
 }
 
 func (m *defaultInventoryModel) Update(ctx context.Context, data *Inventory) error {
-	query := fmt.Sprintf("update %s set %s where `product_id` = ?", m.table, inventoryRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set %s where \"product_id\" = ?", m.table, inventoryRowsWithPlaceHolder)
 	_, err := m.conn.ExecCtx(ctx, query, data.Total, data.Sold, data.ProductId)
 	return err
 }

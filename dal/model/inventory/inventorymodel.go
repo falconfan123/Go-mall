@@ -132,7 +132,7 @@ func (m *customInventoryModel) BatchReturn(ctx context.Context, session sqlx.Ses
 }
 func (m *customInventoryModel) ReturnInventory(ctx context.Context, productId int32, quantity int32) (cnt int64, err error) {
 	var inventory Inventory
-	query := fmt.Sprintf("select * from %s where `product_id` = ? for update", m.table)
+	query := fmt.Sprintf("select * from %s where \"product_id\" = ? for update", m.table)
 	if err := m.conn.QueryRowCtx(ctx, &inventory, query, productId); err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
 			return 0, err
@@ -155,7 +155,7 @@ func (m *customInventoryModel) ReturnInventory(ctx context.Context, productId in
 
 func (m *customInventoryModel) UpdateOrCreate(ctx context.Context, inventory Inventory) error {
 	var exists bool
-	query := fmt.Sprintf("select exists(select 1 from %s where `product_id` = ?)", m.table)
+	query := fmt.Sprintf("select exists(select 1 from %s where \"product_id\" = ?)", m.table)
 	err := m.conn.QueryRowCtx(ctx, &exists, query, inventory.ProductId)
 	if err != nil {
 		return err
@@ -330,7 +330,7 @@ func (m *customInventoryModel) DecreaseInventoryAtom(ctx context.Context, produc
 		// --------------- check ---------------
 
 		var inventory Inventory
-		query := fmt.Sprintf("select * from %s where `product_id` = ? for update", m.table)
+		query := fmt.Sprintf("select * from %s where \"product_id\" = ? for update", m.table)
 		if err := session.QueryRowCtx(ctx, &inventory, query, productId); err != nil {
 			if errors.Is(err, sqlx.ErrNotFound) {
 				return err

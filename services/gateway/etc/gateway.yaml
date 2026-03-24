@@ -1,6 +1,6 @@
 Name: gateway
 Host: 0.0.0.0
-Port: 8080
+Port: 8888
 
 # 日志配置 - 输出到 stdout 由容器收集
 Log:
@@ -72,92 +72,15 @@ Upstreams:
         RpcPath: payment.Payment/CreatePayment
 
   # ==================== 秒杀系统服务 ====================
-
-  # System 时间同步服务 (端口 10010)
-  - Grpc:
-      Target: 127.0.0.1:10010
-    Mappings:
-      - Method: get
-        Path: /api/v1/system/time
-        RpcPath: system.System/Time
-
-  # Activity 活动服务 (端口 10011)
-  - Grpc:
-      Target: 127.0.0.1:10011
-    Mappings:
-      - Method: get
-        Path: /api/v1/activity/token
-        RpcPath: activity.Activity/Token
+  # 秒杀系统服务 (端口 10010, 10011) - 禁用，未启动
 
   # Order 订单服务 (端口 10004)
   - Grpc:
       Target: 127.0.0.1:10004
     Mappings:
       - Method: post
-        Path: /api/v1/order/seckill
-        RpcPath: order.OrderService/Seckill
+        Path: /api/v1/order/create
+        RpcPath: order.OrderService/CreateOrder
 
   # ==================== Admin 管理服务 ====================
-
-  # Admin 服务 (端口 10012)
-  - Grpc:
-      Target: 127.0.0.1:10012
-    Mappings:
-      # 商品管理
-      - Method: post
-        Path: /api/v1/admin/product
-        RpcPath: admin.AdminProductService/CreateProduct
-      - Method: put
-        Path: /api/v1/admin/product
-        RpcPath: admin.AdminProductService/UpdateProduct
-      - Method: delete
-        Path: /api/v1/admin/product
-        RpcPath: admin.AdminProductService/DeleteProduct
-      - Method: get
-        Path: /api/v1/admin/product
-        RpcPath: admin.AdminProductService/GetProduct
-      - Method: get
-        Path: /api/v1/admin/products
-        RpcPath: admin.AdminProductService/ListProducts
-      # 分类管理
-      - Method: post
-        Path: /api/v1/admin/category
-        RpcPath: admin.AdminCategoryService/CreateCategory
-      - Method: put
-        Path: /api/v1/admin/category
-        RpcPath: admin.AdminCategoryService/UpdateCategory
-      - Method: delete
-        Path: /api/v1/admin/category
-        RpcPath: admin.AdminCategoryService/DeleteCategory
-      - Method: get
-        Path: /api/v1/admin/categories
-        RpcPath: admin.AdminCategoryService/ListCategories
-      # 秒杀活动管理
-      - Method: post
-        Path: /api/v1/admin/seckill/activity
-        RpcPath: admin.AdminSeckillService/CreateActivity
-      - Method: put
-        Path: /api/v1/admin/seckill/activity
-        RpcPath: admin.AdminSeckillService/UpdateActivity
-      - Method: delete
-        Path: /api/v1/admin/seckill/activity
-        RpcPath: admin.AdminSeckillService/DeleteActivity
-      - Method: get
-        Path: /api/v1/admin/seckill/activity
-        RpcPath: admin.AdminSeckillService/GetActivity
-      - Method: get
-        Path: /api/v1/admin/seckill/activities
-        RpcPath: admin.AdminSeckillService/ListActivities
-      - Method: put
-        Path: /api/v1/admin/seckill/activity/time
-        RpcPath: admin.AdminSeckillService/SetActivityTime
-      - Method: put
-        Path: /api/v1/admin/seckill/activity/stock
-        RpcPath: admin.AdminSeckillService/SetActivityStock
-      # 库存管理
-      - Method: post
-        Path: /api/v1/admin/inventory/adjust
-        RpcPath: admin.AdminInventoryService/AdjustInventory
-      - Method: get
-        Path: /api/v1/admin/inventory
-        RpcPath: admin.AdminInventoryService/GetInventory
+  # Admin 服务 (端口 10012) - 禁用，未启动
