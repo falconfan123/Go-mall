@@ -49,7 +49,7 @@ func ConvertModelToPaymentItem(p *paymentM.Payments) *payment.PaymentItem {
 		PaidAmount:     p.PaidAmount.Int64,
 		PaymentMethod:  method,
 		TransactionId:  p.TransactionId.String,
-		PayUrl:         p.PayUrl,
+		PayUrl:         p.PayUrl.String,
 		ExpireTime:     p.ExpireTime,
 		Status:         payment.PaymentStatus(p.Status),
 		CreatedAt:      p.CreatedAt.UnixMilli(),
@@ -114,7 +114,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 		OriginalAmount: originalAmount,
 		PaidAmount:     sql.NullInt64{Int64: payableAmount, Valid: true},
 		PaymentMethod:  PaymentMethodToString(in.PaymentMethod),
-		PayUrl:         payUrl,
+		PayUrl:         sql.NullString{String: payUrl, Valid: true},
 		ExpireTime:     time.Now().Add(30 * time.Minute).Unix(),
 		Status:         int64(payment.PaymentStatus_PAYMENT_STATUS_UNPAID), // 初始状态：待支付
 		CreatedAt:      time.Now(),
