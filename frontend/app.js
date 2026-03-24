@@ -252,7 +252,7 @@ async function debouncedSeckillRequest(productId) {
         const result = await submitSeckillOrder(productId, pathKey);
 
         // 3. 处理结果 (兼容 statusCode 和 status_code)
-        const statusCode = result.statusCode || result.status_code;
+        const statusCode = result.statusCode !== undefined ? parseInt(result.statusCode) : (result.status_code !== undefined ? parseInt(result.status_code) : -1);
         const orderId = result.orderId || result.order_id;
         if (statusCode === 0) {
             // 直接跳转支付页面，不显示 toast
@@ -276,7 +276,16 @@ async function debouncedSeckillRequest(productId) {
 document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
     updateNav();
-    showPage('home');
+
+    // 处理初始 hash 路由
+    const hash = window.location.hash.slice(1);
+    if (hash === 'seckill' || hash === 'flash') {
+        showPage('flash');
+        startCountdown();
+    } else {
+        showPage('home');
+    }
+
     loadProducts();
     // 启动时钟同步
     initTimeSync();
@@ -284,6 +293,28 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(syncServerTime, 30000);
     // 启动按钮状态更新（每秒检查）
     setInterval(updateButtonStates, 1000);
+
+    // 监听 hash 变化，实现路由切换
+    window.addEventListener('hashchange', () => {
+        const newHash = window.location.hash.slice(1);
+        console.log('[Router] Hash changed to:', newHash);
+        if (newHash === 'seckill' || newHash === 'flash') {
+            showPage('flash');
+            startCountdown();
+        } else if (newHash === 'products') {
+            showPage('products');
+        } else if (newHash === 'cart') {
+            showPage('cart');
+        } else if (newHash === 'orders') {
+            showPage('orders');
+        } else if (newHash === 'login') {
+            showPage('login');
+        } else if (newHash === 'register') {
+            showPage('register');
+        } else {
+            showPage('home');
+        }
+    });
 });
 
 // 从 localStorage 加载状态
