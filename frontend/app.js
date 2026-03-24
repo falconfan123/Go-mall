@@ -255,15 +255,12 @@ async function debouncedSeckillRequest(productId) {
         const statusCode = result.statusCode || result.status_code;
         const orderId = result.orderId || result.order_id;
         if (statusCode === 0) {
-            showToast('秒杀成功！订单号: ' + orderId, 'success');
-            // 跳转支付页面
-            setTimeout(() => {
-                showPaymentPage({
-                    id: orderId,
-                    order_no: orderId,
-                    total: 0.01
-                });
-            }, 1500);
+            // 直接跳转支付页面，不显示 toast
+            showPaymentPage({
+                id: orderId,
+                order_no: orderId,
+                total: 0.01
+            });
         } else {
             showToast(result.message || '秒杀失败', 'error');
         }
