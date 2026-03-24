@@ -25,6 +25,7 @@ coupons:services/coupons:coupons.go:10009:rpc
 order:services/order:order.go:10004:rpc
 checkout:services/checkout:checkout.go:10005:rpc
 payment:services/payment:payment.go:10006:rpc
+admin:services/admin:admin.go:10012:rpc
 # user-api:apis/user:user.go:8001:api
 # product-api:apis/product:product.go:8002:api
 # carts-api:apis/carts:carts.go:8003:api
@@ -168,7 +169,7 @@ mkdir -p "$LOG_DIR"
 cleanup_old_processes
 
 # 默认启动核心服务
-START_SERVICES="system activity auths audit users inventory product carts order checkout payment gateway"
+START_SERVICES="system activity auths audit users inventory product carts order checkout payment admin gateway"
 for srv in $START_SERVICES; do
     start_service "$srv"
 done
