@@ -10,6 +10,7 @@ require (
 	github.com/falconfan123/Go-mall/common v0.0.0-20260312153719-88b43b07ae7d
 	github.com/falconfan123/Go-mall/dal v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
+	github.com/lib/pq v1.12.0
 	github.com/zeromicro/go-zero v1.10.0
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20251020121907-c2e4c4911576
 	google.golang.org/grpc v1.79.2
@@ -54,7 +55,6 @@ require (
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
-	github.com/lib/pq v1.12.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
