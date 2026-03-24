@@ -596,10 +596,15 @@ async function handlePayment(orderNo) {
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         // 调用后端支付接口
+        const userId = state.user?.user_id || 1;
         await apiRequest(`${API_BASE.payment}/create`, {
             method: 'POST',
+            headers: {
+                'X-User-Id': userId.toString()
+            },
             body: JSON.stringify({
                 order_id: orderNo,
+                user_id: userId,
                 payment_method: 1 // 1-WECHAT_PAY 2-ALIPAY
             })
         });

@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	orderItemsFieldNames          = builder.RawFieldNames(&OrderItems{})
+	orderItemsFieldNames          = builder.RawFieldNames(&OrderItems{}, true) // PostgreSQL mode
 	orderItemsRows                = strings.Join(orderItemsFieldNames, ",")
-	orderItemsRowsExpectAutoSet   = strings.Join(stringx.Remove(orderItemsFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	orderItemsRowsWithPlaceHolder = strings.Join(stringx.Remove(orderItemsFieldNames, "`order_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	orderItemsRowsExpectAutoSet   = strings.Join(stringx.Remove(orderItemsFieldNames, "created_at"), ",")
+	orderItemsRowsWithPlaceHolder = strings.Join(stringx.Remove(orderItemsFieldNames, "order_id", "created_at"), "=?,") + "=?"
 )
 
 type (
@@ -48,18 +48,18 @@ type (
 func newOrderItemsModel(conn sqlx.SqlConn) *defaultOrderItemsModel {
 	return &defaultOrderItemsModel{
 		conn:  conn,
-		table: "`order_items`",
+		table: "order_items",
 	}
 }
 
 func (m *defaultOrderItemsModel) Delete(ctx context.Context, orderId string) error {
-	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"order_id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, orderId)
 	return err
 }
 
 func (m *defaultOrderItemsModel) FindOne(ctx context.Context, orderId string) (*OrderItems, error) {
-	query := fmt.Sprintf("select %s from %s where `order_id` = ? limit 1", orderItemsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"order_id\" = $1 limit 1", orderItemsRows, m.table)
 	var resp OrderItems
 	err := m.conn.QueryRowCtx(ctx, &resp, query, orderId)
 	switch err {
@@ -73,13 +73,27 @@ func (m *defaultOrderItemsModel) FindOne(ctx context.Context, orderId string) (*
 }
 
 func (m *defaultOrderItemsModel) Insert(ctx context.Context, data *OrderItems) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, orderItemsRowsExpectAutoSet)
+	// Use PostgreSQL $1, $2, ... placeholders
+	fields := strings.Split(orderItemsRowsExpectAutoSet, ",")
+	placeholders := make([]string, len(fields))
+	for i := range fields {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+	}
+	query := fmt.Sprintf("insert into %s (%s) values (%s)", m.table, orderItemsRowsExpectAutoSet, strings.Join(placeholders, ", "))
 	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.ProductId, data.Quantity, data.Price, data.ProductName, data.ProductDesc)
 	return ret, err
 }
 
 func (m *defaultOrderItemsModel) Update(ctx context.Context, data *OrderItems) error {
-	query := fmt.Sprintf("update %s set %s where `order_id` = ?", m.table, orderItemsRowsWithPlaceHolder)
+	// Use PostgreSQL $1, $2, ... placeholders
+	fields := strings.Split(orderItemsRowsWithPlaceHolder, "=?")
+	setClauses := make([]string, 0, len(fields))
+	for i, f := range fields {
+		if f != "" {
+			setClauses = append(setClauses, fmt.Sprintf("%s = $%d", f, i+1))
+		}
+	}
+	query := fmt.Sprintf("update %s set %s where \"order_id\" = $%d", m.table, strings.Join(setClauses, ", "), len(setClauses)+1)
 	_, err := m.conn.ExecCtx(ctx, query, data.ProductId, data.Quantity, data.Price, data.ProductName, data.ProductDesc, data.OrderId)
 	return err
 }
