@@ -51,7 +51,7 @@ func (l *ListPaymentsLogic) ListPayments(in *payment.PaymentListReq) (*payment.P
 			OriginalAmount: p.OriginalAmount,
 			PaidAmount:     p.PaidAmount.Int64,
 			TransactionId:  p.TransactionId.String,
-			PayUrl:         p.PayUrl,
+			PayUrl:         p.PayUrl.String,
 			ExpireTime:     p.ExpireTime,
 			Status:         payment.PaymentStatus(p.Status),
 			CreatedAt:      p.CreatedAt.Unix(),

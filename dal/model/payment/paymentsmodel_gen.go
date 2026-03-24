@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	paymentsFieldNames          = builder.RawFieldNames(&Payments{})
+	paymentsFieldNames          = builder.RawFieldNames(&Payments{}, true) // true enables PostgreSQL mode (no backticks)
 	paymentsRows                = strings.Join(paymentsFieldNames, ",")
 	paymentsRowsExpectAutoSet   = strings.Join(stringx.Remove(paymentsFieldNames, "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
 	paymentsRowsWithPlaceHolder = strings.Join(stringx.Remove(paymentsFieldNames, "payment_id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
@@ -43,7 +43,7 @@ type (
 		PaidAmount     sql.NullInt64  `db:"paid_amount"`     // 实付金额（分）
 		PaymentMethod  string         `db:"payment_method"`  // 支付渠道（wx_pay/alipay）
 		TransactionId  sql.NullString `db:"transaction_id"`  // 支付平台交易号
-		PayUrl         string         `db:"pay_url"`         // 支付跳转链接
+		PayUrl         sql.NullString `db:"pay_url"`         // 支付跳转链接
 		ExpireTime     int64          `db:"expire_time"`     // 支付链接过期时间戳（秒）
 		Status         int64          `db:"status"`          // 支付状态（0-未定义 1-待支付 2-已支付...）
 		CreatedAt      time.Time      `db:"created_at"`      // 创建时间（毫秒精度）
@@ -60,13 +60,13 @@ func newPaymentsModel(conn sqlx.SqlConn) *defaultPaymentsModel {
 }
 
 func (m *defaultPaymentsModel) Delete(ctx context.Context, paymentId string) error {
-	query := fmt.Sprintf("delete from %s where \"payment_id\" = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"payment_id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, paymentId)
 	return err
 }
 
 func (m *defaultPaymentsModel) FindOne(ctx context.Context, paymentId string) (*Payments, error) {
-	query := fmt.Sprintf("select %s from %s where \"payment_id\" = ? limit 1", paymentsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"payment_id\" = $1 limit 1", paymentsRows, m.table)
 	var resp Payments
 	err := m.conn.QueryRowCtx(ctx, &resp, query, paymentId)
 	switch err {
@@ -80,13 +80,27 @@ func (m *defaultPaymentsModel) FindOne(ctx context.Context, paymentId string) (*
 }
 
 func (m *defaultPaymentsModel) Insert(ctx context.Context, data *Payments) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, paymentsRowsExpectAutoSet)
+	// Use PostgreSQL $1, $2, ... placeholders
+	fields := strings.Split(paymentsRowsExpectAutoSet, ",")
+	placeholders := make([]string, len(fields))
+	for i := range fields {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+	}
+	query := fmt.Sprintf("insert into %s (%s) values (%s)", m.table, paymentsRowsExpectAutoSet, strings.Join(placeholders, ", "))
 	ret, err := m.conn.ExecCtx(ctx, query, data.PaymentId, data.PreOrderId, data.OrderId, data.UserId, data.OriginalAmount, data.PaidAmount, data.PaymentMethod, data.TransactionId, data.PayUrl, data.ExpireTime, data.Status, data.PaidAt)
 	return ret, err
 }
 
 func (m *defaultPaymentsModel) Update(ctx context.Context, data *Payments) error {
-	query := fmt.Sprintf("update %s set %s where \"payment_id\" = ?", m.table, paymentsRowsWithPlaceHolder)
+	// Use PostgreSQL $1, $2, ... placeholders
+	fields := strings.Split(paymentsRowsWithPlaceHolder, "=?")
+	setClauses := make([]string, len(fields))
+	for i := range fields {
+		if fields[i] != "" {
+			setClauses[i] = fmt.Sprintf("%s = $%d", fields[i], i+1)
+		}
+	}
+	query := fmt.Sprintf("update %s set %s where \"payment_id\" = $%d", m.table, strings.Join(setClauses, ", "), len(fields))
 	_, err := m.conn.ExecCtx(ctx, query, data.PreOrderId, data.OrderId, data.UserId, data.OriginalAmount, data.PaidAmount, data.PaymentMethod, data.TransactionId, data.PayUrl, data.ExpireTime, data.Status, data.PaidAt, data.PaymentId)
 	return err
 }
