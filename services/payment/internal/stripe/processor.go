@@ -1,4 +1,4 @@
-package logic
+package stripe
 
 import (
 	"context"
@@ -12,9 +12,10 @@ import (
 )
 
 type StripeProcessor struct {
-	apiKey     string
-	successURL string
-	cancelURL  string
+	apiKey        string
+	successURL    string
+	cancelURL     string
+	webhookSecret string
 }
 
 func NewStripeProcessor(cfg config.StripeConfig) *StripeProcessor {
@@ -23,9 +24,10 @@ func NewStripeProcessor(cfg config.StripeConfig) *StripeProcessor {
 	}
 	stripe.Key = cfg.APIKey
 	return &StripeProcessor{
-		apiKey:     cfg.APIKey,
-		successURL: cfg.SuccessURL,
-		cancelURL:  cfg.CancelURL,
+		apiKey:        cfg.APIKey,
+		successURL:    cfg.SuccessURL,
+		cancelURL:     cfg.CancelURL,
+		webhookSecret: cfg.WebhookSecret,
 	}
 }
 
@@ -84,6 +86,11 @@ func (s *StripeProcessor) CreatePaymentLink(ctx context.Context, orderID string,
 
 	logx.Infow("Created Stripe payment link", logx.Field("order_id", orderID), logx.Field("url", result.URL))
 	return result.URL, nil
+}
+
+// GetWebhookSecret returns the webhook secret
+func (s *StripeProcessor) GetWebhookSecret() string {
+	return s.webhookSecret
 }
 
 // PaymentItem represents an item in the payment

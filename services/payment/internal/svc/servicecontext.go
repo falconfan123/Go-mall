@@ -7,6 +7,7 @@ import (
 	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/falconfan123/Go-mall/services/payment/internal/mq"
+	"github.com/falconfan123/Go-mall/services/payment/internal/stripe"
 	"github.com/smartwalle/alipay/v3"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -15,13 +16,14 @@ import (
 )
 
 type ServiceContext struct {
-	Config       config.Config
-	Rdb          *redis.Redis
-	PaymentModel payment.PaymentsModel
-	OrderRpc     order.OrderServiceClient
-	Alipay       *alipay.Client
-	PaymentMQ    *mq.PaymentDelayMQ
-	Model        sqlx.SqlConn
+	Config          config.Config
+	Rdb             *redis.Redis
+	PaymentModel    payment.PaymentsModel
+	OrderRpc        order.OrderServiceClient
+	Alipay          *alipay.Client
+	StripeProcessor *stripe.StripeProcessor
+	PaymentMQ       *mq.PaymentDelayMQ
+	Model           sqlx.SqlConn
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -43,13 +45,17 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
+	// 3. 创建 Stripe 处理器
+	stripeProcessor := stripe.NewStripeProcessor(c.Stripe)
+
 	return &ServiceContext{
-		Config:       c,
-		Rdb:          redis.MustNewRedis(c.RedisConf),
-		PaymentModel: payment.NewPaymentsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
-		OrderRpc:     order.NewOrderServiceClient(zrpc.MustNewClient(c.OrderRpc).Conn()),
-		Alipay:       client,
-		PaymentMQ:    nil, // 暂时设置为nil
-		Model:        sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),
+		Config:          c,
+		Rdb:             redis.MustNewRedis(c.RedisConf),
+		PaymentModel:    payment.NewPaymentsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
+		OrderRpc:        order.NewOrderServiceClient(zrpc.MustNewClient(c.OrderRpc).Conn()),
+		Alipay:          client,
+		StripeProcessor: stripeProcessor,
+		PaymentMQ:       nil, // 暂时设置为nil
+		Model:           sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),
 	}
 }

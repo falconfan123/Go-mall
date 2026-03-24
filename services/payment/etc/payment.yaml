@@ -43,6 +43,7 @@ Stripe:
   SuccessURL: "http://localhost:3000/payment/success"
   CancelURL: "http://localhost:3000/payment/cancel"
   WebhookSecret: "whsec_your_webhook_secret"
+  WebhookPort: 11112
 
 OrderRpc:
   Target: consul://localhost:8500/order.rpc?wait=14s

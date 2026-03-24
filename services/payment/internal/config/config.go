@@ -33,4 +33,5 @@ type StripeConfig struct {
 	SuccessURL    string
 	CancelURL     string
 	WebhookSecret string
+	WebhookPort   int
 }
