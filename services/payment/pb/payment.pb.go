@@ -4,7 +4,7 @@
 // 	protoc        v6.33.1
 // source: payment.proto
 
-package pb
+package payment
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -85,6 +85,7 @@ const (
 	PaymentMethod_PAYMENT_METHOD_UNSPECIFIED PaymentMethod = 0 // 未指定或默认状态
 	PaymentMethod_WECHAT_PAY                 PaymentMethod = 1 // 微信支付
 	PaymentMethod_ALIPAY                     PaymentMethod = 2 // 支付宝支付
+	PaymentMethod_STRIPE                     PaymentMethod = 3 // Stripe 支付
 )
 
 // Enum value maps for PaymentMethod.
@@ -93,11 +94,13 @@ var (
 		0: "PAYMENT_METHOD_UNSPECIFIED",
 		1: "WECHAT_PAY",
 		2: "ALIPAY",
+		3: "STRIPE",
 	}
 	PaymentMethod_value = map[string]int32{
 		"PAYMENT_METHOD_UNSPECIFIED": 0,
 		"WECHAT_PAY":                 1,
 		"ALIPAY":                     2,
+		"STRIPE":                     3,
 	}
 )
 
@@ -619,13 +622,15 @@ const file_payment_proto_rawDesc = "" +
 	"\x13PAYMENT_STATUS_PAID\x10\x02\x12\x19\n" +
 	"\x15PAYMENT_STATUS_FAILED\x10\x03\x12!\n" +
 	"\x1dPAYMENT_STATUS_FULLY_REFUNDED\x10\x04\x12\x1a\n" +
-	"\x16PAYMENT_STATUS_EXPIRED\x10\x05*K\n" +
+	"\x16PAYMENT_STATUS_EXPIRED\x10\x05*W\n" +
 	"\rPaymentMethod\x12\x1e\n" +
 	"\x1aPAYMENT_METHOD_UNSPECIFIED\x10\x00\x12\x0e\n" +
 	"\n" +
 	"WECHAT_PAY\x10\x01\x12\n" +
 	"\n" +
-	"\x06ALIPAY\x10\x022\x88\x01\n" +
+	"\x06ALIPAY\x10\x02\x12\n" +
+	"\n" +
+	"\x06STRIPE\x10\x032\x88\x01\n" +
 	"\aPayment\x12:\n" +
 	"\rCreatePayment\x12\x13.payment.PaymentReq\x1a\x14.payment.PaymentResp\x12A\n" +
 	"\fListPayments\x12\x17.payment.PaymentListReq\x1a\x18.payment.PaymentListRespB\vZ\t./paymentb\x06proto3"

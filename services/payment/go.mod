@@ -27,6 +27,7 @@ require (
 	github.com/lib/pq v1.12.0
 	github.com/smartwalle/alipay/v3 v3.2.29
 	github.com/streadway/amqp v1.1.0
+	github.com/stripe/stripe-go/v81 v81.0.0
 	github.com/zeromicro/go-zero v1.10.0
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20251020121907-c2e4c4911576
 	google.golang.org/grpc v1.79.2

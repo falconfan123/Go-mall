@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	paymentM "github.com/falconfan123/Go-mall/dal/model/payment"
 	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/falconfan123/Go-mall/services/payment/internal/mq"
+	stripeLogic "github.com/falconfan123/Go-mall/services/payment/internal/stripe"
 	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
 	payment "github.com/falconfan123/Go-mall/services/payment/pb"
 	"github.com/google/uuid"
@@ -101,9 +103,30 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 		res.StatusMsg = code.PaymentMethodNotSupportMsg
 		return res, nil
 	}
-	payUrl, err := GenerateAlipayPaymentURL(l.svcCtx, payableAmount, 1800, in.OrderId)
-	if err != nil {
-		return nil, err
+	var payUrl string
+
+	// 根据支付方式生成支付链接
+	switch in.PaymentMethod {
+	case payment.PaymentMethod_STRIPE:
+		// 使用 Stripe 生成支付链接
+		stripeItems := []*stripeLogic.PaymentItem{
+			{
+				Name:        "Order Payment",
+				Description: fmt.Sprintf("Order #%s", in.OrderId),
+				Quantity:    1,
+				Price:       payableAmount,
+			},
+		}
+		payUrl, err = l.svcCtx.StripeProcessor.CreatePaymentLink(l.ctx, in.OrderId, payableAmount, stripeItems)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		// 默认使用支付宝
+		payUrl, err = GenerateAlipayPaymentURL(l.svcCtx, payableAmount, 1800, in.OrderId)
+		if err != nil {
+			return nil, err
+		}
 	}
 	// 5. 构造支付单记录
 	newPayment := &paymentM.Payments{
@@ -160,6 +183,8 @@ func PaymentMethodToString(method payment.PaymentMethod) string {
 		return "wx_pay"
 	case payment.PaymentMethod_ALIPAY:
 		return "alipay"
+	case payment.PaymentMethod_STRIPE:
+		return "stripe"
 	default:
 		return "unknown"
 	}

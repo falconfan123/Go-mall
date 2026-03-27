@@ -3,8 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/ip"
 	paymentM "github.com/falconfan123/Go-mall/dal/model/payment"
@@ -14,16 +20,13 @@ import (
 	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
 	payment "github.com/falconfan123/Go-mall/services/payment/pb"
 	"github.com/smartwalle/alipay/v3"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
-	"net/http"
-	"strings"
-	"time"
-
+	"github.com/stripe/stripe-go/v81/webhook"
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
+	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -156,9 +159,84 @@ func (s *PaymentService) handleAlipayNotification(writer http.ResponseWriter, re
 
 }
 
+// handleStripeWebhook 处理 Stripe Webhook 回调
+func (s *PaymentService) handleStripeWebhook(writer http.ResponseWriter, request *http.Request) {
+	logx.Info("Got webhook from Stripe")
+
+	const MaxBodyBytes = int64(65536)
+	request.Body = http.MaxBytesReader(writer, request.Body, MaxBodyBytes)
+	payload, err := io.ReadAll(request.Body)
+	if err != nil {
+		logx.Infow("Error reading request body", logx.Field("err", err))
+		http.Error(writer, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	event, err := webhook.ConstructEvent(payload, request.Header.Get("Stripe-Signature"),
+		s.ctx.StripeProcessor.GetWebhookSecret())
+	if err != nil {
+		logx.Infow("Error verifying webhook signature", logx.Field("err", err))
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// 处理支付成功事件
+	switch event.Type {
+	case "checkout.session.completed":
+		var session struct {
+			ID            string            `json:"id"`
+			PaymentStatus string            `json:"payment_status"`
+			Metadata      map[string]string `json:"metadata"`
+		}
+		if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
+			logx.Infow("Error unmarshaling event", logx.Field("err", err))
+			http.Error(writer, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if session.PaymentStatus == "paid" {
+			logx.Infow("Payment for checkout session completed", logx.Field("session_id", session.ID))
+
+			orderID := session.Metadata["order_id"]
+			if orderID != "" {
+				// 调用 Order RPC 更新订单状态
+				_, err := s.ctx.OrderRpc.UpdateOrder2PaymentSuccess(request.Context(), &order.UpdateOrder2PaymentSuccessRequest{
+					OrderId: orderID,
+					PaymentResult: &order.PaymentResult{
+						TransactionId: session.ID,
+						PaidAmount:    0, // TODO: 从 session 中获取实际金额
+						PaidAt:        time.Now().Unix(),
+					},
+					UserId: 0, // TODO: 从 metadata 中获取 user_id
+				})
+				if err != nil {
+					logx.Errorw("Failed to update order status", logx.Field("err", err))
+				} else {
+					logx.Infow("Order status updated to paid", logx.Field("order_id", orderID))
+				}
+			}
+		}
+	}
+
+	writer.WriteHeader(http.StatusOK)
+}
+
 // 封装HTTP服务启动
 func (s *PaymentService) startHTTPServer() {
+	// 注册支付宝回调
 	http.HandleFunc(s.ctx.Config.Alipay.NotifyPath, s.handleAlipayNotification)
+
+	// 注册 Stripe Webhook
+	if s.ctx.Config.Stripe.WebhookPort > 0 {
+		http.HandleFunc("/stripe/webhook", s.handleStripeWebhook)
+		go func() {
+			if err := http.ListenAndServe(fmt.Sprintf(":%d", s.ctx.Config.Stripe.WebhookPort), nil); err != nil {
+				logx.Errorw("Stripe webhook server error", logx.Field("err", err))
+			}
+		}()
+	}
+
+	// 启动支付宝通知 HTTP 服务
 	go func() {
 		if err := http.ListenAndServe(fmt.Sprintf(":%d", s.ctx.Config.Alipay.NotifyPort), nil); err != nil {
 			logx.Errorw("http server error", logx.Field("err", err))

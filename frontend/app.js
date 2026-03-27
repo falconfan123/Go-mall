@@ -566,8 +566,8 @@ function showPaymentPage(order) {
                     <span>微信支付</span>
                 </div>
                 <div class="payment-method">
-                    <input type="radio" name="paymentMethod" value="credit">
-                    <span>信用卡</span>
+                    <input type="radio" name="paymentMethod" value="stripe">
+                    <span>Stripe 支付</span>
                 </div>
             </div>
         </div>
@@ -591,13 +591,23 @@ function showPaymentPage(order) {
 // 处理支付
 async function handlePayment(orderNo) {
     try {
-        // 模拟支付过程
+        // 获取选中的支付方式
+        const paymentMethodRadio = document.querySelector('input[name="paymentMethod"]:checked');
+        const paymentMethodValue = paymentMethodRadio?.value || 'alipay';
+
+        // 支付方式映射: alipay->2, wechat->1, stripe->3
+        const paymentMethodMap = {
+            'alipay': 2,
+            'wechat': 1,
+            'stripe': 3
+        };
+        const paymentMethod = paymentMethodMap[paymentMethodValue] || 2;
+
         showToast('正在处理支付...', 'info');
-        await new Promise(resolve => setTimeout(resolve, 1500));
 
         // 调用后端支付接口
         const userId = state.user?.user_id || 1;
-        await apiRequest(`${API_BASE.payment}/create`, {
+        const response = await apiRequest(`${API_BASE.payment}/create`, {
             method: 'POST',
             headers: {
                 'X-User-Id': userId.toString()
@@ -605,10 +615,18 @@ async function handlePayment(orderNo) {
             body: JSON.stringify({
                 order_id: orderNo,
                 user_id: userId,
-                payment_method: 1 // 1-WECHAT_PAY 2-ALIPAY
+                payment_method: paymentMethod
             })
         });
 
+        // 如果是 Stripe 支付，跳转到 Stripe 页面
+        if (paymentMethodValue === 'stripe' && response.payment?.pay_url) {
+            showToast('正在跳转到 Stripe 支付页面...', 'info');
+            window.location.href = response.payment.pay_url;
+            return;
+        }
+
+        // 对于其他支付方式，模拟支付成功
         // 更新订单状态
         const order = state.orders.find(o => o.order_no === orderNo);
         if (order) {
