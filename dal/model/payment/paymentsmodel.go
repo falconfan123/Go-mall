@@ -88,7 +88,8 @@ func (m *defaultPaymentsModel) Count(ctx context.Context) (int64, error) {
 }
 func (m *defaultPaymentsModel) FindOneByOrderId(ctx context.Context, orderID string) (*Payments, error) {
 	// PostgreSQL doesn't support "LIMIT n FOR SHARE", using "LIMIT n"
-	query := fmt.Sprintf("select %s from %s where \"order_id\" = $1 limit 1", paymentsRows, m.table)
+	// 注意：这里实际查询的是 pre_order_id 字段
+	query := fmt.Sprintf("select %s from %s where \"pre_order_id\" = $1 limit 1", paymentsRows, m.table)
 	var resp Payments
 	err := m.conn.QueryRowCtx(ctx, &resp, query, orderID)
 	switch {
