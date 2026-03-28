@@ -29,7 +29,7 @@ type AlipayConfig struct {
 }
 
 type StripeConfig struct {
-	APIKey        string
+	APIKey        string `env:"STRIPE_API_KEY"`
 	SuccessURL    string
 	CancelURL     string
 	WebhookSecret string
