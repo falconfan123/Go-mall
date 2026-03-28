@@ -39,7 +39,7 @@ Alipay:
   ReturnURL: http://127.0.0.1:11111/alipay/return
 
 Stripe:
-  APIKey: "sk_test_你的Stripe密钥"
+  APIKey: ${STRIPE_API_KEY:sk_test_placeholder}
   SuccessURL: "http://localhost:3000/payment/success"
   CancelURL: "http://localhost:3000/payment/cancel"
   WebhookSecret: "whsec_a8b03f35ed1100de63b66e47eec1040a422026b264b92f7dd28681fb98591e07"
