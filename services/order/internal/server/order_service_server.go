@@ -57,3 +57,8 @@ func (s *OrderServiceServer) UpdateOrder2PaymentStatus(ctx context.Context, in *
 	l := logic.NewUpdateOrder2PaymentStatusLogic(ctx, s.svcCtx)
 	return l.UpdateOrder2PaymentStatus(in)
 }
+
+func (s *OrderServiceServer) ListOrders(ctx context.Context, in *order.ListOrdersRequest) (*order.ListOrdersResponse, error) {
+	l := logic.NewListOrdersLogic(ctx, s.svcCtx)
+	return l.ListOrders(in)
+}

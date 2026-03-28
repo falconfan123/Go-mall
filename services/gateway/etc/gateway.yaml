@@ -91,6 +91,15 @@ Upstreams:
   - Grpc:
       Target: 127.0.0.1:10004
     Mappings:
+      - Method: get
+        Path: /douyin/order/list
+        RpcPath: order.OrderService/ListOrders
+      - Method: get
+        Path: /douyin/order/detail
+        RpcPath: order.OrderService/GetOrder
+      - Method: post
+        Path: /douyin/order/create
+        RpcPath: order.OrderService/CreateOrder
       - Method: post
         Path: /api/v1/order/create
         RpcPath: order.OrderService/CreateOrder
