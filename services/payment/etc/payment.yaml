@@ -60,3 +60,9 @@ RabbitMQConfig:
   User: "guest"
   Pass: "guest"
   VHost: "/"
+
+# Prometheus 监控暴露
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9106
+  Path: /metrics

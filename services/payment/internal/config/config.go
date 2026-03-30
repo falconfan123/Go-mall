@@ -16,6 +16,7 @@ type Config struct {
 	Stripe         StripeConfig
 	OrderRpc       zrpc.RpcClientConf
 	RabbitMQConfig config.RabbitMQConfig
+	Prometheus     PrometheusConf
 }
 
 type AlipayConfig struct {
@@ -34,4 +35,10 @@ type StripeConfig struct {
 	CancelURL     string
 	WebhookSecret string
 	WebhookPort   int
+}
+
+type PrometheusConf struct {
+	Host string
+	Port int
+	Path string
 }

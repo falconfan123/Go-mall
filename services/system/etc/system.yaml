@@ -15,3 +15,9 @@ Log:
   Mode: 'console'
   Encoding: "json"
   Path: "./logs/system-rpc"
+
+# Prometheus 监控暴露
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9110
+  Path: /metrics

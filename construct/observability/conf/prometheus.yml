@@ -10,13 +10,130 @@ scrape_configs:
     scrape_interval: 15s
     static_configs:
       - targets: ['localhost:9090']
-  - job_name: 'user-api'  # 新增监控任务
-    scrape_interval: 15s  # 抓取频率与全局一致
-    metrics_path: /metrics  # 默认指标端点（根据实际情况确认）
+
+  # ============ Go-mall 微服务监控 ============
+  # Gateway HTTP 服务
+  - job_name: 'gateway'
+    scrape_interval: 10s
     static_configs:
-#      - http://node01:31000
-      - targets: [ '47.96.42.228:31000' ]  # 对应 DevServer 配置的 Host:Port
+      - targets: ['localhost:8888']
         labels:
           namespace: go-mall
-          service: user-api        # 添加服务标签
-          environment: pro         # 对应 Mode 配置
+          service: gateway
+
+  # 用户服务 (gRPC + metrics on 11000)
+  - job_name: 'users'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:11000']
+        labels:
+          namespace: go-mall
+          service: users-rpc
+
+  # 认证服务 (gRPC + metrics on 9101)
+  - job_name: 'auths'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9101']
+        labels:
+          namespace: go-mall
+          service: auths-rpc
+
+  # 商品服务 (gRPC + metrics on 9102)
+  - job_name: 'product'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9102']
+        labels:
+          namespace: go-mall
+          service: products-rpc
+
+  # 购物车服务 (gRPC + metrics on 9103)
+  - job_name: 'carts'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9103']
+        labels:
+          namespace: go-mall
+          service: carts-rpc
+
+  # 订单服务 (gRPC + metrics on 9104)
+  - job_name: 'order'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9104']
+        labels:
+          namespace: go-mall
+          service: order-rpc
+
+  # 结算服务 (gRPC + metrics on 9105)
+  - job_name: 'checkout'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9105']
+        labels:
+          namespace: go-mall
+          service: checkout-rpc
+
+  # 支付服务 (gRPC + metrics on 9106)
+  - job_name: 'payment'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9106']
+        labels:
+          namespace: go-mall
+          service: payment-rpc
+
+  # 库存服务 (gRPC + metrics on 9107)
+  - job_name: 'inventory'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9107']
+        labels:
+          namespace: go-mall
+          service: inventory-rpc
+
+  # 审计服务 (gRPC + metrics on 9108)
+  - job_name: 'audit'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9108']
+        labels:
+          namespace: go-mall
+          service: audit-rpc
+
+  # 优惠券服务 (gRPC + metrics on 9109)
+  - job_name: 'coupons'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9109']
+        labels:
+          namespace: go-mall
+          service: coupons-rpc
+
+  # 系统服务 (gRPC + metrics on 9110)
+  - job_name: 'system'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9110']
+        labels:
+          namespace: go-mall
+          service: system-rpc
+
+  # 活动服务 (gRPC + metrics on 9111)
+  - job_name: 'activity'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9111']
+        labels:
+          namespace: go-mall
+          service: activity-rpc
+
+  # 管理服务 (gRPC + metrics on 9112)
+  - job_name: 'admin'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9112']
+        labels:
+          namespace: go-mall
+          service: admin-rpc

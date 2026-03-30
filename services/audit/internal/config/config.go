@@ -13,4 +13,11 @@ type Config struct {
 	RabbitMQ       config.RabbitMQConfig
 	PostgresConfig config.PostgresConfig
 	ElasticSearch  config.ElasticSearchConfig
+	Prometheus     PrometheusConf
+}
+
+type PrometheusConf struct {
+	Host string
+	Port int
+	Path string
 }

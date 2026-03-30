@@ -11,13 +11,31 @@ type Config struct {
 	PostgresConfig PostgresConfig
 	RedisConf      redis.RedisConf
 	Consul         consul.Conf
-
-	InventoryRpc zrpc.RpcClientConf
-	CouponsRpc   zrpc.RpcClientConf
-	ProductRpc   zrpc.RpcClientConf
+	CheckoutRpc    zrpc.RpcClientConf
+	CouponRpc      zrpc.RpcClientConf
+	UserRpc        zrpc.RpcClientConf
+	InventoryRpc   zrpc.RpcClientConf
+	ProductRpc     zrpc.RpcClientConf
+	CouponsRpc     zrpc.RpcClientConf
+	RabbitMQConfig RabbitMQConfig
+	Prometheus     PrometheusConf
 }
 
 type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
+}
+
+type RabbitMQConfig struct {
+	Host  string
+	Port  int
+	User  string
+	Pass  string
+	VHost string
+}
+
+type PrometheusConf struct {
+	Host string
+	Port int
+	Path string
 }
