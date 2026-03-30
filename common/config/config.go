@@ -3,7 +3,8 @@ package config
 import "fmt"
 
 type PostgresConfig struct {
-	DataSource string
+	DataSource  string
+	Conntimeout int
 }
 
 type RabbitMQConfig struct {

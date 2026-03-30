@@ -13,6 +13,7 @@ type Config struct {
 	PostgresConfig config.PostgresConfig
 	RedisConf      redis.RedisConf
 	ProductRpc     zrpc.RpcClientConf
+	InventoryRpc   zrpc.RpcClientConf
 	Prometheus     PrometheusConf
 }
 
