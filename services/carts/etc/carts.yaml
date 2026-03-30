@@ -25,6 +25,12 @@ PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
   conntimeout: 5
 
+# Prometheus 监控暴露
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9103
+  Path: /metrics
+
 #PostgresConfig:
 #  datasource: "root:123456@tcp(127.0.0.1:3306)/cart_db?charset=utf8mb4&parseTime=True&loc=Local"
 #  conntimeout: 5

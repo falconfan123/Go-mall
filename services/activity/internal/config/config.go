@@ -8,12 +8,19 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	Consul    consul.Conf
-	RedisConf redis.RedisConf
-	Activity  ActivityConfig
+	Consul     consul.Conf
+	RedisConf  redis.RedisConf
+	Activity   ActivityConfig
+	Prometheus PrometheusConf
 }
 
 type ActivityConfig struct {
 	TokenExpire    int // token 有效期（秒）
 	AdvanceSeconds int // 提前获取 token 的秒数
+}
+
+type PrometheusConf struct {
+	Host string
+	Port int
+	Path string
 }

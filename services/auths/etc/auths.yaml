@@ -35,3 +35,9 @@ DevServer:
   Host: 0.0.0.0
   Port:  11000
   EnablePprof: false
+
+# Prometheus 监控暴露
+Prometheus:
+  Host: 0.0.0.0   # 监控暴露的 IP
+  Port: 9100       # 监控暴露的端口
+  Path: /metrics   # 默认路径

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/falconfan123/Go-mall/common/config"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
@@ -8,16 +9,15 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	Consul    consul.Conf
-	RedisConf redis.RedisConf
-	// Database configuration
-	PostgresConfig PostgresConfig
-	// RPC clients
-	ProductRpc   zrpc.RpcClientConf
-	InventoryRpc zrpc.RpcClientConf
+	Consul         consul.Conf
+	PostgresConfig config.PostgresConfig
+	RedisConf      redis.RedisConf
+	ProductRpc     zrpc.RpcClientConf
+	Prometheus     PrometheusConf
 }
 
-type PostgresConfig struct {
-	DataSource  string
-	ConnTimeout int
+type PrometheusConf struct {
+	Host string
+	Port int
+	Path string
 }

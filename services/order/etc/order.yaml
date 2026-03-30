@@ -56,3 +56,9 @@ RedisConf:
   Host: localhost:6379
   Pass: ""
   Tls: false
+
+# Prometheus 监控暴露
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9104
+  Path: /metrics

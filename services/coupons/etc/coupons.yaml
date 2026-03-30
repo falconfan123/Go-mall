@@ -36,3 +36,9 @@ RedisConf:
 ProductRpc:
   Target: consul://localhost:8500/products.rpc?wait=14s
   NonBlock: true
+
+# Prometheus 监控暴露
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9109
+  Path: /metrics
