@@ -19,7 +19,7 @@ Log:
 # Redis 配置
 RedisConf:
   Host: localhost:6379
-  Pass: ""
+  Pass: jjzzchtt
   Tls: false
 
 # 活动配置
@@ -27,8 +27,3 @@ Activity:
   TokenExpire: 60 # token 有效期（秒）
   AdvanceSeconds: 5 # 提前获取 token 的秒数
 
-# Prometheus 监控暴露
-Prometheus:
-  Host: 0.0.0.0
-  Port: 9111
-  Path: /metrics

@@ -147,6 +147,13 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 	}
 }
 
+// ClearPurchasedRecord 清除用户的购买记录（用于测试或重试）
+func (l *SeckillLogic) ClearPurchasedRecord(userId, activityId int64) error {
+	key := fmt.Sprintf("act_%d_bought", activityId)
+	_, err := l.svcCtx.RedisClient.SremCtx(l.ctx, key, fmt.Sprintf("%d", userId))
+	return err
+}
+
 func (l *SeckillLogic) generateOrderID(userId, productId int64) string {
 	return fmt.Sprintf("SK%d%d%d", time.Now().UnixMilli(), userId, productId)
 }

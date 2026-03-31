@@ -53,3 +53,8 @@ func (s *AdminSeckillServiceServer) SetActivityStock(ctx context.Context, in *pb
 	l := logic.NewSetActivityStockLogic(ctx, s.svcCtx)
 	return l.SetActivityStock(in)
 }
+
+func (s *AdminSeckillServiceServer) ClearSeckillRecord(ctx context.Context, in *pb.ClearSeckillRecordRequest) (*pb.ClearSeckillRecordResponse, error) {
+	l := logic.NewClearSeckillRecordLogic(ctx, s.svcCtx)
+	return l.ClearSeckillRecord(in)
+}
