@@ -74,45 +74,36 @@ func (r *CartRepositoryImpl) GetByUserID(ctx context.Context, userID int64) (*ag
 
 // Save 保存购物车
 func (r *CartRepositoryImpl) Save(ctx context.Context, cart *aggregate.Cart) error {
-	// 1. 先删除用户所有现有购物车项
-	// 注意：这里采用全量覆盖的方式，实际生产环境可以优化为增量更新
+	// 逐项保存购物车项
 	for _, item := range cart.Items {
 		// 检查商品是否已存在
-		_, exists, err := r.cartsModel.CheckCartItemExists(ctx, int32(cart.UserID), int32(item.ProductID))
+		existingID, exists, err := r.cartsModel.CheckCartItemExists(ctx, int32(cart.UserID), int32(item.ProductID))
 		if err != nil {
 			return err
 		}
 
-		if exists {
-			// 更新现有项
-			// 先查询现有记录ID
-			existingID, _, err := r.cartsModel.CheckCartItemExists(ctx, int32(cart.UserID), int32(item.ProductID))
-			if err != nil {
-				return err
-			}
-
-			// 准备更新数据
+		if exists && existingID > 0 {
+			// 更新现有项 - 只更新数量和价格等字段，不更新 id
 			cartData := &cartmodel.Carts{
-				Id: int64(existingID),
 				UserId: sql.NullInt64{
 					Int64: cart.UserID,
 					Valid: true,
 				},
 				ProductId: sql.NullInt64{
 					Int64: item.ProductID,
-					Valid: true,
+					Valid: item.ProductID > 0,
 				},
 				ProductName: sql.NullString{
 					String: item.ProductName,
-					Valid:  true,
+					Valid:  len(item.ProductName) > 0,
 				},
 				ProductImage: sql.NullString{
 					String: item.ProductImage,
-					Valid:  true,
+					Valid:  len(item.ProductImage) > 0,
 				},
 				ProductPrice: sql.NullFloat64{
 					Float64: item.ProductPrice,
-					Valid:   true,
+					Valid:   item.ProductPrice > 0,
 				},
 				Quantity: sql.NullInt64{
 					Int64: int64(item.Quantity.Value()),
@@ -127,6 +118,7 @@ func (r *CartRepositoryImpl) Save(ctx context.Context, cart *aggregate.Cart) err
 				cartData.Checked.Int64 = 1
 			}
 
+			// 使用 UpdateItemQuantity 来更新数量
 			if err := r.cartsModel.Update(ctx, cartData); err != nil {
 				return err
 			}
@@ -139,19 +131,19 @@ func (r *CartRepositoryImpl) Save(ctx context.Context, cart *aggregate.Cart) err
 				},
 				ProductId: sql.NullInt64{
 					Int64: item.ProductID,
-					Valid: true,
+					Valid: item.ProductID > 0,
 				},
 				ProductName: sql.NullString{
 					String: item.ProductName,
-					Valid:  true,
+					Valid:  len(item.ProductName) > 0,
 				},
 				ProductImage: sql.NullString{
 					String: item.ProductImage,
-					Valid:  true,
+					Valid:  len(item.ProductImage) > 0,
 				},
 				ProductPrice: sql.NullFloat64{
 					Float64: item.ProductPrice,
-					Valid:   true,
+					Valid:   item.ProductPrice > 0,
 				},
 				Quantity: sql.NullInt64{
 					Int64: int64(item.Quantity.Value()),
