@@ -13,12 +13,16 @@ const api = axios.create({
 // 请求拦截器 - 自动携带令牌
 api.interceptors.request.use(
   (config) => {
-    const { longToken, shortToken } = useAuthStore.getState();
+    const { longToken, shortToken, user } = useAuthStore.getState();
     if (longToken) {
       config.headers['Long-Token'] = longToken;
     }
     if (shortToken) {
       config.headers['Short-Token'] = shortToken;
+    }
+    // 购物车请求需要 user_id
+    if (user && user.user_id) {
+      config.headers['user_id'] = user.user_id.toString();
     }
     return config;
   },
