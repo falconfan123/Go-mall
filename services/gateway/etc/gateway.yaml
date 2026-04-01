@@ -86,6 +86,9 @@ Upstreams:
       - Method: get
         Path: /api/v1/activity/token
         RpcPath: activity.Activity/Token
+      - Method: get
+        Path: /api/v1/activity/status
+        RpcPath: activity.Activity/CheckSeckillStatus
 
   # ==================== Order 订单服务 (端口 10004) ====================
   - Grpc:

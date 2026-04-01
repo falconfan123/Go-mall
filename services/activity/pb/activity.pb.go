@@ -118,6 +118,103 @@ func (x *TokenResp) GetExpiresAt() int64 {
 	return 0
 }
 
+// 检查用户购买状态
+type CheckStatusReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ActivityId    int64                  `protobuf:"varint,1,opt,name=activity_id,json=activityId,proto3" json:"activity_id,omitempty"` // 活动ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckStatusReq) Reset() {
+	*x = CheckStatusReq{}
+	mi := &file_activity_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckStatusReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckStatusReq) ProtoMessage() {}
+
+func (x *CheckStatusReq) ProtoReflect() protoreflect.Message {
+	mi := &file_activity_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckStatusReq.ProtoReflect.Descriptor instead.
+func (*CheckStatusReq) Descriptor() ([]byte, []int) {
+	return file_activity_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CheckStatusReq) GetActivityId() int64 {
+	if x != nil {
+		return x.ActivityId
+	}
+	return 0
+}
+
+type CheckStatusResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsPurchased   bool                   `protobuf:"varint,1,opt,name=is_purchased,json=isPurchased,proto3" json:"is_purchased,omitempty"` // 是否已购买
+	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`              // 订单ID（如果已购买）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckStatusResp) Reset() {
+	*x = CheckStatusResp{}
+	mi := &file_activity_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckStatusResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckStatusResp) ProtoMessage() {}
+
+func (x *CheckStatusResp) ProtoReflect() protoreflect.Message {
+	mi := &file_activity_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckStatusResp.ProtoReflect.Descriptor instead.
+func (*CheckStatusResp) Descriptor() ([]byte, []int) {
+	return file_activity_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CheckStatusResp) GetIsPurchased() bool {
+	if x != nil {
+		return x.IsPurchased
+	}
+	return false
+}
+
+func (x *CheckStatusResp) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
 var File_activity_proto protoreflect.FileDescriptor
 
 const file_activity_proto_rawDesc = "" +
@@ -129,9 +226,16 @@ const file_activity_proto_rawDesc = "" +
 	"\tTokenResp\x12\x19\n" +
 	"\bpath_key\x18\x01 \x01(\tR\apathKey\x12\x1d\n" +
 	"\n" +
-	"expires_at\x18\x02 \x01(\x03R\texpiresAt2<\n" +
+	"expires_at\x18\x02 \x01(\x03R\texpiresAt\"1\n" +
+	"\x0eCheckStatusReq\x12\x1f\n" +
+	"\vactivity_id\x18\x01 \x01(\x03R\n" +
+	"activityId\"O\n" +
+	"\x0fCheckStatusResp\x12!\n" +
+	"\fis_purchased\x18\x01 \x01(\bR\visPurchased\x12\x19\n" +
+	"\border_id\x18\x02 \x01(\tR\aorderId2\x87\x01\n" +
 	"\bActivity\x120\n" +
-	"\x05Token\x12\x12.activity.TokenReq\x1a\x13.activity.TokenRespB\x06Z\x04./pbb\x06proto3"
+	"\x05Token\x12\x12.activity.TokenReq\x1a\x13.activity.TokenResp\x12I\n" +
+	"\x12CheckSeckillStatus\x12\x18.activity.CheckStatusReq\x1a\x19.activity.CheckStatusRespB\x06Z\x04./pbb\x06proto3"
 
 var (
 	file_activity_proto_rawDescOnce sync.Once
@@ -145,16 +249,20 @@ func file_activity_proto_rawDescGZIP() []byte {
 	return file_activity_proto_rawDescData
 }
 
-var file_activity_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_activity_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_activity_proto_goTypes = []any{
-	(*TokenReq)(nil),  // 0: activity.TokenReq
-	(*TokenResp)(nil), // 1: activity.TokenResp
+	(*TokenReq)(nil),        // 0: activity.TokenReq
+	(*TokenResp)(nil),       // 1: activity.TokenResp
+	(*CheckStatusReq)(nil),  // 2: activity.CheckStatusReq
+	(*CheckStatusResp)(nil), // 3: activity.CheckStatusResp
 }
 var file_activity_proto_depIdxs = []int32{
 	0, // 0: activity.Activity.Token:input_type -> activity.TokenReq
-	1, // 1: activity.Activity.Token:output_type -> activity.TokenResp
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 1: activity.Activity.CheckSeckillStatus:input_type -> activity.CheckStatusReq
+	1, // 2: activity.Activity.Token:output_type -> activity.TokenResp
+	3, // 3: activity.Activity.CheckSeckillStatus:output_type -> activity.CheckStatusResp
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -171,7 +279,7 @@ func file_activity_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_activity_proto_rawDesc), len(file_activity_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

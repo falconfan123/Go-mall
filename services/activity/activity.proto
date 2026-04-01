@@ -14,7 +14,19 @@ message TokenResp {
   int64 expires_at = 2; // 过期时间
 }
 
+// 检查用户购买状态
+message CheckStatusReq {
+  int64 activity_id = 1; // 活动ID
+}
+
+message CheckStatusResp {
+  bool is_purchased = 1;   // 是否已购买
+  string order_id = 2;    // 订单ID（如果已购买）
+}
+
 service Activity {
   // Token 获取下单动态路径
   rpc Token (TokenReq) returns (TokenResp);
+  // CheckSeckillStatus 检查用户购买状态
+  rpc CheckSeckillStatus (CheckStatusReq) returns (CheckStatusResp);
 }

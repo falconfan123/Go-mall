@@ -11,6 +11,7 @@ const API_BASE = {
     // 秒杀系统 API
     systemTime: '/api/v1/system/time',
     activityToken: '/api/v1/activity/token',
+    activityStatus: '/api/v1/activity/status',
     seckill: '/api/v1/order/seckill'
 };
 
@@ -433,7 +434,7 @@ function startCountdown() {
     }, 1000);
 }
 
-// 加载秒杀商品
+// 加载秒杀商品并检查购买状态
 async function loadFlashProducts() {
     const flashProductList = document.getElementById('flashProductList');
 
@@ -445,13 +446,63 @@ async function loadFlashProducts() {
         { id: 4, name: 'AirPods Pro 2', description: '最新款降噪耳机', price: 1899, flashPrice: 1499, stock: 100, picture: '🎧' }
     ];
 
+    // 如果用户已登录，检查购买状态
+    if (state.longToken) {
+        await loadSeckillStatus(demoFlashProducts);
+    }
+
     renderFlashProducts(demoFlashProducts);
+}
+
+// 批量检查用户购买状态
+async function loadSeckillStatus(products) {
+    if (!state.longToken) return;
+
+    const productIds = products.map(p => p.id);
+
+    try {
+        const response = await fetch(`${API_BASE.activityStatus}?activity_id=1`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${state.longToken}`
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // 将购买状态添加到商品数据中
+            products.forEach(product => {
+                product.isPurchased = data.is_purchased || false;
+            });
+        }
+    } catch (error) {
+        console.error('检查购买状态失败:', error);
+    }
 }
 
 // 渲染秒杀商品列表
 function renderFlashProducts(products) {
     const flashProductList = document.getElementById('flashProductList');
-    flashProductList.innerHTML = products.map(product => `
+    flashProductList.innerHTML = products.map(product => {
+        // 确定按钮状态
+        let buttonText = '即将开始';
+        let buttonClass = 'flash-btn';
+        let isDisabled = '';
+
+        if (product.isPurchased) {
+            buttonText = '查看订单';
+            buttonClass = 'flash-btn btn-disabled';
+            isDisabled = 'disabled';
+        } else if (product.stock <= 0) {
+            buttonText = '已售罄';
+            buttonClass = 'flash-btn btn-disabled';
+            isDisabled = 'disabled';
+        } else {
+            buttonText = '立即抢购';
+            buttonClass = 'flash-btn';
+        }
+
+        return `
         <div class="flash-product-card">
             <div class="flash-product-image">
                 <span class="flash-badge">秒杀</span>
@@ -468,13 +519,13 @@ function renderFlashProducts(products) {
                     库存: <span class="stock-number">${product.stock}</span> 件
                 </div>
                 <div class="flash-action">
-                    <button class="flash-btn" data-product-id="${product.id}" onclick="handleFlashBuy(${product.id})" ${product.stock <= 0 ? 'disabled' : ''}>
-                        ${product.stock > 0 ? '即将开始' : '已售罄'}
+                    <button class="${buttonClass}" data-product-id="${product.id}" onclick="handleFlashBuy(${product.id})" ${isDisabled}>
+                        ${buttonText}
                     </button>
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // 处理秒杀购买

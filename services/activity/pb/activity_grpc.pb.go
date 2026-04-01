@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Activity_Token_FullMethodName = "/activity.Activity/Token"
+	Activity_Token_FullMethodName              = "/activity.Activity/Token"
+	Activity_CheckSeckillStatus_FullMethodName = "/activity.Activity/CheckSeckillStatus"
 )
 
 // ActivityClient is the client API for Activity service.
@@ -28,6 +29,8 @@ const (
 type ActivityClient interface {
 	// Token 获取下单动态路径
 	Token(ctx context.Context, in *TokenReq, opts ...grpc.CallOption) (*TokenResp, error)
+	// CheckSeckillStatus 检查用户购买状态
+	CheckSeckillStatus(ctx context.Context, in *CheckStatusReq, opts ...grpc.CallOption) (*CheckStatusResp, error)
 }
 
 type activityClient struct {
@@ -48,12 +51,24 @@ func (c *activityClient) Token(ctx context.Context, in *TokenReq, opts ...grpc.C
 	return out, nil
 }
 
+func (c *activityClient) CheckSeckillStatus(ctx context.Context, in *CheckStatusReq, opts ...grpc.CallOption) (*CheckStatusResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckStatusResp)
+	err := c.cc.Invoke(ctx, Activity_CheckSeckillStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ActivityServer is the server API for Activity service.
 // All implementations must embed UnimplementedActivityServer
 // for forward compatibility.
 type ActivityServer interface {
 	// Token 获取下单动态路径
 	Token(context.Context, *TokenReq) (*TokenResp, error)
+	// CheckSeckillStatus 检查用户购买状态
+	CheckSeckillStatus(context.Context, *CheckStatusReq) (*CheckStatusResp, error)
 	mustEmbedUnimplementedActivityServer()
 }
 
@@ -66,6 +81,9 @@ type UnimplementedActivityServer struct{}
 
 func (UnimplementedActivityServer) Token(context.Context, *TokenReq) (*TokenResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method Token not implemented")
+}
+func (UnimplementedActivityServer) CheckSeckillStatus(context.Context, *CheckStatusReq) (*CheckStatusResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method CheckSeckillStatus not implemented")
 }
 func (UnimplementedActivityServer) mustEmbedUnimplementedActivityServer() {}
 func (UnimplementedActivityServer) testEmbeddedByValue()                  {}
@@ -106,6 +124,24 @@ func _Activity_Token_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Activity_CheckSeckillStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ActivityServer).CheckSeckillStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Activity_CheckSeckillStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ActivityServer).CheckSeckillStatus(ctx, req.(*CheckStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Activity_ServiceDesc is the grpc.ServiceDesc for Activity service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -116,6 +152,10 @@ var Activity_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Token",
 			Handler:    _Activity_Token_Handler,
+		},
+		{
+			MethodName: "CheckSeckillStatus",
+			Handler:    _Activity_CheckSeckillStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -31,6 +31,14 @@ func (l *TokenLogic) Token(in *pb.TokenReq, userId int64) (*pb.TokenResp, error)
 	activityId := in.ActivityId
 	salt := "seckill_salt_2026"
 
+	// 检查用户是否已购买
+	key := fmt.Sprintf("act_%d_bought", activityId)
+	isPurchased, err := l.svcCtx.Redis.Sismember(key, fmt.Sprintf("%d", userId))
+	if err == nil && isPurchased {
+		logx.Errorf("user %d already purchased activity %d", userId, activityId)
+		return nil, fmt.Errorf("USER_ALREADY_PURCHASED")
+	}
+
 	// 生成 path_key: md5(userId + activityId + salt)
 	raw := fmt.Sprintf("%d_%d_%s", userId, activityId, salt)
 	hash := md5.Sum([]byte(raw))
@@ -60,9 +68,9 @@ func (l *TokenLogic) Token(in *pb.TokenReq, userId int64) (*pb.TokenResp, error)
 	}
 
 	// 存储 path_key 到 Redis，有效期 1 分钟
-	key := fmt.Sprintf("act_%d_path_%d", activityId, userId)
+	pathKeyRedis := fmt.Sprintf("act_%d_path_%d", activityId, userId)
 	expire := l.svcCtx.Config.Activity.TokenExpire
-	err = l.svcCtx.Redis.Setex(key, pathKey, expire)
+	err = l.svcCtx.Redis.Setex(pathKeyRedis, pathKey, expire)
 	if err != nil {
 		logx.Errorf("failed to set path_key: %v", err)
 		return nil, err
