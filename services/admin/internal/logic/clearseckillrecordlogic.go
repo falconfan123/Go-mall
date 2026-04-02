@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	admin "github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -25,11 +25,11 @@ func NewClearSeckillRecordLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 // ClearSeckillRecord 清除秒杀购买记录
-func (l *ClearSeckillRecordLogic) ClearSeckillRecord(in *admin.ClearSeckillRecordRequest) (*admin.ClearSeckillRecordResponse, error) {
+func (l *ClearSeckillRecordLogic) ClearSeckillRecord(in *adminpb.ClearSeckillRecordRequest) (*adminpb.ClearSeckillRecordResponse, error) {
 	activityId := in.ActivityId
 
 	if activityId <= 0 {
-		return &admin.ClearSeckillRecordResponse{
+		return &adminpb.ClearSeckillRecordResponse{
 			StatusCode: 1,
 			StatusMsg:  "无效的活动ID",
 		}, nil
@@ -44,7 +44,7 @@ func (l *ClearSeckillRecordLogic) ClearSeckillRecord(in *admin.ClearSeckillRecor
 		removed, err := l.svcCtx.Redis.SremCtx(l.ctx, key, fmt.Sprintf("%d", in.UserId))
 		if err != nil {
 			logx.Errorf("failed to clear seckill record for user %d: %v", in.UserId, err)
-			return &admin.ClearSeckillRecordResponse{
+			return &adminpb.ClearSeckillRecordResponse{
 				StatusCode: 1,
 				StatusMsg:  "清除记录失败",
 			}, nil
@@ -65,7 +65,7 @@ func (l *ClearSeckillRecordLogic) ClearSeckillRecord(in *admin.ClearSeckillRecor
 			_, err = l.svcCtx.Redis.DelCtx(l.ctx, key)
 			if err != nil {
 				logx.Errorf("failed to clear all seckill records for activity %d: %v", activityId, err)
-				return &admin.ClearSeckillRecordResponse{
+				return &adminpb.ClearSeckillRecordResponse{
 					StatusCode: 1,
 					StatusMsg:  "清除记录失败",
 				}, nil
@@ -82,7 +82,7 @@ func (l *ClearSeckillRecordLogic) ClearSeckillRecord(in *admin.ClearSeckillRecor
 		logx.Infof("reset stock for activity %d", activityId)
 	}
 
-	return &admin.ClearSeckillRecordResponse{
+	return &adminpb.ClearSeckillRecordResponse{
 		StatusCode:   0,
 		StatusMsg:    "success",
 		ClearedCount: clearedCount,

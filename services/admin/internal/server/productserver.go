@@ -5,12 +5,12 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/logic"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 )
 
 type AdminProductServiceServer struct {
 	svcCtx *svc.ServiceContext
-	pb.UnimplementedAdminProductServiceServer
+	adminpb.UnimplementedAdminProductServiceServer
 }
 
 func NewAdminProductServiceServer(svcCtx *svc.ServiceContext) *AdminProductServiceServer {
@@ -19,27 +19,27 @@ func NewAdminProductServiceServer(svcCtx *svc.ServiceContext) *AdminProductServi
 	}
 }
 
-func (s *AdminProductServiceServer) CreateProduct(ctx context.Context, in *pb.CreateProductRequest) (*pb.CreateProductResponse, error) {
+func (s *AdminProductServiceServer) CreateProduct(ctx context.Context, in *adminpb.CreateProductRequest) (*adminpb.CreateProductResponse, error) {
 	l := logic.NewCreateProductLogic(ctx, s.svcCtx)
 	return l.CreateProduct(in)
 }
 
-func (s *AdminProductServiceServer) UpdateProduct(ctx context.Context, in *pb.UpdateProductRequest) (*pb.UpdateProductResponse, error) {
+func (s *AdminProductServiceServer) UpdateProduct(ctx context.Context, in *adminpb.UpdateProductRequest) (*adminpb.UpdateProductResponse, error) {
 	l := logic.NewUpdateProductLogic(ctx, s.svcCtx)
 	return l.UpdateProduct(in)
 }
 
-func (s *AdminProductServiceServer) DeleteProduct(ctx context.Context, in *pb.DeleteProductRequest) (*pb.DeleteProductResponse, error) {
+func (s *AdminProductServiceServer) DeleteProduct(ctx context.Context, in *adminpb.DeleteProductRequest) (*adminpb.DeleteProductResponse, error) {
 	l := logic.NewDeleteProductLogic(ctx, s.svcCtx)
 	return l.DeleteProduct(in)
 }
 
-func (s *AdminProductServiceServer) GetProduct(ctx context.Context, in *pb.GetProductRequest) (*pb.GetProductResponse, error) {
+func (s *AdminProductServiceServer) GetProduct(ctx context.Context, in *adminpb.GetProductRequest) (*adminpb.GetProductResponse, error) {
 	l := logic.NewGetProductLogic(ctx, s.svcCtx)
 	return l.GetProduct(in)
 }
 
-func (s *AdminProductServiceServer) ListProducts(ctx context.Context, in *pb.ListProductsRequest) (*pb.ListProductsResponse, error) {
+func (s *AdminProductServiceServer) ListProducts(ctx context.Context, in *adminpb.ListProductsRequest) (*adminpb.ListProductsResponse, error) {
 	l := logic.NewListProductsLogic(ctx, s.svcCtx)
 	return l.ListProducts(in)
 }

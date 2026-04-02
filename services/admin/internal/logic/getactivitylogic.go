@@ -5,7 +5,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 )
 
 type GetActivityLogic struct {
@@ -20,27 +20,27 @@ func NewGetActivityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAc
 	}
 }
 
-func (l *GetActivityLogic) GetActivity(in *pb.GetActivityRequest) (*pb.GetActivityResponse, error) {
+func (l *GetActivityLogic) GetActivity(in *adminpb.GetActivityRequest) (*adminpb.GetActivityResponse, error) {
 	activity, err := db.GetActivityByID(l.svcCtx.DB, in.Id)
 	if err != nil {
-		return &pb.GetActivityResponse{
+		return &adminpb.GetActivityResponse{
 			StatusCode: 404,
 			StatusMsg:  "activity not found",
 		}, nil
 	}
 
-	return &pb.GetActivityResponse{
+	return &adminpb.GetActivityResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 		Activity:   convertActivity(activity),
 	}, nil
 }
 
-func convertActivity(a *db.Activity) *pb.Activity {
+func convertActivity(a *db.Activity) *adminpb.Activity {
 	if a == nil {
 		return nil
 	}
-	return &pb.Activity{
+	return &adminpb.Activity{
 		Id:           a.ID,
 		Name:         a.Name,
 		ProductId:    a.ProductID,

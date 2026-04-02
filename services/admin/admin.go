@@ -8,7 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/server"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -33,10 +33,10 @@ func main() {
 	}
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		pb.RegisterAdminProductServiceServer(grpcServer, server.NewAdminProductServiceServer(ctx))
-		pb.RegisterAdminCategoryServiceServer(grpcServer, server.NewAdminCategoryServiceServer(ctx))
-		pb.RegisterAdminSeckillServiceServer(grpcServer, server.NewAdminSeckillServiceServer(ctx))
-		pb.RegisterAdminInventoryServiceServer(grpcServer, server.NewAdminInventoryServiceServer(ctx))
+		adminpb.RegisterAdminProductServiceServer(grpcServer, server.NewAdminProductServiceServer(ctx))
+		adminpb.RegisterAdminCategoryServiceServer(grpcServer, server.NewAdminCategoryServiceServer(ctx))
+		adminpb.RegisterAdminSeckillServiceServer(grpcServer, server.NewAdminSeckillServiceServer(ctx))
+		adminpb.RegisterAdminInventoryServiceServer(grpcServer, server.NewAdminInventoryServiceServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
