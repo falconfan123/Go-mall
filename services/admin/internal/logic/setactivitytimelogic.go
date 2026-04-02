@@ -8,7 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -24,10 +24,10 @@ func NewSetActivityTimeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *S
 	}
 }
 
-func (l *SetActivityTimeLogic) SetActivityTime(in *pb.SetActivityTimeRequest) (*pb.SetActivityTimeResponse, error) {
+func (l *SetActivityTimeLogic) SetActivityTime(in *adminpb.SetActivityTimeRequest) (*adminpb.SetActivityTimeResponse, error) {
 	activity, err := db.GetActivityByID(l.svcCtx.DB, in.Id)
 	if err != nil {
-		return &pb.SetActivityTimeResponse{
+		return &adminpb.SetActivityTimeResponse{
 			StatusCode: 404,
 			StatusMsg:  "activity not found",
 		}, nil
@@ -37,7 +37,7 @@ func (l *SetActivityTimeLogic) SetActivityTime(in *pb.SetActivityTimeRequest) (*
 	if err != nil {
 		startTime, err = time.Parse("2006-01-02 15:04:05", in.StartTime)
 		if err != nil {
-			return &pb.SetActivityTimeResponse{
+			return &adminpb.SetActivityTimeResponse{
 				StatusCode: 400,
 				StatusMsg:  "invalid start time format",
 			}, nil
@@ -48,7 +48,7 @@ func (l *SetActivityTimeLogic) SetActivityTime(in *pb.SetActivityTimeRequest) (*
 	if err != nil {
 		endTime, err = time.Parse("2006-01-02 15:04:05", in.EndTime)
 		if err != nil {
-			return &pb.SetActivityTimeResponse{
+			return &adminpb.SetActivityTimeResponse{
 				StatusCode: 400,
 				StatusMsg:  "invalid end time format",
 			}, nil
@@ -70,7 +70,7 @@ func (l *SetActivityTimeLogic) SetActivityTime(in *pb.SetActivityTimeRequest) (*
 
 	if err := activity.Update(l.svcCtx.DB); err != nil {
 		logx.Errorf("failed to update activity time: %v", err)
-		return &pb.SetActivityTimeResponse{
+		return &adminpb.SetActivityTimeResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to update activity time: " + err.Error(),
 		}, nil
@@ -89,7 +89,7 @@ func (l *SetActivityTimeLogic) SetActivityTime(in *pb.SetActivityTimeRequest) (*
 	logx.Infof("updated activity %d time in Redis: start=%d, ttl=%d seconds",
 		activity.ID, activity.StartTime.UnixMilli(), int(expireSeconds))
 
-	return &pb.SetActivityTimeResponse{
+	return &adminpb.SetActivityTimeResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 	}, nil

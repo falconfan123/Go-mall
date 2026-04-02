@@ -4,7 +4,7 @@
 // - protoc             v6.33.1
 // source: admin.proto
 
-package pb
+package admin
 
 import (
 	context "context"
@@ -489,13 +489,14 @@ var AdminCategoryService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	AdminSeckillService_CreateActivity_FullMethodName   = "/admin.AdminSeckillService/CreateActivity"
-	AdminSeckillService_UpdateActivity_FullMethodName   = "/admin.AdminSeckillService/UpdateActivity"
-	AdminSeckillService_DeleteActivity_FullMethodName   = "/admin.AdminSeckillService/DeleteActivity"
-	AdminSeckillService_GetActivity_FullMethodName      = "/admin.AdminSeckillService/GetActivity"
-	AdminSeckillService_ListActivities_FullMethodName   = "/admin.AdminSeckillService/ListActivities"
-	AdminSeckillService_SetActivityTime_FullMethodName  = "/admin.AdminSeckillService/SetActivityTime"
-	AdminSeckillService_SetActivityStock_FullMethodName = "/admin.AdminSeckillService/SetActivityStock"
+	AdminSeckillService_CreateActivity_FullMethodName     = "/admin.AdminSeckillService/CreateActivity"
+	AdminSeckillService_UpdateActivity_FullMethodName     = "/admin.AdminSeckillService/UpdateActivity"
+	AdminSeckillService_DeleteActivity_FullMethodName     = "/admin.AdminSeckillService/DeleteActivity"
+	AdminSeckillService_GetActivity_FullMethodName        = "/admin.AdminSeckillService/GetActivity"
+	AdminSeckillService_ListActivities_FullMethodName     = "/admin.AdminSeckillService/ListActivities"
+	AdminSeckillService_SetActivityTime_FullMethodName    = "/admin.AdminSeckillService/SetActivityTime"
+	AdminSeckillService_SetActivityStock_FullMethodName   = "/admin.AdminSeckillService/SetActivityStock"
+	AdminSeckillService_ClearSeckillRecord_FullMethodName = "/admin.AdminSeckillService/ClearSeckillRecord"
 )
 
 // AdminSeckillServiceClient is the client API for AdminSeckillService service.
@@ -509,6 +510,8 @@ type AdminSeckillServiceClient interface {
 	ListActivities(ctx context.Context, in *ListActivitiesRequest, opts ...grpc.CallOption) (*ListActivitiesResponse, error)
 	SetActivityTime(ctx context.Context, in *SetActivityTimeRequest, opts ...grpc.CallOption) (*SetActivityTimeResponse, error)
 	SetActivityStock(ctx context.Context, in *SetActivityStockRequest, opts ...grpc.CallOption) (*SetActivityStockResponse, error)
+	// 清除秒杀购买记录（用于测试或重置活动）
+	ClearSeckillRecord(ctx context.Context, in *ClearSeckillRecordRequest, opts ...grpc.CallOption) (*ClearSeckillRecordResponse, error)
 }
 
 type adminSeckillServiceClient struct {
@@ -589,6 +592,16 @@ func (c *adminSeckillServiceClient) SetActivityStock(ctx context.Context, in *Se
 	return out, nil
 }
 
+func (c *adminSeckillServiceClient) ClearSeckillRecord(ctx context.Context, in *ClearSeckillRecordRequest, opts ...grpc.CallOption) (*ClearSeckillRecordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClearSeckillRecordResponse)
+	err := c.cc.Invoke(ctx, AdminSeckillService_ClearSeckillRecord_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminSeckillServiceServer is the server API for AdminSeckillService service.
 // All implementations must embed UnimplementedAdminSeckillServiceServer
 // for forward compatibility.
@@ -600,6 +613,8 @@ type AdminSeckillServiceServer interface {
 	ListActivities(context.Context, *ListActivitiesRequest) (*ListActivitiesResponse, error)
 	SetActivityTime(context.Context, *SetActivityTimeRequest) (*SetActivityTimeResponse, error)
 	SetActivityStock(context.Context, *SetActivityStockRequest) (*SetActivityStockResponse, error)
+	// 清除秒杀购买记录（用于测试或重置活动）
+	ClearSeckillRecord(context.Context, *ClearSeckillRecordRequest) (*ClearSeckillRecordResponse, error)
 	mustEmbedUnimplementedAdminSeckillServiceServer()
 }
 
@@ -630,6 +645,9 @@ func (UnimplementedAdminSeckillServiceServer) SetActivityTime(context.Context, *
 }
 func (UnimplementedAdminSeckillServiceServer) SetActivityStock(context.Context, *SetActivityStockRequest) (*SetActivityStockResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetActivityStock not implemented")
+}
+func (UnimplementedAdminSeckillServiceServer) ClearSeckillRecord(context.Context, *ClearSeckillRecordRequest) (*ClearSeckillRecordResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ClearSeckillRecord not implemented")
 }
 func (UnimplementedAdminSeckillServiceServer) mustEmbedUnimplementedAdminSeckillServiceServer() {}
 func (UnimplementedAdminSeckillServiceServer) testEmbeddedByValue()                             {}
@@ -778,6 +796,24 @@ func _AdminSeckillService_SetActivityStock_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminSeckillService_ClearSeckillRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearSeckillRecordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminSeckillServiceServer).ClearSeckillRecord(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminSeckillService_ClearSeckillRecord_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminSeckillServiceServer).ClearSeckillRecord(ctx, req.(*ClearSeckillRecordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminSeckillService_ServiceDesc is the grpc.ServiceDesc for AdminSeckillService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -812,6 +848,10 @@ var AdminSeckillService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetActivityStock",
 			Handler:    _AdminSeckillService_SetActivityStock_Handler,
+		},
+		{
+			MethodName: "ClearSeckillRecord",
+			Handler:    _AdminSeckillService_ClearSeckillRecord_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -8,7 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -24,13 +24,13 @@ func NewCreateActivityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 	}
 }
 
-func (l *CreateActivityLogic) CreateActivity(in *pb.CreateActivityRequest) (*pb.CreateActivityResponse, error) {
+func (l *CreateActivityLogic) CreateActivity(in *adminpb.CreateActivityRequest) (*adminpb.CreateActivityResponse, error) {
 	// Parse time
 	startTime, err := time.Parse(time.RFC3339, in.StartTime)
 	if err != nil {
 		startTime, err = time.Parse("2006-01-02 15:04:05", in.StartTime)
 		if err != nil {
-			return &pb.CreateActivityResponse{
+			return &adminpb.CreateActivityResponse{
 				StatusCode: 400,
 				StatusMsg:  "invalid start time format",
 			}, nil
@@ -41,7 +41,7 @@ func (l *CreateActivityLogic) CreateActivity(in *pb.CreateActivityRequest) (*pb.
 	if err != nil {
 		endTime, err = time.Parse("2006-01-02 15:04:05", in.EndTime)
 		if err != nil {
-			return &pb.CreateActivityResponse{
+			return &adminpb.CreateActivityResponse{
 				StatusCode: 400,
 				StatusMsg:  "invalid end time format",
 			}, nil
@@ -69,7 +69,7 @@ func (l *CreateActivityLogic) CreateActivity(in *pb.CreateActivityRequest) (*pb.
 
 	if err := activity.Create(l.svcCtx.DB); err != nil {
 		logx.Errorf("failed to create activity: %v", err)
-		return &pb.CreateActivityResponse{
+		return &adminpb.CreateActivityResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to create activity: " + err.Error(),
 		}, nil
@@ -78,7 +78,7 @@ func (l *CreateActivityLogic) CreateActivity(in *pb.CreateActivityRequest) (*pb.
 	// Sync to Redis
 	l.syncActivityToRedis(activity)
 
-	return &pb.CreateActivityResponse{
+	return &adminpb.CreateActivityResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 		ActivityId: activity.ID,

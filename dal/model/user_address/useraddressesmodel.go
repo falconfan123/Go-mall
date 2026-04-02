@@ -50,7 +50,7 @@ func (m *customUserAddressesModel) WithSession(session sqlx.Session) UserAddress
 
 func (m *customUserAddressesModel) FindAllByUserId(ctx context.Context, userId int32) ([]*UserAddresses, error) {
 	var resp []*UserAddresses
-	query := fmt.Sprintf("SELECT "+userAddressesRows+" FROM "+m.table+" WHERE user_id = $1")
+	query := fmt.Sprintf("SELECT " + userAddressesRows + " FROM " + m.table + " WHERE user_id = $1")
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId)
 
 	switch {

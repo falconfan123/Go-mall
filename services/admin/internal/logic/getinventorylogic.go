@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
 )
 
@@ -20,20 +20,20 @@ func NewGetInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetI
 	}
 }
 
-func (l *GetInventoryLogic) GetInventory(in *pb.GetInventoryRequest) (*pb.GetInventoryResponse, error) {
+func (l *GetInventoryLogic) GetInventory(in *adminpb.GetInventoryRequest) (*adminpb.GetInventoryResponse, error) {
 	client := inventory.NewInventoryClient(l.svcCtx.InventoryRpc.Conn())
 
 	resp, err := client.GetInventory(l.ctx, &inventory.GetInventoryReq{
 		ProductId: int32(in.ProductId),
 	})
 	if err != nil {
-		return &pb.GetInventoryResponse{
+		return &adminpb.GetInventoryResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to get inventory: " + err.Error(),
 		}, nil
 	}
 
-	return &pb.GetInventoryResponse{
+	return &adminpb.GetInventoryResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 		ProductId:  in.ProductId,

@@ -4,7 +4,7 @@
 // 	protoc        v6.33.1
 // source: admin.proto
 
-package pb
+package admin
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -2477,6 +2477,127 @@ func (x *GetInventoryResponse) GetReserved() int64 {
 	return 0
 }
 
+// 清除秒杀购买记录
+type ClearSeckillRecordRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ActivityId    int64                  `protobuf:"varint,1,opt,name=activity_id,json=activityId,proto3" json:"activity_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`             // 清除指定用户的记录，如果为0则清除所有
+	ClearStock    bool                   `protobuf:"varint,3,opt,name=clear_stock,json=clearStock,proto3" json:"clear_stock,omitempty"` // 是否同时重置库存
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearSeckillRecordRequest) Reset() {
+	*x = ClearSeckillRecordRequest{}
+	mi := &file_admin_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearSeckillRecordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearSeckillRecordRequest) ProtoMessage() {}
+
+func (x *ClearSeckillRecordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_admin_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClearSeckillRecordRequest.ProtoReflect.Descriptor instead.
+func (*ClearSeckillRecordRequest) Descriptor() ([]byte, []int) {
+	return file_admin_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *ClearSeckillRecordRequest) GetActivityId() int64 {
+	if x != nil {
+		return x.ActivityId
+	}
+	return 0
+}
+
+func (x *ClearSeckillRecordRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ClearSeckillRecordRequest) GetClearStock() bool {
+	if x != nil {
+		return x.ClearStock
+	}
+	return false
+}
+
+type ClearSeckillRecordResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StatusCode    uint32                 `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
+	StatusMsg     string                 `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`
+	ClearedCount  int64                  `protobuf:"varint,3,opt,name=cleared_count,json=clearedCount,proto3" json:"cleared_count,omitempty"` // 清除的记录数
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearSeckillRecordResponse) Reset() {
+	*x = ClearSeckillRecordResponse{}
+	mi := &file_admin_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearSeckillRecordResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearSeckillRecordResponse) ProtoMessage() {}
+
+func (x *ClearSeckillRecordResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_admin_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClearSeckillRecordResponse.ProtoReflect.Descriptor instead.
+func (*ClearSeckillRecordResponse) Descriptor() ([]byte, []int) {
+	return file_admin_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *ClearSeckillRecordResponse) GetStatusCode() uint32 {
+	if x != nil {
+		return x.StatusCode
+	}
+	return 0
+}
+
+func (x *ClearSeckillRecordResponse) GetStatusMsg() string {
+	if x != nil {
+		return x.StatusMsg
+	}
+	return ""
+}
+
+func (x *ClearSeckillRecordResponse) GetClearedCount() int64 {
+	if x != nil {
+		return x.ClearedCount
+	}
+	return 0
+}
+
 var File_admin_proto protoreflect.FileDescriptor
 
 const file_admin_proto_rawDesc = "" +
@@ -2719,7 +2840,19 @@ const file_admin_proto_rawDesc = "" +
 	"\n" +
 	"product_id\x18\x03 \x01(\x03R\tproductId\x12\x14\n" +
 	"\x05stock\x18\x04 \x01(\x03R\x05stock\x12\x1a\n" +
-	"\breserved\x18\x05 \x01(\x03R\breserved2\x85\x03\n" +
+	"\breserved\x18\x05 \x01(\x03R\breserved\"v\n" +
+	"\x19ClearSeckillRecordRequest\x12\x1f\n" +
+	"\vactivity_id\x18\x01 \x01(\x03R\n" +
+	"activityId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1f\n" +
+	"\vclear_stock\x18\x03 \x01(\bR\n" +
+	"clearStock\"\x81\x01\n" +
+	"\x1aClearSeckillRecordResponse\x12\x1f\n" +
+	"\vstatus_code\x18\x01 \x01(\rR\n" +
+	"statusCode\x12\x1d\n" +
+	"\n" +
+	"status_msg\x18\x02 \x01(\tR\tstatusMsg\x12#\n" +
+	"\rcleared_count\x18\x03 \x01(\x03R\fclearedCount2\x85\x03\n" +
 	"\x13AdminProductService\x12J\n" +
 	"\rCreateProduct\x12\x1b.admin.CreateProductRequest\x1a\x1c.admin.CreateProductResponse\x12J\n" +
 	"\rUpdateProduct\x12\x1b.admin.UpdateProductRequest\x1a\x1c.admin.UpdateProductResponse\x12J\n" +
@@ -2731,7 +2864,7 @@ const file_admin_proto_rawDesc = "" +
 	"\x0eCreateCategory\x12\x1c.admin.CreateCategoryRequest\x1a\x1d.admin.CreateCategoryResponse\x12M\n" +
 	"\x0eUpdateCategory\x12\x1c.admin.UpdateCategoryRequest\x1a\x1d.admin.UpdateCategoryResponse\x12M\n" +
 	"\x0eDeleteCategory\x12\x1c.admin.DeleteCategoryRequest\x1a\x1d.admin.DeleteCategoryResponse\x12M\n" +
-	"\x0eListCategories\x12\x1c.admin.ListCategoriesRequest\x1a\x1d.admin.ListCategoriesResponse2\xbe\x04\n" +
+	"\x0eListCategories\x12\x1c.admin.ListCategoriesRequest\x1a\x1d.admin.ListCategoriesResponse2\x99\x05\n" +
 	"\x13AdminSeckillService\x12M\n" +
 	"\x0eCreateActivity\x12\x1c.admin.CreateActivityRequest\x1a\x1d.admin.CreateActivityResponse\x12M\n" +
 	"\x0eUpdateActivity\x12\x1c.admin.UpdateActivityRequest\x1a\x1d.admin.UpdateActivityResponse\x12M\n" +
@@ -2739,10 +2872,11 @@ const file_admin_proto_rawDesc = "" +
 	"\vGetActivity\x12\x19.admin.GetActivityRequest\x1a\x1a.admin.GetActivityResponse\x12M\n" +
 	"\x0eListActivities\x12\x1c.admin.ListActivitiesRequest\x1a\x1d.admin.ListActivitiesResponse\x12P\n" +
 	"\x0fSetActivityTime\x12\x1d.admin.SetActivityTimeRequest\x1a\x1e.admin.SetActivityTimeResponse\x12S\n" +
-	"\x10SetActivityStock\x12\x1e.admin.SetActivityStockRequest\x1a\x1f.admin.SetActivityStockResponse2\xb2\x01\n" +
+	"\x10SetActivityStock\x12\x1e.admin.SetActivityStockRequest\x1a\x1f.admin.SetActivityStockResponse\x12Y\n" +
+	"\x12ClearSeckillRecord\x12 .admin.ClearSeckillRecordRequest\x1a!.admin.ClearSeckillRecordResponse2\xb2\x01\n" +
 	"\x15AdminInventoryService\x12P\n" +
 	"\x0fAdjustInventory\x12\x1d.admin.AdjustInventoryRequest\x1a\x1e.admin.AdjustInventoryResponse\x12G\n" +
-	"\fGetInventory\x12\x1a.admin.GetInventoryRequest\x1a\x1b.admin.GetInventoryResponseB3Z1github.com/falconfan123/Go-mall/services/admin/pbb\x06proto3"
+	"\fGetInventory\x12\x1a.admin.GetInventoryRequest\x1a\x1b.admin.GetInventoryResponseB\tZ\a./adminb\x06proto3"
 
 var (
 	file_admin_proto_rawDescOnce sync.Once
@@ -2756,47 +2890,49 @@ func file_admin_proto_rawDescGZIP() []byte {
 	return file_admin_proto_rawDescData
 }
 
-var file_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_admin_proto_goTypes = []any{
-	(*CreateProductRequest)(nil),     // 0: admin.CreateProductRequest
-	(*CreateProductResponse)(nil),    // 1: admin.CreateProductResponse
-	(*UpdateProductRequest)(nil),     // 2: admin.UpdateProductRequest
-	(*UpdateProductResponse)(nil),    // 3: admin.UpdateProductResponse
-	(*DeleteProductRequest)(nil),     // 4: admin.DeleteProductRequest
-	(*DeleteProductResponse)(nil),    // 5: admin.DeleteProductResponse
-	(*GetProductRequest)(nil),        // 6: admin.GetProductRequest
-	(*GetProductResponse)(nil),       // 7: admin.GetProductResponse
-	(*ListProductsRequest)(nil),      // 8: admin.ListProductsRequest
-	(*ListProductsResponse)(nil),     // 9: admin.ListProductsResponse
-	(*Product)(nil),                  // 10: admin.Product
-	(*CreateCategoryRequest)(nil),    // 11: admin.CreateCategoryRequest
-	(*CreateCategoryResponse)(nil),   // 12: admin.CreateCategoryResponse
-	(*UpdateCategoryRequest)(nil),    // 13: admin.UpdateCategoryRequest
-	(*UpdateCategoryResponse)(nil),   // 14: admin.UpdateCategoryResponse
-	(*DeleteCategoryRequest)(nil),    // 15: admin.DeleteCategoryRequest
-	(*DeleteCategoryResponse)(nil),   // 16: admin.DeleteCategoryResponse
-	(*ListCategoriesRequest)(nil),    // 17: admin.ListCategoriesRequest
-	(*ListCategoriesResponse)(nil),   // 18: admin.ListCategoriesResponse
-	(*Category)(nil),                 // 19: admin.Category
-	(*CreateActivityRequest)(nil),    // 20: admin.CreateActivityRequest
-	(*CreateActivityResponse)(nil),   // 21: admin.CreateActivityResponse
-	(*UpdateActivityRequest)(nil),    // 22: admin.UpdateActivityRequest
-	(*UpdateActivityResponse)(nil),   // 23: admin.UpdateActivityResponse
-	(*DeleteActivityRequest)(nil),    // 24: admin.DeleteActivityRequest
-	(*DeleteActivityResponse)(nil),   // 25: admin.DeleteActivityResponse
-	(*GetActivityRequest)(nil),       // 26: admin.GetActivityRequest
-	(*GetActivityResponse)(nil),      // 27: admin.GetActivityResponse
-	(*ListActivitiesRequest)(nil),    // 28: admin.ListActivitiesRequest
-	(*ListActivitiesResponse)(nil),   // 29: admin.ListActivitiesResponse
-	(*SetActivityTimeRequest)(nil),   // 30: admin.SetActivityTimeRequest
-	(*SetActivityTimeResponse)(nil),  // 31: admin.SetActivityTimeResponse
-	(*SetActivityStockRequest)(nil),  // 32: admin.SetActivityStockRequest
-	(*SetActivityStockResponse)(nil), // 33: admin.SetActivityStockResponse
-	(*Activity)(nil),                 // 34: admin.Activity
-	(*AdjustInventoryRequest)(nil),   // 35: admin.AdjustInventoryRequest
-	(*AdjustInventoryResponse)(nil),  // 36: admin.AdjustInventoryResponse
-	(*GetInventoryRequest)(nil),      // 37: admin.GetInventoryRequest
-	(*GetInventoryResponse)(nil),     // 38: admin.GetInventoryResponse
+	(*CreateProductRequest)(nil),       // 0: admin.CreateProductRequest
+	(*CreateProductResponse)(nil),      // 1: admin.CreateProductResponse
+	(*UpdateProductRequest)(nil),       // 2: admin.UpdateProductRequest
+	(*UpdateProductResponse)(nil),      // 3: admin.UpdateProductResponse
+	(*DeleteProductRequest)(nil),       // 4: admin.DeleteProductRequest
+	(*DeleteProductResponse)(nil),      // 5: admin.DeleteProductResponse
+	(*GetProductRequest)(nil),          // 6: admin.GetProductRequest
+	(*GetProductResponse)(nil),         // 7: admin.GetProductResponse
+	(*ListProductsRequest)(nil),        // 8: admin.ListProductsRequest
+	(*ListProductsResponse)(nil),       // 9: admin.ListProductsResponse
+	(*Product)(nil),                    // 10: admin.Product
+	(*CreateCategoryRequest)(nil),      // 11: admin.CreateCategoryRequest
+	(*CreateCategoryResponse)(nil),     // 12: admin.CreateCategoryResponse
+	(*UpdateCategoryRequest)(nil),      // 13: admin.UpdateCategoryRequest
+	(*UpdateCategoryResponse)(nil),     // 14: admin.UpdateCategoryResponse
+	(*DeleteCategoryRequest)(nil),      // 15: admin.DeleteCategoryRequest
+	(*DeleteCategoryResponse)(nil),     // 16: admin.DeleteCategoryResponse
+	(*ListCategoriesRequest)(nil),      // 17: admin.ListCategoriesRequest
+	(*ListCategoriesResponse)(nil),     // 18: admin.ListCategoriesResponse
+	(*Category)(nil),                   // 19: admin.Category
+	(*CreateActivityRequest)(nil),      // 20: admin.CreateActivityRequest
+	(*CreateActivityResponse)(nil),     // 21: admin.CreateActivityResponse
+	(*UpdateActivityRequest)(nil),      // 22: admin.UpdateActivityRequest
+	(*UpdateActivityResponse)(nil),     // 23: admin.UpdateActivityResponse
+	(*DeleteActivityRequest)(nil),      // 24: admin.DeleteActivityRequest
+	(*DeleteActivityResponse)(nil),     // 25: admin.DeleteActivityResponse
+	(*GetActivityRequest)(nil),         // 26: admin.GetActivityRequest
+	(*GetActivityResponse)(nil),        // 27: admin.GetActivityResponse
+	(*ListActivitiesRequest)(nil),      // 28: admin.ListActivitiesRequest
+	(*ListActivitiesResponse)(nil),     // 29: admin.ListActivitiesResponse
+	(*SetActivityTimeRequest)(nil),     // 30: admin.SetActivityTimeRequest
+	(*SetActivityTimeResponse)(nil),    // 31: admin.SetActivityTimeResponse
+	(*SetActivityStockRequest)(nil),    // 32: admin.SetActivityStockRequest
+	(*SetActivityStockResponse)(nil),   // 33: admin.SetActivityStockResponse
+	(*Activity)(nil),                   // 34: admin.Activity
+	(*AdjustInventoryRequest)(nil),     // 35: admin.AdjustInventoryRequest
+	(*AdjustInventoryResponse)(nil),    // 36: admin.AdjustInventoryResponse
+	(*GetInventoryRequest)(nil),        // 37: admin.GetInventoryRequest
+	(*GetInventoryResponse)(nil),       // 38: admin.GetInventoryResponse
+	(*ClearSeckillRecordRequest)(nil),  // 39: admin.ClearSeckillRecordRequest
+	(*ClearSeckillRecordResponse)(nil), // 40: admin.ClearSeckillRecordResponse
 }
 var file_admin_proto_depIdxs = []int32{
 	10, // 0: admin.GetProductResponse.product:type_name -> admin.Product
@@ -2820,28 +2956,30 @@ var file_admin_proto_depIdxs = []int32{
 	28, // 18: admin.AdminSeckillService.ListActivities:input_type -> admin.ListActivitiesRequest
 	30, // 19: admin.AdminSeckillService.SetActivityTime:input_type -> admin.SetActivityTimeRequest
 	32, // 20: admin.AdminSeckillService.SetActivityStock:input_type -> admin.SetActivityStockRequest
-	35, // 21: admin.AdminInventoryService.AdjustInventory:input_type -> admin.AdjustInventoryRequest
-	37, // 22: admin.AdminInventoryService.GetInventory:input_type -> admin.GetInventoryRequest
-	1,  // 23: admin.AdminProductService.CreateProduct:output_type -> admin.CreateProductResponse
-	3,  // 24: admin.AdminProductService.UpdateProduct:output_type -> admin.UpdateProductResponse
-	5,  // 25: admin.AdminProductService.DeleteProduct:output_type -> admin.DeleteProductResponse
-	7,  // 26: admin.AdminProductService.GetProduct:output_type -> admin.GetProductResponse
-	9,  // 27: admin.AdminProductService.ListProducts:output_type -> admin.ListProductsResponse
-	12, // 28: admin.AdminCategoryService.CreateCategory:output_type -> admin.CreateCategoryResponse
-	14, // 29: admin.AdminCategoryService.UpdateCategory:output_type -> admin.UpdateCategoryResponse
-	16, // 30: admin.AdminCategoryService.DeleteCategory:output_type -> admin.DeleteCategoryResponse
-	18, // 31: admin.AdminCategoryService.ListCategories:output_type -> admin.ListCategoriesResponse
-	21, // 32: admin.AdminSeckillService.CreateActivity:output_type -> admin.CreateActivityResponse
-	23, // 33: admin.AdminSeckillService.UpdateActivity:output_type -> admin.UpdateActivityResponse
-	25, // 34: admin.AdminSeckillService.DeleteActivity:output_type -> admin.DeleteActivityResponse
-	27, // 35: admin.AdminSeckillService.GetActivity:output_type -> admin.GetActivityResponse
-	29, // 36: admin.AdminSeckillService.ListActivities:output_type -> admin.ListActivitiesResponse
-	31, // 37: admin.AdminSeckillService.SetActivityTime:output_type -> admin.SetActivityTimeResponse
-	33, // 38: admin.AdminSeckillService.SetActivityStock:output_type -> admin.SetActivityStockResponse
-	36, // 39: admin.AdminInventoryService.AdjustInventory:output_type -> admin.AdjustInventoryResponse
-	38, // 40: admin.AdminInventoryService.GetInventory:output_type -> admin.GetInventoryResponse
-	23, // [23:41] is the sub-list for method output_type
-	5,  // [5:23] is the sub-list for method input_type
+	39, // 21: admin.AdminSeckillService.ClearSeckillRecord:input_type -> admin.ClearSeckillRecordRequest
+	35, // 22: admin.AdminInventoryService.AdjustInventory:input_type -> admin.AdjustInventoryRequest
+	37, // 23: admin.AdminInventoryService.GetInventory:input_type -> admin.GetInventoryRequest
+	1,  // 24: admin.AdminProductService.CreateProduct:output_type -> admin.CreateProductResponse
+	3,  // 25: admin.AdminProductService.UpdateProduct:output_type -> admin.UpdateProductResponse
+	5,  // 26: admin.AdminProductService.DeleteProduct:output_type -> admin.DeleteProductResponse
+	7,  // 27: admin.AdminProductService.GetProduct:output_type -> admin.GetProductResponse
+	9,  // 28: admin.AdminProductService.ListProducts:output_type -> admin.ListProductsResponse
+	12, // 29: admin.AdminCategoryService.CreateCategory:output_type -> admin.CreateCategoryResponse
+	14, // 30: admin.AdminCategoryService.UpdateCategory:output_type -> admin.UpdateCategoryResponse
+	16, // 31: admin.AdminCategoryService.DeleteCategory:output_type -> admin.DeleteCategoryResponse
+	18, // 32: admin.AdminCategoryService.ListCategories:output_type -> admin.ListCategoriesResponse
+	21, // 33: admin.AdminSeckillService.CreateActivity:output_type -> admin.CreateActivityResponse
+	23, // 34: admin.AdminSeckillService.UpdateActivity:output_type -> admin.UpdateActivityResponse
+	25, // 35: admin.AdminSeckillService.DeleteActivity:output_type -> admin.DeleteActivityResponse
+	27, // 36: admin.AdminSeckillService.GetActivity:output_type -> admin.GetActivityResponse
+	29, // 37: admin.AdminSeckillService.ListActivities:output_type -> admin.ListActivitiesResponse
+	31, // 38: admin.AdminSeckillService.SetActivityTime:output_type -> admin.SetActivityTimeResponse
+	33, // 39: admin.AdminSeckillService.SetActivityStock:output_type -> admin.SetActivityStockResponse
+	40, // 40: admin.AdminSeckillService.ClearSeckillRecord:output_type -> admin.ClearSeckillRecordResponse
+	36, // 41: admin.AdminInventoryService.AdjustInventory:output_type -> admin.AdjustInventoryResponse
+	38, // 42: admin.AdminInventoryService.GetInventory:output_type -> admin.GetInventoryResponse
+	24, // [24:43] is the sub-list for method output_type
+	5,  // [5:24] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -2858,7 +2996,7 @@ func file_admin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_admin_proto_rawDesc), len(file_admin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   39,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   4,
 		},

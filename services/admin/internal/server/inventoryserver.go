@@ -5,12 +5,12 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/logic"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 )
 
 type AdminInventoryServiceServer struct {
 	svcCtx *svc.ServiceContext
-	pb.UnimplementedAdminInventoryServiceServer
+	adminpb.UnimplementedAdminInventoryServiceServer
 }
 
 func NewAdminInventoryServiceServer(svcCtx *svc.ServiceContext) *AdminInventoryServiceServer {
@@ -19,12 +19,12 @@ func NewAdminInventoryServiceServer(svcCtx *svc.ServiceContext) *AdminInventoryS
 	}
 }
 
-func (s *AdminInventoryServiceServer) AdjustInventory(ctx context.Context, in *pb.AdjustInventoryRequest) (*pb.AdjustInventoryResponse, error) {
+func (s *AdminInventoryServiceServer) AdjustInventory(ctx context.Context, in *adminpb.AdjustInventoryRequest) (*adminpb.AdjustInventoryResponse, error) {
 	l := logic.NewAdjustInventoryLogic(ctx, s.svcCtx)
 	return l.AdjustInventory(in)
 }
 
-func (s *AdminInventoryServiceServer) GetInventory(ctx context.Context, in *pb.GetInventoryRequest) (*pb.GetInventoryResponse, error) {
+func (s *AdminInventoryServiceServer) GetInventory(ctx context.Context, in *adminpb.GetInventoryRequest) (*adminpb.GetInventoryResponse, error) {
 	l := logic.NewGetInventoryLogic(ctx, s.svcCtx)
 	return l.GetInventory(in)
 }

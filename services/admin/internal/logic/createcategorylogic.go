@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 )
 
 type CreateCategoryLogic struct {
@@ -19,10 +19,10 @@ func NewCreateCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 	}
 }
 
-func (l *CreateCategoryLogic) CreateCategory(in *pb.CreateCategoryRequest) (*pb.CreateCategoryResponse, error) {
+func (l *CreateCategoryLogic) CreateCategory(in *adminpb.CreateCategoryRequest) (*adminpb.CreateCategoryResponse, error) {
 	// Categories are stored as part of product in this implementation
 	// Return success with a mock category ID
-	return &pb.CreateCategoryResponse{
+	return &adminpb.CreateCategoryResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 		CategoryId: 1,

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
 )
 
@@ -20,7 +20,7 @@ func NewUpdateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 	}
 }
 
-func (l *UpdateProductLogic) UpdateProduct(in *pb.UpdateProductRequest) (*pb.UpdateProductResponse, error) {
+func (l *UpdateProductLogic) UpdateProduct(in *adminpb.UpdateProductRequest) (*adminpb.UpdateProductResponse, error) {
 	client := product.NewProductCatalogServiceClient(l.svcCtx.ProductRpc.Conn())
 	resp, err := client.UpdateProduct(l.ctx, &product.UpdateProductReq{
 		Id:          in.Id,
@@ -32,13 +32,13 @@ func (l *UpdateProductLogic) UpdateProduct(in *pb.UpdateProductRequest) (*pb.Upd
 		Categories:  in.Categories,
 	})
 	if err != nil {
-		return &pb.UpdateProductResponse{
+		return &adminpb.UpdateProductResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to update product: " + err.Error(),
 		}, nil
 	}
 
-	return &pb.UpdateProductResponse{
+	return &adminpb.UpdateProductResponse{
 		StatusCode: resp.StatusCode,
 		StatusMsg:  resp.StatusMsg,
 		Id:         resp.Id,

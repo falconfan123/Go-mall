@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 )
 
 type DeleteCategoryLogic struct {
@@ -19,8 +19,8 @@ func NewDeleteCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 	}
 }
 
-func (l *DeleteCategoryLogic) DeleteCategory(in *pb.DeleteCategoryRequest) (*pb.DeleteCategoryResponse, error) {
-	return &pb.DeleteCategoryResponse{
+func (l *DeleteCategoryLogic) DeleteCategory(in *adminpb.DeleteCategoryRequest) (*adminpb.DeleteCategoryResponse, error) {
+	return &adminpb.DeleteCategoryResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 	}, nil

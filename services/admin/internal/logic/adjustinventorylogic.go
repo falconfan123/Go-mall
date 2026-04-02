@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
 )
 
@@ -20,7 +20,7 @@ func NewAdjustInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *A
 	}
 }
 
-func (l *AdjustInventoryLogic) AdjustInventory(in *pb.AdjustInventoryRequest) (*pb.AdjustInventoryResponse, error) {
+func (l *AdjustInventoryLogic) AdjustInventory(in *adminpb.AdjustInventoryRequest) (*adminpb.AdjustInventoryResponse, error) {
 	client := inventory.NewInventoryClient(l.svcCtx.InventoryRpc.Conn())
 
 	// Get current inventory first
@@ -28,7 +28,7 @@ func (l *AdjustInventoryLogic) AdjustInventory(in *pb.AdjustInventoryRequest) (*
 		ProductId: int32(in.ProductId),
 	})
 	if err != nil {
-		return &pb.AdjustInventoryResponse{
+		return &adminpb.AdjustInventoryResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to get inventory: " + err.Error(),
 		}, nil
@@ -37,7 +37,7 @@ func (l *AdjustInventoryLogic) AdjustInventory(in *pb.AdjustInventoryRequest) (*
 	// Calculate new inventory
 	newStock := getResp.Inventory + in.Quantity
 	if newStock < 0 {
-		return &pb.AdjustInventoryResponse{
+		return &adminpb.AdjustInventoryResponse{
 			StatusCode: 400,
 			StatusMsg:  "insufficient inventory",
 		}, nil
@@ -50,13 +50,13 @@ func (l *AdjustInventoryLogic) AdjustInventory(in *pb.AdjustInventoryRequest) (*
 		},
 	})
 	if err != nil {
-		return &pb.AdjustInventoryResponse{
+		return &adminpb.AdjustInventoryResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to adjust inventory: " + err.Error(),
 		}, nil
 	}
 
-	return &pb.AdjustInventoryResponse{
+	return &adminpb.AdjustInventoryResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 		NewStock:   newStock,

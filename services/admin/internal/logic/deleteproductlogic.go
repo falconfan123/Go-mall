@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
 )
 
@@ -20,17 +20,17 @@ func NewDeleteProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 	}
 }
 
-func (l *DeleteProductLogic) DeleteProduct(in *pb.DeleteProductRequest) (*pb.DeleteProductResponse, error) {
+func (l *DeleteProductLogic) DeleteProduct(in *adminpb.DeleteProductRequest) (*adminpb.DeleteProductResponse, error) {
 	client := product.NewProductCatalogServiceClient(l.svcCtx.ProductRpc.Conn())
 	resp, err := client.DeleteProduct(l.ctx, &product.DeleteProductReq{Id: in.Id})
 	if err != nil {
-		return &pb.DeleteProductResponse{
+		return &adminpb.DeleteProductResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to delete product: " + err.Error(),
 		}, nil
 	}
 
-	return &pb.DeleteProductResponse{
+	return &adminpb.DeleteProductResponse{
 		StatusCode: resp.StatusCode,
 		StatusMsg:  resp.StatusMsg,
 	}, nil
