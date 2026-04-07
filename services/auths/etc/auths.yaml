@@ -25,6 +25,7 @@ Log:
 
 PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
+  Conntimeout: 5
 
 SessionRedis:
   Host: localhost:6379
@@ -37,7 +38,7 @@ DevServer:
   EnablePprof: false
 
 # Prometheus 监控暴露
-Prometheus:
+PrometheusExt:
   Host: 0.0.0.0   # 监控暴露的 IP
   Port: 9100       # 监控暴露的端口
   Path: /metrics   # 默认路径

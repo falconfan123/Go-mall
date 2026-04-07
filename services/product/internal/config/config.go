@@ -18,7 +18,7 @@ type Config struct {
 	InventoryRpc   zrpc.RpcClientConf
 	GorseConfig    config.GorseConfig
 	Minio          Minio
-	Prometheus     PrometheusConf
+	PrometheusExt  PrometheusExtConf
 }
 
 type Minio struct {
@@ -41,7 +41,7 @@ type QiNiu struct {
 	Domain    string
 }
 
-type PrometheusConf struct {
+type PrometheusExtConf struct {
 	Host string
 	Port int
 	Path string

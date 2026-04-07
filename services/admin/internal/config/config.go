@@ -14,10 +14,10 @@ type Config struct {
 	RedisConf      redis.RedisConf
 	ProductRpc     zrpc.RpcClientConf
 	InventoryRpc   zrpc.RpcClientConf
-	Prometheus     PrometheusConf
+	PrometheusExt  PrometheusExtConf
 }
 
-type PrometheusConf struct {
+type PrometheusExtConf struct {
 	Host string
 	Port int
 	Path string

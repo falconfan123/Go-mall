@@ -45,7 +45,7 @@ Cache:
     Pass: ""
     Type: node  
 
-Prometheus:
+PrometheusExt:
   Host: 0.0.0.0   # 监控暴露的 IP
   Port: 9100       # 监控暴露的端口
   Path: /metrics   # 默认路径（可自定义）

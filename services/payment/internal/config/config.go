@@ -16,7 +16,7 @@ type Config struct {
 	Stripe         StripeConfig
 	OrderRpc       zrpc.RpcClientConf
 	RabbitMQConfig config.RabbitMQConfig
-	Prometheus     PrometheusConf
+	PrometheusExt  PrometheusExtConf
 }
 
 type AlipayConfig struct {
@@ -37,7 +37,7 @@ type StripeConfig struct {
 	WebhookPort   int
 }
 
-type PrometheusConf struct {
+type PrometheusExtConf struct {
 	Host string
 	Port int
 	Path string

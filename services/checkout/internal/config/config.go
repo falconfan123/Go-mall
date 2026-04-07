@@ -18,7 +18,7 @@ type Config struct {
 	ProductRpc     zrpc.RpcClientConf
 	CouponsRpc     zrpc.RpcClientConf
 	RabbitMQConfig RabbitMQConfig
-	Prometheus     PrometheusConf
+	PrometheusExt  PrometheusExtConf
 }
 
 type PostgresConfig struct {
@@ -34,7 +34,7 @@ type RabbitMQConfig struct {
 	VHost string
 }
 
-type PrometheusConf struct {
+type PrometheusExtConf struct {
 	Host string
 	Port int
 	Path string
