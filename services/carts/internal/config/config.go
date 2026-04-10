@@ -11,16 +11,9 @@ type Config struct {
 	Consul         consul.Conf
 	PostgresConfig PostgresConfig
 	RedisConf      redis.RedisConf
-	Prometheus     PrometheusConf
 }
 
 type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
-}
-
-type PrometheusConf struct {
-	Host string
-	Port int
-	Path string
 }

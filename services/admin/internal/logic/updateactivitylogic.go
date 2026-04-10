@@ -6,7 +6,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -22,10 +22,10 @@ func NewUpdateActivityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Up
 	}
 }
 
-func (l *UpdateActivityLogic) UpdateActivity(in *pb.UpdateActivityRequest) (*pb.UpdateActivityResponse, error) {
+func (l *UpdateActivityLogic) UpdateActivity(in *adminpb.UpdateActivityRequest) (*adminpb.UpdateActivityResponse, error) {
 	activity, err := db.GetActivityByID(l.svcCtx.DB, in.Id)
 	if err != nil {
-		return &pb.UpdateActivityResponse{
+		return &adminpb.UpdateActivityResponse{
 			StatusCode: 404,
 			StatusMsg:  "activity not found",
 		}, nil
@@ -38,7 +38,7 @@ func (l *UpdateActivityLogic) UpdateActivity(in *pb.UpdateActivityRequest) (*pb.
 
 	if err := activity.Update(l.svcCtx.DB); err != nil {
 		logx.Errorf("failed to update activity: %v", err)
-		return &pb.UpdateActivityResponse{
+		return &adminpb.UpdateActivityResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to update activity: " + err.Error(),
 		}, nil
@@ -47,7 +47,7 @@ func (l *UpdateActivityLogic) UpdateActivity(in *pb.UpdateActivityRequest) (*pb.
 	// Sync to Redis
 	l.syncActivityToRedis(activity)
 
-	return &pb.UpdateActivityResponse{
+	return &adminpb.UpdateActivityResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 		Id:         in.Id,

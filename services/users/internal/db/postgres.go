@@ -7,6 +7,8 @@ import (
 	"github.com/falconfan123/Go-mall/services/users/internal/config"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
+	_ "github.com/lib/pq"
 )
 
 func NewPostgres(postgresConf config.PostgresConfig) sqlx.SqlConn {

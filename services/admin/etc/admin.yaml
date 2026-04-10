@@ -45,7 +45,7 @@ InventoryRpc:
   NonBlock: true
 
 # Prometheus 监控暴露
-Prometheus:
+PrometheusExt:
   Host: 0.0.0.0
   Port: 9112
   Path: /metrics

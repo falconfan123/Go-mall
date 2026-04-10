@@ -24,6 +24,7 @@ Log:
 
 PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
+  conntimeout: 5
 
 
 
@@ -58,7 +59,7 @@ RedisConf:
   Tls: false
 
 # Prometheus 监控暴露
-Prometheus:
+PrometheusExt:
   Host: 0.0.0.0
   Port: 9104
   Path: /metrics

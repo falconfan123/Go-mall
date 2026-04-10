@@ -27,3 +27,9 @@ Activity:
   TokenExpire: 60 # token 有效期（秒）
   AdvanceSeconds: 5 # 提前获取 token 的秒数
 
+# Prometheus 监控暴露
+PrometheusExt:
+  Host: 0.0.0.0
+  Port: 9111
+  Path: /metrics
+

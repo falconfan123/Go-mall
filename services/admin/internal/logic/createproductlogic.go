@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
 )
 
@@ -20,7 +20,7 @@ func NewCreateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 	}
 }
 
-func (l *CreateProductLogic) CreateProduct(in *pb.CreateProductRequest) (*pb.CreateProductResponse, error) {
+func (l *CreateProductLogic) CreateProduct(in *adminpb.CreateProductRequest) (*adminpb.CreateProductResponse, error) {
 	// Call product service RPC to create product
 	client := product.NewProductCatalogServiceClient(l.svcCtx.ProductRpc.Conn())
 	resp, err := client.CreateProduct(l.ctx, &product.CreateProductReq{
@@ -32,13 +32,13 @@ func (l *CreateProductLogic) CreateProduct(in *pb.CreateProductRequest) (*pb.Cre
 		Categories:  in.Categories,
 	})
 	if err != nil {
-		return &pb.CreateProductResponse{
+		return &adminpb.CreateProductResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to create product: " + err.Error(),
 		}, nil
 	}
 
-	return &pb.CreateProductResponse{
+	return &adminpb.CreateProductResponse{
 		StatusCode: resp.StatusCode,
 		StatusMsg:  resp.StatusMsg,
 		ProductId:  resp.ProductId,

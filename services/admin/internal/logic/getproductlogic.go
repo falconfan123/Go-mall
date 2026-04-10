@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
 )
 
@@ -20,28 +20,28 @@ func NewGetProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetPro
 	}
 }
 
-func (l *GetProductLogic) GetProduct(in *pb.GetProductRequest) (*pb.GetProductResponse, error) {
+func (l *GetProductLogic) GetProduct(in *adminpb.GetProductRequest) (*adminpb.GetProductResponse, error) {
 	client := product.NewProductCatalogServiceClient(l.svcCtx.ProductRpc.Conn())
 	resp, err := client.GetProduct(l.ctx, &product.GetProductReq{Id: uint32(in.Id)})
 	if err != nil {
-		return &pb.GetProductResponse{
+		return &adminpb.GetProductResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to get product: " + err.Error(),
 		}, nil
 	}
 
-	return &pb.GetProductResponse{
+	return &adminpb.GetProductResponse{
 		StatusCode: resp.StatusCode,
 		StatusMsg:  resp.StatusMsg,
 		Product:    convertProduct(resp.Product),
 	}, nil
 }
 
-func convertProduct(p *product.Product) *pb.Product {
+func convertProduct(p *product.Product) *adminpb.Product {
 	if p == nil {
 		return nil
 	}
-	return &pb.Product{
+	return &adminpb.Product{
 		Id:          p.Id,
 		Name:        p.Name,
 		Description: p.Description,

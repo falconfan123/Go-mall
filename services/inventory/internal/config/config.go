@@ -13,10 +13,10 @@ type Config struct {
 	Consul         consul.Conf
 	PostgresConfig config.PostgresConfig
 	RedisConf      redis.RedisConf
-	Prometheus     PrometheusConf
+	PrometheusExt  PrometheusExtConf
 }
 
-type PrometheusConf struct {
+type PrometheusExtConf struct {
 	Host string
 	Port int
 	Path string

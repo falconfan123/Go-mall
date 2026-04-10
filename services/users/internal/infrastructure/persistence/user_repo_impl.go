@@ -67,7 +67,7 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *aggregate.User) e
 		AvatarUrl:    sql.NullString{String: user.Avatar, Valid: user.Avatar != ""},
 		LoginAt:      sql.NullTime{Time: user.LastLoginTime, Valid: !user.LastLoginTime.IsZero()},
 	}
-	_, err := r.userModel.Update(ctx, u)
+	err := r.userModel.Update(ctx, u)
 	return err
 }
 

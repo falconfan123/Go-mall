@@ -27,7 +27,7 @@ func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdd
 
 // 获取单个收货地址
 func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAddressResponse, error) {
-	address, err := l.svcCtx.UserAddressesModel.FindOne(l.ctx, in.AddressId)
+	address, err := l.svcCtx.UserAddressesModel.FindOne(l.ctx, int64(in.AddressId))
 	if err != nil {
 		if err == user_address.ErrNotFound {
 			return &users.GetAddressResponse{

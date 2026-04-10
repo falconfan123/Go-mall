@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package admin;
 
-option go_package = "github.com/falconfan123/Go-mall/services/admin/pb;admin";
+option go_package = "./admin";
 
 // ==================== 商品管理 ====================
 

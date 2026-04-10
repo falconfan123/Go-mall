@@ -6,7 +6,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/db"
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -22,10 +22,10 @@ func NewDeleteActivityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 	}
 }
 
-func (l *DeleteActivityLogic) DeleteActivity(in *pb.DeleteActivityRequest) (*pb.DeleteActivityResponse, error) {
+func (l *DeleteActivityLogic) DeleteActivity(in *adminpb.DeleteActivityRequest) (*adminpb.DeleteActivityResponse, error) {
 	activity, err := db.GetActivityByID(l.svcCtx.DB, in.Id)
 	if err != nil {
-		return &pb.DeleteActivityResponse{
+		return &adminpb.DeleteActivityResponse{
 			StatusCode: 404,
 			StatusMsg:  "activity not found",
 		}, nil
@@ -33,7 +33,7 @@ func (l *DeleteActivityLogic) DeleteActivity(in *pb.DeleteActivityRequest) (*pb.
 
 	if err := activity.Delete(l.svcCtx.DB); err != nil {
 		logx.Errorf("failed to delete activity: %v", err)
-		return &pb.DeleteActivityResponse{
+		return &adminpb.DeleteActivityResponse{
 			StatusCode: 500,
 			StatusMsg:  "failed to delete activity: " + err.Error(),
 		}, nil
@@ -45,7 +45,7 @@ func (l *DeleteActivityLogic) DeleteActivity(in *pb.DeleteActivityRequest) (*pb.
 	l.svcCtx.Redis.Del(startKey)
 	l.svcCtx.Redis.Del(stockKey)
 
-	return &pb.DeleteActivityResponse{
+	return &adminpb.DeleteActivityResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
 	}, nil

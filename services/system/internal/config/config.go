@@ -11,7 +11,7 @@ type Config struct {
 	Consul     consul.Conf
 	RedisConf  redis.RedisConf
 	Activity   ActivityConfig
-	Prometheus PrometheusConf
+	PrometheusExt  PrometheusExtConf
 }
 
 type ActivityConfig struct {
@@ -19,7 +19,7 @@ type ActivityConfig struct {
 	AdvanceSeconds int // 提前获取 token 的秒数
 }
 
-type PrometheusConf struct {
+type PrometheusExtConf struct {
 	Host string
 	Port int
 	Path string

@@ -23,6 +23,7 @@ Log:
 
 PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
+  conntimeout: 5
 
 RedisConf:
   Host: localhost:6379
@@ -62,7 +63,7 @@ RabbitMQConfig:
   VHost: "/"
 
 # Prometheus 监控暴露
-Prometheus:
+PrometheusExt:
   Host: 0.0.0.0
   Port: 9106
   Path: /metrics

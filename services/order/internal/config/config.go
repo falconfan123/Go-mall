@@ -19,7 +19,7 @@ type Config struct {
 	CouponRpc      zrpc.RpcClientConf
 	UserRpc        zrpc.RpcClientConf
 	RabbitMQConfig RabbitMQConfig
-	Prometheus     PrometheusConf
+	PrometheusExt  PrometheusExtConf
 }
 
 type PostgresConfig struct {
@@ -39,7 +39,7 @@ func (r *RabbitMQConfig) Dns() string {
 	return "amqp://" + r.User + ":" + r.Pass + "@" + r.Host + ":" + string(rune(r.Port)) + "/" + r.VHost
 }
 
-type PrometheusConf struct {
+type PrometheusExtConf struct {
 	Host string
 	Port int
 	Path string

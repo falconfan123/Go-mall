@@ -12,7 +12,7 @@ type Config struct {
 	PostgresConfig PostgresConfig
 	RedisConf      redis.RedisConf
 	ProductRpc     zrpc.RpcClientConf
-	Prometheus     PrometheusConf
+	PrometheusExt  PrometheusExtConf
 }
 
 type PostgresConfig struct {
@@ -20,7 +20,7 @@ type PostgresConfig struct {
 	Conntimeout int
 }
 
-type PrometheusConf struct {
+type PrometheusExtConf struct {
 	Host string
 	Port int
 	Path string

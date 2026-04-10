@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/falconfan123/Go-mall/services/admin/internal/svc"
-	"github.com/falconfan123/Go-mall/services/admin/pb"
+	adminpb "github.com/falconfan123/Go-mall/services/admin/pb"
 )
 
 type ListCategoriesLogic struct {
@@ -19,12 +19,12 @@ func NewListCategoriesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Li
 	}
 }
 
-func (l *ListCategoriesLogic) ListCategories(in *pb.ListCategoriesRequest) (*pb.ListCategoriesResponse, error) {
+func (l *ListCategoriesLogic) ListCategories(in *adminpb.ListCategoriesRequest) (*adminpb.ListCategoriesResponse, error) {
 	// Return default categories
-	return &pb.ListCategoriesResponse{
+	return &adminpb.ListCategoriesResponse{
 		StatusCode: 200,
 		StatusMsg:  "success",
-		Categories: []*pb.Category{
+		Categories: []*adminpb.Category{
 			{Id: 1, Name: "电子产品", Description: "电子相关产品", ParentId: 0},
 			{Id: 2, Name: "服装", Description: "服装类", ParentId: 0},
 			{Id: 3, Name: "食品", Description: "食品类", ParentId: 0},

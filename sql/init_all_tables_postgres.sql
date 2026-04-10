@@ -249,3 +249,61 @@ INSERT INTO inventory (product_id, total, sold) VALUES
 (1, 100, 0),
 (2, 50, 0),
 (3, 200, 0);
+
+-- Categories table
+DROP TABLE IF EXISTS product_categories CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+
+-- Products table
+CREATE TABLE products (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  picture TEXT,
+  price BIGINT NOT NULL DEFAULT 0,
+  stock BIGINT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_products_name ON products(name);
+
+-- Categories table
+CREATE TABLE categories (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Product-Category relationship table
+CREATE TABLE product_categories (
+  id BIGSERIAL PRIMARY KEY,
+  product_id BIGINT NOT NULL,
+  category_id BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (product_id, category_id)
+);
+CREATE INDEX idx_product_categories_product_id ON product_categories(product_id);
+CREATE INDEX idx_product_categories_category_id ON product_categories(category_id);
+
+-- Insert some test products
+INSERT INTO products (name, description, picture, price, stock) VALUES
+('iPhone 15 Pro', 'Apple iPhone 15 Pro 256GB', 'https://via.placeholder.com/300', 899900, 100),
+('MacBook Pro 14', 'Apple MacBook Pro 14 inch M3', 'https://via.placeholder.com/300', 1999900, 50),
+('AirPods Pro', 'Apple AirPods Pro 2nd Generation', 'https://via.placeholder.com/300', 249900, 200);
+
+-- Insert some test categories
+INSERT INTO categories (name, description) VALUES
+('Electronics', 'Electronic devices and accessories'),
+('Apple', 'Apple products'),
+('Smartphones', 'Mobile phones'),
+('Laptops', 'Laptop computers'),
+('Audio', 'Audio equipment');
+
+-- Insert product-category relationships
+INSERT INTO product_categories (product_id, category_id) VALUES
+(1, 1), (1, 2), (1, 3),
+(2, 1), (2, 2), (2, 4),
+(3, 1), (2, 2), (3, 5);
