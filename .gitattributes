@@ -1,0 +1,5 @@
+# AppleDouble files (macOS Finder extended attributes)
+._* binary filter=drop
+
+# macOS system files
+.DS_Store
