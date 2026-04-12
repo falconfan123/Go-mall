@@ -24,6 +24,7 @@ Log:
 
 PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
+  Conntimeout: 5
 
 
 RedisConf:
