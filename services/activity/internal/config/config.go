@@ -8,10 +8,10 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	Consul     consul.Conf
-	RedisConf  redis.RedisConf
-	Activity   ActivityConfig
-	PrometheusExt  PrometheusExtConf
+	Consul        consul.Conf
+	RedisConf     redis.RedisConf
+	Activity      ActivityConfig
+	PrometheusExt PrometheusExtConf
 }
 
 type ActivityConfig struct {

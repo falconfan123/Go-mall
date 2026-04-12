@@ -15,6 +15,7 @@ use (
 	./services/order
 	./services/payment
 	./services/product
+	./services/search
 	./services/system
 	./services/users
 )

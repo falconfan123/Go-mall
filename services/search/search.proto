@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "github.com/falconfan123/Go-mall/services/search/pb";
+
+service SearchService {
+  // ParseQuery parses a search query and returns intent
+  rpc ParseQuery(ParseQueryRequest) returns (ParseQueryResponse);
+
+  // Search performs a search with parsed intent
+  rpc Search(SearchRequest) returns (SearchResponse);
+}
+
+message ParseQueryRequest {
+  string query = 1;
+}
+
+message ParseQueryResponse {
+  string original_query = 1;
+  string normalized_query = 2;
+  string predicted_category = 3;
+  repeated string brands = 4;
+  repeated string product_words = 5;
+  repeated string modifiers = 6;
+}
+
+message SearchRequest {
+  string query = 1;
+  string category = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+  string sort_by = 5;
+  string sort_order = 6;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+  int32 total_pages = 5;
+}
+
+message SearchResult {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  string image_url = 5;
+  string category = 6;
+  string brand = 7;
+  double score = 8;
+}
