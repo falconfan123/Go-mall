@@ -1,0 +1,26 @@
+Name: search
+ListenOn: 0.0.0.0:8081
+Mode: dev
+Log:
+  ServiceName: search
+  Mode: console
+
+Consul:
+  Host: 127.0.0.1
+  Port: 8500
+
+PostgresConfig:
+  DataSource: "host=127.0.0.1 port=3306 user=root password=root dbname=mall sslmode=disable"
+  Conntimeout: 30
+
+RedisConf:
+  Host: 127.0.0.1
+  Type: node
+
+ElasticSearch:
+  Addr: http://127.0.0.1:9200
+  IndexName: products
+
+ProductRpc:
+  Endpoints:
+    - 127.0.0.1:8080

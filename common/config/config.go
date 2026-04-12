@@ -15,7 +15,8 @@ type RabbitMQConfig struct {
 	VHost string
 }
 type ElasticSearchConfig struct {
-	Addr string
+	Addr      string
+	IndexName string
 }
 type GorseConfig struct {
 	GorseAddr   string
