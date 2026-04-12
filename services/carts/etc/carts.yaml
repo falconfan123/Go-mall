@@ -7,6 +7,7 @@ Consul:
   Key: carts.rpc
   Meta:
     Protocol: grpc
+  TTL: 10
 
 # 链路追踪
 Telemetry:

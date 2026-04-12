@@ -8,6 +8,7 @@ Consul:
   Key: activity.rpc
   Meta:
     Protocol: grpc
+  TTL: 10
 
 # 日志配置
 Log:

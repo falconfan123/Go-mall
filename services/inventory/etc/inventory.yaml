@@ -8,6 +8,7 @@ Consul:
   Key: inventory.rpc
   Meta:
     Protocol: grpc
+  TTL: 10
 
 Telemetry:
   Name: inventory.rpc

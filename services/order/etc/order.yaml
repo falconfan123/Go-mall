@@ -8,6 +8,7 @@ Consul:
   Key: order.rpc
   Meta:
     Protocol: grpc
+  TTL: 10 # 健康检查 TTL（秒），Consul 会定期检测心跳
 
 # 链路追踪
 Telemetry:

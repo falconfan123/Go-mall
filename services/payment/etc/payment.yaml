@@ -8,6 +8,7 @@ Consul:
   Key: payment.rpc
   Meta:
     Protocol: grpc
+  TTL: 10
 
 Telemetry:
   Name: payment.rpc
