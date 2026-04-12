@@ -24,7 +24,7 @@ require (
 	github.com/falconfan123/Go-mall/dal v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/order v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
-	github.com/lib/pq v1.12.0
+	github.com/lib/pq v1.12.3
 	github.com/smartwalle/alipay/v3 v3.2.29
 	github.com/streadway/amqp v1.1.0
 	github.com/stripe/stripe-go/v81 v81.0.0
