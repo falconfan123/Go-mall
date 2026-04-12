@@ -2,9 +2,11 @@ package mq
 
 import (
 	"context"
+	"time"
+
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/streadway/amqp"
-	"time"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 )
 
 const (
@@ -15,7 +17,8 @@ const (
 )
 
 type PaymentDelayMQ struct {
-	conn *amqp.Connection
+	conn  *amqp.Connection
+	Redis *redis.Redis
 }
 type PaymentReq struct {
 	OrderId string
@@ -74,7 +77,8 @@ func Init(c config.Config) (*PaymentDelayMQ, error) {
 
 	}
 	paymentDelay := &PaymentDelayMQ{
-		conn: conn,
+		conn:  conn,
+		Redis: redis.MustNewRedis(c.RedisConf),
 	}
 	go paymentDelay.consumer(context.TODO())
 	return paymentDelay, nil

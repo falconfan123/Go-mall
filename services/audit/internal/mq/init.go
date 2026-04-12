@@ -3,6 +3,9 @@ package mq
 import (
 	"context"
 	"fmt"
+	"io"
+	"strings"
+
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
@@ -10,9 +13,8 @@ import (
 	"github.com/falconfan123/Go-mall/services/audit/internal/config"
 	"github.com/falconfan123/Go-mall/services/audit/model/es"
 	"github.com/streadway/amqp"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"io"
-	"strings"
 )
 
 const (
@@ -30,6 +32,7 @@ type AuditMQ struct {
 	conn     *amqp.Connection
 	model    audit.AuditModel
 	esClient *elasticsearch.Client
+	Redis    *redis.Redis
 }
 
 type AuditReq struct {
@@ -183,6 +186,7 @@ func Init(c config.Config) (*AuditMQ, error) {
 		conn:     conn,
 		model:    model,
 		esClient: esClient,
+		Redis:    redis.MustNewRedis(c.RedisConf),
 	}
 	// 启动监听协程
 	if err := mq.consumer(); err != nil {

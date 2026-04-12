@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
+	idempotency "github.com/falconfan123/Go-mall/common/utils/idempotency"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -38,6 +41,25 @@ func (a *PaymentDelayMQ) consumer(ctx context.Context) {
 			}
 			continue
 		}
+
+		// 幂等检查：检查并设置去重 key
+		idempotencyKey := idempotency.BuildKey("payment", "delay", msg.OrderId)
+		isProcessed, err := idempotency.CheckAndSet(ctx, a.Redis, idempotencyKey, time.Hour)
+		if err != nil {
+			logx.Errorw("failed to check idempotency", logx.Field("err", err), logx.Field("key", idempotencyKey))
+			if err := res.Reject(true); err != nil {
+				logx.Errorw("failed to reject message", logx.Field("error", err), logx.Field("body", string(res.Body)))
+			}
+			continue
+		}
+		if isProcessed {
+			logx.Infow("message already processed, skipping", logx.Field("key", idempotencyKey))
+			if err := res.Ack(false); err != nil {
+				logx.Errorw("failed to ack message", logx.Field("error", err), logx.Field("body", string(res.Body)))
+			}
+			continue
+		}
+
 		fmt.Println(msg)
 
 	}

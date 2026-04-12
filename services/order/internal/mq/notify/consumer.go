@@ -3,8 +3,11 @@ package notify
 import (
 	"context"
 	"encoding/json"
+	"time"
+
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
+	idempotency "github.com/falconfan123/Go-mall/common/utils/idempotency"
 	order2 "github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
 	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
@@ -45,6 +48,25 @@ func (a *OrderNotifyMQ) consumer(ctx context.Context) {
 			}
 			continue
 		}
+
+		// 幂等检查：检查并设置去重 key
+		idempotencyKey := idempotency.BuildKey("order", "notify", msg.OrderId)
+		isProcessed, err := idempotency.CheckAndSet(ctx, a.Redis, idempotencyKey, time.Hour)
+		if err != nil {
+			logx.Errorw("failed to check idempotency", logx.Field("err", err), logx.Field("key", idempotencyKey))
+			if err := res.Reject(true); err != nil {
+				logx.Errorw("failed to reject message", logx.Field("err", err), logx.Field("body", string(res.Body)))
+			}
+			continue
+		}
+		if isProcessed {
+			logx.Infow("message already processed, skipping", logx.Field("key", idempotencyKey))
+			if err := res.Ack(false); err != nil {
+				logx.Errorw("failed to ack message", logx.Field("err", err), logx.Field("body", string(res.Body)))
+			}
+			continue
+		}
+
 		var orderModelRes *order2.Orders
 		// --------------- reverse --------------- 幂等
 		if err := a.Model.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {

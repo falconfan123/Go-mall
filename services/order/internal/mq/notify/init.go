@@ -2,12 +2,15 @@ package notify
 
 import (
 	"context"
+
 	"github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
 	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
 	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/streadway/amqp"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
 )
@@ -25,6 +28,7 @@ type OrderNotifyMQ struct {
 	InventoryRpc   inventoryclient.Inventory
 	Model          sqlx.SqlConn
 	OrderItemModel order.OrderItemsModel
+	Redis          *redis.Redis
 }
 
 type OrderNotifyReq struct {
@@ -85,7 +89,7 @@ func Init(c config.Config) (*OrderNotifyMQ, error) {
 		return nil, err
 
 	}
-	orderDelay := &OrderNotifyMQ{
+	orderNotify := &OrderNotifyMQ{
 		conn:           conn,
 		OrderModel:     order.NewOrdersModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		OrderItemModel: order.NewOrderItemsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
@@ -93,7 +97,8 @@ func Init(c config.Config) (*OrderNotifyMQ, error) {
 		CouponRpc:      couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponRpc)),
 		InventoryRpc:   inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		Model:          sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),
+		Redis:          redis.MustNewRedis(c.RedisConf),
 	}
-	go orderDelay.consumer(context.TODO())
-	return orderDelay, nil
+	go orderNotify.consumer(context.TODO())
+	return orderNotify, nil
 }

@@ -2,15 +2,18 @@ package delay
 
 import (
 	"context"
+	"time"
+
 	"github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
 	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
 	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/order/internal/config"
 	"github.com/streadway/amqp"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
-	"time"
 )
 
 const (
@@ -30,6 +33,7 @@ type OrderDelayMQ struct {
 	CheckoutRpc     checkoutservice.CheckoutService
 	CouponRpc       couponsclient.Coupons
 	InventoryRpc    inventoryclient.Inventory
+	Redis           *redis.Redis
 }
 type OrderReq struct {
 	OrderId  string `json:"order_id"`
@@ -130,6 +134,7 @@ func Init(c config.Config) (*OrderDelayMQ, error) {
 		InventoryRpc:    inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		Model:           sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),
 		OrderItemsModel: order.NewOrderItemsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
+		Redis:           redis.MustNewRedis(c.RedisConf),
 	}
 	go orderDelay.consumer(context.TODO())
 	return orderDelay, nil

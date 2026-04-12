@@ -6,11 +6,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
+	idempotency "github.com/falconfan123/Go-mall/common/utils/idempotency"
 	"github.com/falconfan123/Go-mall/dal/model/audit"
 	"github.com/zeromicro/go-zero/core/logx"
-	"time"
 )
 
 func (a *AuditMQ) consumer() error {
@@ -34,6 +36,25 @@ func (a *AuditMQ) consumer() error {
 				}
 				continue
 			}
+
+			// 幂等检查：检查并设置去重 key
+			idempotencyKey := idempotency.BuildKey("audit", "logs", msg.TraceID)
+			isProcessed, err := idempotency.CheckAndSet(ctx, a.Redis, idempotencyKey, 24*time.Hour)
+			if err != nil {
+				logx.Errorw("failed to check idempotency", logx.Field("err", err), logx.Field("key", idempotencyKey))
+				if err := res.Reject(true); err != nil {
+					logx.Errorw("failed to reject message", logx.Field("error", err), logx.Field("body", string(res.Body)))
+				}
+				continue
+			}
+			if isProcessed {
+				logx.Infow("message already processed, skipping", logx.Field("key", idempotencyKey))
+				if err := res.Ack(false); err != nil {
+					logx.Errorw("failed to ack message", logx.Field("error", err), logx.Field("body", string(res.Body)))
+				}
+				continue
+			}
+
 			// 确保入库
 			if err := a.persistData(ctx, msg); err != nil {
 				logx.Errorw("insert failed, rejecting message", logx.Field("err", err), logx.Field("msg", msg))
