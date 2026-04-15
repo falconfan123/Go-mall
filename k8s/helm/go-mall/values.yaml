@@ -1,0 +1,258 @@
+# Go-mall Helm Chart Values
+# 12 个微服务的统一配置
+
+global:
+  namespace: go-mall
+  imageRegistry: docker.io
+  imagePullPolicy: IfNotPresent
+
+  # 共享配置
+  consul:
+    host: consul-headless.consul.svc.cluster.local
+    port: 8500
+  redis:
+    host: redis.redis.svc.cluster.local
+    port: 6379
+  postgres:
+    host: postgres.postgres.svc.cluster.local
+    port: 5432
+    user: root
+    password: fht3825099
+    database: mall
+  jaeger:
+    endpoint: http://jaeger-collector.observability.svc.cluster.local:14268/api/traces
+
+# 12 个微服务配置
+services:
+  auths:
+    enabled: true
+    image: minikube/authsatest:latest
+    port: 10000
+    grpcPort: 10000
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  users:
+    enabled: true
+    image: minikube/usersatest:latest
+    port: 10001
+    grpcPort: 10001
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  product:
+    enabled: true
+    image: minikube/productatest:latest
+    port: 10002
+    grpcPort: 10002
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  carts:
+    enabled: true
+    image: minikube/cartsatest:latest
+    port: 10003
+    grpcPort: 10003
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  order:
+    enabled: true
+    image: minikube/orderatest:latest
+    port: 10004
+    grpcPort: 10004
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  checkout:
+    enabled: true
+    image: minikube/checkoutatest:latest
+    port: 10005
+    grpcPort: 10005
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  payment:
+    enabled: true
+    image: minikube/paymentatest:latest
+    port: 10006
+    grpcPort: 10006
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  inventory:
+    enabled: true
+    image: minikube/inventoryatest:latest
+    port: 10007
+    grpcPort: 10007
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  audit:
+    enabled: true
+    image: minikube/auditatest:latest
+    port: 10008
+    grpcPort: 10008
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  coupons:
+    enabled: true
+    image: minikube/couponsatest:latest
+    port: 10009
+    grpcPort: 10009
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  system:
+    enabled: true
+    image: minikube/systematest:latest
+    port: 10010
+    grpcPort: 10010
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  activity:
+    enabled: true
+    image: minikube/activityatest:latest
+    port: 10011
+    grpcPort: 10011
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  admin:
+    enabled: true
+    image: minikube/adminatest:latest
+    port: 10012
+    grpcPort: 10012
+    httpPort: 8080
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+# 网关配置
+gateway:
+  enabled: true
+  image: minikube/gatewayatest:latest
+  port: 8888
+  replicas: 1
+  serviceType: NodePort
+  nodePort: 30088
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Ingress 配置
+ingress:
+  enabled: true
+  className: nginx
+  host: api.go-mall.local
+  tls:
+    enabled: false
+    secretName: go-mall-tls
+
+# 健康检查配置
+healthCheck:
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3

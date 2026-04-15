@@ -1,0 +1,8 @@
+# Go-mall Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: go-mall
+  labels:
+    app.kubernetes.io/name: go-mall
+    app.kubernetes.io/managed-by: Helm
