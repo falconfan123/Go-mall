@@ -1,4 +1,4 @@
-# Add register endpoint to gateway
+# Gateway 配置 - 静态 Target（当前可用）
 Name: gateway
 Host: 0.0.0.0
 Port: 8888
@@ -6,7 +6,7 @@ Port: 8888
 Log:
   Mode: 'console'
   Encoding: 'json'
-  Stat: false
+  Stat: true
 
 Auth:
   AccessSecret: "u666"
@@ -16,7 +16,7 @@ Upstreams:
   # Users 服务
   - Grpc:
       NonBlock: true
-      Target: users-rpc.go-mall.svc.cluster.local:10001
+      Target: users.go-mall.svc.cluster.local:10001
     Mappings:
       - Method: post
         Path: /douyin/user/login
@@ -24,48 +24,21 @@ Upstreams:
       - Method: post
         Path: /douyin/user/register
         RpcPath: users.Users/Register
-      - Method: get
-        Path: /douyin/user
-        RpcPath: users.Users/GetUser
 
   # Product 服务
   - Grpc:
       NonBlock: true
-      Target: product-rpc.go-mall.svc.cluster.local:10002
+      Target: product.go-mall.svc.cluster.local:10002
     Mappings:
       - Method: get
         Path: /douyin/product/list
         RpcPath: product.ProductCatalogService/ListProducts
+
+  # System 服务
+  - Grpc:
+      NonBlock: true
+      Target: system.go-mall.svc.cluster.local:10010
+    Mappings:
       - Method: get
-        Path: /douyin/product/detail
-        RpcPath: product.ProductCatalogService/GetProduct
-
-  # Order 服务
-  - Grpc:
-      NonBlock: true
-      Target: order-rpc.go-mall.svc.cluster.local:10004
-    Mappings:
-      - Method: post
-        Path: /douyin/order/create
-        RpcPath: order.OrderService/CreateOrder
-      - Method: get
-        Path: /douyin/order/list
-        RpcPath: order.OrderService/ListOrders
-
-  # Checkout 服务
-  - Grpc:
-      NonBlock: true
-      Target: checkout-rpc.go-mall.svc.cluster.local:10005
-    Mappings:
-      - Method: post
-        Path: /api/v1/checkout/prepare
-        RpcPath: checkout.CheckoutService/PrepareCheckout
-
-  # Auths 服务
-  - Grpc:
-      NonBlock: true
-      Target: auths-rpc.go-mall.svc.cluster.local:10000
-    Mappings:
-      - Method: post
-        Path: /api/v1/auth/token
-        RpcPath: auths.Auths/GenerateToken
+        Path: /api/v1/system/time
+        RpcPath: system.System/Time
