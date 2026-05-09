@@ -1,4 +1,5 @@
-# Gateway 配置 - 静态 Target（当前可用）
+# Core services only (working ones)
+# Checkout 暂时注释，因为 RPC 方法名可能不匹配
 Name: gateway
 Host: 0.0.0.0
 Port: 8888
@@ -13,7 +14,7 @@ Auth:
   AccessExpire: 86400
 
 Upstreams:
-  # Users 服务
+  # Users 服务 - Port 10001
   - Grpc:
       NonBlock: true
       Target: users.go-mall.svc.cluster.local:10001
@@ -25,7 +26,7 @@ Upstreams:
         Path: /douyin/user/register
         RpcPath: users.Users/Register
 
-  # Product 服务
+  # Product 服务 - Port 10002
   - Grpc:
       NonBlock: true
       Target: product.go-mall.svc.cluster.local:10002
@@ -34,7 +35,7 @@ Upstreams:
         Path: /douyin/product/list
         RpcPath: product.ProductCatalogService/ListProducts
 
-  # System 服务
+  # System 服务 - Port 10010
   - Grpc:
       NonBlock: true
       Target: system.go-mall.svc.cluster.local:10010
@@ -42,3 +43,105 @@ Upstreams:
       - Method: get
         Path: /api/v1/system/time
         RpcPath: system.System/Time
+
+  # Carts 服务 - Port 10003
+  - Grpc:
+      NonBlock: true
+      Target: carts.go-mall.svc.cluster.local:10003
+    Mappings:
+      - Method: get
+        Path: /douyin/cart/list
+        RpcPath: Cart/CartItemList
+
+  # Order 服务 - Port 10004
+  - Grpc:
+      NonBlock: true
+      Target: order.go-mall.svc.cluster.local:10004
+    Mappings:
+      - Method: post
+        Path: /douyin/order/create
+        RpcPath: OrderService/CreateOrder
+      - Method: get
+        Path: /douyin/order/list
+        RpcPath: OrderService/ListOrders
+
+  # Payment 服务 - Port 10006
+  - Grpc:
+      NonBlock: true
+      Target: payment.go-mall.svc.cluster.local:10006
+    Mappings:
+      - Method: post
+        Path: /douyin/payment/create
+        RpcPath: Payment/CreatePayment
+
+  # Inventory 服务 - Port 10007
+  - Grpc:
+      NonBlock: true
+      Target: inventory.go-mall.svc.cluster.local:10007
+    Mappings:
+      - Method: get
+        Path: /douyin/inventory/detail
+        RpcPath: Inventory/GetInventory
+
+  # Activity 服务 - Port 10011
+  - Grpc:
+      NonBlock: true
+      Target: activity.go-mall.svc.cluster.local:10011
+    Mappings:
+      - Method: get
+        Path: /api/v1/activity/token
+        RpcPath: Activity/Token
+
+  # Auths 服务 - Port 10000
+  - Grpc:
+      NonBlock: true
+      Target: auths.go-mall.svc.cluster.local:10000
+    Mappings:
+      - Method: post
+        Path: /api/v1/auth/validate
+        RpcPath: Auths/ValidateToken
+
+  # Coupons 服务 - Port 10009
+  - Grpc:
+      NonBlock: true
+      Target: coupons.go-mall.svc.cluster.local:10009
+    Mappings:
+      - Method: get
+        Path: /douyin/coupon/list
+        RpcPath: Coupons/ListCoupons
+
+  # Admin 服务 - Port 10012
+  - Grpc:
+      NonBlock: true
+      Target: admin.go-mall.svc.cluster.local:10012
+    Mappings:
+      - Method: get
+        Path: /api/v1/admin/products
+        RpcPath: Admin/GetProducts
+      - Method: post
+        Path: /api/v1/admin/products
+        RpcPath: Admin/CreateProduct
+      - Method: put
+        Path: /api/v1/admin/products/:id
+        RpcPath: Admin/UpdateProduct
+      - Method: delete
+        Path: /api/v1/admin/products/:id
+        RpcPath: Admin/DeleteProduct
+
+  # Checkout 服务 - Port 10005 (临时移除)
+  # - Grpc:
+  #     NonBlock: true
+  #     Target: checkout.go-mall.svc.cluster.local:10005
+  #   Mappings:
+  #     - Method: post
+  #       Path: /douyin/checkout/prepare
+  #       RpcPath: CheckoutService/PrepareCheckout
+
+  # Audit 服务 - Port 10008 (临时移除)
+  # - Grpc:
+  #     NonBlock: true
+  #     Target: audit.go-mall.svc.cluster.local:10008
+  #   Mappings:
+  #     - Method: get
+  #       Path: /api/v1/audit/logs
+  #       RpcPath: Audit/ListLogs
