@@ -3,12 +3,10 @@ ListenOn: 0.0.0.0:10011
 Mode: dev
 
 # 服务发现
-Consul:
-  Host: localhost:8500
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: activity.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 日志配置
 Log:
@@ -33,4 +31,3 @@ PrometheusExt:
   Host: 0.0.0.0
   Port: 9111
   Path: /metrics
-

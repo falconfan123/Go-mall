@@ -2,16 +2,17 @@ Name: products.rpc
 ListenOn: 0.0.0.0:10002
 Mode: pro
 # 服务发现
-Consul:
-  Host: ${CONSUL_HOST} 
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}
   Key: products.rpc
-  Meta:
-    Protocol: grpc
-  Tag:
-    - "grpc"  # api服务就是api，rpc是grpc
 InventoryRpc:
-  Target: consul://${CONSUL_HOST}/inventory.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: inventory.rpc
   NonBlock: true
+  Timeout: 3000
 
 PostgresConfig:
   datasource: ${POSTGRES_DATA_SOURCE}
@@ -57,3 +58,10 @@ RedisConf:
 GorseConfig:
   GorseAddr: ${GORSE_HOST}
   GorseApikey: ${GORSE_APIKEY}
+
+Minio:
+  Endpoint: ${MINIO_ENDPOINT}
+  AccessKey: ${MINIO_ACCESS_KEY}
+  SecretKey: ${MINIO_SECRET_KEY}
+  Bucket: ${MINIO_BUCKET}
+  UseSSL: false

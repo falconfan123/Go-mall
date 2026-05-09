@@ -1,34 +1,50 @@
-# 第一阶段：构建
-FROM golang:1.21 as builder
+# ==============================================
+# Go-mall 通用构建 Dockerfile
+# 从仓库根目录构建单个微服务镜像
+# ==============================================
 
-WORKDIR /project/go-mall
+FROM golang:1.25-alpine AS builder
 
-# 安装基础工具
+RUN apk add --no-cache git make
 
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOPROXY=https://goproxy.cn,direct \
+    GOTOOLCHAIN=auto
 
-# 设置Go环境
-ENV CGO_ENABLED=0
-# 复制源代码
+WORKDIR /workspace
+
+ARG SERVICE_NAME
+
 COPY . .
 
-# 下载依赖
+RUN test -n "$SERVICE_NAME"
+WORKDIR /workspace/services/${SERVICE_NAME}
 RUN go mod download
+RUN go build -o /out/${SERVICE_NAME} .
 
-# 执行构建脚本
-RUN bash ./scripts/build.sh
-# 第二阶段：运行
 FROM alpine:3.19
 
-# 使用阿里云镜像
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk update && \
-    apk add --no-cache tzdata ca-certificates
+RUN apk add --no-cache ca-certificates tzdata curl
 
-# 设置时区
-ENV TZ=Asia/Shanghai
+ENV TZ=Asia/Shanghai \
+    GIN_MODE=release
 
-# 创建必要的目录
 WORKDIR /app
 
-# 从构建阶段复制编译好的文件
-COPY --from=builder /app /app/ 
+ARG SERVICE_NAME
+ENV SERVICE_NAME=$SERVICE_NAME
+
+COPY --from=builder /out/${SERVICE_NAME} /app/${SERVICE_NAME}
+COPY --from=builder /workspace/services/${SERVICE_NAME}/etc/ /app/etc/
+
+RUN addgroup -g 1000 appgroup && \
+    adduser -u 1000 -G appgroup -s /bin/sh -D appuser && \
+    chown -R appuser:appgroup /app
+
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+CMD ["/bin/sh", "-lc", "exec /app/$SERVICE_NAME"]

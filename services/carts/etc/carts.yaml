@@ -2,12 +2,10 @@ Name: carts.rpc
 ListenOn: 0.0.0.0:10003
 Mode: dev
 
-Consul:
-  Host: localhost:8500 # consul endpoint
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: carts.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 链路追踪
 Telemetry:

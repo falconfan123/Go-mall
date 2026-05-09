@@ -4,7 +4,6 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
-	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 )
 
 type Config struct {
@@ -13,7 +12,6 @@ type Config struct {
 	GorseConfig    GorseConfig
 	AuditRpc       zrpc.RpcClientConf
 	AuthsRpc       zrpc.RpcClientConf
-	Consul         consul.Conf
 	Cache          cache.CacheConf
 	RedisConf      redis.RedisConf
 	Salt           string

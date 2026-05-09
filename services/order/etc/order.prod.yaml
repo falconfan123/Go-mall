@@ -3,13 +3,10 @@ ListenOn: 0.0.0.0:10004
 Mode: pro
 Timeout: 28000
 # 服务发现
-Consul:
-  Host: ${CONSUL_HOST}
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}
   Key: order.rpc
-  Meta:
-    Protocol: grpc
-  Tag:
-    - "grpc"  # api服务就是api，rpc是grpc
 
 
 PostgresConfig:
@@ -37,20 +34,32 @@ Telemetry:
 
 
 CheckoutRpc:
-  Target: consul://${CONSUL_HOST}/checkout.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: checkout.rpc
   NonBlock: true
   Timeout: 16000
 
 CouponRpc:
-  Target: consul://${CONSUL_HOST}/coupons.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: coupons.rpc
   NonBlock: true
   Timeout: 4000
 UserRpc:
-  Target: consul://${CONSUL_HOST}/users.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: users.rpc
   NonBlock: true
   Timeout: 3000
 InventoryRpc:
-  Target: consul://${CONSUL_HOST}/inventory.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: inventory.rpc
   NonBlock: true
   Timeout: 3000
 

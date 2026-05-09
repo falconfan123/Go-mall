@@ -3,12 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+
+	_ "github.com/lib/pq"
+
 	"github.com/falconfan123/Go-mall/services/audit/internal/config"
 	"github.com/falconfan123/Go-mall/services/audit/internal/server"
 	"github.com/falconfan123/Go-mall/services/audit/internal/svc"
 	audit "github.com/falconfan123/Go-mall/services/audit/pb"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -32,11 +33,6 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
-	// 注册服务
-	if err := consul.RegisterService(c.ListenOn, c.Consul); err != nil {
-		logx.Errorw("register service error", logx.Field("err", err))
-		panic(err)
-	}
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

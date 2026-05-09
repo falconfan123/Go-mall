@@ -3,13 +3,10 @@ ListenOn: 0.0.0.0:10006
 Mode: pro
 Timeout: 30000
 # 服务发现
-Consul:
-  Host: ${CONSUL_HOST}
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}
   Key: payment.rpc
-  Meta:
-    Protocol: grpc
-  Tag:
-    - "grpc"
 
 Telemetry:
   Name: payment.rpc
@@ -45,7 +42,10 @@ DevServer:
   Port: 11006
   EnablePprof: false
 OrderRpc:
-  Target: consul://${CONSUL_HOST}/order.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: order.rpc
   NonBlock: true
   Timeout: 25000
 

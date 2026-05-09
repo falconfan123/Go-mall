@@ -1,8 +1,8 @@
-{{- /* 生成所有服务的 ConfigMap */ -}}
+{{- /* Service ConfigMaps */ -}}
 {{- $root := . -}}
-
 {{- range $name, $svc := .Values.services }}
 {{- if $svc.enabled }}
+{{- $rpcKey := default (printf "%s.rpc" $name) $svc.rpcKey }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -11,60 +11,252 @@ metadata:
   namespace: {{ $root.Values.global.namespace | default "default" }}
 data:
   {{ $name }}.yaml: |
-    Name: {{ $name }}.rpc
+    Name: {{ $rpcKey }}
     ListenOn: 0.0.0.0:{{ $svc.grpcPort }}
     Mode: dev
+    Timeout: 5000
 
-    # 服务发现 - 使用 K8s 内置服务
-    Consul:
-      Host: consul-headless.go-mall.svc.cluster.local:8500
-      Key: {{ $name }}.rpc
-      Meta:
-        Protocol: grpc
-      TTL: 10
+    Etcd:
+      Hosts:
+        - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+      Key: {{ $rpcKey }}
 
-    # 日志
     Log:
       ServiceName: "{{ $name }}-rpc"
-      Mode: 'console'
+      Mode: "console"
       Encoding: "json"
       Stat: false
 
-    # MySQL (PostgreSQL)
+    Telemetry:
+      Name: {{ $rpcKey }}
+      Endpoint: {{ $root.Values.global.jaeger.endpoint | quote }}
+      Batcher: zipkin
+      Sampler: 1.0
+
     PostgresConfig:
       datasource: postgres://{{ $root.Values.global.postgres.user }}:{{ $root.Values.global.postgres.password }}@{{ $root.Values.global.postgres.host }}:{{ $root.Values.global.postgres.port }}/{{ $root.Values.global.postgres.database }}?sslmode=disable
-      conntimeout: 5
+      Conntimeout: 5
 
-    # Redis 缓存
     RedisConf:
       Host: {{ $root.Values.global.redis.host }}:{{ $root.Values.global.redis.port }}
       Type: node
-      Pass: ""
+      Pass: {{ $root.Values.global.redis.password | quote }}
       Tls: false
 
-    # Session Redis (某些服务需要)
+    PrometheusExt:
+      Host: 0.0.0.0
+      Port: {{ add 1000 $svc.grpcPort }}
+      Path: /metrics
+
+    DevServer:
+      Enabled: true
+      Host: 0.0.0.0
+      Port: {{ add 1000 $svc.grpcPort }}
+      EnablePprof: false
+
+    {{- if eq $name "auths" }}
     SessionRedis:
       Host: {{ $root.Values.global.redis.host }}:{{ $root.Values.global.redis.port }}
       Type: node
+      Pass: {{ $root.Values.global.redis.password | quote }}
+    {{- end }}
 
-    # Prometheus 监控
-    PrometheusExt:
-      Host: 0.0.0.0
-      Port: 9100
-      Path: /metrics
+    {{- if eq $name "users" }}
+    Salt: "J1j1zH4zH4"
+    AuthConfig:
+      AccessSecret: "uKq5xR8vW2zN9mP4sL7jH6yG3bF1dC0"
+      AccessExpire: 86400
+    Cache:
+      - Host: {{ $root.Values.global.redis.host }}:{{ $root.Values.global.redis.port }}
+        Pass: {{ $root.Values.global.redis.password | quote }}
+        Type: node
+    GorseConfig:
+      GorseAddr: {{ $root.Values.global.gorse.host | quote }}
+      GorseApikey: {{ $root.Values.global.gorse.apikey | quote }}
+    {{- end }}
 
-    # DevServer (开发模式 - 禁用)
-    DevServer:
-      Enabled: false
-      Host: 0.0.0.0
-      Port: 11000
-      EnablePprof: false
+    {{- if or (eq $name "activity") (eq $name "system") }}
+    Activity:
+      TokenExpire: 60
+      AdvanceSeconds: 5
+    {{- end }}
 
+    {{- if eq $name "product" }}
+    InventoryRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "inventory" "rpcKey" }}
+      NonBlock: true
+      Timeout: 3000
+    ElasticSearch:
+      Addr: {{ $root.Values.global.elasticsearch.host | quote }}
+      IndexName: products
+    GorseConfig:
+      GorseAddr: {{ $root.Values.global.gorse.host | quote }}
+      GorseApikey: {{ $root.Values.global.gorse.apikey | quote }}
+    QiNiu:
+      AccessKey: ""
+      SecretKey: ""
+      Bucket: ""
+      Domain: ""
+    Minio:
+      Endpoint: minio.go-mall.svc.cluster.local:9000
+      AccessKey: minioadmin
+      SecretKey: minioadmin
+      Bucket: go-mall
+      UseSSL: false
+    {{- end }}
+
+    {{- if eq $name "coupons" }}
+    ProductRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "product" "rpcKey" }}
+      NonBlock: true
+      Timeout: 5000
+    {{- end }}
+
+    {{- if eq $name "admin" }}
+    ProductRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "product" "rpcKey" }}
+      NonBlock: true
+      Timeout: 5000
+    InventoryRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "inventory" "rpcKey" }}
+      NonBlock: true
+      Timeout: 3000
+    {{- end }}
+
+    {{- if eq $name "order" }}
+    CheckoutRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "checkout" "rpcKey" }}
+      NonBlock: true
+      Timeout: 16000
+    CouponRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "coupons" "rpcKey" }}
+      NonBlock: true
+      Timeout: 4000
+    UserRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "users" "rpcKey" }}
+      NonBlock: true
+      Timeout: 3000
+    InventoryRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "inventory" "rpcKey" }}
+      NonBlock: true
+      Timeout: 3000
+    RabbitMQConfig:
+      Host: {{ $root.Values.global.rabbitmq.host | quote }}
+      Port: {{ $root.Values.global.rabbitmq.port }}
+      User: {{ $root.Values.global.rabbitmq.user | quote }}
+      Pass: {{ $root.Values.global.rabbitmq.password | quote }}
+      VHost: {{ $root.Values.global.rabbitmq.vhost | quote }}
+    {{- end }}
+
+    {{- if eq $name "checkout" }}
+    InventoryRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "inventory" "rpcKey" }}
+      NonBlock: true
+      Timeout: 3000
+    ProductRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "product" "rpcKey" }}
+      NonBlock: true
+      Timeout: 5000
+    CouponsRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "coupons" "rpcKey" }}
+      NonBlock: true
+      Timeout: 5000
+    RabbitMQConfig:
+      Host: {{ $root.Values.global.rabbitmq.host | quote }}
+      Port: {{ $root.Values.global.rabbitmq.port }}
+      User: {{ $root.Values.global.rabbitmq.user | quote }}
+      Pass: {{ $root.Values.global.rabbitmq.password | quote }}
+      VHost: {{ $root.Values.global.rabbitmq.vhost | quote }}
+    {{- end }}
+
+    {{- if eq $name "payment" }}
+    OrderRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "order" "rpcKey" }}
+      NonBlock: true
+      Timeout: 5000
+    RabbitMQConfig:
+      Host: {{ $root.Values.global.rabbitmq.host | quote }}
+      Port: {{ $root.Values.global.rabbitmq.port }}
+      User: {{ $root.Values.global.rabbitmq.user | quote }}
+      Pass: {{ $root.Values.global.rabbitmq.password | quote }}
+      VHost: {{ $root.Values.global.rabbitmq.vhost | quote }}
+    Alipay:
+      AppId: ""
+      AlipayPublicKey: ""
+      PrivateKey: ""
+      NotifyURL: ""
+      NotifyPath: ""
+      NotifyPort: 0
+      ReturnURL: ""
+    Stripe:
+      APIKey: ""
+      SuccessURL: ""
+      CancelURL: ""
+      WebhookSecret: ""
+      WebhookPort: 0
+    {{- end }}
+
+    {{- if eq $name "audit" }}
+    RabbitMQ:
+      Host: {{ $root.Values.global.rabbitmq.host | quote }}
+      Port: {{ $root.Values.global.rabbitmq.port }}
+      User: {{ $root.Values.global.rabbitmq.user | quote }}
+      Pass: {{ $root.Values.global.rabbitmq.password | quote }}
+      VHost: {{ $root.Values.global.rabbitmq.vhost | quote }}
+    ElasticSearch:
+      Addr: {{ $root.Values.global.elasticsearch.host | quote }}
+      IndexName: audit_logs
+    {{- end }}
+
+    {{- if eq $name "search" }}
+    ProductRpc:
+      Etcd:
+        Hosts:
+          - {{ $root.Values.global.etcd.host }}:{{ $root.Values.global.etcd.port }}
+        Key: {{ index $root.Values.services "product" "rpcKey" }}
+      NonBlock: true
+      Timeout: 5000
+    {{- end }}
 {{- end }}
 {{- end }}
 
-{{- /* 网关配置 */ -}}
-{{- $root := . -}}
+{{- /* Gateway ConfigMap */ -}}
 {{- if .Values.gateway.enabled }}
 ---
 apiVersion: v1
@@ -79,8 +271,8 @@ data:
     Port: {{ .Values.gateway.port }}
 
     Log:
-      Mode: 'console'
-      Encoding: 'json'
+      Mode: "console"
+      Encoding: "json"
       Stat: false
 
     Auth:
@@ -88,9 +280,12 @@ data:
       AccessExpire: 86400
 
     Upstreams:
-      # ==================== Users 用户服务 (端口 10001) ====================
       - Grpc:
-          Target: users-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "users" "grpcPort" }}
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "users" "rpcKey" }}
+          NonBlock: true
         Mappings:
           - Method: post
             Path: /douyin/user/login
@@ -108,26 +303,29 @@ data:
             Path: /douyin/user/address/list
             RpcPath: users.Users/ListAddresses
 
-      # ==================== Product 产品服务 (端口 10002) ====================
       - Grpc:
-          Target: product-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "product" "grpcPort" }}
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "product" "rpcKey" }}
+          NonBlock: true
         Mappings:
           - Method: get
             Path: /douyin/product/list
-            RpcPath: product.ProductCatalogService/GetAllProduct
+            RpcPath: product.ProductCatalogService/ListProducts
           - Method: get
             Path: /douyin/product
             RpcPath: product.ProductCatalogService/GetProduct
           - Method: post
             Path: /douyin/product/upload
             RpcPath: product.ProductCatalogService/GetUploadURL
-          - Method: get
-            Path: /douyin/product/list/cursor
-            RpcPath: product.ProductCatalogService/ListProducts
 
-      # ==================== Carts 购物车服务 (端口 10003) ====================
       - Grpc:
-          Target: carts-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "carts" "grpcPort" }}
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "carts" "rpcKey" }}
+          NonBlock: true
         Mappings:
           - Method: post
             Path: /douyin/cart/add
@@ -142,83 +340,39 @@ data:
             Path: /douyin/cart/sub
             RpcPath: carts.Cart/SubCartItem
 
-      # ==================== Payment 支付服务 (端口 10006) ====================
       - Grpc:
-          Target: payment-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "payment" "grpcPort" }}
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "order" "rpcKey" }}
+          NonBlock: true
         Mappings:
           - Method: post
-            Path: /douyin/payment/create
-            RpcPath: payment.Payment/CreatePayment
-
-      # ==================== System 系统服务 (端口 10010) ====================
-      - Grpc:
-          Target: system-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "system" "grpcPort" }}
-        Mappings:
-          - Method: get
-            Path: /api/v1/system/time
-            RpcPath: system.System/Time
-
-      # ==================== Activity 秒杀活动服务 (端口 10011) ====================
-      - Grpc:
-          Target: activity-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "activity" "grpcPort" }}
-        Mappings:
-          - Method: get
-            Path: /api/v1/activity/token
-            RpcPath: activity.Activity/Token
-          - Method: get
-            Path: /api/v1/activity/status
-            RpcPath: activity.Activity/CheckSeckillStatus
-
-      # ==================== Order 订单服务 (端口 10004) ====================
-      - Grpc:
-          Target: order-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "order" "grpcPort" }}
-        Mappings:
+            Path: /douyin/order/create
+            RpcPath: order.OrderService/CreateOrder
           - Method: get
             Path: /douyin/order/list
             RpcPath: order.OrderService/ListOrders
           - Method: get
-            Path: /douyin/order/detail
-            RpcPath: order.OrderService/GetOrder
-          - Method: post
-            Path: /douyin/order/create
-            RpcPath: order.OrderService/CreateOrder
-          - Method: post
-            Path: /api/v1/order/create
-            RpcPath: order.OrderService/CreateOrder
-          - Method: post
-            Path: /api/v1/order/seckill
-            RpcPath: order.OrderService/Seckill
-          - Method: get
             Path: /api/v1/order/detail
             RpcPath: order.OrderService/GetOrder
-          - Method: get
-            Path: /api/v1/order/list
-            RpcPath: order.OrderService/ListOrders
           - Method: post
             Path: /api/v1/order/cancel
             RpcPath: order.OrderService/CancelOrder
+          - Method: post
+            Path: /api/v1/order/seckill
+            RpcPath: order.OrderService/Seckill
 
-      # ==================== Auths 认证服务 (端口 10000) ====================
       - Grpc:
-          Target: auths-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "auths" "grpcPort" }}
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "checkout" "rpcKey" }}
+          NonBlock: true
         Mappings:
           - Method: post
-            Path: /api/v1/auth/token
-            RpcPath: auths.Auths/GenerateToken
-          - Method: post
-            Path: /api/v1/auth/validate
-            RpcPath: auths.Auths/ValidateToken
-          - Method: post
-            Path: /api/v1/auth/renewal
-            RpcPath: auths.Auths/RenewToken
-          - Method: post
-            Path: /api/v1/auth/logout
-            RpcPath: auths.Auths/Logout
-
-      # ==================== Checkout 结算服务 (端口 10005) ====================
-      - Grpc:
-          Target: checkout-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "checkout" "grpcPort" }}
-        Mappings:
+            Path: /douyin/checkout/prepare
+            RpcPath: checkout.CheckoutService/PrepareCheckout
           - Method: post
             Path: /api/v1/checkout/prepare
             RpcPath: checkout.CheckoutService/PrepareCheckout
@@ -232,9 +386,23 @@ data:
             Path: /api/v1/checkout/detail
             RpcPath: checkout.CheckoutService/GetCheckoutDetail
 
-      # ==================== Inventory 库存服务 (端口 10007) ====================
       - Grpc:
-          Target: inventory-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "inventory" "grpcPort" }}
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "payment" "rpcKey" }}
+          NonBlock: true
+        Mappings:
+          - Method: post
+            Path: /douyin/payment/create
+            RpcPath: payment.Payment/CreatePayment
+
+      - Grpc:
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "inventory" "rpcKey" }}
+          NonBlock: true
         Mappings:
           - Method: get
             Path: /api/v1/inventory/detail
@@ -249,66 +417,79 @@ data:
             Path: /api/v1/inventory/return
             RpcPath: inventory.Inventory/ReturnInventory
 
-      # ==================== Admin 管理服务 (端口 10012) ====================
       - Grpc:
-          Target: admin-rpc.{{ .Values.global.namespace | default "default" }}.svc.cluster.local:{{ index .Values.services "admin" "grpcPort" }}
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "system" "rpcKey" }}
+          NonBlock: true
         Mappings:
-          # 商品管理
-          - Method: post
-            Path: /api/v1/admin/product/create
-            RpcPath: admin.AdminProductService/CreateProduct
-          - Method: post
-            Path: /api/v1/admin/product/update
-            RpcPath: admin.AdminProductService/UpdateProduct
-          - Method: post
-            Path: /api/v1/admin/product/delete
-            RpcPath: admin.AdminProductService/DeleteProduct
           - Method: get
-            Path: /api/v1/admin/product/detail
-            RpcPath: admin.AdminProductService/GetProduct
+            Path: /api/v1/system/time
+            RpcPath: system.System/Time
+
+      - Grpc:
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "activity" "rpcKey" }}
+          NonBlock: true
+        Mappings:
           - Method: get
-            Path: /api/v1/admin/product/list
+            Path: /api/v1/activity/token
+            RpcPath: activity.Activity/Token
+          - Method: get
+            Path: /api/v1/activity/status
+            RpcPath: activity.Activity/CheckSeckillStatus
+
+      - Grpc:
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "auths" "rpcKey" }}
+          NonBlock: true
+        Mappings:
+          - Method: post
+            Path: /api/v1/auth/token
+            RpcPath: auths.Auths/GenerateToken
+          - Method: post
+            Path: /api/v1/auth/validate
+            RpcPath: auths.Auths/ValidateToken
+          - Method: post
+            Path: /api/v1/auth/renewal
+            RpcPath: auths.Auths/RenewToken
+          - Method: post
+            Path: /api/v1/auth/logout
+            RpcPath: auths.Auths/Logout
+
+      - Grpc:
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "coupons" "rpcKey" }}
+          NonBlock: true
+        Mappings:
+          - Method: get
+            Path: /douyin/coupon/list
+            RpcPath: coupons.Coupons/ListCoupons
+
+      - Grpc:
+          Etcd:
+            Hosts:
+              - {{ .Values.global.etcd.host }}:{{ .Values.global.etcd.port }}
+            Key: {{ index .Values.services "admin" "rpcKey" }}
+          NonBlock: true
+        Mappings:
+          - Method: get
+            Path: /api/v1/admin/products
             RpcPath: admin.AdminProductService/ListProducts
-          # 分类管理
           - Method: post
-            Path: /api/v1/admin/category/create
-            RpcPath: admin.AdminCategoryService/CreateCategory
-          - Method: post
-            Path: /api/v1/admin/category/update
-            RpcPath: admin.AdminCategoryService/UpdateCategory
-          - Method: post
-            Path: /api/v1/admin/category/delete
-            RpcPath: admin.AdminCategoryService/DeleteCategory
-          - Method: get
-            Path: /api/v1/admin/category/list
-            RpcPath: admin.AdminCategoryService/ListCategories
-          # 秒杀活动管理
-          - Method: post
-            Path: /api/v1/admin/activity/create
-            RpcPath: admin.AdminSeckillService/CreateActivity
-          - Method: post
-            Path: /api/v1/admin/activity/update
-            RpcPath: admin.AdminSeckillService/UpdateActivity
-          - Method: post
-            Path: /api/v1/admin/activity/delete
-            RpcPath: admin.AdminSeckillService/DeleteActivity
-          - Method: get
-            Path: /api/v1/admin/activity/detail
-            RpcPath: admin.AdminSeckillService/GetActivity
-          - Method: get
-            Path: /api/v1/admin/activity/list
-            RpcPath: admin.AdminSeckillService/ListActivities
-          - Method: post
-            Path: /api/v1/admin/activity/settime
-            RpcPath: admin.AdminSeckillService/SetActivityTime
-          - Method: post
-            Path: /api/v1/admin/activity/setstock
-            RpcPath: admin.AdminSeckillService/SetActivityStock
-          # 库存管理
-          - Method: post
-            Path: /api/v1/admin/inventory/adjust
-            RpcPath: admin.AdminInventoryService/AdjustInventory
-          - Method: get
-            Path: /api/v1/admin/inventory/detail
-            RpcPath: admin.AdminInventoryService/GetInventory
+            Path: /api/v1/admin/products
+            RpcPath: admin.AdminProductService/CreateProduct
+          - Method: put
+            Path: /api/v1/admin/products/:id
+            RpcPath: admin.AdminProductService/UpdateProduct
+          - Method: delete
+            Path: /api/v1/admin/products/:id
+            RpcPath: admin.AdminProductService/DeleteProduct
 {{- end }}

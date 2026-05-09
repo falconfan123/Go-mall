@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd
+  namespace: go-mall
+spec:
+  ports:
+    - name: client
+      port: 2379
+      targetPort: 2379
+  selector:
+    app: etcd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: etcd
+  namespace: go-mall
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: etcd
+  template:
+    metadata:
+      labels:
+        app: etcd
+    spec:
+      containers:
+        - name: etcd
+          image: docker.m.daoclub.io/rancher/coreos-etcd:v3.5.0
+          ports:
+            - containerPort: 2379
+          env:
+            - name: ETCD_NAME
+              value: etcd0
+            - name: ETCD_DATA_DIR
+              value: /etcd
+          command:
+            - /usr/local/bin/etcd
+            - --listen-client-urls=http://0.0.0.0:2379
+            - --advertise-client-urls=http://etcd.go-mall.svc.cluster.local:2379

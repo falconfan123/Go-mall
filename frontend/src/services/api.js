@@ -1,9 +1,11 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+
 // 创建 axios 实例
 const api = axios.create({
-  baseURL: '/douyin',
+  baseURL: apiBaseUrl,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -75,46 +77,46 @@ export default api;
 
 // 用户 API
 export const userApi = {
-  login: (data) => api.post('/user/login', data),
-  register: (data) => api.post('/user/register', data),
-  info: () => api.get('/user/info'),
+  login: (data) => api.post('/douyin/user/login', data),
+  register: (data) => api.post('/douyin/user/register', data),
+  info: () => api.get('/douyin/user/info'),
 };
 
 // 商品 API
 export const productApi = {
-  list: (params) => api.get('/product/list', { params }),
-  detail: (id) => api.get(`/product/detail?id=${id}`),
-  search: (keyword) => api.get('/product/search', { params: { keyword } }),
+  list: (params) => api.get('/douyin/product/list', { params }),
+  detail: (id) => api.get(`/douyin/product/detail?id=${id}`),
+  search: (keyword) => api.get('/douyin/product/search', { params: { keyword } }),
 };
 
 // 购物车 API
 export const cartApi = {
-  list: () => api.get('/cart/list'),
-  add: (data) => api.post('/cart/add', data),
-  update: (data) => api.put('/cart/update', data),
-  remove: (id) => api.delete(`/cart/remove?id=${id}`),
-  clear: () => api.delete('/cart/clear'),
+  list: () => api.get('/douyin/cart/list'),
+  add: (data) => api.post('/douyin/cart/add', data),
+  update: (data) => api.put('/douyin/cart/update', data),
+  remove: (id) => api.delete(`/douyin/cart/remove?id=${id}`),
+  clear: () => api.delete('/douyin/cart/clear'),
 };
 
 // 订单 API
 export const orderApi = {
-  list: () => api.get('/order/list'),
-  detail: (id) => api.get(`/order/detail?id=${id}`),
-  create: (data) => api.post('/order/create', data),
-  cancel: (id) => api.post(`/order/cancel?id=${id}`),
+  list: () => api.get('/douyin/order/list'),
+  detail: (id) => api.get(`/douyin/order/detail?id=${id}`),
+  create: (data) => api.post('/douyin/order/create', data),
+  cancel: (id) => api.post(`/douyin/order/cancel?id=${id}`),
 };
 
 // 支付 API
 export const paymentApi = {
-  create: (data) => api.post('/payment/create', data),
-  status: (id) => api.get(`/payment/status?id=${id}`),
+  create: (data) => api.post('/douyin/payment/create', data),
+  status: (id) => api.get(`/douyin/payment/status?id=${id}`),
 };
 
 // 秒杀 API
 export const flashApi = {
-  list: () => api.get('/flash/list'),
-  detail: (id) => api.get(`/flash/detail?id=${id}`),
-  status: (activityId) => api.get(`/flash/status?activity_id=${activityId}`),
+  list: () => api.get('/douyin/flash/list'),
+  detail: (id) => api.get(`/douyin/flash/detail?id=${id}`),
+  status: (activityId) => api.get(`/douyin/flash/status?activity_id=${activityId}`),
 };
 
 // 秒杀系统 API

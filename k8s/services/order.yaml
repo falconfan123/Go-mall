@@ -1,0 +1,109 @@
+# ==============================================
+# Order Service Deployment (Etcd-only 示例)
+# ==============================================
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-config
+  namespace: go-mall
+data:
+  order.yaml: |
+    Name: order.rpc
+    ListenOn: 0.0.0.0:10004
+    Mode: dev
+    Timeout: 28000
+
+    Etcd:
+      Hosts:
+        - etcd.go-mall.svc.cluster.local:2379
+      Key: order.rpc
+
+    Telemetry:
+      Name: order.rpc
+      Endpoint: http://jaeger-collector.go-mall.svc.cluster.local:14268/api/traces
+      Batcher: zipkin
+      Sampler: 1.0
+
+    PostgresConfig:
+      datasource: postgres://root:fht3825099@postgres.go-mall.svc.cluster.local:5432/mall?sslmode=disable
+      conntimeout: 5
+
+    RedisConf:
+      Host: redis.go-mall.svc.cluster.local:6379
+      Type: node
+      Pass: ""
+      Tls: false
+
+    Log:
+      ServiceName: "order-rpc"
+      Mode: "console"
+      Encoding: "json"
+      Stat: false
+
+    CheckoutRpc:
+      Etcd:
+        Hosts:
+          - etcd.go-mall.svc.cluster.local:2379
+        Key: checkout.rpc
+      NonBlock: true
+      Timeout: 16000
+
+    CouponRpc:
+      Etcd:
+        Hosts:
+          - etcd.go-mall.svc.cluster.local:2379
+        Key: coupons.rpc
+      NonBlock: true
+      Timeout: 4000
+
+    UserRpc:
+      Etcd:
+        Hosts:
+          - etcd.go-mall.svc.cluster.local:2379
+        Key: users.rpc
+      NonBlock: true
+      Timeout: 3000
+
+    InventoryRpc:
+      Etcd:
+        Hosts:
+          - etcd.go-mall.svc.cluster.local:2379
+        Key: inventory.rpc
+      NonBlock: true
+      Timeout: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-rpc
+  namespace: go-mall
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-rpc
+  template:
+    metadata:
+      labels:
+        app: order-rpc
+    spec:
+      containers:
+        - name: order-rpc
+          image: go-mall/order:latest
+          imagePullPolicy: Never
+          command: ["/app/order"]
+          args: ["-f", "/app/etc/order.yaml"]
+          ports:
+            - containerPort: 10004
+              name: grpc
+          volumeMounts:
+            - name: config
+              mountPath: /app/etc
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: order-config

@@ -3,16 +3,19 @@ ListenOn: 0.0.0.0:10008
 Mode: pro
 Timeout: 5000
 # 服务发现
-Consul:
-  Host: ${CONSUL_HOST}
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}
   Key: audit.rpc # 与服务名称保持一致
-  Meta:
-    Protocol: grpc
-  Tag:
-    - "grpc"
 
 PostgresConfig:
   datasource: ${POSTGRES_DATA_SOURCE}
+
+RedisConf:
+  Host: ${REDIS_HOST}
+  Type: node
+  Pass: ${REDIS_PASSWORD}
+  Tls: false
 
 Log:
   ServiceName: "audit-rpc"
@@ -44,3 +47,4 @@ RabbitMQ:
 
 ElasticSearch:
   Addr: ${ELASTICSEARCH_HOST}
+  IndexName: audit_logs

@@ -5,13 +5,10 @@ Mode: pro
 Timeout: 5000
 
 # 服务发现
-Consul:
-  Host: ${CONSUL_HOST}
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}
   Key: auths.rpc # 与服务名称保持一致
-  Meta:
-    Protocol: grpc
-  Tag:
-    - "grpc"
 
 PostgresConfig:
   datasource: ${POSTGRES_DATA_SOURCE}

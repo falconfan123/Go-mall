@@ -1,12 +1,12 @@
 Name: audit.rpc
 ListenOn: 0.0.0.0:10008
+Mode: dev
+Timeout: 5000
 # 服务发现
-Consul:
-  Host: localhost:8500 # consul endpoint
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: audit.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 链路追踪
 Telemetry:
@@ -24,6 +24,12 @@ PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
   Conntimeout: 5
 
+RedisConf:
+  Host: localhost:6379
+  Type: node
+  Pass: ""
+  Tls: false
+
 RabbitMQ:
   Host: "localhost"
   Port: 5672
@@ -33,9 +39,16 @@ RabbitMQ:
 
 ElasticSearch:
   Addr: "http://localhost:9200"
+  IndexName: "audit_logs"
 
 # Prometheus 监控暴露
 PrometheusExt:
   Host: 0.0.0.0
   Port: 9108
   Path: /metrics
+
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 11008
+  EnablePprof: false

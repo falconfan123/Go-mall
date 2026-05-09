@@ -3,13 +3,10 @@ ListenOn: 0.0.0.0:10005 # 端口见接口文档
 Mode: pro
 Timeout: 18000
 # 服务发现
-Consul:
-  Host: ${CONSUL_HOST}
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}
   Key: checkout.rpc # 与服务名称保持一致
-  Meta:
-    Protocol: grpc # 这里无需修改
-  Tag:
-    - "grpc"  # api服务就是api，rpc是grpc
 
 PostgresConfig:
   datasource: ${POSTGRES_DATA_SOURCE}
@@ -36,21 +33,31 @@ Telemetry:
   Sampler: 0.1 # 采样率，1.0表示全部采集, 0.1表示10%
 
 InventoryRpc:
-  Target: consul://${CONSUL_HOST}/inventory.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: inventory.rpc
   NonBlock: true
   Timeout: 3000
 
 ProductRpc:
-  Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: products.rpc
   NonBlock: true
   Timeout: 5000
 
 CouponsRpc:
-  Target: consul://${CONSUL_HOST}/coupons.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: coupons.rpc
   NonBlock: true
   Timeout: 5000
 
 RedisConf:
   Host: ${REDIS_HOST}
+  Type: node
   Pass: ${REDIS_PASSWORD}
   Tls: false

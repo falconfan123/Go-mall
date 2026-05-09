@@ -4,12 +4,10 @@ Mode: dev
 Timeout: 0
 
 # 服务发现配置
-Consul:
-  Host: localhost:8500
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: products.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 链路追踪
 Telemetry:
@@ -25,8 +23,12 @@ Log:
   Stat: false
 
 InventoryRpc:
-  Target: consul://localhost:8500/inventory.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: inventory.rpc
   NonBlock: true
+  Timeout: 3000
 
 # MySQL 配置
 PostgresConfig:
@@ -41,6 +43,7 @@ RedisConf:
 # Elasticsearch 配置
 ElasticSearch:
   Addr: http://localhost:9200
+  IndexName: products
 #七牛云
 QiNiu:
   accessKey: JfDRw6TYF7B-MXNjIivW1zxcZ6PrSHAHYksBcZOt

@@ -39,7 +39,7 @@ frontend:frontend:node proxy.js:3000:frontend
 "
 
 # 基础设施依赖
-INFRA_DEPS="Consul:8500 MySQL:3306 Redis:6379 Elasticsearch:9200 RabbitMQ:5672"
+INFRA_DEPS="Etcd:2379 MySQL:3306 Redis:6379 Elasticsearch:9200 RabbitMQ:5672"
 
 # Loki + Grafana 日志系统
 LOKI_STACK="infrastructure/docker-compose.yaml"

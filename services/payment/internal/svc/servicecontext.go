@@ -33,19 +33,25 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// 	logx.Errorw("创建延迟队列失败", logx.LogField{Key: "err", Value: err})
 	// 	panic(err)
 	// }
-	// 1. 创建支付宝客户端
-	client, err := alipay.New(c.Alipay.AppId, c.Alipay.PrivateKey, false)
-	if err != nil {
-		logx.Errorw("创建支付宝客户端失败", logx.LogField{Key: "err", Value: err})
-		panic(err)
-	}
-	// 2. 加载支付宝公钥用于验签
-	if err := client.LoadAliPayPublicKey(c.Alipay.AlipayPublicKey); err != nil {
-		logx.Errorw("加载支付宝公钥失败", logx.LogField{Key: "err", Value: err})
-		panic(err)
+	var alipayClient *alipay.Client
+	// 1. 只有配置有效时才创建支付宝客户端
+	if c.Alipay.AppId != "" && c.Alipay.PrivateKey != "" {
+		var err error
+		alipayClient, err = alipay.New(c.Alipay.AppId, c.Alipay.PrivateKey, false)
+		if err != nil {
+			logx.Errorw("创建支付宝客户端失败", logx.LogField{Key: "err", Value: err})
+			panic(err)
+		}
+		// 加载支付宝公钥用于验签
+		if c.Alipay.AlipayPublicKey != "" {
+			if err := alipayClient.LoadAliPayPublicKey(c.Alipay.AlipayPublicKey); err != nil {
+				logx.Errorw("加载支付宝公钥失败", logx.LogField{Key: "err", Value: err})
+				panic(err)
+			}
+		}
 	}
 
-	// 3. 创建 Stripe 处理器
+	// 2. 创建 Stripe 处理器
 	stripeProcessor := stripe.NewStripeProcessor(c.Stripe)
 
 	return &ServiceContext{
@@ -53,7 +59,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Rdb:             redis.MustNewRedis(c.RedisConf),
 		PaymentModel:    payment.NewPaymentsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		OrderRpc:        order.NewOrderServiceClient(zrpc.MustNewClient(c.OrderRpc).Conn()),
-		Alipay:          client,
+		Alipay:          alipayClient,
 		StripeProcessor: stripeProcessor,
 		PaymentMQ:       nil, // 暂时设置为nil
 		Model:           sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),

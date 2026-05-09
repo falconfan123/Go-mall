@@ -1,6 +1,9 @@
 package svc
 
 import (
+	"time"
+
+	"github.com/avast/retry-go"
 	"github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
 	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
@@ -33,20 +36,20 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	orderDelayMQ, err := delay.Init(c)
+	orderDelayMQ, err := initOrderDelayMQ(c)
 	if err != nil {
-		logx.Errorf("delay mq init failed: %v, continuing without it", err)
-		orderDelayMQ = nil
+		logx.Errorf("delay mq init failed after retries: %v", err)
+		panic(err)
 	}
-	notifyMQ, err := notify.Init(c)
+	notifyMQ, err := initOrderNotifyMQ(c)
 	if err != nil {
-		logx.Errorf("notify mq init failed: %v, continuing without it", err)
-		notifyMQ = nil
+		logx.Errorf("notify mq init failed after retries: %v", err)
+		panic(err)
 	}
-	seckillMQ, err := seckill.Init(c)
+	seckillMQ, err := initSeckillMQ(c)
 	if err != nil {
-		logx.Errorf("seckill mq init failed: %v, continuing without it", err)
-		seckillMQ = nil
+		logx.Errorf("seckill mq init failed after retries: %v", err)
+		panic(err)
 	}
 	redisClient, err := redis.NewRedis(c.RedisConf)
 	if err != nil {
@@ -68,4 +71,79 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		SeckillMQ:      seckillMQ,
 		RedisClient:    redisClient,
 	}
+}
+
+func initOrderDelayMQ(c config.Config) (*delay.OrderDelayMQ, error) {
+	var (
+		orderDelayMQ *delay.OrderDelayMQ
+		err          error
+	)
+
+	retryErr := retry.Do(
+		func() error {
+			orderDelayMQ, err = delay.Init(c)
+			return err
+		},
+		retry.Attempts(30),
+		retry.Delay(2*time.Second),
+		retry.LastErrorOnly(true),
+		retry.OnRetry(func(n uint, err error) {
+			logx.Errorf("delay mq init attempt %d/30 failed: %v", n+1, err)
+		}),
+	)
+	if retryErr != nil {
+		return nil, retryErr
+	}
+
+	return orderDelayMQ, nil
+}
+
+func initOrderNotifyMQ(c config.Config) (*notify.OrderNotifyMQ, error) {
+	var (
+		orderNotifyMQ *notify.OrderNotifyMQ
+		err           error
+	)
+
+	retryErr := retry.Do(
+		func() error {
+			orderNotifyMQ, err = notify.Init(c)
+			return err
+		},
+		retry.Attempts(30),
+		retry.Delay(2*time.Second),
+		retry.LastErrorOnly(true),
+		retry.OnRetry(func(n uint, err error) {
+			logx.Errorf("notify mq init attempt %d/30 failed: %v", n+1, err)
+		}),
+	)
+	if retryErr != nil {
+		return nil, retryErr
+	}
+
+	return orderNotifyMQ, nil
+}
+
+func initSeckillMQ(c config.Config) (*seckill.SeckillMQ, error) {
+	var (
+		seckillMQ *seckill.SeckillMQ
+		err       error
+	)
+
+	retryErr := retry.Do(
+		func() error {
+			seckillMQ, err = seckill.Init(c)
+			return err
+		},
+		retry.Attempts(30),
+		retry.Delay(2*time.Second),
+		retry.LastErrorOnly(true),
+		retry.OnRetry(func(n uint, err error) {
+			logx.Errorf("seckill mq init attempt %d/30 failed: %v", n+1, err)
+		}),
+	)
+	if retryErr != nil {
+		return nil, retryErr
+	}
+
+	return seckillMQ, nil
 }

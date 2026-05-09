@@ -3,12 +3,10 @@ ListenOn: 0.0.0.0:10004
 Mode: dev
 Timeout: 0
 # 服务发现
-Consul:
-  Host: localhost:8500 # consul endpoint
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: order.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10 # 健康检查 TTL（秒），Consul 会定期检测心跳
 
 # 链路追踪
 Telemetry:
@@ -30,20 +28,32 @@ PostgresConfig:
 
 
 CheckoutRpc:
-  Target: consul://localhost:8500/checkout.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: checkout.rpc
   NonBlock: true
   Timeout: 10000
 
 CouponRpc:
-  Target: consul://localhost:8500/coupons.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: coupons.rpc
   NonBlock: true
   Timeout: 10000
 UserRpc:
-  Target: consul://localhost:8500/users.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: users.rpc
   NonBlock: true
   Timeout: 10000
 InventoryRpc:
-  Target: consul://localhost:8500/inventory.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: inventory.rpc
   NonBlock: true
   Timeout: 10000
 
@@ -56,6 +66,7 @@ RabbitMQConfig:
 
 RedisConf:
   Host: localhost:6379
+  Type: node
   Pass: ""
   Tls: false
 

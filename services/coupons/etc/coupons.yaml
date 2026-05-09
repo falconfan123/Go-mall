@@ -3,12 +3,10 @@ ListenOn: 0.0.0.0:10009
 
 
 # 服务发现
-Consul:
-  Host: localhost:8500 # consul endpoint
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: coupons.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 链路追踪
 Telemetry:
@@ -36,8 +34,12 @@ RedisConf:
 
 
 ProductRpc:
-  Target: consul://localhost:8500/products.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: products.rpc
   NonBlock: true
+  Timeout: 5000
 
 # Prometheus 监控暴露
 PrometheusExt:

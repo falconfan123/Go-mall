@@ -99,7 +99,7 @@ func (a *AuditMQ) persistData(ctx context.Context, data *AuditReq) error {
 }
 
 func (a *AuditMQ) ToMysql(ctx context.Context, data *AuditReq) (int64, error) {
-	res, err := a.model.Insert(ctx, &audit.Audit{
+	_, err := a.model.Insert(ctx, &audit.Audit{
 		UserId:      uint64(data.UserID),
 		TargetId:    uint64(data.TargetID),
 		TargetTable: data.TargetTable,
@@ -117,15 +117,26 @@ func (a *AuditMQ) ToMysql(ctx context.Context, data *AuditReq) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
+	return 0, nil
 }
 
 func (a *AuditMQ) ToEs(ctx context.Context, data *AuditReq) error {
-	jsonData, err := json.Marshal(data)
+	doc := map[string]any{
+		"user_id":      data.UserID,
+		"action_type":  data.ActionType,
+		"action_desc":  data.ActionDesc,
+		"old_data":     data.OldData,
+		"new_data":     data.NewData,
+		"service_name": data.ServiceName,
+		"target_table": data.TargetTable,
+		"target_id":    data.TargetID,
+		"client_ip":    data.ClientIP,
+		"trace_id":     data.TraceID,
+		"span_id":      data.SpanID,
+		"created_at":   time.Unix(data.CreatedAt, 0).UTC().Format(time.RFC3339),
+	}
+
+	jsonData, err := json.Marshal(doc)
 	if err != nil {
 		return fmt.Errorf("failed to marshal data: %w", err)
 	}

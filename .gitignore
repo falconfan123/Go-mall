@@ -35,6 +35,8 @@ key/
 .DS_Store
 .AppleDouble
 .LSOverride
+._*
+**/._*
 
 # Editor/IDE
 .vscode/
@@ -50,6 +52,7 @@ tmp/
 *.tmp
 *.bak
 *.log
+.gocache/
 
 # Project specific
 *.trace
@@ -57,10 +60,15 @@ tmp/
 dtm.bolt
 test_assertion.go
 .github_token
+/data/
 
 # Compiled binaries
 *-srv
 *-service
+*-binary
+/audit
+/checkout
+/services/coupons/coupons
 /services/order/order
 /services/checkout/checkout/checkout
 /services/gateway/gateway

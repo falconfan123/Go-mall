@@ -3,12 +3,10 @@ ListenOn: 0.0.0.0:10001
 Mode: dev
 
 # 服务发现
-Consul:
-  Host: localhost:8500 # consul endpoint
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: users.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 链路追踪
 Telemetry:
@@ -18,12 +16,20 @@ Telemetry:
   Sampler: 1.0
 
 AuditRpc:
-  Target: consul://localhost:8500/audit.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: audit.rpc
   NonBlock: true 
+  Timeout: 5000
 
 AuthsRpc:
-  Target: consul://localhost:8500/auths.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: auths.rpc
   NonBlock: true
+  Timeout: 5000
 
 Log:
   ServiceName: "users-rpc"
@@ -53,6 +59,7 @@ PrometheusExt:
 
 RedisConf:
   Host: localhost:6379
+  Type: node
   Pass: ""
   Tls: false
 GorseConfig:

@@ -4,21 +4,16 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/service"
+	"github.com/zeromicro/go-zero/zrpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
 	"github.com/falconfan123/Go-mall/services/users/internal/config"
 	"github.com/falconfan123/Go-mall/services/users/internal/interface/grpc/server"
 	"github.com/falconfan123/Go-mall/services/users/internal/svc"
 	users "github.com/falconfan123/Go-mall/services/users/pb"
-
-	"github.com/falconfan123/Go-mall/common/utils/ip"
-	"strings"
-
-	"github.com/zeromicro/go-zero/core/conf"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/service"
-	"github.com/zeromicro/go-zero/zrpc"
-	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 var configFile = flag.String("f", "etc/users.yaml", "the config file")
@@ -37,20 +32,6 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
-
-	registerOn := c.ListenOn
-	if strings.Contains(registerOn, "0.0.0.0") {
-		localIP, err := ip.GetLocalIP()
-		if err == nil && localIP != "" {
-			registerOn = strings.Replace(registerOn, "0.0.0.0", localIP, 1)
-		} else {
-			registerOn = strings.Replace(registerOn, "0.0.0.0", "host.docker.internal", 1)
-		}
-	}
-	if err := consul.RegisterService(registerOn, c.Consul); err != nil {
-		logx.Errorw("register service error", logx.Field("err", err))
-		panic(err)
-	}
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

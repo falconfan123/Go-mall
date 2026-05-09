@@ -15,11 +15,14 @@ SERVICES="auths users product carts order checkout payment inventory audit coupo
 # 默认使用 minikube，可通过环境变量切换
 KUBE_ENV="${KUBE_ENV:-minikube}"
 
-# 镜像仓库前缀
-IMAGE_REGISTRY="${IMAGE_REGISTRY:-minikube}"
+# 镜像仓库前缀。默认与 Helm values 中的镜像仓库命名保持一致。
+IMAGE_REGISTRY="${IMAGE_REGISTRY:-go-mall}"
 
 # 镜像标签
 IMAGE_TAG="${IMAGE_TAG:-latest}"
+
+# 目标架构。默认自动从集群节点探测。
+TARGET_ARCH="${TARGET_ARCH:-}"
 
 # 检查 kube 环境
 check_kube_env() {
@@ -56,25 +59,82 @@ check_kube_env() {
     esac
 }
 
+detect_target_arch() {
+    if [ -n "$TARGET_ARCH" ]; then
+        return
+    fi
+
+    TARGET_ARCH="$(kubectl get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}' 2>/dev/null || true)"
+    case "$TARGET_ARCH" in
+        amd64|arm64)
+            ;;
+        aarch64)
+            TARGET_ARCH="arm64"
+            ;;
+        x86_64)
+            TARGET_ARCH="amd64"
+            ;;
+        *)
+            TARGET_ARCH="amd64"
+            ;;
+    esac
+}
+
+resolve_base_image() {
+    local svc=$1
+    local candidates=(
+        "${IMAGE_REGISTRY}/${svc}:latest"
+        "${IMAGE_REGISTRY}/${svc}:v2"
+        "${IMAGE_REGISTRY}/${svc}:fixed"
+    )
+
+    for image in "${candidates[@]}"; do
+        if docker image inspect "$image" >/dev/null 2>&1; then
+            echo "$image"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 # 构建单个服务镜像
 build_image() {
     local svc=$1
     local image_name="${IMAGE_REGISTRY}/${svc}:${IMAGE_TAG}"
+    local build_dir="/tmp/go-mall-image-build/${svc}"
+    local base_image
 
     echo ""
     echo ">>> 构建 $image_name ..."
 
-    # 进入服务目录
-    cd "$PROJECT_ROOT/services/$svc"
-
-    # 检查 Dockerfile 是否存在
-    if [ ! -f "Dockerfile" ]; then
-        echo "警告: $svc/Dockerfile 不存在，跳过"
+    if ! base_image="$(resolve_base_image "$svc")"; then
+        echo "✗ 未找到 $svc 的本地基础镜像，无法离线重建"
         return 1
     fi
 
-    # 构建镜像
-    docker build -t "$image_name" .
+    rm -rf "$build_dir"
+    mkdir -p "$build_dir/etc"
+
+    (
+        cd "$PROJECT_ROOT/services/$svc" && \
+        TMPDIR=/tmp \
+        GOCACHE="$PROJECT_ROOT/.gocache" \
+        CGO_ENABLED=0 \
+        GOOS=linux \
+        GOARCH="$TARGET_ARCH" \
+        go build -o "$build_dir/$svc" .
+    )
+
+    cp -R "$PROJECT_ROOT/services/$svc/etc/." "$build_dir/etc/"
+
+    cat > "$build_dir/Dockerfile" <<EOF
+FROM $base_image
+COPY $svc /app/$svc
+COPY etc/ /app/etc/
+EOF
+
+    docker build -t "$image_name" "$build_dir"
 
     if [ $? -eq 0 ]; then
         echo "✓ $image_name 构建成功"
@@ -95,6 +155,8 @@ main() {
 
     # 检查并配置 kube 环境
     check_kube_env
+    detect_target_arch
+    echo "目标架构: $TARGET_ARCH"
 
     # 构建所有服务镜像
     failed=0

@@ -1,0 +1,182 @@
+# Nginx Deployment for Go-mall API Gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-gateway
+  namespace: go-mall
+  labels:
+    app: nginx-gateway
+spec:
+  type: NodePort
+  ports:
+    - port: 8888
+      targetPort: 8888
+      name: http
+      nodePort: 30088
+    - name: grpc-10001
+      port: 10001
+      targetPort: 10001
+      nodePort: 30001
+    - name: grpc-10002
+      port: 10002
+      targetPort: 10002
+      nodePort: 30002
+  selector:
+    app: nginx-gateway
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-gateway-config
+  namespace: go-mall
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    stream {
+        upstream users {
+            server users-rpc.go-mall.svc.cluster.local:10001;
+        }
+        upstream product {
+            server product-rpc.go-mall.svc.cluster.local:10002;
+        }
+        upstream carts {
+            server carts-rpc.go-mall.svc.cluster.local:10003;
+        }
+        upstream order {
+            server order-rpc.go-mall.svc.cluster.local:10004;
+        }
+        upstream checkout {
+            server checkout-rpc.go-mall.svc.cluster.local:10005;
+        }
+        upstream payment {
+            server payment-rpc.go-mall.svc.cluster.local:10006;
+        }
+        upstream auths {
+            server auths-rpc.go-mall.svc.cluster.local:10000;
+        }
+        upstream system {
+            server system-rpc.go-mall.svc.cluster.local:10010;
+        }
+        upstream activity {
+            server activity-rpc.go-mall.svc.cluster.local:10011;
+        }
+        upstream admin {
+            server admin-rpc.go-mall.svc.cluster.local:10012;
+        }
+
+        server {
+            listen 10001;
+            proxy_pass users;
+        }
+        server {
+            listen 10002;
+            proxy_pass product;
+        }
+        server {
+            listen 10003;
+            proxy_pass carts;
+        }
+        server {
+            listen 10004;
+            proxy_pass order;
+        }
+        server {
+            listen 10005;
+            proxy_pass checkout;
+        }
+        server {
+            listen 10006;
+            proxy_pass payment;
+        }
+        server {
+            listen 10000;
+            proxy_pass auths;
+        }
+        server {
+            listen 10010;
+            proxy_pass system;
+        }
+        server {
+            listen 10011;
+            proxy_pass activity;
+        }
+        server {
+            listen 10012;
+            proxy_pass admin;
+        }
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+        sendfile on;
+        keepalive_timeout 65;
+
+        server {
+            listen 8888;
+
+            location /health {
+                return 200 'OK';
+                add_header Content-Type text/plain;
+            }
+
+            location / {
+                return 200 '{"service":"nginx-gateway","status":"running"}';
+                add_header Content-Type application/json;
+            }
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-gateway
+  namespace: go-mall
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-gateway
+  template:
+    metadata:
+      labels:
+        app: nginx-gateway
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 8888
+          name: http
+        - containerPort: 10001
+          name: grpc-10001
+        - containerPort: 10002
+          name: grpc-10002
+        - containerPort: 10003
+          name: grpc-10003
+        - containerPort: 10004
+          name: grpc-10004
+        - containerPort: 10005
+          name: grpc-10005
+        - containerPort: 10006
+          name: grpc-10006
+        - containerPort: 10000
+          name: grpc-10000
+        - containerPort: 10010
+          name: grpc-10010
+        - containerPort: 10011
+          name: grpc-10011
+        - containerPort: 10012
+          name: grpc-10012
+        volumeMounts:
+        - name: config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: config
+        configMap:
+          name: nginx-gateway-config

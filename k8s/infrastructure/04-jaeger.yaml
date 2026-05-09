@@ -56,7 +56,8 @@ spec:
     spec:
       containers:
       - name: jaeger
-        image: jaegertracing/all-in-one:1.48
+        image: m.daocloud.io/docker.io/jaegertracing/all-in-one:1.48
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 16686
           name: query

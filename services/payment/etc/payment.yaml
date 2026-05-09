@@ -3,12 +3,10 @@ ListenOn: 0.0.0.0:10006
 Mode: dev
 
 # 服务发现
-Consul:
-  Host: localhost:8500
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: payment.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 Telemetry:
   Name: payment.rpc
@@ -48,13 +46,12 @@ Stripe:
   WebhookPort: 11112
 
 OrderRpc:
-  Target: consul://localhost:8500/order.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: order.rpc
   NonBlock: true
   Timeout: 25000
-
-OrderRpc:
-  Target: consul://localhost:8500/order.rpc?wait=14s
-  NonBlock: true
 
 RabbitMQConfig:
   Host: "localhost"

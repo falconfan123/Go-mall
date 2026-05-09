@@ -3,12 +3,10 @@ ListenOn: 0.0.0.0:10007
 Mode: dev
 
 # 服务发现
-Consul:
-  Host: localhost:8500
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: inventory.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 Telemetry:
   Name: inventory.rpc
@@ -36,4 +34,3 @@ PrometheusExt:
   Host: 0.0.0.0
   Port: 9107
   Path: /metrics
-

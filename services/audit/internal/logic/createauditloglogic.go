@@ -59,6 +59,9 @@ func (l *CreateAuditLogLogic) CreateAuditLog(in *audit.CreateAuditLogReq) (*audi
 	if err := Validate(in); err != nil {
 		return nil, err
 	}
+	if l.svcCtx.AuditMQ == nil {
+		return nil, errors.New("audit mq is unavailable")
+	}
 	spanContext := trace.SpanContextFromContext(l.ctx)
 	traceID := spanContext.TraceID().String()
 	spanID := spanContext.SpanID().String()

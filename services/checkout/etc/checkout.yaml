@@ -2,12 +2,10 @@ Name: checkout.rpc
 ListenOn: 0.0.0.0:10005
 Mode: dev
 Timeout: 0
-Consul:
-  Host: localhost:8500 # consul endpoint
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: checkout.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 链路追踪
 Telemetry:
@@ -27,19 +25,30 @@ PostgresConfig:
   conntimeout: 5
 
 InventoryRpc:
-  Target: consul://localhost:8500/inventory.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: inventory.rpc
   NonBlock: true
+  Timeout: 3000
 
 ProductRpc:
-  Target: consul://localhost:8500/products.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: products.rpc
   NonBlock: true
   Timeout: 10000
 CouponsRpc:
-  Target: consul://localhost:8500/coupons.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: coupons.rpc
   NonBlock: true
   Timeout: 10000
 RedisConf:
   Host: localhost:6379
+  Type: node
   Pass: ""
   Tls: false
 

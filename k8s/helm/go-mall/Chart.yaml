@@ -1,0 +1,13 @@
+apiVersion: v2
+name: go-mall
+description: Go-mall microservices on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "1.0"
+keywords:
+  - go-zero
+  - microservices
+  - e-commerce
+maintainers:
+  - name: falconfan123
+    email: falconfan123@github.com

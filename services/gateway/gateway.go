@@ -47,30 +47,23 @@ func main() {
 			var userID uint32
 			var needRefresh bool
 
-			// 1. 首先尝试验证短令牌
 			if shortToken != "" {
 				uid, _, _, err := token.VerifyShortToken(shortToken, biz.TokenSignSecret)
 				if err == nil {
-					// 短令牌验证成功
 					userID = uid
 					needRefresh = false
 					fmt.Printf("Short token validated, user_id: %d\n", userID)
 				} else {
-					// 短令牌过期或无效，尝试长令牌
 					fmt.Printf("Short token validation failed: %v, trying long token\n", err)
 					if longToken != "" {
 						sessionID, err := token.VerifyLongToken(longToken, biz.TokenSignSecret)
 						if err == nil {
 							fmt.Printf("Long token validated, session_id: %s\n", sessionID)
-							// 长令牌验证成功，但需要刷新短令牌
-							// 注意：这里需要调用 auths 服务来获取完整的用户信息和刷新短令牌
-							// 为简化处理，我们这里先设置一个标记，在实际生产环境中应该调用 RPC
 							needRefresh = true
 						}
 					}
 				}
 			} else if longToken != "" {
-				// 没有短令牌，直接验证长令牌
 				sessionID, err := token.VerifyLongToken(longToken, biz.TokenSignSecret)
 				if err == nil {
 					fmt.Printf("Long token validated, session_id: %s\n", sessionID)
@@ -78,20 +71,16 @@ func main() {
 				}
 			}
 
-			// 如果验证成功，注入 user_id header
 			if userID > 0 {
 				r.Header.Set("user_id", fmt.Sprintf("%d", userID))
 				r.Header.Set("Grpc-Metadata-User-Id", fmt.Sprintf("%d", userID))
 				fmt.Printf("Using token user_id: %d\n", userID)
 			} else if xUserId := r.Header.Get("X-User-Id"); xUserId != "" {
-				// 如果没有 token，但有 X-User-Id 头，直接使用它
 				r.Header.Set("user_id", xUserId)
 				r.Header.Set("Grpc-Metadata-User-Id", xUserId)
 				fmt.Printf("Using X-User-Id header: %s\n", xUserId)
 			}
 
-			// 如果需要刷新短令牌，在响应头中设置标记
-			// 实际生产环境中应该调用 auths 服务的 ValidateToken 接口来获取新的短令牌
 			if needRefresh {
 				w.Header().Set("X-Need-Token-Refresh", "true")
 			}

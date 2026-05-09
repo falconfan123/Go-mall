@@ -1,0 +1,1585 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Go Mall Test Contract API",
+    "version": "0.1.0",
+    "description": "Generated from gateway route mappings and frontend API calls for Apifox import, mock testing, and gateway smoke testing."
+  },
+  "servers": [
+    {
+      "url": "{baseUrl}",
+      "description": "Gateway base URL",
+      "variables": {
+        "baseUrl": {
+          "default": "http://127.0.0.1:18888"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/douyin/user/login": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "用户登录",
+        "description": "Generated from gateway mapping users.Users/Login.",
+        "operationId": "users_Users_Login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "device_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password",
+                  "device_id"
+                ]
+              },
+              "example": {
+                "username": "demo",
+                "password": "demo123456",
+                "device_id": "device-demo-001"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/register": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "用户注册",
+        "description": "Generated from gateway mapping users.Users/Register.",
+        "operationId": "users_Users_Register",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "GetUser",
+        "description": "Generated from gateway mapping users.Users/GetUser.",
+        "operationId": "users_Users_GetUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/address/add": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "AddAddress",
+        "description": "Generated from gateway mapping users.Users/AddAddress.",
+        "operationId": "users_Users_AddAddress",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/address/list": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "ListAddresses",
+        "description": "Generated from gateway mapping users.Users/ListAddresses.",
+        "operationId": "users_Users_ListAddresses",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/product/list": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "ListProducts",
+        "description": "Generated from gateway mapping product.ProductCatalogService/ListProducts.",
+        "operationId": "product_ProductCatalogService_ListProducts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/product": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "GetProduct",
+        "description": "Generated from gateway mapping product.ProductCatalogService/GetProduct.",
+        "operationId": "product_ProductCatalogService_GetProduct",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/product/upload": {
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "summary": "GetUploadURL",
+        "description": "Generated from gateway mapping product.ProductCatalogService/GetUploadURL.",
+        "operationId": "product_ProductCatalogService_GetUploadURL",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/add": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "CreateCartItem",
+        "description": "Generated from gateway mapping carts.Cart/CreateCartItem.",
+        "operationId": "carts_Cart_CreateCartItem",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/list": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "CartItemList",
+        "description": "Generated from gateway mapping carts.Cart/CartItemList.",
+        "operationId": "carts_Cart_CartItemList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/delete": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "DeleteCartItem",
+        "description": "Generated from gateway mapping carts.Cart/DeleteCartItem.",
+        "operationId": "carts_Cart_DeleteCartItem",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/sub": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "SubCartItem",
+        "description": "Generated from gateway mapping carts.Cart/SubCartItem.",
+        "operationId": "carts_Cart_SubCartItem",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/order/create": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "CreateOrder",
+        "description": "Generated from gateway mapping order.OrderService/CreateOrder.",
+        "operationId": "order_OrderService_CreateOrder",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/order/list": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "ListOrders",
+        "description": "Generated from gateway mapping order.OrderService/ListOrders.",
+        "operationId": "order_OrderService_ListOrders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/order/detail": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "查询订单详情",
+        "description": "Generated from gateway mapping order.OrderService/GetOrder.",
+        "operationId": "order_OrderService_GetOrder",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ORDER-001"
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1001
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/order/cancel": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "取消订单",
+        "description": "Generated from gateway mapping order.OrderService/CancelOrder.",
+        "operationId": "order_OrderService_CancelOrder",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "order_id": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "cancel_reason": {
+                    "type": "string"
+                  },
+                  "initiative": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "order_id",
+                  "user_id"
+                ]
+              },
+              "example": {
+                "order_id": "ORDER-001",
+                "user_id": 1001,
+                "cancel_reason": "manual test",
+                "initiative": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/order/seckill": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "提交秒杀订单",
+        "description": "Generated from gateway mapping order.OrderService/Seckill.",
+        "operationId": "order_OrderService_Seckill",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeckillRequest"
+              },
+              "example": {
+                "path_key": "seckill-token-demo",
+                "product_id": 1,
+                "user_id": 1001,
+                "address_id": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/checkout/prepare": {
+      "post": {
+        "tags": [
+          "checkout"
+        ],
+        "summary": "PrepareCheckout",
+        "description": "Generated from gateway mapping checkout.CheckoutService/PrepareCheckout.",
+        "operationId": "checkout_CheckoutService_PrepareCheckout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/checkout/prepare": {
+      "post": {
+        "tags": [
+          "checkout"
+        ],
+        "summary": "准备结算",
+        "description": "Generated from gateway mapping checkout.CheckoutService/PrepareCheckout.",
+        "operationId": "checkout_CheckoutService_PrepareCheckout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "address_id": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "coupon_id": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "user_id": 1001,
+                "address_id": 1,
+                "coupon_id": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/checkout/release": {
+      "post": {
+        "tags": [
+          "checkout"
+        ],
+        "summary": "ReleaseCheckout",
+        "description": "Generated from gateway mapping checkout.CheckoutService/ReleaseCheckout.",
+        "operationId": "checkout_CheckoutService_ReleaseCheckout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/checkout/list": {
+      "get": {
+        "tags": [
+          "checkout"
+        ],
+        "summary": "GetCheckoutList",
+        "description": "Generated from gateway mapping checkout.CheckoutService/GetCheckoutList.",
+        "operationId": "checkout_CheckoutService_GetCheckoutList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/checkout/detail": {
+      "get": {
+        "tags": [
+          "checkout"
+        ],
+        "summary": "GetCheckoutDetail",
+        "description": "Generated from gateway mapping checkout.CheckoutService/GetCheckoutDetail.",
+        "operationId": "checkout_CheckoutService_GetCheckoutDetail",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/payment/create": {
+      "post": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "CreatePayment",
+        "description": "Generated from gateway mapping payment.Payment/CreatePayment.",
+        "operationId": "payment_Payment_CreatePayment",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/detail": {
+      "get": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "GetInventory",
+        "description": "Generated from gateway mapping inventory.Inventory/GetInventory.",
+        "operationId": "inventory_Inventory_GetInventory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/update": {
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "UpdateInventory",
+        "description": "Generated from gateway mapping inventory.Inventory/UpdateInventory.",
+        "operationId": "inventory_Inventory_UpdateInventory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/decrease": {
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "DecreaseInventory",
+        "description": "Generated from gateway mapping inventory.Inventory/DecreaseInventory.",
+        "operationId": "inventory_Inventory_DecreaseInventory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/return": {
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "ReturnInventory",
+        "description": "Generated from gateway mapping inventory.Inventory/ReturnInventory.",
+        "operationId": "inventory_Inventory_ReturnInventory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/system/time": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "获取系统时间",
+        "description": "Generated from gateway mapping system.System/Time.",
+        "operationId": "system_System_Time",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemTimeResponse"
+                },
+                "example": {
+                  "now": 1778336885665
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/activity/token": {
+      "get": {
+        "tags": [
+          "activity"
+        ],
+        "summary": "获取秒杀动态令牌",
+        "description": "Generated from gateway mapping activity.Activity/Token.",
+        "operationId": "activity_Activity_Token",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "path_key": {
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                },
+                "example": {
+                  "path_key": "seckill-token-demo",
+                  "expires_at": 1778339999999
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/activity/status": {
+      "get": {
+        "tags": [
+          "activity"
+        ],
+        "summary": "查询秒杀购买状态",
+        "description": "Generated from gateway mapping activity.Activity/CheckSeckillStatus.",
+        "operationId": "activity_Activity_CheckSeckillStatus",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/token": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "签发令牌",
+        "description": "Generated from gateway mapping auths.Auths/GenerateToken.",
+        "operationId": "auths_Auths_GenerateToken",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "device_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "user_id",
+                  "device_id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/validate": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "校验令牌",
+        "description": "Generated from gateway mapping auths.Auths/ValidateToken.",
+        "operationId": "auths_Auths_ValidateToken",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "token"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/renewal": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "RenewToken",
+        "description": "Generated from gateway mapping auths.Auths/RenewToken.",
+        "operationId": "auths_Auths_RenewToken",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "description": "Generated from gateway mapping auths.Auths/Logout.",
+        "operationId": "auths_Auths_Logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/coupon/list": {
+      "get": {
+        "tags": [
+          "coupon"
+        ],
+        "summary": "ListCoupons",
+        "description": "Generated from gateway mapping coupons.Coupons/ListCoupons.",
+        "operationId": "coupons_Coupons_ListCoupons",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/products": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "ListProducts",
+        "description": "Generated from gateway mapping admin.AdminProductService/ListProducts.",
+        "operationId": "admin_AdminProductService_ListProducts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "CreateProduct",
+        "description": "Generated from gateway mapping admin.AdminProductService/CreateProduct.",
+        "operationId": "admin_AdminProductService_CreateProduct",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/products/{id}": {
+      "put": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "UpdateProduct",
+        "description": "Generated from gateway mapping admin.AdminProductService/UpdateProduct.",
+        "operationId": "admin_AdminProductService_UpdateProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "DeleteProduct",
+        "description": "Generated from gateway mapping admin.AdminProductService/DeleteProduct.",
+        "operationId": "admin_AdminProductService_DeleteProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/user/info": {
+      "get": {
+        "tags": [
+          "frontend-user"
+        ],
+        "summary": "Frontend contract for /douyin/user/info",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_get__douyin_user_info",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/product/detail": {
+      "get": {
+        "tags": [
+          "frontend-product"
+        ],
+        "summary": "Frontend contract for /douyin/product/detail",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_get__douyin_product_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/product/search": {
+      "get": {
+        "tags": [
+          "frontend-product"
+        ],
+        "summary": "Frontend contract for /douyin/product/search",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_get__douyin_product_search",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/update": {
+      "put": {
+        "tags": [
+          "frontend-cart"
+        ],
+        "summary": "Frontend contract for /douyin/cart/update",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_put__douyin_cart_update",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/remove": {
+      "delete": {
+        "tags": [
+          "frontend-cart"
+        ],
+        "summary": "Frontend contract for /douyin/cart/remove",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_delete__douyin_cart_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/cart/clear": {
+      "delete": {
+        "tags": [
+          "frontend-cart"
+        ],
+        "summary": "Frontend contract for /douyin/cart/clear",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_delete__douyin_cart_clear",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/order/detail": {
+      "get": {
+        "tags": [
+          "frontend-order"
+        ],
+        "summary": "Frontend contract for /douyin/order/detail",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_get__douyin_order_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/order/cancel": {
+      "post": {
+        "tags": [
+          "frontend-order"
+        ],
+        "summary": "Frontend contract for /douyin/order/cancel",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_post__douyin_order_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/payment/status": {
+      "get": {
+        "tags": [
+          "frontend-payment"
+        ],
+        "summary": "Frontend contract for /douyin/payment/status",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_get__douyin_payment_status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/flash/list": {
+      "get": {
+        "tags": [
+          "frontend-flash"
+        ],
+        "summary": "Frontend contract for /douyin/flash/list",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_get__douyin_flash_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/flash/detail": {
+      "get": {
+        "tags": [
+          "frontend-flash"
+        ],
+        "summary": "Frontend contract for /douyin/flash/detail",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_get__douyin_flash_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/douyin/flash/status": {
+      "get": {
+        "tags": [
+          "frontend-flash"
+        ],
+        "summary": "Frontend contract for /douyin/flash/status",
+        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
+        "operationId": "frontend_get__douyin_flash_status",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GenericResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "status_code": {
+            "type": "integer"
+          },
+          "status_msg": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SystemTimeResponse": {
+        "type": "object",
+        "properties": {
+          "now": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "now"
+        ]
+      },
+      "SeckillRequest": {
+        "type": "object",
+        "properties": {
+          "path_key": {
+            "type": "string"
+          },
+          "product_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "address_id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "path_key",
+          "product_id",
+          "user_id",
+          "address_id"
+        ]
+      }
+    }
+  }
+}

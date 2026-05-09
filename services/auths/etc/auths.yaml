@@ -3,12 +3,10 @@ ListenOn: 0.0.0.0:10000
 Mode: dev
 
 # 服务发现
-Consul:
-  Host: localhost:8500 # consul endpoint
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: auths.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 链路追踪
 Telemetry:
@@ -31,6 +29,7 @@ PostgresConfig:
 SessionRedis:
   Host: localhost:6379
   Type: node
+  Pass: ""
 
 DevServer:
   Enabled: true

@@ -3,30 +3,43 @@
 
 global:
   namespace: go-mall
-  imageRegistry: docker.io
-  imagePullPolicy: IfNotPresent
+  imageRegistry: ""
+  imagePullPolicy: Never
 
-  # 共享配置
-  consul:
-    host: consul-headless.consul.svc.cluster.local
-    port: 8500
+  # 共享配置 - 使用 K8s 内部服务
+  etcd:
+    host: etcd.go-mall.svc.cluster.local
+    port: 2379
   redis:
-    host: redis.redis.svc.cluster.local
+    host: redis.go-mall.svc.cluster.local
     port: 6379
+    password: ""
   postgres:
-    host: postgres.postgres.svc.cluster.local
+    host: postgres.go-mall.svc.cluster.local
     port: 5432
     user: root
     password: fht3825099
     database: mall
+  rabbitmq:
+    host: rabbitmq.go-mall.svc.cluster.local
+    port: 5672
+    user: admin
+    password: admin
+    vhost: /
+  elasticsearch:
+    host: http://elasticsearch.go-mall.svc.cluster.local:9200
+  gorse:
+    host: http://gorse.go-mall.svc.cluster.local:8088
+    apikey: ""
   jaeger:
-    endpoint: http://jaeger-collector.observability.svc.cluster.local:14268/api/traces
+    endpoint: http://jaeger-collector.go-mall.svc.cluster.local:14268/api/traces
 
 # 12 个微服务配置
 services:
   auths:
     enabled: true
-    image: minikube/authsatest:latest
+    image: go-mall/auths:latest
+    rpcKey: auths.rpc
     port: 10000
     grpcPort: 10000
     httpPort: 8080
@@ -41,7 +54,8 @@ services:
 
   users:
     enabled: true
-    image: minikube/usersatest:latest
+    image: go-mall/users:latest
+    rpcKey: users.rpc
     port: 10001
     grpcPort: 10001
     httpPort: 8080
@@ -56,7 +70,8 @@ services:
 
   product:
     enabled: true
-    image: minikube/productatest:latest
+    image: go-mall/product:latest
+    rpcKey: products.rpc
     port: 10002
     grpcPort: 10002
     httpPort: 8080
@@ -71,7 +86,8 @@ services:
 
   carts:
     enabled: true
-    image: minikube/cartsatest:latest
+    image: go-mall/carts:latest
+    rpcKey: carts.rpc
     port: 10003
     grpcPort: 10003
     httpPort: 8080
@@ -86,7 +102,8 @@ services:
 
   order:
     enabled: true
-    image: minikube/orderatest:latest
+    image: go-mall/order:latest
+    rpcKey: order.rpc
     port: 10004
     grpcPort: 10004
     httpPort: 8080
@@ -101,7 +118,8 @@ services:
 
   checkout:
     enabled: true
-    image: minikube/checkoutatest:latest
+    image: go-mall/checkout:latest
+    rpcKey: checkout.rpc
     port: 10005
     grpcPort: 10005
     httpPort: 8080
@@ -116,7 +134,8 @@ services:
 
   payment:
     enabled: true
-    image: minikube/paymentatest:latest
+    image: go-mall/payment:latest
+    rpcKey: payment.rpc
     port: 10006
     grpcPort: 10006
     httpPort: 8080
@@ -131,7 +150,8 @@ services:
 
   inventory:
     enabled: true
-    image: minikube/inventoryatest:latest
+    image: go-mall/inventory:latest
+    rpcKey: inventory.rpc
     port: 10007
     grpcPort: 10007
     httpPort: 8080
@@ -146,7 +166,8 @@ services:
 
   audit:
     enabled: true
-    image: minikube/auditatest:latest
+    image: go-mall/audit:latest
+    rpcKey: audit.rpc
     port: 10008
     grpcPort: 10008
     httpPort: 8080
@@ -161,7 +182,8 @@ services:
 
   coupons:
     enabled: true
-    image: minikube/couponsatest:latest
+    image: go-mall/coupons:latest
+    rpcKey: coupons.rpc
     port: 10009
     grpcPort: 10009
     httpPort: 8080
@@ -176,7 +198,8 @@ services:
 
   system:
     enabled: true
-    image: minikube/systematest:latest
+    image: go-mall/system:latest
+    rpcKey: system.rpc
     port: 10010
     grpcPort: 10010
     httpPort: 8080
@@ -191,7 +214,8 @@ services:
 
   activity:
     enabled: true
-    image: minikube/activityatest:latest
+    image: go-mall/activity:latest
+    rpcKey: activity.rpc
     port: 10011
     grpcPort: 10011
     httpPort: 8080
@@ -206,7 +230,8 @@ services:
 
   admin:
     enabled: true
-    image: minikube/adminatest:latest
+    image: go-mall/admin:latest
+    rpcKey: admin.rpc
     port: 10012
     grpcPort: 10012
     httpPort: 8080
@@ -222,7 +247,7 @@ services:
 # 网关配置
 gateway:
   enabled: true
-  image: minikube/gatewayatest:latest
+  image: go-mall/gateway:latest
   port: 8888
   replicas: 1
   serviceType: NodePort

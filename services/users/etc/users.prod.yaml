@@ -2,13 +2,10 @@ Name: users.rpc
 ListenOn: 0.0.0.0:10001
 Mode: pro
 # 服务发现
-Consul:
-  Host: ${CONSUL_HOST} 
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}
   Key: users.rpc
-  Meta:
-    Protocol: grpc
-  Tag:
-    - "grpc"  # api服务就是api，rpc是grpc
 
 
 PostgresConfig:
@@ -26,8 +23,12 @@ Log:
   Stat: false
 
 AuditRpc:
-  Target: consul://${CONSUL_HOST}/audit.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}
+    Key: audit.rpc
   NonBlock: true
+  Timeout: 5000
 
 # 指标监控配置
 DevServer:
@@ -44,8 +45,9 @@ Telemetry:
   Sampler: 0.1  # 采样率，1.0表示全部采集, 0.1表示10%
 RedisConf:
   Host: ${REDIS_HOST}
+  Type: node
   Pass: ${REDIS_PASSWORD}
   Tls: false
 GorseConfig:
- GorseAddr: ${GORSE HOST}
- GorseApikey: ${GORSE_APIKEY}
+  GorseAddr: ${GORSE_HOST}
+  GorseApikey: ${GORSE_APIKEY}

@@ -62,20 +62,23 @@ CREATE INDEX idx_user_address_user_id ON user_address(user_id);
 DROP TABLE IF EXISTS audit CASCADE;
 CREATE TABLE audit (
   id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT,
-  action VARCHAR(255) NOT NULL,
-  resource VARCHAR(255),
-  resource_id BIGINT,
-  ip_address VARCHAR(50),
-  user_agent TEXT,
-  request_data JSONB,
-  response_data JSONB,
-  status VARCHAR(50),
-  error_message TEXT,
+  user_id BIGINT NOT NULL,
+  action_type VARCHAR(64) NOT NULL,
+  action_desc TEXT,
+  old_data JSONB,
+  new_data JSONB,
+  service_name VARCHAR(64) NOT NULL,
+  target_table VARCHAR(64) NOT NULL,
+  target_id BIGINT NOT NULL,
+  client_ip VARCHAR(45) NOT NULL,
+  trace_id VARCHAR(36) NOT NULL UNIQUE,
+  span_id VARCHAR(36) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_audit_user_id ON audit(user_id);
-CREATE INDEX idx_audit_action ON audit(action);
+CREATE INDEX idx_audit_service_name ON audit(service_name);
+CREATE INDEX idx_audit_action_type ON audit(action_type);
+CREATE INDEX idx_audit_target ON audit(target_table, target_id);
 CREATE INDEX idx_audit_created_at ON audit(created_at);
 
 -- Coupons tables

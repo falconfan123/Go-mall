@@ -1,0 +1,11 @@
+.git
+.gocache
+.tmp
+.DS_Store
+._*
+node_modules
+frontend/node_modules
+audit
+checkout
+services/*/*-binary
+services/*/*.exe

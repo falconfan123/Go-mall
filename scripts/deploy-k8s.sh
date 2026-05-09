@@ -18,8 +18,8 @@ NAMESPACE="${NAMESPACE:-go-mall}"
 # 部署环境
 ENVIRONMENT="${ENVIRONMENT:-dev}"
 
-# 镜像仓库
-IMAGE_REGISTRY="${IMAGE_REGISTRY:-minikube}"
+# 镜像仓库。minikube 本地镜像不需要额外 registry 前缀。
+IMAGE_REGISTRY="${IMAGE_REGISTRY:-}"
 
 # 显示帮助
 show_help() {
@@ -35,7 +35,7 @@ show_help() {
     echo "选项:"
     echo "  -n, --namespace     命名空间 (默认: go-mall)"
     echo "  -e, --env          环境 (dev/prod, 默认: dev)"
-    echo "  -r, --registry    镜像仓库 (默认: minikube)"
+    echo "  -r, --registry    镜像仓库前缀 (默认: 空)"
     echo "  -h, --help        显示帮助"
     echo ""
     echo "示例:"
@@ -64,7 +64,7 @@ deploy() {
     echo "部署 Go-mall 到 K8s"
     echo "命名空间: $NAMESPACE"
     echo "环境: $ENVIRONMENT"
-    echo "镜像仓库: $IMAGE_REGISTRY"
+    echo "镜像仓库: ${IMAGE_REGISTRY:-<none>}"
     echo "========================================="
 
     # 创建命名空间
@@ -74,15 +74,18 @@ deploy() {
 
     # 部署基础设施
     echo ""
-    echo ">>> 部署基础设施 (Consul, Redis, Postgres)..."
+    echo ">>> 部署基础设施 (etcd, Redis, Postgres, Elasticsearch, RabbitMQ, Jaeger)..."
     kubectl apply -f k8s/infrastructure/ -n "$NAMESPACE"
 
     # 等待基础设施就绪
     echo ""
     echo ">>> 等待基础设施就绪..."
-    kubectl wait --for=condition=available deployment/consul -n "$NAMESPACE" --timeout=60s || true
+    kubectl wait --for=condition=available deployment/etcd -n "$NAMESPACE" --timeout=60s || true
     kubectl wait --for=condition=available deployment/redis -n "$NAMESPACE" --timeout=60s || true
     kubectl wait --for=condition=available deployment/postgres -n "$NAMESPACE" --timeout=60s || true
+    kubectl wait --for=condition=available deployment/elasticsearch -n "$NAMESPACE" --timeout=60s || true
+    kubectl wait --for=condition=available deployment/rabbitmq -n "$NAMESPACE" --timeout=60s || true
+    kubectl wait --for=condition=available deployment/jaeger -n "$NAMESPACE" --timeout=60s || true
 
     # 使用 Helm 部署
     echo ""
@@ -91,7 +94,6 @@ deploy() {
         --namespace "$NAMESPACE" \
         --set global.namespace="$NAMESPACE" \
         --set global.imageRegistry="$IMAGE_REGISTRY" \
-        --set gateway.image="$IMAGE_REGISTRY/gateway:latest" \
         --wait \
         --timeout 5m
 

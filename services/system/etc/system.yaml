@@ -3,12 +3,10 @@ ListenOn: 0.0.0.0:10010
 Mode: dev
 
 # 服务发现
-Consul:
-  Host: localhost:8500
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: system.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 日志配置
 Log:

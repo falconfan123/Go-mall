@@ -4,12 +4,10 @@ Mode: dev
 Timeout: 0
 
 # 服务发现配置
-Consul:
-  Host: localhost:8500
+Etcd:
+  Hosts:
+    - localhost:2379
   Key: admin.rpc
-  Meta:
-    Protocol: grpc
-  TTL: 10
 
 # 链路追踪
 Telemetry:
@@ -37,12 +35,18 @@ RedisConf:
 
 # Product 服务 RPC 配置
 ProductRpc:
-  Target: consul://localhost:8500/products.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: products.rpc
   NonBlock: true
 
 # Inventory 服务 RPC 配置
 InventoryRpc:
-  Target: consul://localhost:8500/inventory.rpc?wait=14s
+  Etcd:
+    Hosts:
+      - localhost:2379
+    Key: inventory.rpc
   NonBlock: true
 
 # Prometheus 监控暴露

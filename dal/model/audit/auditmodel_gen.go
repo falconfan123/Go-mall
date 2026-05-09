@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	auditFieldNames          = builder.RawFieldNames(&Audit{})
+	auditFieldNames          = builder.RawFieldNames(&Audit{}, true) // PostgreSQL mode
 	auditRows                = strings.Join(auditFieldNames, ",")
-	auditRowsExpectAutoSet   = strings.Join(stringx.Remove(auditFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	auditRowsWithPlaceHolder = strings.Join(stringx.Remove(auditFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	auditRowsExpectAutoSet   = strings.Join(stringx.Remove(auditFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	auditRowsWithPlaceHolder = strings.Join(stringx.Remove(auditFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -55,18 +55,18 @@ type (
 func newAuditModel(conn sqlx.SqlConn) *defaultAuditModel {
 	return &defaultAuditModel{
 		conn:  conn,
-		table: "`audit`",
+		table: "audit",
 	}
 }
 
 func (m *defaultAuditModel) Delete(ctx context.Context, id uint64) error {
-	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
 func (m *defaultAuditModel) FindOne(ctx context.Context, id uint64) (*Audit, error) {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", auditRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"id\" = $1 limit 1", auditRows, m.table)
 	var resp Audit
 	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
 	switch err {
@@ -81,7 +81,7 @@ func (m *defaultAuditModel) FindOne(ctx context.Context, id uint64) (*Audit, err
 
 func (m *defaultAuditModel) FindOneByTraceId(ctx context.Context, traceId string) (*Audit, error) {
 	var resp Audit
-	query := fmt.Sprintf("select %s from %s where `trace_id` = ? limit 1", auditRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"trace_id\" = $1 limit 1", auditRows, m.table)
 	err := m.conn.QueryRowCtx(ctx, &resp, query, traceId)
 	switch err {
 	case nil:
@@ -94,13 +94,25 @@ func (m *defaultAuditModel) FindOneByTraceId(ctx context.Context, traceId string
 }
 
 func (m *defaultAuditModel) Insert(ctx context.Context, data *Audit) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, auditRowsExpectAutoSet)
+	fields := strings.Split(auditRowsExpectAutoSet, ",")
+	placeholders := make([]string, len(fields))
+	for i := range fields {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+	}
+	query := fmt.Sprintf("insert into %s (%s) values (%s)", m.table, auditRowsExpectAutoSet, strings.Join(placeholders, ", "))
 	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ActionType, data.ActionDesc, data.OldData, data.NewData, data.ServiceName, data.TargetTable, data.TargetId, data.ClientIp, data.TraceId, data.SpanId)
 	return ret, err
 }
 
 func (m *defaultAuditModel) Update(ctx context.Context, newData *Audit) error {
-	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, auditRowsWithPlaceHolder)
+	fields := strings.Split(auditRowsWithPlaceHolder, "=?")
+	setClauses := make([]string, 0, len(fields))
+	for i, f := range fields {
+		if f != "" {
+			setClauses = append(setClauses, fmt.Sprintf("%s = $%d", f, i+1))
+		}
+	}
+	query := fmt.Sprintf("update %s set %s where \"id\" = $%d", m.table, strings.Join(setClauses, ", "), len(setClauses)+1)
 	_, err := m.conn.ExecCtx(ctx, query, newData.UserId, newData.ActionType, newData.ActionDesc, newData.OldData, newData.NewData, newData.ServiceName, newData.TargetTable, newData.TargetId, newData.ClientIp, newData.TraceId, newData.SpanId, newData.Id)
 	return err
 }

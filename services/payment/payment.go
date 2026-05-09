@@ -8,11 +8,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/common/utils/ip"
 	paymentM "github.com/falconfan123/Go-mall/dal/model/payment"
 	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
@@ -26,7 +24,6 @@ import (
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
-	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -47,19 +44,6 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
-	registerOn := c.ListenOn
-	if strings.Contains(registerOn, "0.0.0.0") {
-		localIP, err := ip.GetLocalIP()
-		if err == nil && localIP != "" {
-			registerOn = strings.Replace(registerOn, "0.0.0.0", localIP, 1)
-		} else {
-			registerOn = strings.Replace(registerOn, "0.0.0.0", "host.docker.internal", 1)
-		}
-	}
-	if err := consul.RegisterService(registerOn, c.Consul); err != nil {
-		logx.Errorw("register service error", logx.Field("err", err))
-		panic(err)
-	}
 	paymentSvc := NewPaymentService(ctx)
 	paymentSvc.startHTTPServer()
 
@@ -223,8 +207,10 @@ func (s *PaymentService) handleStripeWebhook(writer http.ResponseWriter, request
 
 // 封装HTTP服务启动
 func (s *PaymentService) startHTTPServer() {
-	// 注册支付宝回调
-	http.HandleFunc(s.ctx.Config.Alipay.NotifyPath, s.handleAlipayNotification)
+	// 注册支付宝回调 - 只有配置了 NotifyPath 才注册
+	if s.ctx.Config.Alipay.NotifyPath != "" {
+		http.HandleFunc(s.ctx.Config.Alipay.NotifyPath, s.handleAlipayNotification)
+	}
 
 	// 注册 Stripe Webhook
 	if s.ctx.Config.Stripe.WebhookPort > 0 {

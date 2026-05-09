@@ -4,16 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
-	"log"
-	"time"
-
-	"github.com/falconfan123/Go-mall/common/utils/ip"
 	"github.com/falconfan123/Go-mall/services/product/internal/config"
 	"github.com/falconfan123/Go-mall/services/product/internal/logic"
 	"github.com/falconfan123/Go-mall/services/product/internal/server"
@@ -24,7 +20,6 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"strings"
 )
 
 var configFile = flag.String("f", "etc/product.yaml", "the config file")
@@ -65,20 +60,6 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
-	// 注册服务
-	registerOn := c.ListenOn
-	if strings.Contains(registerOn, "0.0.0.0") {
-		localIP, err := ip.GetLocalIP()
-		if err == nil && localIP != "" {
-			registerOn = strings.Replace(registerOn, "0.0.0.0", localIP, 1)
-		} else {
-			registerOn = strings.Replace(registerOn, "0.0.0.0", "host.docker.internal", 1)
-		}
-	}
-	if err := consul.RegisterService(registerOn, c.Consul); err != nil {
-		logx.Errorw("register service error", logx.Field("err", err))
-		panic(err)
-	}
 	defer s.Stop()
 	// 在服务停止时调用 cancel 函数，通知定时任务退出
 	defer cancel()

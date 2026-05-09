@@ -1,0 +1,119 @@
+{{- /* 生成所有服务的 Deployment */ -}}
+{{- $root := . -}}
+
+{{- range $name, $svc := .Values.services }}
+{{- if $svc.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-rpc
+  namespace: {{ $root.Values.global.namespace | default "default" }}
+  labels:
+    app: {{ $name }}
+    tier: backend
+    app.kubernetes.io/name: go-mall
+    app.kubernetes.io/component: rpc-service
+    app.kubernetes.io/version: {{ $root.Values.global.appVersion | default "1.0" | quote }}
+  annotations:
+    description: {{ printf "Go-mall %s service" $name | quote }}
+spec:
+  replicas: {{ $svc.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+        tier: backend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+      - name: {{ $name }}
+        image: {{ if $root.Values.global.imageRegistry }}{{ $root.Values.global.imageRegistry }}/{{ end }}{{ $svc.image }}
+        imagePullPolicy: {{ $root.Values.global.imagePullPolicy }}
+        command: ["/app/{{ $name }}"]
+        args: ["-f", "/app/etc/{{ $name }}.yaml"]
+
+        ports:
+        - name: grpc
+          containerPort: {{ $svc.grpcPort }}
+          protocol: TCP
+        # HTTP 端口暂时注释，因为大多数 RPC 服务没有实现 HTTP 端点
+        # - name: http
+        #   containerPort: {{ $svc.httpPort }}
+        #   protocol: TCP
+
+        {{- if $svc.resources }}
+        resources:
+          {{- if $svc.resources.limits }}
+          limits:
+            cpu: {{ $svc.resources.limits.cpu }}
+            memory: {{ $svc.resources.limits.memory }}
+          {{- end }}
+          {{- if $svc.resources.requests }}
+          requests:
+            cpu: {{ $svc.resources.requests.cpu }}
+            memory: {{ $svc.resources.requests.memory }}
+          {{- end }}
+        {{- end }}
+
+        {{- $hc := $root.Values.healthCheck }}
+        # 暂时禁用健康检查，因为大多数 RPC 服务没有实现 HTTP /health 端点
+        # {{- if $hc.enabled }}
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: http
+        #   initialDelaySeconds: {{ $hc.liveness.initialDelaySeconds }}
+        #   periodSeconds: {{ $hc.liveness.periodSeconds }}
+        #   timeoutSeconds: {{ $hc.liveness.timeoutSeconds }}
+        #   failureThreshold: {{ $hc.liveness.failureThreshold }}
+
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: http
+        #   initialDelaySeconds: {{ $hc.readiness.initialDelaySeconds }}
+        #   periodSeconds: {{ $hc.readiness.periodSeconds }}
+        #   timeoutSeconds: {{ $hc.readiness.timeoutSeconds }}
+        #   failureThreshold: {{ $hc.readiness.failureThreshold }}
+        # {{- end }}
+
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: SERVICE_NAME
+          value: {{ $name }}
+        - name: BINARY_NAME
+          value: {{ $name }}
+
+        volumeMounts:
+        - name: config
+          mountPath: /app/etc
+          readOnly: true
+          # subPath: {{ $name }}.yaml  # 暂时禁用，使用整个目录
+
+      volumes:
+      - name: config
+        configMap:
+          name: {{ $name }}-config
+
+---
+{{- end }}
+{{- end }}
