@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 
@@ -25,6 +28,12 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c, conf.UseEnv())
 	ctx := svc.NewServiceContext(c)
+	if err := ctx.RAGStats.EnsureSchema(context.Background()); err != nil {
+		log.Fatalf("failed to ensure rag stats schema: %v", err)
+	}
+	if err := ctx.StatsHTTPServer.Start(); err != nil {
+		log.Fatalf("failed to start stats http server: %v", err)
+	}
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		search.RegisterSearchServiceServer(grpcServer, server.NewSearchServiceServer(ctx))
@@ -34,6 +43,13 @@ func main() {
 		}
 	})
 	defer s.Stop()
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := ctx.StatsHTTPServer.Stop(shutdownCtx); err != nil {
+			log.Printf("failed to stop stats http server: %v", err)
+		}
+	}()
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }

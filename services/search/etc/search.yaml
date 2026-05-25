@@ -11,8 +11,8 @@ Etcd:
   Key: search.rpc
 
 PostgresConfig:
-  DataSource: "host=127.0.0.1 port=3306 user=root password=root dbname=mall sslmode=disable"
-  Conntimeout: 30
+  DataSource: "postgres://root:fht3825099@localhost:5432/mall?sslmode=disable"
+  Conntimeout: 5
 
 RedisConf:
   Host: 127.0.0.1
@@ -29,3 +29,8 @@ ProductRpc:
     Key: products.rpc
   NonBlock: true
   Timeout: 5000
+
+PrometheusExt:
+  Host: 0.0.0.0
+  Port: 9113
+  Path: /metrics

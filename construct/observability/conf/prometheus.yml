@@ -48,6 +48,15 @@ scrape_configs:
           namespace: go-mall
           service: products-rpc
 
+  # 搜索服务 (gRPC + metrics on 9113)
+  - job_name: 'search'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9113']
+        labels:
+          namespace: go-mall
+          service: search-rpc
+
   # 购物车服务 (gRPC + metrics on 9103)
   - job_name: 'carts'
     scrape_interval: 10s

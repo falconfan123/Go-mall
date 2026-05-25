@@ -291,6 +291,35 @@ CREATE TABLE product_categories (
 CREATE INDEX idx_product_categories_product_id ON product_categories(product_id);
 CREATE INDEX idx_product_categories_category_id ON product_categories(category_id);
 
+-- RAG stats event table
+DROP TABLE IF EXISTS rag_stat_events CASCADE;
+CREATE TABLE rag_stat_events (
+  id BIGSERIAL PRIMARY KEY,
+  conversation_id VARCHAR(128) NOT NULL,
+  turn_id VARCHAR(128) NOT NULL,
+  user_id VARCHAR(128) NOT NULL DEFAULT '',
+  app_id VARCHAR(128) NOT NULL,
+  knowledge_base_id VARCHAR(128) NOT NULL,
+  channel VARCHAR(64) NOT NULL,
+  event_type VARCHAR(64) NOT NULL,
+  is_rag BOOLEAN NOT NULL DEFAULT FALSE,
+  retrieved_doc_count INTEGER NOT NULL DEFAULT 0,
+  rag_strategy VARCHAR(128) NOT NULL DEFAULT '',
+  status VARCHAR(32) NOT NULL DEFAULT '',
+  error_code VARCHAR(128) NOT NULL DEFAULT '',
+  latency_ms BIGINT NOT NULL DEFAULT 0,
+  trace_id VARCHAR(128) NOT NULL DEFAULT '',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX idx_rag_stat_conversation_created ON rag_stat_events(conversation_id)
+  WHERE event_type = 'conversation_created';
+CREATE INDEX idx_rag_stat_created_at ON rag_stat_events(created_at);
+CREATE INDEX idx_rag_stat_app_created_at ON rag_stat_events(app_id, created_at);
+CREATE INDEX idx_rag_stat_kb_created_at ON rag_stat_events(knowledge_base_id, created_at);
+CREATE INDEX idx_rag_stat_channel_created_at ON rag_stat_events(channel, created_at);
+CREATE INDEX idx_rag_stat_event_type_created_at ON rag_stat_events(event_type, created_at);
+CREATE INDEX idx_rag_stat_turn_id ON rag_stat_events(turn_id);
+
 -- Insert some test products
 INSERT INTO products (name, description, picture, price, stock) VALUES
 ('iPhone 15 Pro', 'Apple iPhone 15 Pro 256GB', 'https://via.placeholder.com/300', 899900, 100),

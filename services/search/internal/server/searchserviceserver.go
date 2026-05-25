@@ -5,6 +5,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/search/internal/application/dto"
 	"github.com/falconfan123/Go-mall/services/search/internal/application/service"
+	"github.com/falconfan123/Go-mall/services/search/internal/stats"
 	"github.com/falconfan123/Go-mall/services/search/internal/svc"
 	search "github.com/falconfan123/Go-mall/services/search/pb"
 )
@@ -18,11 +19,19 @@ type SearchServiceServer struct {
 func NewSearchServiceServer(ctx *svc.ServiceContext) *SearchServiceServer {
 	return &SearchServiceServer{
 		ctx: ctx,
-		svc: service.NewSearchAppService(ctx.QueryParser, ctx.ElasticsearchClient),
+		svc: service.NewSearchAppService(ctx.QueryParser, ctx.ElasticsearchClient, ctx.RAGStats),
 	}
 }
 
 func (s *SearchServiceServer) ParseQuery(ctx context.Context, req *search.ParseQueryRequest) (*search.ParseQueryResponse, error) {
+	meta := stats.ExtractRequestMetadata(ctx, s.ctx.Config.ElasticSearch.IndexName)
+	if _, err := s.ctx.RAGStats.RecordConversationCreated(ctx, meta); err != nil {
+		return nil, err
+	}
+	if err := s.ctx.RAGStats.RecordTurnStarted(ctx, meta, false); err != nil {
+		return nil, err
+	}
+
 	result, err := s.svc.ParseQuery(ctx, req.Query)
 	if err != nil {
 		return nil, err
@@ -58,8 +67,9 @@ func (s *SearchServiceServer) Search(ctx context.Context, req *search.SearchRequ
 		SortBy:    req.SortBy,
 		SortOrder: req.SortOrder,
 	}
+	meta := stats.ExtractRequestMetadata(ctx, s.ctx.Config.ElasticSearch.IndexName)
 
-	result, err := s.svc.Search(ctx, dtoReq)
+	result, err := s.svc.Search(ctx, dtoReq, meta)
 	if err != nil {
 		return nil, err
 	}
