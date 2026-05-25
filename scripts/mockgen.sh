@@ -24,9 +24,11 @@ while read -r source_file package_path interface_name destination; do
     continue
   fi
 
-  mkdir -p "$(dirname "$ROOT_DIR/$destination")"
+  source_dir="$(dirname "$source_file")"
+  destination_dir="$(dirname "$destination")"
+  mkdir -p "$ROOT_DIR/$destination_dir"
   "$mockgen_bin" \
-    -source "$ROOT_DIR/$source_file" \
+    -source "$source_file" \
     -package testmock \
-    -destination "$ROOT_DIR/$destination"
+    -destination "$destination"
 done <"$TARGETS_FILE"
