@@ -53,9 +53,34 @@ func (s *OrderServiceServer) GetOrder2Payment(ctx context.Context, in *order.Get
 	return l.GetOrder2Payment(in)
 }
 
+func (s *OrderServiceServer) CancelOrder(ctx context.Context, in *order.CancelOrderRequest) (*order.EmptyRes, error) {
+	l := logic.NewCancelOrderLogic(ctx, s.svcCtx)
+	return l.CancelOrder(in)
+}
+
+func (s *OrderServiceServer) GetOrder(ctx context.Context, in *order.GetOrderRequest) (*order.OrderDetailResponse, error) {
+	l := logic.NewGetOrderLogic(ctx, s.svcCtx)
+	return l.GetOrder(in)
+}
+
 func (s *OrderServiceServer) UpdateOrder2PaymentStatus(ctx context.Context, in *order.UpdateOrder2PaymentRequest) (*order.EmptyRes, error) {
 	l := logic.NewUpdateOrder2PaymentStatusLogic(ctx, s.svcCtx)
 	return l.UpdateOrder2PaymentStatus(in)
+}
+
+func (s *OrderServiceServer) UpdateOrder2PaymentStatusRollback(ctx context.Context, in *order.UpdateOrder2PaymentRequest) (*order.EmptyRes, error) {
+	l := logic.NewUpdateOrder2PaymentStatusRollbackLogic(ctx, s.svcCtx)
+	return l.UpdateOrder2PaymentStatusRollback(in)
+}
+
+func (s *OrderServiceServer) UpdateOrder2PaymentSuccess(ctx context.Context, in *order.UpdateOrder2PaymentSuccessRequest) (*order.EmptyRes, error) {
+	l := logic.NewUpdateOrder2PaymentSuccessLogic(ctx, s.svcCtx)
+	return l.UpdateOrder2PaymentSuccess(in)
+}
+
+func (s *OrderServiceServer) UpdateOrder2PaymentSuccessRollback(ctx context.Context, in *order.UpdateOrder2PaymentSuccessRequest) (*order.EmptyRes, error) {
+	l := logic.NewUpdateOrder2PaymentSuccessRollbackLogic(ctx, s.svcCtx)
+	return l.UpdateOrder2PaymentSuccessRollback(in)
 }
 
 func (s *OrderServiceServer) ListOrders(ctx context.Context, in *order.ListOrdersRequest) (*order.ListOrdersResponse, error) {

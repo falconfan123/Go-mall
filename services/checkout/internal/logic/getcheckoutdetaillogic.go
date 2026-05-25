@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/svc"
@@ -72,11 +73,20 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 
 	var items []*checkout.CheckoutItem
 	for _, item := range checkoutItems {
+		var snapshot map[string]string
+		if err := json.Unmarshal([]byte(item.Snapshot), &snapshot); err != nil {
+			l.Logger.Errorw("解析 checkout item snapshot 失败",
+				logx.Field("err", err),
+				logx.Field("pre_order_id", in.PreOrderId),
+				logx.Field("product_id", item.ProductId))
+			snapshot = map[string]string{}
+		}
 		checkoutItem := &checkout.CheckoutItem{
 			ProductId:   int32(item.ProductId),
 			Quantity:    int32(item.Quantity),
 			Price:       item.Price,
-			ProductName: item.Snapshot,
+			ProductName: snapshot["name"],
+			ProductDesc: snapshot["desc"],
 		}
 		items = append(items, checkoutItem)
 	}
@@ -84,6 +94,8 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	orderData.Items = items
 
 	resp := &checkout.CheckoutDetailResp{
+		StatusCode: code.Success,
+		StatusMsg:  code.SuccessMsg,
 		Data: orderData,
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	checkout2 "github.com/falconfan123/Go-mall/dal/model/checkout"
@@ -75,10 +76,95 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			PreOrderId: preOrderId,
 		}, nil
 	}
-	// 如果结果不是 ARGV[2]，说明是已存在的预订单
+	// 如果结果不是 ARGV[2]，说明是已存在的预订单，直接返回已有结算单以保持幂等。
 	if result != preOrderId {
 		l.Logger.Infof("用户 %d 的预订单已存在，使用已有的预订单: %v", in.UserId, result)
 		preOrderId = result.(string)
+
+		existing, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, int32(in.UserId), preOrderId)
+		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				l.Logger.Infow("清理脏预订单缓存并重新创建预订单",
+					logx.Field("user_id", in.UserId),
+					logx.Field("pre_order_id", preOrderId))
+				if _, delErr := l.svcCtx.RedisClient.Del(cacheKey); delErr != nil {
+					l.Logger.Errorw("删除脏预订单缓存失败",
+						logx.Field("err", delErr),
+						logx.Field("user_id", in.UserId),
+						logx.Field("pre_order_id", preOrderId))
+					return &checkout.CheckoutResp{
+						StatusCode: code.InternalFailed,
+						StatusMsg:  code.InternalFailedMsg,
+						PreOrderId: preOrderId,
+					}, nil
+				}
+			} else {
+				l.Logger.Errorw("查询已有预订单失败",
+					logx.Field("err", err),
+					logx.Field("user_id", in.UserId),
+					logx.Field("pre_order_id", preOrderId))
+				return &checkout.CheckoutResp{
+					StatusCode: code.InternalFailed,
+					StatusMsg:  code.InternalFailedMsg,
+					PreOrderId: preOrderId,
+				}, nil
+			}
+		} else {
+			return &checkout.CheckoutResp{
+				StatusCode: code.Success,
+				PreOrderId: existing.PreOrderId,
+				ExpireTime: existing.ExpireTime,
+				PayMethod:  []int64{1, 2},
+			}, nil
+		}
+
+		preOrderId, err = generatePreOrderID()
+		if err != nil {
+			l.Logger.Errorw("重建 preOrderId 失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+			return &checkout.CheckoutResp{
+				StatusCode: code.GenerateOrderFailed,
+				StatusMsg:  code.GenerateOrderFailedMsg,
+			}, nil
+		}
+
+		result, err = l.svcCtx.RedisClient.EvalCtx(l.ctx, luaScript, []string{cacheKey}, []any{300, preOrderId})
+		if err != nil {
+			l.Logger.Errorw("查询已有预订单失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId),
+				logx.Field("pre_order_id", preOrderId))
+			return &checkout.CheckoutResp{
+				StatusCode: code.InternalFailed,
+				StatusMsg:  code.InternalFailedMsg,
+				PreOrderId: preOrderId,
+			}, nil
+		}
+		if result != preOrderId {
+			l.Logger.Infow("重建预订单时再次命中已有缓存",
+				logx.Field("user_id", in.UserId),
+				logx.Field("pre_order_id", result))
+			preOrderId = result.(string)
+			existing, err = l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, int32(in.UserId), preOrderId)
+			if err != nil {
+				l.Logger.Errorw("重建后查询已有预订单失败",
+					logx.Field("err", err),
+					logx.Field("user_id", in.UserId),
+					logx.Field("pre_order_id", preOrderId))
+				return &checkout.CheckoutResp{
+					StatusCode: code.InternalFailed,
+					StatusMsg:  code.InternalFailedMsg,
+					PreOrderId: preOrderId,
+				}, nil
+			}
+			return &checkout.CheckoutResp{
+				StatusCode: code.Success,
+				PreOrderId: existing.PreOrderId,
+				ExpireTime: existing.ExpireTime,
+				PayMethod:  []int64{1, 2},
+			}, nil
+		}
 	}
 
 	// 3. 检查是否有商品信息
@@ -215,6 +301,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	}
 	// 6. 返回预结算信息
 	return &checkout.CheckoutResp{
+		StatusCode: code.Success,
 		PreOrderId: preOrderId,
 		ExpireTime: expireTime,
 		PayMethod:  []int64{1, 2},

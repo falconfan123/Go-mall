@@ -57,3 +57,17 @@ jobs:
 
       - name: Build service
         run: bash scripts/go-ci-build.sh ${{ matrix.service }}
+
+  build-summary:
+    name: Build
+    if: ${{ always() }}
+    needs:
+      - build-services
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check matrix result
+        run: |
+          if [[ "${{ needs.build-services.result }}" != "success" ]]; then
+            echo "build matrix failed"
+            exit 1
+          fi

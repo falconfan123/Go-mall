@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	couponsFieldNames          = builder.RawFieldNames(&Coupons{})
+	couponsFieldNames          = builder.RawFieldNames(&Coupons{}, true)
 	couponsRows                = strings.Join(couponsFieldNames, ",")
 	couponsRowsExpectAutoSet   = strings.Join(stringx.Remove(couponsFieldNames, "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
-	couponsRowsWithPlaceHolder = strings.Join(stringx.Remove(couponsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
+	couponsRowsWithPlaceHolder = strings.Join(stringx.Remove(couponsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
 )
 
 type (
@@ -78,7 +78,7 @@ func (m *defaultCouponsModel) FindOne(ctx context.Context, id string) (*Coupons,
 }
 
 func (m *defaultCouponsModel) Insert(ctx context.Context, data *Coupons) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, couponsRowsExpectAutoSet)
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", m.table, couponsRowsExpectAutoSet)
 	ret, err := m.conn.ExecCtx(ctx, query, data.Id, data.Name, data.Type, data.Value, data.MinAmount, data.StartTime, data.EndTime, data.Status, data.TotalCount, data.RemainingCount)
 	return ret, err
 }

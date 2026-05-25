@@ -42,27 +42,8 @@ jobs:
       - name: Sync workspace
         run: go work sync
 
-      - name: Start integration stack
-        run: bash scripts/ci-rpc-stack.sh start
-
-      - name: Verify dependency ports
-        run: |
-          for port in 2379 5432 5672 6379 9200 8088; do
-            timeout 2 bash -lc "</dev/tcp/127.0.0.1/${port}"
-          done
-
-      - name: Verify service ports
-        run: |
-          for port in 10000 10001 10002 10003 10004 10005 10006 10007 10008 10009 8888; do
-            timeout 2 bash -lc "</dev/tcp/127.0.0.1/${port}"
-          done
-
       - name: Run RPC integration tests
         run: make test-integration
-
-      - name: Snapshot dependency logs
-        if: always()
-        run: bash scripts/ci-rpc-stack.sh snapshot-dependency-logs
 
       - name: Upload integration report
         if: always()
@@ -88,6 +69,16 @@ jobs:
           if-no-files-found: ignore
           path: .artifacts/dependency-logs/*.log
 
-      - name: Stop integration stack
-        if: always()
-        run: bash scripts/ci-rpc-stack.sh stop
+  integration-summary:
+    name: Integration
+    if: ${{ always() }}
+    needs:
+      - rpc-integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check integration result
+        run: |
+          if [[ "${{ needs.rpc-integration.result }}" != "success" ]]; then
+            echo "integration workflow failed"
+            exit 1
+          fi

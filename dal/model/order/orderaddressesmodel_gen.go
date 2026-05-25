@@ -97,7 +97,7 @@ func (m *defaultOrderAddressesModel) Insert(ctx context.Context, data *OrderAddr
 		placeholders[i] = fmt.Sprintf("$%d", i+1)
 	}
 	query := fmt.Sprintf("insert into %s (%s) values (%s)", m.table, orderAddressesRowsExpectAutoSet, strings.Join(placeholders, ", "))
-	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress)
+	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.AddressId, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress)
 	return ret, err
 }
 

@@ -109,16 +109,18 @@ make build         # 通过 Makefile 构建
 
 ### 4. ci-rpc-stack.sh
 
-**用途**: GitHub Actions / 本地 CI 使用的无交互集成环境启动脚本
+**用途**: GitHub Actions / 本地 CI 使用的无交互集成环境编排脚本
 
 **功能**:
 - 使用 `construct/depend/docker-compose.yaml` 启动 Postgres、Redis、RabbitMQ、etcd、Elasticsearch、gorse
 - 校准 Postgres 和 RabbitMQ 测试账号
 - 直接以 `go run` 启动本地 RPC 服务与 gateway，不依赖 `air`
+- 为 CI 本地模式渲染临时配置，将 `localhost` 依赖地址覆写为 `127.0.0.1`，避免 IPv6 `::1` 解析问题
 - 校验依赖端口 `2379/5432/5672/6379/9200/8088`
 - 校验核心端口 `10000-10009/8888`
 - 输出服务日志到 `scripts/logs/*.log`
 - 输出依赖容器日志到 `.artifacts/dependency-logs/*.log`
+- 支持在同一个脚本生命周期内完成“启动 -> 测试 -> 日志采集 -> 清理”
 
 **使用方法**:
 ```bash
@@ -126,6 +128,7 @@ make build         # 通过 Makefile 构建
 ./scripts/ci-rpc-stack.sh status
 ./scripts/ci-rpc-stack.sh snapshot-dependency-logs
 ./scripts/ci-rpc-stack.sh stop
+./scripts/ci-rpc-stack.sh run-local-suite env GO_MALL_TEST_LOCAL=1 bash scripts/test-integration.sh
 ```
 
 **相关命令**:
@@ -141,8 +144,9 @@ make integration-down
 **用途**: 执行 RPC 集成测试，并生成 HTML/JUnit/摘要报告
 
 **功能**:
-- 本地模式下直跑 `test/rpc` 模块
+- 本地模式下在同一个脚本进程中完成依赖启动、RPC/gateway 拉起、端口校验、测试执行、日志采集与清理
 - 生成 `.artifacts/rpc-integration-report/{index.html,junit.xml,summary.txt}`
+- 如果在 `go test` 前的启动阶段失败，仍会生成最小失败报告，保证 CI artifact 完整
 - 保留 Kubernetes Job 模式作为兼容入口，但 CI 默认不使用它
 
 **使用方法**:
@@ -249,6 +253,48 @@ ANTHROPIC_VERSION=...      # 可选，默认 2023-06-01
 ```
 
 说明：这不是新增 `minimax` backend，而是对现有 `anthropic` backend 增加兼容鉴权扩展；接口仍然是 `POST /v1/messages`。
+
+---
+
+### 11. configure-branch-protection.sh
+
+**用途**: 为 GitHub 仓库默认分支配置 CI 门禁与 auto-merge 能力
+
+**功能**:
+- 打开仓库 `allow_auto_merge`
+- 为 `main` 创建或更新名为 `main-ci-gate` 的规则集
+- 强制默认分支必须通过 PR 合并
+- 要求固定检查 `Build` / `Quality` / `Integration` 通过后才能合并
+
+**使用方法**:
+```bash
+./scripts/configure-branch-protection.sh
+make configure-branch-protection
+```
+
+---
+
+### 12. submit-with-ci.sh
+
+**用途**: 一条命令完成提交、推送、创建 PR、等待 CI、自动合并
+
+**功能**:
+- 检查 `git` / `gh` / `go` / `make` 环境
+- 运行本地前置校验：`go work sync`、`make test-unit`、`make ci-build`
+- 自动创建时间戳分支、提交全部改动并 rebase 到 `origin/main`
+- 自动创建 PR、启用 `squash` auto-merge
+- 轮询 required checks，直到通过或失败
+- 合并完成后同步本地 `main`
+
+**使用方法**:
+```bash
+MSG="ci: enable automated PR merge flow" ./scripts/submit-with-ci.sh
+make submit-ci MSG="ci: enable automated PR merge flow"
+```
+
+**注意事项**:
+- 默认会拦截 basename 以 `.tmp` 开头的文件，避免调试残留被自动提交
+- 依赖 GitHub Actions 检查名 `Build` / `Quality` / `Integration`
 
 ---
 
