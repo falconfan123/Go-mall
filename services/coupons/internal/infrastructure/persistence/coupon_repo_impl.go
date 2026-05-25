@@ -62,8 +62,23 @@ func (r *CouponRepositoryImpl) List(ctx context.Context, page, pageSize int) ([]
 
 // ListAvailable 查询可用优惠券列表
 func (r *CouponRepositoryImpl) ListAvailable(ctx context.Context, page, pageSize int) ([]*aggregate.Coupon, int64, error) {
-	// 简化实现，实际需要根据状态和时间查询可用优惠券
-	return []*aggregate.Coupon{}, 0, nil
+	pageCoupons, err := r.couponModel.QueryCoupons(ctx, int32(page), int32(pageSize), 0)
+	if err != nil {
+		return nil, 0, err
+	}
+	var total int64
+	if err := r.conn.QueryRowCtx(ctx, &total, "SELECT COUNT(*) FROM coupons"); err != nil {
+		return nil, 0, err
+	}
+	result := make([]*aggregate.Coupon, 0, len(pageCoupons))
+	for _, c := range pageCoupons {
+		domainCoupon, err := r.convertToDomain(c)
+		if err != nil {
+			return nil, 0, err
+		}
+		result = append(result, domainCoupon)
+	}
+	return result, total, nil
 }
 
 // DecreaseStock 原子扣减库存
@@ -160,9 +175,9 @@ type PageCoupon struct {
 
 // ListByPage 分页查询优惠券
 func (r *CouponRepositoryImpl) ListByPage(ctx context.Context, offset, limit int) ([]*PageCoupon, int64, error) {
-	query := "SELECT id, name, type, value, min_amount, start_time, end_time, status, total_count, remaining_count, created_at, updated_at FROM coupons ORDER BY created_at DESC LIMIT ?, ?"
+	query := "SELECT id, name, type, value, min_amount, start_time, end_time, status, total_count, remaining_count, created_at, updated_at FROM coupons ORDER BY created_at DESC LIMIT $1 OFFSET $2"
 	var results []*PageCoupon
-	err := r.conn.QueryRowsCtx(ctx, &results, query, offset, limit)
+	err := r.conn.QueryRowsCtx(ctx, &results, query, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}

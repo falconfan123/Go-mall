@@ -17,8 +17,8 @@ import (
 var (
 	couponsFieldNames          = builder.RawFieldNames(&Coupons{})
 	couponsRows                = strings.Join(couponsFieldNames, ",")
-	couponsRowsExpectAutoSet   = strings.Join(stringx.Remove(couponsFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	couponsRowsWithPlaceHolder = strings.Join(stringx.Remove(couponsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	couponsRowsExpectAutoSet   = strings.Join(stringx.Remove(couponsFieldNames, "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	couponsRowsWithPlaceHolder = strings.Join(stringx.Remove(couponsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -53,18 +53,18 @@ type (
 func newCouponsModel(conn sqlx.SqlConn) *defaultCouponsModel {
 	return &defaultCouponsModel{
 		conn:  conn,
-		table: "`coupons`",
+		table: "coupons",
 	}
 }
 
 func (m *defaultCouponsModel) Delete(ctx context.Context, id string) error {
-	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
 func (m *defaultCouponsModel) FindOne(ctx context.Context, id string) (*Coupons, error) {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", couponsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"id\" = $1 limit 1", couponsRows, m.table)
 	var resp Coupons
 	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
 	switch err {
@@ -84,7 +84,7 @@ func (m *defaultCouponsModel) Insert(ctx context.Context, data *Coupons) (sql.Re
 }
 
 func (m *defaultCouponsModel) Update(ctx context.Context, data *Coupons) error {
-	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, couponsRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set \"name\" = $1, \"type\" = $2, \"value\" = $3, \"min_amount\" = $4, \"start_time\" = $5, \"end_time\" = $6, \"status\" = $7, \"total_count\" = $8, \"remaining_count\" = $9 where \"id\" = $10", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, data.Name, data.Type, data.Value, data.MinAmount, data.StartTime, data.EndTime, data.Status, data.TotalCount, data.RemainingCount, data.Id)
 	return err
 }

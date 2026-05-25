@@ -20,26 +20,24 @@ CREATE TABLE inventory (
 DROP TABLE IF EXISTS inventory_lock CASCADE;
 CREATE TABLE inventory_lock (
   id BIGSERIAL PRIMARY KEY,
-  product_id BIGINT NOT NULL,
-  quantity INTEGER NOT NULL,
-  order_id BIGINT NOT NULL,
+  order_id TEXT NOT NULL,
   status INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  user_id BIGINT NOT NULL DEFAULT 0
 );
-CREATE INDEX idx_inventory_lock_product_id ON inventory_lock(product_id);
+CREATE INDEX idx_inventory_lock_order_user ON inventory_lock(order_id, user_id);
 
 DROP TABLE IF EXISTS return_lock CASCADE;
 CREATE TABLE return_lock (
   id BIGSERIAL PRIMARY KEY,
-  product_id BIGINT NOT NULL,
-  quantity INTEGER NOT NULL,
-  order_id BIGINT NOT NULL,
+  order_id TEXT NOT NULL,
   status INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  user_id BIGINT NOT NULL DEFAULT 0
 );
-CREATE INDEX idx_return_lock_product_id ON return_lock(product_id);
+CREATE INDEX idx_return_lock_order_user ON return_lock(order_id, user_id);
 
 -- User address table
 DROP TABLE IF EXISTS user_address CASCADE;
@@ -338,4 +336,4 @@ INSERT INTO categories (name, description) VALUES
 INSERT INTO product_categories (product_id, category_id) VALUES
 (1, 1), (1, 2), (1, 3),
 (2, 1), (2, 2), (2, 4),
-(3, 1), (2, 2), (3, 5);
+(3, 1), (3, 2), (3, 5);

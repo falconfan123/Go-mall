@@ -19,8 +19,8 @@ import (
 var (
 	checkoutItemsFieldNames          = builder.RawFieldNames(&CheckoutItems{})
 	checkoutItemsRows                = strings.Join(checkoutItemsFieldNames, ",")
-	checkoutItemsRowsExpectAutoSet   = strings.Join(stringx.Remove(checkoutItemsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	checkoutItemsRowsWithPlaceHolder = strings.Join(stringx.Remove(checkoutItemsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	checkoutItemsRowsExpectAutoSet   = strings.Join(stringx.Remove(checkoutItemsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	checkoutItemsRowsWithPlaceHolder = strings.Join(stringx.Remove(checkoutItemsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -50,18 +50,18 @@ type (
 func newCheckoutItemsModel(conn sqlx.SqlConn) *defaultCheckoutItemsModel {
 	return &defaultCheckoutItemsModel{
 		conn:  conn,
-		table: "`checkout_items`",
+		table: "checkout_items",
 	}
 }
 
 func (m *defaultCheckoutItemsModel) Delete(ctx context.Context, id int64) error {
-	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
 func (m *defaultCheckoutItemsModel) FindOne(ctx context.Context, id int64) (*CheckoutItems, error) {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", checkoutItemsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"id\" = $1 limit 1", checkoutItemsRows, m.table)
 	var resp CheckoutItems
 	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
 	switch err {
@@ -81,7 +81,7 @@ func (m *defaultCheckoutItemsModel) Insert(ctx context.Context, data *CheckoutIt
 }
 
 func (m *defaultCheckoutItemsModel) Update(ctx context.Context, data *CheckoutItems) error {
-	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, checkoutItemsRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set \"pre_order_id\" = $1, \"product_id\" = $2, \"quantity\" = $3, \"price\" = $4, \"snapshot\" = $5 where \"id\" = $6", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, data.PreOrderId, data.ProductId, data.Quantity, data.Price, data.Snapshot, data.Id)
 	return err
 }

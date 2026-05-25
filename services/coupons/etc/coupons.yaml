@@ -1,5 +1,6 @@
 Name: coupons.rpc
 ListenOn: 0.0.0.0:10009
+Mode: dev
 
 
 # 服务发现

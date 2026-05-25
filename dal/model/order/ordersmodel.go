@@ -47,9 +47,9 @@ func (m *customOrdersModel) DeleteOrderByOrderID(ctx context.Context, session sq
 }
 
 func (m *customOrdersModel) GetOrdersByUserID(ctx context.Context, userId int32, page, size int32) ([]*Orders, error) {
-	query := fmt.Sprintf("select %s from %s where \"user_id\" = $1", ordersRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"user_id\" = $1 order by \"created_at\" desc limit $2 offset $3", ordersRows, m.table)
 	var resp []*Orders
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId)
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, size, (page-1)*size)
 	switch {
 	case err == nil:
 		return resp, nil

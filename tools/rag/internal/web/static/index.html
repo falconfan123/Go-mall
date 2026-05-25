@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go-mall RAG Console</title>
+    <style>
+      :root {
+        --bg: #f5efe5;
+        --panel: rgba(255, 251, 245, 0.92);
+        --panel-strong: #fffaf2;
+        --ink: #1f1b16;
+        --muted: #6f675f;
+        --accent: #cc5a2c;
+        --accent-deep: #8c3210;
+        --line: rgba(31, 27, 22, 0.12);
+        --ok: #1f7a4f;
+        --warn: #b86a00;
+        --shadow: 0 24px 80px rgba(74, 43, 23, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Avenir Next", "Segoe UI", "PingFang SC", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(204, 90, 44, 0.16), transparent 28%),
+          radial-gradient(circle at top right, rgba(31, 122, 79, 0.12), transparent 24%),
+          linear-gradient(180deg, #fbf5eb 0%, var(--bg) 100%);
+        min-height: 100vh;
+      }
+
+      .shell {
+        width: min(1180px, calc(100vw - 32px));
+        margin: 32px auto 56px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 18px;
+        padding: 28px;
+        border-radius: 28px;
+        background: linear-gradient(135deg, rgba(255, 250, 242, 0.96), rgba(250, 236, 218, 0.96));
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(204, 90, 44, 0.16);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(204, 90, 44, 0.09);
+        color: var(--accent-deep);
+        font: 700 12px/1 "IBM Plex Mono", "SFMono-Regular", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(34px, 6vw, 56px);
+        line-height: 0.98;
+        letter-spacing: -0.04em;
+      }
+
+      .hero p {
+        margin: 0;
+        max-width: 760px;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.6;
+      }
+
+      .grid {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+        gap: 20px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 22px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .card-head h2 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: -0.02em;
+      }
+
+      .card-body {
+        padding: 20px 22px 22px;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 16px;
+      }
+
+      label {
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      input,
+      select,
+      textarea,
+      button {
+        font: inherit;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(31, 27, 22, 0.12);
+        background: var(--panel-strong);
+        color: var(--ink);
+        padding: 14px 14px;
+        transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      textarea {
+        min-height: 168px;
+        resize: vertical;
+        line-height: 1.55;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: rgba(204, 90, 44, 0.42);
+        box-shadow: 0 0 0 4px rgba(204, 90, 44, 0.09);
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 14px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+        border-radius: 999px;
+        padding: 13px 18px;
+        font-weight: 700;
+        transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.65;
+        transform: none;
+      }
+
+      .primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+        color: #fff7f0;
+        box-shadow: 0 16px 32px rgba(140, 50, 16, 0.22);
+      }
+
+      .secondary {
+        background: rgba(31, 27, 22, 0.06);
+        color: var(--ink);
+      }
+
+      .inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .checkbox {
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 10px;
+        margin-top: 4px;
+      }
+
+      .checkbox input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        accent-color: var(--accent);
+      }
+
+      .status {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 12px;
+        border-radius: 999px;
+        background: rgba(31, 27, 22, 0.05);
+        color: var(--muted);
+        font: 600 13px/1.2 "IBM Plex Mono", "SFMono-Regular", monospace;
+      }
+
+      .pill.ok {
+        background: rgba(31, 122, 79, 0.12);
+        color: var(--ok);
+      }
+
+      .pill.warn {
+        background: rgba(184, 106, 0, 0.12);
+        color: var(--warn);
+      }
+
+      .meta {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .meta-row {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 12px;
+        align-items: start;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .meta-row strong {
+        color: var(--ink);
+      }
+
+      .answer {
+        white-space: pre-wrap;
+        line-height: 1.7;
+        font-size: 15px;
+      }
+
+      .results {
+        display: grid;
+        gap: 14px;
+      }
+
+      .result {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 14px 15px 15px;
+        background: rgba(255, 255, 255, 0.62);
+      }
+
+      .result-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: baseline;
+        margin-bottom: 8px;
+      }
+
+      .result code,
+      .mono {
+        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+      }
+
+      .snippet {
+        margin: 0;
+        white-space: pre-wrap;
+        color: var(--muted);
+        line-height: 1.55;
+        font-size: 13px;
+      }
+
+      .empty {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .flash {
+        min-height: 24px;
+        color: var(--accent-deep);
+        font-weight: 600;
+      }
+
+      .examples {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .chip {
+        border-radius: 999px;
+        border: 1px solid rgba(31, 27, 22, 0.12);
+        background: rgba(255, 255, 255, 0.64);
+        color: var(--ink);
+        padding: 10px 13px;
+        font-size: 13px;
+      }
+
+      @media (max-width: 960px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .controls {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="eyebrow">Go-mall • Repo Local RAG</div>
+        <h1>RAG Console</h1>
+        <p>
+          这个页面直接调用仓库内的 `tools/rag` 逻辑。你可以先做 `doctor` 和 `index`，再用 `none`
+          backend 验证检索，或者切到 `anthropic` 走真实模型问答。
+        </p>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <div class="card-head">
+            <h2>Ask</h2>
+            <div id="requestState" class="pill">idle</div>
+          </div>
+          <div class="card-body">
+            <div class="controls">
+              <label>
+                Backend
+                <select id="backend">
+                  <option value="anthropic">anthropic</option>
+                  <option value="none">none</option>
+                </select>
+              </label>
+              <label>
+                Top K
+                <input id="topK" type="number" min="1" max="12" value="6" />
+              </label>
+              <label class="checkbox">
+                <input id="refresh" type="checkbox" />
+                <span>Ask 前重建索引</span>
+              </label>
+            </div>
+
+            <label>
+              Question
+              <textarea id="question" placeholder="例如：tools/rag/internal/app/app.go 里的 Doctor 会检查哪些项？"></textarea>
+            </label>
+
+            <div class="examples">
+              <button class="chip" data-example="tools/rag/internal/app/app.go 里的 Doctor 会检查哪些项？">Doctor 检查项</button>
+              <button class="chip" data-example="inventory 预扣减逻辑在哪？">Inventory 预扣减</button>
+              <button class="chip" data-example="tools/rag/internal/indexer/indexer.go 现在如何过滤噪声文件？">索引过滤逻辑</button>
+            </div>
+
+            <div class="toolbar">
+              <div class="actions">
+                <button id="askBtn" class="primary">Ask</button>
+                <button id="indexBtn" class="secondary">Rebuild Index</button>
+                <button id="doctorBtn" class="secondary">Refresh Doctor</button>
+              </div>
+              <div id="flash" class="flash"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Doctor</h2>
+            <div id="doctorReady" class="pill warn">loading</div>
+          </div>
+          <div class="card-body">
+            <div id="doctorPills" class="status"></div>
+            <div class="meta">
+              <div class="meta-row"><strong>Repo</strong><span id="repoRoot" class="mono">-</span></div>
+              <div class="meta-row"><strong>DB</strong><span id="dbPath" class="mono">-</span></div>
+              <div class="meta-row"><strong>Checks</strong><span id="allowedChecks">-</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <div class="card-head">
+            <h2>Answer</h2>
+            <div id="answerBackend" class="pill">backend: -</div>
+          </div>
+          <div class="card-body">
+            <div id="answer" class="answer empty">还没有回答。先输入问题并点击 Ask。</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Retrieved Context</h2>
+            <div id="resultCount" class="pill">0 hits</div>
+          </div>
+          <div id="results" class="card-body results">
+            <div class="empty">检索结果会显示在这里。</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const els = {
+        backend: document.getElementById("backend"),
+        topK: document.getElementById("topK"),
+        refresh: document.getElementById("refresh"),
+        question: document.getElementById("question"),
+        askBtn: document.getElementById("askBtn"),
+        indexBtn: document.getElementById("indexBtn"),
+        doctorBtn: document.getElementById("doctorBtn"),
+        requestState: document.getElementById("requestState"),
+        doctorReady: document.getElementById("doctorReady"),
+        doctorPills: document.getElementById("doctorPills"),
+        repoRoot: document.getElementById("repoRoot"),
+        dbPath: document.getElementById("dbPath"),
+        allowedChecks: document.getElementById("allowedChecks"),
+        flash: document.getElementById("flash"),
+        answer: document.getElementById("answer"),
+        answerBackend: document.getElementById("answerBackend"),
+        resultCount: document.getElementById("resultCount"),
+        results: document.getElementById("results"),
+      };
+
+      function setBusy(busy, label = "working") {
+        els.askBtn.disabled = busy;
+        els.indexBtn.disabled = busy;
+        els.doctorBtn.disabled = busy;
+        els.requestState.textContent = busy ? label : "idle";
+        els.requestState.className = busy ? "pill warn" : "pill";
+      }
+
+      function flash(message, kind = "info") {
+        els.flash.textContent = message;
+        els.flash.style.color = kind === "error" ? "#8c3210" : kind === "ok" ? "#1f7a4f" : "#6f675f";
+      }
+
+      async function api(path, options = {}) {
+        const res = await fetch(path, {
+          headers: { "Content-Type": "application/json" },
+          ...options,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || `request failed: ${res.status}`);
+        }
+        return data;
+      }
+
+      function renderDoctor(data) {
+        els.repoRoot.textContent = data.repo_root || "-";
+        els.dbPath.textContent = data.db_path || "-";
+        els.doctorReady.textContent = data.auth_ready ? "auth ready" : "auth missing";
+        els.doctorReady.className = data.auth_ready ? "pill ok" : "pill warn";
+
+        const checks = (data.allowed_checks || [])
+          .map((item) => `${item.name}: ${item.ok ? "OK" : item.detail || "FAIL"}`);
+        els.allowedChecks.textContent = checks.length ? checks.join(" | ") : "-";
+
+        const pills = [
+          ["writable", data.writable],
+          ["git", data.git_ready],
+          ["auth_token", data.anthropic_auth_token],
+          ["api_key", data.anthropic_api_key],
+          ["auth_ready", data.auth_ready],
+        ];
+        els.doctorPills.innerHTML = pills
+          .map(([label, ok]) => `<span class="pill ${ok ? "ok" : "warn"}">${label}: ${ok}</span>`)
+          .join("");
+      }
+
+      function renderResults(items) {
+        els.resultCount.textContent = `${items.length} hits`;
+        if (!items.length) {
+          els.results.innerHTML = `<div class="empty">没有命中上下文。</div>`;
+          return;
+        }
+        els.results.innerHTML = items
+          .map(
+            (item) => `
+              <article class="result">
+                <div class="result-top">
+                  <code>${item.citation}</code>
+                  <span class="mono">score ${item.score.toFixed(1)}</span>
+                </div>
+                <pre class="snippet">${escapeHtml(item.snippet)}</pre>
+              </article>
+            `,
+          )
+          .join("");
+      }
+
+      function escapeHtml(value) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+      }
+
+      async function refreshDoctor() {
+        const data = await api("/api/doctor");
+        renderDoctor(data);
+      }
+
+      async function rebuildIndex() {
+        setBusy(true, "indexing");
+        flash("正在重建索引…");
+        try {
+          const data = await api("/api/index", { method: "POST" });
+          flash(`索引完成：${data.files_indexed} files, ${data.chunk_count} chunks`, "ok");
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function ask() {
+        const query = els.question.value.trim();
+        if (!query) {
+          flash("先输入问题。", "error");
+          els.question.focus();
+          return;
+        }
+        setBusy(true, "asking");
+        flash("正在查询…");
+        try {
+          const data = await api("/api/ask", {
+            method: "POST",
+            body: JSON.stringify({
+              query,
+              backend: els.backend.value,
+              top_k: Number(els.topK.value) || 6,
+              refresh: els.refresh.checked,
+            }),
+          });
+          els.answer.textContent = data.answer || "没有返回回答。";
+          els.answer.className = "answer";
+          els.answerBackend.textContent = `backend: ${data.backend}`;
+          renderResults(data.results || []);
+          flash("查询完成。", "ok");
+        } catch (error) {
+          els.answer.textContent = error.message;
+          els.answer.className = "answer";
+          renderResults([]);
+          flash(error.message, "error");
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      document.querySelectorAll("[data-example]").forEach((button) => {
+        button.addEventListener("click", () => {
+          els.question.value = button.dataset.example;
+          els.question.focus();
+        });
+      });
+      els.askBtn.addEventListener("click", ask);
+      els.indexBtn.addEventListener("click", rebuildIndex);
+      els.doctorBtn.addEventListener("click", async () => {
+        setBusy(true, "doctor");
+        flash("正在刷新 doctor…");
+        try {
+          await refreshDoctor();
+          flash("doctor 已刷新。", "ok");
+        } finally {
+          setBusy(false);
+        }
+      });
+      els.question.addEventListener("keydown", (event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+          ask();
+        }
+      });
+
+      refreshDoctor().catch((error) => {
+        flash(error.message, "error");
+      });
+    </script>
+  </body>
+</html>

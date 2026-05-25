@@ -1,182 +1,259 @@
 #!/bin/bash
-# ==============================================
-# Go-Mall 统一启动脚本 (增强版 - 强制清理端口)
-# ==============================================
+
+set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
-# 全局变量
-MODE="core"
 PID_FILE="/tmp/go-mall-pids.txt"
 LOG_DIR="${PROJECT_ROOT}/scripts/logs"
+DEPEND_STACK="${PROJECT_ROOT}/construct/depend/docker-compose.yaml"
+LOKI_STACK="${PROJECT_ROOT}/infrastructure/docker-compose.yaml"
 
-# 服务定义
 ALL_SERVICES="
-system:services/system:system.go:10010:rpc
-activity:services/activity:activity.go:10011:rpc
-auths:services/auths:auths.go:10000:rpc
-audit:services/audit:audit.go:10008:rpc
-users:services/users:users.go:10001:rpc
-inventory:services/inventory:inventory.go:10007:rpc
-product:services/product:product.go:10002:rpc
-carts:services/carts:carts.go:10003:rpc
-coupons:services/coupons:coupons.go:10009:rpc
-order:services/order:order.go:10004:rpc
-checkout:services/checkout:checkout.go:10005:rpc
-payment:services/payment:payment.go:10006:rpc
-admin:services/admin:admin.go:10012:rpc
-# user-api:apis/user:user.go:8001:api
-# product-api:apis/product:product.go:8002:api
-# carts-api:apis/carts:carts.go:8003:api
-# order-api:apis/order:order.go:8004:api
-# checkout-api:apis/checkout:checkout.go:8005:api
-# payment-api:apis/payment:payment.go:8006:api
-# coupon-api:apis/coupon:coupon.go:8009:api
-# flash-api:apis/flash_sale:flash.go:8008:api
-gateway:services/gateway:gateway.go:8888:gateway
-frontend:frontend:node proxy.js:3000:frontend
+system:services/system:10010:rpc
+activity:services/activity:10011:rpc
+auths:services/auths:10000:rpc
+audit:services/audit:10008:rpc
+users:services/users:10001:rpc
+inventory:services/inventory:10007:rpc
+product:services/product:10002:rpc
+carts:services/carts:10003:rpc
+coupons:services/coupons:10009:rpc
+order:services/order:10004:rpc
+checkout:services/checkout:10005:rpc
+payment:services/payment:10006:rpc
+admin:services/admin:10012:rpc
+gateway:services/gateway:8888:gateway
 "
 
-# 基础设施依赖
-INFRA_DEPS="Etcd:2379 MySQL:3306 Redis:6379 Elasticsearch:9200 RabbitMQ:5672"
+INFRA_PORTS="2379 5432 5672 6379 9200 8088"
+CORE_PORTS="10000 10001 10002 10003 10004 10005 10006 10007 10008 10009 8888"
 
-# Loki + Grafana 日志系统
-LOKI_STACK="infrastructure/docker-compose.yaml"
+port_in_use() {
+    lsof -Pi :"$1" -sTCP:LISTEN -t >/dev/null 2>&1
+}
 
-# --- 核心修改部分：强化清理函数 ---
+wait_for_port() {
+    local port="$1"
+    local attempts="${2:-30}"
+    local sleep_secs="${3:-2}"
+    local i
+    for ((i = 1; i <= attempts; i++)); do
+        if port_in_use "$port"; then
+            return 0
+        fi
+        sleep "$sleep_secs"
+    done
+    return 1
+}
+
+wait_for_container_health() {
+    local container="$1"
+    local attempts="${2:-40}"
+    local sleep_secs="${3:-3}"
+    local i
+    for ((i = 1; i <= attempts; i++)); do
+        local status
+        status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container" 2>/dev/null || true)"
+        if [[ "$status" == "healthy" || "$status" == "running" ]]; then
+            return 0
+        fi
+        sleep "$sleep_secs"
+    done
+    return 1
+}
+
 cleanup_old_processes() {
-    echo "正在强制清理旧进程及占用端口..."
+    echo "正在清理旧进程及占用端口..."
 
-    # 1. 尝试通过 PID 文件杀掉进程
-    if [ -f "$PID_FILE" ]; then
-        # 兼容旧版读取方式
-        PIDS_TO_KILL=$(grep -o '[0-9]\+' "$PID_FILE" || true)
-        for pid in $PIDS_TO_KILL; do
-            kill -9 $pid 2>/dev/null || true
+    if [[ -f "$PID_FILE" ]]; then
+        awk -F: '{print $2}' "$PID_FILE" | while read -r pid; do
+            [[ -n "$pid" ]] && kill -TERM -- "-$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
         done
         rm -f "$PID_FILE"
     fi
 
-    # 2. 批量清理所有服务定义的端口 (核心修复)
-    # 提取 ALL_SERVICES 中所有的端口号
-    local ports=$(echo "$ALL_SERVICES" | awk -F':' '{print $4}' | xargs)
-
+    local ports
+    ports="$(printf '%s\n%s\n' "$CORE_PORTS" "3000" | xargs)"
     for port in $ports; do
-        if [ -n "$port" ]; then
-            # 查找占用该端口的 PID
-            local port_pids=$(lsof -ti :$port 2>/dev/null)
-            if [ -n "$port_pids" ]; then
-                echo "释放端口 $port (PID: $port_pids)..."
-                echo "$port_pids" | xargs kill -9 2>/dev/null || true
-            fi
+        local pids
+        pids="$(lsof -ti :"$port" 2>/dev/null || true)"
+        if [[ -n "$pids" ]]; then
+            echo "释放端口 $port (PID: $pids)"
+            echo "$pids" | xargs kill -9 2>/dev/null || true
         fi
     done
 
-    # 3. 兜底清理关键字进程
-    pkill -9 -f "go run" 2>/dev/null || true
-    pkill -9 -f "python3.*http.server 3000" 2>/dev/null || true
-
-    sleep 1
-    echo "旧进程清理完成"
+    (pkill -9 -f "air -c .air.toml" 2>/dev/null || true) >/dev/null 2>&1
+    (pkill -9 -f "node proxy.js" 2>/dev/null || true) >/dev/null 2>&1
 }
 
-# 检查端口是否被占用
-port_in_use() {
-    lsof -Pi :$1 -sTCP:LISTEN -t >/dev/null 2>&1
+start_dependencies() {
+    echo "启动本地依赖栈..."
+    docker compose -f "$DEPEND_STACK" up -d
+
+    local containers=(
+        go-mall-postgres
+        go-mall-redis
+        go-mall-rabbitmq
+        go-mall-etcd
+        go-mall-elasticsearch
+        go-mall-gorse
+    )
+
+    local container
+    for container in "${containers[@]}"; do
+        echo "等待 $container 健康..."
+        wait_for_container_health "$container" || {
+            echo "依赖未就绪: $container"
+            docker logs --tail 100 "$container" || true
+            exit 1
+        }
+    done
+
+    local port
+    for port in $INFRA_PORTS; do
+        wait_for_port "$port" 20 1 || {
+            echo "依赖端口未就绪: $port"
+            exit 1
+        }
+    done
 }
 
-# 获取服务信息
+reconcile_postgres() {
+    echo "校准 Postgres 本地角色和库..."
+    docker exec -i go-mall-postgres psql -U root -d postgres <<'SQL'
+DO
+$do$
+BEGIN
+   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'root') THEN
+      CREATE ROLE root LOGIN PASSWORD 'fht3825099' SUPERUSER;
+   ELSE
+      ALTER ROLE root WITH LOGIN PASSWORD 'fht3825099' SUPERUSER;
+   END IF;
+END
+$do$;
+SQL
+
+    docker exec -i go-mall-postgres psql -U root -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='mall'" | grep -q 1 || \
+        docker exec -i go-mall-postgres psql -U root -d postgres -c "CREATE DATABASE mall OWNER root;"
+
+    docker exec -i go-mall-postgres psql -U root -d mall -c "GRANT ALL PRIVILEGES ON DATABASE mall TO root;"
+    docker exec -i go-mall-postgres psql -U root -d mall -f /docker-entrypoint-initdb.d/01-init_all_tables_postgres.sql >/dev/null
+}
+
+reconcile_rabbitmq() {
+    echo "校准 RabbitMQ 本地账号权限..."
+    docker exec go-mall-rabbitmq rabbitmqctl await_startup >/dev/null
+    docker exec go-mall-rabbitmq rabbitmqctl add_vhost / >/dev/null 2>&1 || true
+    docker exec go-mall-rabbitmq rabbitmqctl add_user admin admin >/dev/null 2>&1 || \
+        docker exec go-mall-rabbitmq rabbitmqctl change_password admin admin >/dev/null
+    docker exec go-mall-rabbitmq rabbitmqctl set_permissions -p / admin ".*" ".*" ".*" >/dev/null
+    docker exec go-mall-rabbitmq rabbitmqctl set_user_tags admin administrator >/dev/null
+}
+
 get_service_info() {
     echo "$ALL_SERVICES" | grep -E "^$1:" | head -1
 }
 
-# 启动服务逻辑 (略作优化以保证稳定性)
 start_service() {
-    local srv_name=$1
-    local srv_info=$(get_service_info "$srv_name")
-    [ -z "$srv_info" ] && return 1
+    local srv_name="$1"
+    local srv_info
+    srv_info="$(get_service_info "$srv_name")"
+    [[ -z "$srv_info" ]] && return 1
 
-    IFS=':' read -r _ srv_dir srv_cmd srv_port srv_type <<< "$srv_info"
+    IFS=':' read -r _ srv_dir srv_port srv_type <<< "$srv_info"
 
-    # 二次检查端口，防止清理失败
-    if port_in_use $srv_port; then
-        echo "⚠️  端口 $srv_port 仍被占用，尝试最后一次强制清理..."
-        lsof -ti :$srv_port | xargs kill -9 2>/dev/null || true
+    if port_in_use "$srv_port"; then
+        lsof -ti :"$srv_port" | xargs kill -9 2>/dev/null || true
         sleep 1
     fi
 
     echo "启动 $srv_name (端口 $srv_port)..."
     local log_file="${LOG_DIR}/${srv_name}.log"
-
-    cd "$srv_dir"
-    if [[ "$srv_type" == "frontend" ]]; then
-        node proxy.js > "$log_file" 2>&1 &
-    elif [[ "$srv_type" == "api" ]]; then
-        air -c .air.toml > "$log_file" 2>&1 &
+    if command -v setsid >/dev/null 2>&1; then
+        setsid bash -lc "
+            cd '$PROJECT_ROOT/$srv_dir'
+            if [[ -f .air.toml ]]; then
+                exec air -c .air.toml > '$log_file' 2>&1
+            fi
+            entrypoint='${srv_name}.go'
+            if [[ ! -f \"\$entrypoint\" ]]; then
+                entrypoint='$(basename "$srv_dir").go'
+            fi
+            exec go run \"\$entrypoint\" > '$log_file' 2>&1
+        " &
     else
-        # RPC 服务使用 air 热加载
-        air -c .air.toml > "$log_file" 2>&1 &
+        (
+            cd "$PROJECT_ROOT/$srv_dir"
+            if [[ -f .air.toml ]]; then
+                exec air -c .air.toml > "$log_file" 2>&1
+            fi
+            local entrypoint
+            entrypoint="${srv_name}.go"
+            if [[ ! -f "$entrypoint" ]]; then
+                entrypoint="$(basename "$srv_dir").go"
+            fi
+            exec go run "$entrypoint" > "$log_file" 2>&1
+        ) &
     fi
     local pid=$!
-    cd "$PROJECT_ROOT"
-
     echo "$srv_name:$pid:$srv_port" >> "$PID_FILE"
 
-    # 等待服务启动 (air 需要更长时间编译)
-    sleep 5
-    if port_in_use $srv_port; then
-        echo "✅ $srv_name 启动成功 (端口 $srv_port)"
+    if wait_for_port "$srv_port" 20 1; then
+        echo "服务就绪: $srv_name ($srv_port)"
     else
-        echo "⚠️  $srv_name 可能正在启动，查看: $log_file"
+        echo "服务未在预期时间内监听: $srv_name"
+        tail -n 80 "$log_file" || true
+        exit 1
     fi
 }
 
-# --- 以下为脚本主逻辑 (简化调用) ---
-
-# 处理停止逻辑
-if [ "$1" == "stop" ]; then
-    cleanup_old_processes
-    # 停止 Loki + Grafana
-    echo "停止 Loki + Grafana..."
-    docker-compose -f "$LOKI_STACK" down 2>/dev/null
-    exit 0
-fi
-
-# 启动 Loki + Grafana 日志系统
 start_loki_stack() {
-    echo "启动 Loki + Grafana 日志系统..."
-    cd "$PROJECT_ROOT/$LOKI_STACK"
-
-    # 检查 Docker 是否运行
-    if ! docker info > /dev/null 2>&1; then
-        echo "⚠️  Docker 未运行，跳过 Loki + Grafana 启动"
+    if ! docker info >/dev/null 2>&1; then
+        echo "Docker 未运行，跳过 Loki/Grafana"
         return
     fi
+    echo "启动 Loki/Grafana..."
+    docker compose -f "$LOKI_STACK" up -d
+}
 
-    # 启动日志系统
-    docker-compose up -d
-    cd "$PROJECT_ROOT"
+scan_core_ports() {
+    local port
+    for port in $CORE_PORTS; do
+        wait_for_port "$port" 5 1 || {
+            echo "关键端口未监听: $port"
+            exit 1
+        }
+    done
+}
 
-    # 等待服务启动
-    sleep 3
-    echo "✅ Loki + Grafana 启动完成"
-    echo "   - Loki: http://localhost:3100"
-    echo "   - Grafana: http://localhost:3001 (admin/admin123)"
+stop_all() {
+    cleanup_old_processes
+    docker compose -f "$DEPEND_STACK" down >/dev/null 2>&1 || true
+    docker compose -f "$LOKI_STACK" down >/dev/null 2>&1 || true
 }
 
 mkdir -p "$LOG_DIR"
-cleanup_old_processes
 
-# 默认启动核心服务
-START_SERVICES="system activity auths audit users inventory product carts order checkout payment admin gateway"
-for srv in $START_SERVICES; do
+if [[ "${1:-}" == "stop" ]]; then
+    stop_all
+    exit 0
+fi
+
+cleanup_old_processes
+start_dependencies
+reconcile_postgres
+reconcile_rabbitmq
+
+for srv in system activity auths audit users inventory product carts coupons order checkout payment admin gateway; do
     start_service "$srv"
 done
 
-# 启动日志系统
+scan_core_ports
 start_loki_stack
 
-echo "所有服务处理完毕。"
-echo ""
-echo "📊 日志查询: http://localhost:3001 (admin/admin123)"
+echo "本地联调环境已启动。"
+echo "关键依赖端口: $INFRA_PORTS"
+echo "核心服务端口: $CORE_PORTS"

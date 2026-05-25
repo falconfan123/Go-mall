@@ -2,9 +2,10 @@ package get
 
 import (
 	"context"
-	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/users/pb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -15,7 +16,7 @@ var users_client users.UsersClient
 
 func initusers() {
 
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("users", biz.UsersRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
@@ -25,14 +26,14 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
+	user := seed.CreateUser(t, users_client)
 
 	//这里可以从token中获取user——id
 	resp, err := users_client.GetUser(context.Background(), &users.GetUserRequest{
-		UserId: 4,
+		UserId: user.UserID,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("GET success", resp)
 	t.Log("GET success", resp)
 }

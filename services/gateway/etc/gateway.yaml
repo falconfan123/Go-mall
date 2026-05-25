@@ -15,7 +15,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: users.rpc
       NonBlock: true
     Mappings:
@@ -29,7 +29,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: products.rpc
       NonBlock: true
     Mappings:
@@ -40,7 +40,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: carts.rpc
       NonBlock: true
     Mappings:
@@ -51,7 +51,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: order.rpc
       NonBlock: true
     Mappings:
@@ -65,7 +65,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: checkout.rpc
       NonBlock: true
     Mappings:
@@ -76,7 +76,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: payment.rpc
       NonBlock: true
     Mappings:
@@ -87,7 +87,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: inventory.rpc
       NonBlock: true
     Mappings:
@@ -98,7 +98,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: activity.rpc
       NonBlock: true
     Mappings:
@@ -109,7 +109,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: system.rpc
       NonBlock: true
     Mappings:
@@ -120,7 +120,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: auths.rpc
       NonBlock: true
     Mappings:
@@ -131,7 +131,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: coupons.rpc
       NonBlock: true
     Mappings:
@@ -142,7 +142,7 @@ Upstreams:
   - Grpc:
       Etcd:
         Hosts:
-          - etcd.go-mall.svc.cluster.local:2379
+          - localhost:2379
         Key: admin.rpc
       NonBlock: true
     Mappings:

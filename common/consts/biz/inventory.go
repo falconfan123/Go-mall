@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	InventoryRpcPort = 10011
+	InventoryRpcPort = 10007
 )
 const (
 	InventoryKeyPrefix        = "inventory:%d"

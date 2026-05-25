@@ -32,7 +32,7 @@ type (
 
 func (m *customUserCouponsModel) CheckUserCouponStatus(ctx context.Context, session sqlx.Session, u uint64, id string) (int64, error) {
 	var status int64
-	query := fmt.Sprintf("select `status` from %s where `user_id` = ? and `coupon_id` = ? limit 1", m.table)
+	query := fmt.Sprintf("select \"status\" from %s where \"user_id\" = $1 and \"coupon_id\" = $2 limit 1", m.table)
 	err := session.QueryRowCtx(ctx, &status, query, u, id)
 	switch {
 	case err == nil:
@@ -45,20 +45,20 @@ func (m *customUserCouponsModel) CheckUserCouponStatus(ctx context.Context, sess
 }
 
 func (m *customUserCouponsModel) LockUserCoupon(ctx context.Context, session sqlx.Session, uCouponID uint64) error {
-	query := fmt.Sprintf("update %s set `status` = ? where `id` = ?", m.table)
+	query := fmt.Sprintf("update %s set \"status\" = $1 where \"id\" = $2", m.table)
 	_, err := session.ExecCtx(ctx, query, coupons.CouponStatusLocked, uCouponID)
 	return err
 }
 
 func (m *customUserCouponsModel) UpdateStatusOrderById(ctx context.Context, orderId string, id int, used coupons.CouponStatus) error {
-	query := fmt.Sprintf("update %s set `status` = ?, `order_id` = ?,used_at = now() where `id` = ?", m.table)
+	query := fmt.Sprintf("update %s set \"status\" = $1, \"order_id\" = $2, used_at = now() where \"id\" = $3", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, used, orderId, id)
 	return err
 }
 
 func (m *customUserCouponsModel) GetStatusByUserIdCouponId(ctx context.Context, userid int32, couponId string) (*Status, error) {
 	var status Status
-	query := fmt.Sprintf("select `id`,`status` from %s where `user_id` = ? and `coupon_id` = ? limit 1", m.table)
+	query := fmt.Sprintf("select \"id\",\"status\" from %s where \"user_id\" = $1 and \"coupon_id\" = $2 limit 1", m.table)
 	err := m.conn.QueryRowCtx(ctx, &status, query, userid, couponId)
 	switch {
 	case err == nil:
@@ -71,9 +71,9 @@ func (m *customUserCouponsModel) GetStatusByUserIdCouponId(ctx context.Context, 
 }
 
 func (m *customUserCouponsModel) GetUserCouponByUserIdCouponIdWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `coupon_id` = ? limit 1 for update", userCouponsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"user_id\" = $1 and \"coupon_id\" = $2 limit 1 for update", userCouponsRows, m.table)
 	var resp UserCoupons
-	err := m.conn.QueryRowCtx(ctx, &resp, query, userId, couponId)
+	err := session.QueryRowCtx(ctx, &resp, query, userId, couponId)
 	switch {
 	case err == nil:
 		return &resp, nil
@@ -85,21 +85,23 @@ func (m *customUserCouponsModel) GetUserCouponByUserIdCouponIdWithLock(ctx conte
 }
 
 func (m *customUserCouponsModel) CheckUserCouponExistWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error) {
-	var cnt int64
-	query := fmt.Sprintf("select count(*) from %s where `user_id` = ? and `coupon_id` = ? LIMIT 1 FOR SHARE ", m.table)
-	err := session.QueryRowCtx(ctx, &cnt, query, userId, couponId)
+	var id uint64
+	query := fmt.Sprintf("select \"id\" from %s where \"user_id\" = $1 and \"coupon_id\" = $2 limit 1 for share", m.table)
+	err := session.QueryRowCtx(ctx, &id, query, userId, couponId)
 	switch {
 	case err == nil:
-		return cnt > 0, nil
+		return true, nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return false, nil
 	default:
 		return false, err
 	}
 }
 
 func (m *customUserCouponsModel) QueryUserCoupons(ctx context.Context, userId, page, pageSize int32) ([]*UserCoupons, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? order by `created_at` desc limit ?,?", userCouponsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"user_id\" = $1 order by \"created_at\" desc limit $2 offset $3", userCouponsRows, m.table)
 	var resp []*UserCoupons
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, (page-1)*pageSize, pageSize)
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, pageSize, (page-1)*pageSize)
 	switch {
 	case err == nil:
 		return resp, nil

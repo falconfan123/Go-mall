@@ -25,13 +25,13 @@ type (
 )
 
 func (m *customOrderAddressesModel) DeleteOrderAddressByOrderID(ctx context.Context, session sqlx.Session, orderID string) error {
-	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"order_id\" = $1", m.table)
 	_, err := session.ExecCtx(ctx, query, orderID)
 	return err
 }
 
 func (m *customOrderAddressesModel) GetOrderAddressByOrderID(ctx context.Context, orderID string) (*OrderAddresses, error) {
-	query := fmt.Sprintf("select %s from %s where `order_id` = ?", orderAddressesRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"order_id\" = $1", orderAddressesRows, m.table)
 	var resp OrderAddresses
 	err := m.conn.QueryRowCtx(ctx, &resp, query, orderID)
 	switch {

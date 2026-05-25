@@ -7,6 +7,7 @@ replace github.com/falconfan123/Go-mall/common => ../../common
 replace github.com/falconfan123/Go-mall/dal => ../../dal
 
 require (
+	github.com/stretchr/testify v1.11.1
 	github.com/zeromicro/go-zero v1.10.1
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11

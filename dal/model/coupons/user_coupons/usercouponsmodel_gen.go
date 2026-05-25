@@ -17,8 +17,8 @@ import (
 var (
 	userCouponsFieldNames          = builder.RawFieldNames(&UserCoupons{})
 	userCouponsRows                = strings.Join(userCouponsFieldNames, ",")
-	userCouponsRowsExpectAutoSet   = strings.Join(stringx.Remove(userCouponsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	userCouponsRowsWithPlaceHolder = strings.Join(stringx.Remove(userCouponsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	userCouponsRowsExpectAutoSet   = strings.Join(stringx.Remove(userCouponsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	userCouponsRowsWithPlaceHolder = strings.Join(stringx.Remove(userCouponsFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -50,18 +50,18 @@ type (
 func newUserCouponsModel(conn sqlx.SqlConn) *defaultUserCouponsModel {
 	return &defaultUserCouponsModel{
 		conn:  conn,
-		table: "`user_coupons`",
+		table: "user_coupons",
 	}
 }
 
 func (m *defaultUserCouponsModel) Delete(ctx context.Context, id uint64) error {
-	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
 func (m *defaultUserCouponsModel) FindOne(ctx context.Context, id uint64) (*UserCoupons, error) {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", userCouponsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"id\" = $1 limit 1", userCouponsRows, m.table)
 	var resp UserCoupons
 	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
 	switch err {
@@ -76,7 +76,7 @@ func (m *defaultUserCouponsModel) FindOne(ctx context.Context, id uint64) (*User
 
 func (m *defaultUserCouponsModel) FindOneByUserIdCouponId(ctx context.Context, userId uint64, couponId string) (*UserCoupons, error) {
 	var resp UserCoupons
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `coupon_id` = ? limit 1", userCouponsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"user_id\" = $1 and \"coupon_id\" = $2 limit 1", userCouponsRows, m.table)
 	err := m.conn.QueryRowCtx(ctx, &resp, query, userId, couponId)
 	switch err {
 	case nil:
@@ -95,7 +95,7 @@ func (m *defaultUserCouponsModel) Insert(ctx context.Context, data *UserCoupons)
 }
 
 func (m *defaultUserCouponsModel) Update(ctx context.Context, newData *UserCoupons) error {
-	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, userCouponsRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set \"user_id\" = $1, \"coupon_id\" = $2, \"status\" = $3, \"order_id\" = $4, \"used_at\" = $5 where \"id\" = $6", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, newData.UserId, newData.CouponId, newData.Status, newData.OrderId, newData.UsedAt, newData.Id)
 	return err
 }

@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/inventory/pb"
+	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"sync"
 	"testing"
 	"time"
@@ -19,9 +20,13 @@ var once2 sync.Once
 
 func setupInventoryClient(t *testing.T) {
 	once2.Do(func() {
-		conn, err := grpc.NewClient(
-			fmt.Sprintf("127.0.0.1:%d", biz.InventoryRpcPort),
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		conn, err := grpc.DialContext(
+			ctx,
+			testenv.ServiceAddr("inventory", biz.InventoryRpcPort),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock(),
 		)
 		if err != nil {
 			t.Fatalf("连接库存服务失败: %v", err)
@@ -350,7 +355,7 @@ func TestInventoryService_HighConcurrency(t *testing.T) {
 	t.Logf("预期库存: %d, 实际库存: %d",
 		expectedFinalStock, finalStockResp.Inventory)
 
-	assert.Equal(t, expectedFinalStock, finalStockResp.Inventory,
+	assert.Equal(t, int64(expectedFinalStock), finalStockResp.Inventory,
 		"最终库存不一致，可能存在并发问题")
 
 	// 验证总扣减次数（可选）

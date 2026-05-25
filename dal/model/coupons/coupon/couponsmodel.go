@@ -31,10 +31,8 @@ type (
 
 func (m *customCouponsModel) CheckExpirationAndStatus(ctx context.Context, session sqlx.Session, id string) (bool, error) {
 	var status CStatus
-	query := fmt.Sprintf("select `status`, `end_time` from %s where id = ? limit 1", m.table)
+	query := fmt.Sprintf("select \"status\", \"end_time\" from %s where \"id\" = $1 limit 1", m.table)
 	err := session.QueryRowCtx(ctx, &status, query, id)
-	fmt.Println(status.Status)
-	fmt.Println(status.EndTime)
 	switch {
 	case err == nil:
 		return status.Status == 1 && status.EndTime.Before(time.Now()), nil
@@ -47,14 +45,14 @@ func (m *customCouponsModel) CheckExpirationAndStatus(ctx context.Context, sessi
 
 func (m *customCouponsModel) GetCouponTypeByID(ctx context.Context, session sqlx.Session, id string) (int64, error) {
 	var ctp int64
-	query := fmt.Sprintf("select `type` from %s where id = ? limit 1", m.table)
+	query := fmt.Sprintf("select \"type\" from %s where \"id\" = $1 limit 1", m.table)
 	err := session.QueryRowCtx(ctx, &ctp, query, id)
 	return ctp, err
 
 }
 
 func (m *customCouponsModel) FindOneWithLock(ctx context.Context, session sqlx.Session, id string) (*Coupons, error) {
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE `id` = ? FOR SHARE", couponsRows, m.table)
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE \"id\" = $1 FOR SHARE", couponsRows, m.table)
 	var resp Coupons
 	err := session.QueryRowCtx(ctx, &resp, query, id)
 	return &resp, err
@@ -77,7 +75,7 @@ func (m *customCouponsModel) QueryCoupons(ctx context.Context, page, pageSize, c
 	var args []interface{}
 
 	if ctype != 0 {
-		where = append(where, "type = ?")
+		where = append(where, "\"type\" = $1")
 		args = append(args, ctype)
 	}
 
@@ -87,7 +85,7 @@ func (m *customCouponsModel) QueryCoupons(ctx context.Context, page, pageSize, c
 	}
 
 	// 添加分页
-	query += " LIMIT ? OFFSET ?"
+	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", len(args)+1, len(args)+2)
 	args = append(args, pageSize, (page-1)*pageSize)
 
 	var coupons []*Coupons

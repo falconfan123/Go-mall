@@ -1,5 +1,7 @@
 package valueobject
 
+import "strconv"
+
 // FieldWeight represents a field with its boost weight
 type FieldWeight struct {
 	Field  string  `json:"field"`
@@ -66,7 +68,7 @@ func (d *DSLFragment) ToMapQuery() map[string]interface{} {
 
 func formatWeight(weight float64) string {
 	if weight == float64(int(weight)) {
-		return string(rune('0' + int(weight)))
+		return strconv.Itoa(int(weight))
 	}
-	return ""
+	return strconv.FormatFloat(weight, 'f', -1, 64)
 }

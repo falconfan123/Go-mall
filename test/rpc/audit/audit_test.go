@@ -2,13 +2,13 @@ package audit
 
 import (
 	"context"
-	"fmt"
-	"github.com/falconfan123/Go-mall/services/audit/pb"
+	audit "github.com/falconfan123/Go-mall/services/audit/pb"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -20,7 +20,7 @@ var auditOnce sync.Once
 func setupAuditClient(t *testing.T) {
 	auditOnce.Do(func() {
 		conn, err := grpc.NewClient(
-			fmt.Sprintf("127.0.0.1:%d", biz.AuditRpcPort),
+			testenv.ServiceAddr("audit", biz.AuditRpcPort),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		if err != nil {

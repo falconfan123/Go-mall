@@ -2,14 +2,30 @@ package checkout
 
 import (
 	"context"
-	"github.com/falconfan123/Go-mall/services/checkout/pb"
+	checkout "github.com/falconfan123/Go-mall/services/checkout/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/harness"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
 	"testing"
 )
 
 func TestGetCheckoutDetail(t *testing.T) {
-	detail, err := checkoutClient.GetCheckoutDetail(context.TODO(), &checkout.CheckoutDetailReq{
-		PreOrderId: "019555d7-8dca-7f17-b945-cee24c0efb7b",
-		UserId:     1,
+	clients := harness.NewClients(t)
+	harness.WaitForServices(t, clients)
+
+	user := seed.CreateUser(t, clients.Users)
+	product := seed.CreateProductWithInventory(t, clients.Product, clients.Inventory, 8)
+	prepareResp, err := clients.Checkout.PrepareCheckout(context.TODO(), seed.MakeCheckoutRequest(
+		user.UserID,
+		user.AddressID,
+		&checkout.CheckoutReq_OrderItem{ProductId: int32(product.ProductID), Quantity: 1},
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	detail, err := clients.Checkout.GetCheckoutDetail(context.TODO(), &checkout.CheckoutDetailReq{
+		PreOrderId: prepareResp.GetPreOrderId(),
+		UserId:     int32(user.UserID),
 	})
 	if err != nil {
 		t.Error(err)
@@ -17,10 +33,23 @@ func TestGetCheckoutDetail(t *testing.T) {
 	t.Log(detail)
 }
 func TestGetCheckoutList(t *testing.T) {
-	list, err := checkoutClient.GetCheckoutList(context.TODO(), &checkout.CheckoutListReq{
+	clients := harness.NewClients(t)
+	harness.WaitForServices(t, clients)
+
+	user := seed.CreateUser(t, clients.Users)
+	product := seed.CreateProductWithInventory(t, clients.Product, clients.Inventory, 8)
+	if _, err := clients.Checkout.PrepareCheckout(context.TODO(), seed.MakeCheckoutRequest(
+		user.UserID,
+		user.AddressID,
+		&checkout.CheckoutReq_OrderItem{ProductId: int32(product.ProductID), Quantity: 1},
+	)); err != nil {
+		t.Fatal(err)
+	}
+
+	list, err := clients.Checkout.GetCheckoutList(context.TODO(), &checkout.CheckoutListReq{
 		PageSize: 5,
 		Page:     1,
-		UserId:   1,
+		UserId:   user.UserID,
 	})
 	if err != nil {
 		t.Error(err)

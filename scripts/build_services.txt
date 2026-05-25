@@ -1,0 +1,16 @@
+# Services built by CI. One entry per workspace module under services/.
+activity
+admin
+audit
+auths
+carts
+checkout
+coupons
+gateway
+inventory
+order
+payment
+product
+search
+system
+users

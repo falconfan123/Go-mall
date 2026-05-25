@@ -1,9 +1,9 @@
 package coupons
 
 import (
-	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/coupons/pb"
+	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -11,7 +11,7 @@ import (
 var couponsClient coupons.CouponsClient
 
 func init() {
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.CouponsRpcPort),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("coupons", biz.CouponsRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)

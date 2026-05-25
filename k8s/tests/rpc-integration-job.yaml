@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: go-mall-rpc-tests-__RUN_ID__
+  namespace: __NAMESPACE__
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  activeDeadlineSeconds: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: runner
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GO_MALL_TEST_NAMESPACE
+              value: "__NAMESPACE__"
+            - name: GO_MALL_TEST_MODE
+              value: "integration"
+            - name: GO_MALL_TEST_RUN_ID
+              value: "__RUN_ID__"
+            - name: GO_MALL_TEST_TIMEOUT
+              value: "__TIMEOUT__"
+            - name: GO_MALL_TEST_SERVICE_ENDPOINTS
+              value: "__SERVICE_ENDPOINTS__"

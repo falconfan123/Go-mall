@@ -14,10 +14,10 @@ import (
 )
 
 var (
-	inventoryFieldNames          = builder.RawFieldNames(&Inventory{})
+	inventoryFieldNames          = builder.RawFieldNames(&Inventory{}, true)
 	inventoryRows                = strings.Join(inventoryFieldNames, ",")
-	inventoryRowsExpectAutoSet   = strings.Join(stringx.Remove(inventoryFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	inventoryRowsWithPlaceHolder = strings.Join(stringx.Remove(inventoryFieldNames, "`product_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	inventoryRowsExpectAutoSet   = strings.Join(stringx.Remove(inventoryFieldNames, "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	inventoryRowsWithPlaceHolder = builder.PostgreSqlJoin(stringx.Remove(inventoryFieldNames, "product_id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"))
 )
 
 type (
@@ -52,14 +52,14 @@ func newInventoryModel(conn sqlx.SqlConn) *defaultInventoryModel {
 }
 
 func (m *defaultInventoryModel) Delete(ctx context.Context, productId int64) error {
-	query := fmt.Sprintf("delete from %s where \"product_id\" = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"product_id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, productId)
 	return err
 }
 
 func (m *defaultInventoryModel) FindOne(ctx context.Context, productId int64) (*Inventory, error) {
 
-	query := fmt.Sprintf("select %s from %s where \"product_id\" = ? limit 1", inventoryRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"product_id\" = $1 limit 1", inventoryRows, m.table)
 	var resp Inventory
 	err := m.conn.QueryRowCtx(ctx, &resp, query, productId)
 	switch err {
@@ -73,14 +73,14 @@ func (m *defaultInventoryModel) FindOne(ctx context.Context, productId int64) (*
 }
 
 func (m *defaultInventoryModel) Insert(ctx context.Context, data *Inventory) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?)", m.table, inventoryRowsExpectAutoSet)
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3)", m.table, inventoryRowsExpectAutoSet)
 	ret, err := m.conn.ExecCtx(ctx, query, data.ProductId, data.Total, data.Sold)
 	return ret, err
 }
 
 func (m *defaultInventoryModel) Update(ctx context.Context, data *Inventory) error {
-	query := fmt.Sprintf("update %s set %s where \"product_id\" = ?", m.table, inventoryRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.Total, data.Sold, data.ProductId)
+	query := fmt.Sprintf("update %s set %s where \"product_id\" = $1", m.table, inventoryRowsWithPlaceHolder)
+	_, err := m.conn.ExecCtx(ctx, query, data.ProductId, data.Total, data.Sold)
 	return err
 }
 

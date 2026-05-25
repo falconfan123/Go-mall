@@ -19,8 +19,8 @@ import (
 var (
 	checkoutsFieldNames          = builder.RawFieldNames(&Checkouts{})
 	checkoutsRows                = strings.Join(checkoutsFieldNames, ",")
-	checkoutsRowsExpectAutoSet   = strings.Join(stringx.Remove(checkoutsFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	checkoutsRowsWithPlaceHolder = strings.Join(stringx.Remove(checkoutsFieldNames, "`pre_order_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	checkoutsRowsExpectAutoSet   = strings.Join(stringx.Remove(checkoutsFieldNames, "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	checkoutsRowsWithPlaceHolder = strings.Join(stringx.Remove(checkoutsFieldNames, "pre_order_id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -53,18 +53,18 @@ type (
 func newCheckoutsModel(conn sqlx.SqlConn) *defaultCheckoutsModel {
 	return &defaultCheckoutsModel{
 		conn:  conn,
-		table: "`checkouts`",
+		table: "checkouts",
 	}
 }
 
 func (m *defaultCheckoutsModel) Delete(ctx context.Context, preOrderId string) error {
-	query := fmt.Sprintf("delete from %s where `pre_order_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"pre_order_id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, preOrderId)
 	return err
 }
 
 func (m *defaultCheckoutsModel) FindOne(ctx context.Context, preOrderId string) (*Checkouts, error) {
-	query := fmt.Sprintf("select %s from %s where `pre_order_id` = ? limit 1", checkoutsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"pre_order_id\" = $1 limit 1", checkoutsRows, m.table)
 	var resp Checkouts
 	err := m.conn.QueryRowCtx(ctx, &resp, query, preOrderId)
 	switch err {
@@ -84,7 +84,7 @@ func (m *defaultCheckoutsModel) Insert(ctx context.Context, data *Checkouts) (sq
 }
 
 func (m *defaultCheckoutsModel) Update(ctx context.Context, data *Checkouts) error {
-	query := fmt.Sprintf("update %s set %s where `pre_order_id` = ?", m.table, checkoutsRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set \"user_id\" = $1, \"address_id\" = $2, \"coupon_id\" = $3, \"original_amount\" = $4, \"final_amount\" = $5, \"status\" = $6, \"expire_time\" = $7 where \"pre_order_id\" = $8", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.AddressId, data.CouponId, data.OriginalAmount, data.FinalAmount, data.Status, data.ExpireTime, data.PreOrderId)
 	return err
 }

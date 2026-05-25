@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Go-mall 本地 CI 检查脚本
-# 用法: ./scripts/local-ci.sh [--skip-tests]
+# Go-mall 本地聚合检查脚本
+# 用法: ./scripts/check.sh [--skip-tests]
 #
-# 此脚本在本地先筛一遍检查，避免将问题推到 GitHub Actions
-# GitHub Actions 会调用此脚本进行最终检查
+# 此脚本用于本地一次性执行常用检查。
+# GitHub Actions 会直接调用更细粒度的脚本入口，而不是依赖本脚本。
 
 set -e
 
@@ -24,6 +24,7 @@ cd "$PROJECT_ROOT"
 
 # 标志位
 SKIP_TESTS=false
+RUN_UNIT_TESTS=false
 VERBOSE=false
 AUTO_FIX=false
 
@@ -32,6 +33,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --skip-tests)
             SKIP_TESTS=true
+            shift
+            ;;
+        --unit-tests)
+            RUN_UNIT_TESTS=true
             shift
             ;;
         --auto-fix)
@@ -47,6 +52,7 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "选项:"
             echo "  --skip-tests    跳过测试"
+            echo "  --unit-tests    显式运行单元测试"
             echo "  --auto-fix     自动修复格式问题"
             echo "  --verbose, -v   显示详细输出"
             echo "  --help, -h      显示帮助"
@@ -172,12 +178,10 @@ check_format() {
 run_vet() {
     print_header "运行 go vet"
 
-    # vet 可能会有一些误报，使用 || true 让它不阻塞
-    if go vet ./... 2>&1; then
+    if bash scripts/go-ci-vet.sh 2>&1; then
         print_success "go vet 检查通过"
     else
-        print_warning "go vet 检查有警告 (可能是已知的遗留问题)"
-        # 不阻塞，让 CI 去检查
+        print_warning "go vet 检查有警告"
     fi
 }
 
@@ -248,25 +252,11 @@ run_errcheck() {
 check_deps() {
     print_header "检查依赖"
 
-    # go mod download
-    print_info "下载依赖..."
-
-    # 尝试下载依赖，但不阻塞（可能有遗留问题）
-    if go mod download 2>&1; then
-        print_success "依赖下载完成"
+    print_info "同步 go.work..."
+    if go work sync 2>&1; then
+        print_success "工作区同步完成"
     else
-        print_warning "依赖下载有警告 (可能是已知的遗留问题)"
-    fi
-
-    # 检查依赖是否一致 (可能因为遗留问题失败)
-    if go mod tidy -v 2>&1; then
-        # 检查是否有更改
-        if [ -n "$(git diff go.mod go.sum 2>/dev/null)" ]; then
-            print_warning "go.mod 或 go.sum 有更改，请检查是否需要提交"
-        fi
-        print_success "依赖检查通过"
-    else
-        print_warning "依赖检查有警告 (可能是已知的遗留问题)"
+        print_warning "工作区同步有警告"
     fi
 }
 
@@ -277,19 +267,14 @@ run_tests() {
         return 0
     fi
 
-    print_header "运行测试"
-
-    # 先检查是否有测试文件
-    TEST_COUNT=$(find . -name "*_test.go" | wc -l)
-    if [ "$TEST_COUNT" -eq 0 ]; then
-        print_warning "未找到测试文件"
+    if [ "$RUN_UNIT_TESTS" != true ]; then
+        print_warning "默认跳过单元测试，使用 --unit-tests 显式执行"
         return 0
     fi
 
-    print_info "找到 $TEST_COUNT 个测试文件"
+    print_header "运行测试"
 
-    # 运行测试 (较慢，使用 race 检测)
-    if go test -race -short -timeout 5m ./... 2>&1; then
+    if bash scripts/test-unit.sh 2>&1; then
         print_success "测试通过"
     else
         print_error "测试失败"
@@ -301,26 +286,10 @@ run_tests() {
 run_build() {
     print_header "构建项目"
 
-    # 尝试构建，跳过已知有问题的废弃服务
-    # flash_sale 服务引用了不存在的 usersclient 包
-    # order 服务引用了不存在的 order.OrderService 类型
-    if go build -o /dev/null ./services/... 2>&1; then
-        print_success "services 构建通过"
+    if bash scripts/go-ci-build.sh --all 2>&1; then
+        print_success "CI 服务构建通过"
     else
-        print_warning "services 构建有警告 (可能是废弃服务)"
-    fi
-
-    # 尝试构建 apis，排除有问题的 flash_sale 和 order
-    if go build -o /dev/null ./apis/carts \
-        ./apis/checkout \
-        ./apis/coupon \
-        ./apis/payment \
-        ./apis/product \
-        ./apis/user \
-        2>&1; then
-        print_success "apis 构建通过"
-    else
-        print_warning "apis 构建有警告 (可能是废弃服务)"
+        print_warning "CI 服务构建有警告"
     fi
 }
 

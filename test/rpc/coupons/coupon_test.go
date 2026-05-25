@@ -3,7 +3,7 @@ package coupons
 import (
 	"context"
 	"encoding/json"
-	"github.com/falconfan123/Go-mall/services/coupons/pb"
+	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -17,8 +17,7 @@ func Test_ListCouponsLogic_ListCoupons(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	assert.Equal(t, uint32(0), resp.StatusCode)
 	for _, coupon := range resp.Coupons {
@@ -34,8 +33,7 @@ func Test_GetCouponLogic_GetCoupon_NotFount(t *testing.T) {
 		Id: "1",
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	if resp.StatusCode != 0 {
 		t.Logf("code：%d, msg:%s", resp.StatusCode, resp.StatusMsg)
@@ -49,7 +47,7 @@ func Test_GetCouponLogic_GetCoupon(t *testing.T) {
 		Id: "67508ec1ea7111ef86d80242ac120005",
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	assert.Equal(t, uint32(0), resp.StatusCode)
 	t.Log(resp.Coupon)
@@ -76,8 +74,7 @@ func Test_CalculateCouponLogic_CalculateCoupon(t *testing.T) {
 			},
 		})
 		if err2 != nil {
-			t.Error(err2)
-			return
+			t.Fatal(err2)
 		}
 		assert.Equal(t, uint32(0), coupon.StatusCode)
 		assert.Equal(t, final, coupon.FinalAmount)

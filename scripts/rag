@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TOOL_DIR="$ROOT_DIR/tools/rag"
+
+export GOWORK=off
+
+cd "$TOOL_DIR"
+exec go run ./cmd/rag --repo "$ROOT_DIR" "$@"

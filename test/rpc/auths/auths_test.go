@@ -2,17 +2,15 @@ package auths
 
 import (
 	"context"
-	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"sync"
 	"testing"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/auths/pb"
+	auths "github.com/falconfan123/Go-mall/services/auths/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -27,7 +25,7 @@ func init() {
 }
 func setupGRPCConnection(t *testing.T) {
 	once1.Do(func() {
-		conn, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%d", biz.AuthsRpcPort),
+		conn, err := grpc.NewClient(testenv.ServiceAddr("auths", biz.AuthsRpcPort),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		if err != nil {
@@ -52,7 +50,7 @@ func TestAuthenticationLogic_Authentication(t *testing.T) {
 	assert.Equal(t, uint32(0), resp.StatusCode)
 
 	res, err := client.Authentication(context.Background(), &auths.AuthReq{
-		Token: resp.AccessToken, ClientIp: clientIP,
+		Token: resp.GetShortToken(), ClientIp: clientIP,
 	})
 	if err != nil {
 		t.Fatalf("Authentication failed: %v", err)
@@ -74,8 +72,8 @@ func TestAuthenticationLogic_GenerateToken(t *testing.T) {
 		t.Fatalf("GenerateToken failed: %v", err)
 	}
 	assert.Equal(t, uint32(0), resp.StatusCode)
-	assert.NotEmpty(t, resp.AccessToken)
-	assert.NotEmpty(t, resp.RefreshToken)
+	assert.NotEmpty(t, resp.GetShortToken())
+	assert.NotEmpty(t, resp.GetLongToken())
 
 	t.Log(resp)
 }
@@ -94,30 +92,14 @@ func TestAuthenticationLogic_RenewToken(t *testing.T) {
 	}
 	assert.Equal(t, uint32(0), resp.StatusCode)
 
-	// 这里假设 token 的有效期为 10 秒，refresh token 的有效期为 30 分钟
-	time.Sleep(time.Second * 11)
-
-	res, err := client.Authentication(context.Background(), &auths.AuthReq{
-		Token:    resp.AccessToken,
-		ClientIp: clientIP,
+	renewResp, err := client.RenewToken(context.Background(), &auths.AuthRenewalReq{
+		LongToken:  resp.GetLongToken(),
+		ShortToken: resp.GetShortToken(),
+		ClientIp:   clientIP,
 	})
 	if err != nil {
-		t.Fatalf("Authentication failed: %v", err)
+		t.Fatalf("RenewToken failed: %v", err)
 	}
-	if res.StatusCode == code.AuthExpired {
-		t.Logf("exprie token is %s", resp.AccessToken)
-
-		renewResp, err := client.RenewToken(context.Background(), &auths.AuthRenewalReq{
-			RefreshToken: resp.RefreshToken,
-			ClientIp:     clientIP,
-		})
-		if err != nil {
-			t.Fatalf("RenewToken failed: %v", err)
-		}
-		assert.Equal(t, uint32(0), renewResp.StatusCode)
-		t.Logf("renew token is %s", renewResp.AccessToken)
-	} else {
-		assert.Equal(t, uint32(0), res.StatusCode)
-		t.Log(res)
-	}
+	assert.Equal(t, uint32(0), renewResp.StatusCode)
+	t.Logf("renew token is %s", renewResp.GetShortToken())
 }

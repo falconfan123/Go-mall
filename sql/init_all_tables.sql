@@ -16,27 +16,25 @@ CREATE TABLE `inventory` (
 DROP TABLE IF EXISTS `inventory_lock`;
 CREATE TABLE `inventory_lock` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `product_id` bigint NOT NULL,
-  `quantity` int NOT NULL,
-  `order_id` bigint NOT NULL,
+  `order_id` text NOT NULL,
   `status` tinyint NOT NULL DEFAULT 0,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` bigint NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
-  INDEX `idx_product_id` (`product_id`)
+  INDEX `idx_order_user` (`order_id`(32), `user_id`)
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `return_lock`;
 CREATE TABLE `return_lock` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `product_id` bigint NOT NULL,
-  `quantity` int NOT NULL,
-  `order_id` bigint NOT NULL,
+  `order_id` text NOT NULL,
   `status` tinyint NOT NULL DEFAULT 0,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` bigint NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
-  INDEX `idx_product_id` (`product_id`)
+  INDEX `idx_order_user` (`order_id`(32), `user_id`)
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 -- User address table

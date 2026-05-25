@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/users/pb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -15,7 +16,7 @@ var users_client users.UsersClient
 
 func initusers() {
 
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("users", biz.UsersRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
@@ -25,10 +26,11 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
+	name := testenv.UniqueName("register")
 	// 测试用户名注册
 	resp, err := users_client.Register(context.Background(), &users.RegisterRequest{
-		Username:        "testuser123",
-		Email:           "testuser123@example.com",
+		Username:        name,
+		Email:           fmt.Sprintf("%s@example.com", name),
 		Password:        "password123",
 		ConfirmPassword: "password123",
 	})

@@ -2,9 +2,10 @@ package update
 
 import (
 	"context"
-	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/users/pb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"sync"
 	"testing"
 
@@ -17,7 +18,7 @@ var once1 sync.Once
 
 func initusers() {
 	once1.Do(func() {
-		conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort),
+		conn, err := grpc.NewClient(testenv.ServiceAddr("users", biz.UsersRpcPort),
 			grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			panic(err)
@@ -28,14 +29,13 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
+	user := seed.CreateUser(t, users_client)
 	resp, err := users_client.UpdateUser(context.Background(), &users.UpdateUserRequest{
-
-		UsrName: "test4",
-		UserId:  4, //通过id修改
+		UsrName: "updated-" + user.Username,
+		UserId:  user.UserID, //通过id修改
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("update success", resp)
 	t.Log("update success", resp)
 }

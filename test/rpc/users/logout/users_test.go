@@ -2,9 +2,10 @@ package logout
 
 import (
 	"context"
-	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/users/pb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -15,7 +16,7 @@ var users_client users.UsersClient
 
 func initusers() {
 
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("users", biz.UsersRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
@@ -25,12 +26,12 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
+	user := seed.CreateUser(t, users_client)
 	resp, err := users_client.Logout(context.Background(), &users.LogoutRequest{
-		UserId: 20,
+		UserId: user.UserID,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("logout success", resp)
 	t.Log("logout success", resp)
 }

@@ -28,7 +28,7 @@ func (m *customCouponUsageModel) QueryUsageListByUserId(ctx context.Context, use
 
 	offset := (page - 1) * size
 
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE user_id = ? ORDER BY `applied_at` DESC LIMIT ? OFFSET ?",
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE \"user_id\" = $1 ORDER BY \"applied_at\" DESC LIMIT $2 OFFSET $3",
 		couponUsageRows, m.table)
 
 	var resp []*CouponUsage

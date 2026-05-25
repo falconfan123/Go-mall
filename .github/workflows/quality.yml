@@ -1,0 +1,182 @@
+name: Quality
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mock-consistency:
+    name: Mock Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: false
+
+      - name: Restore Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('.go-version', 'go.sum', 'go.work.sum', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install mockgen
+        run: go install go.uber.org/mock/mockgen@v0.6.0
+
+      - name: Sync workspace
+        run: go work sync
+
+      - name: Regenerate mocks
+        run: make mock
+
+      - name: Verify generated code is committed
+        run: git diff --exit-code
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: false
+
+      - name: Restore Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('.go-version', 'go.sum', 'go.work.sum', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Sync workspace
+        run: go work sync
+
+      - name: Run unit tests
+        run: make test-unit
+
+      - name: Upload unit test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-report
+          if-no-files-found: ignore
+          path: .artifacts/unit-report/*
+
+  coverage:
+    name: Coverage Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: false
+
+      - name: Restore Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('.go-version', 'go.sum', 'go.work.sum', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Sync workspace
+        run: go work sync
+
+      - name: Run coverage gate
+        run: make coverage-ci
+
+      - name: Print coverage summary
+        if: always()
+        run: test -f .artifacts/coverage/summary.txt && cat .artifacts/coverage/summary.txt
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          if-no-files-found: ignore
+          path: .artifacts/coverage/*
+
+  go-vet:
+    name: Go Vet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: false
+
+      - name: Restore Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('.go-version', 'go.sum', 'go.work.sum', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Run go vet across workspace modules
+        run: bash scripts/go-ci-vet.sh
+
+  govulncheck:
+    name: Govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: false
+
+      - name: Restore Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('.go-version', 'go.sum', 'go.work.sum', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck across workspace modules
+        run: bash scripts/go-ci-vulncheck.sh

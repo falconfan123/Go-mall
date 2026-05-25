@@ -107,7 +107,79 @@ make build         # 通过 Makefile 构建
 
 ---
 
-### 4. update_configs.sh
+### 4. ci-rpc-stack.sh
+
+**用途**: GitHub Actions / 本地 CI 使用的无交互集成环境启动脚本
+
+**功能**:
+- 使用 `construct/depend/docker-compose.yaml` 启动 Postgres、Redis、RabbitMQ、etcd、Elasticsearch、gorse
+- 校准 Postgres 和 RabbitMQ 测试账号
+- 直接以 `go run` 启动本地 RPC 服务与 gateway，不依赖 `air`
+- 校验依赖端口 `2379/5432/5672/6379/9200/8088`
+- 校验核心端口 `10000-10009/8888`
+- 输出服务日志到 `scripts/logs/*.log`
+- 输出依赖容器日志到 `.artifacts/dependency-logs/*.log`
+
+**使用方法**:
+```bash
+./scripts/ci-rpc-stack.sh start
+./scripts/ci-rpc-stack.sh status
+./scripts/ci-rpc-stack.sh snapshot-dependency-logs
+./scripts/ci-rpc-stack.sh stop
+```
+
+**相关命令**:
+```bash
+make integration-up
+make integration-down
+```
+
+---
+
+### 5. test-integration.sh
+
+**用途**: 执行 RPC 集成测试，并生成 HTML/JUnit/摘要报告
+
+**功能**:
+- 本地模式下直跑 `test/rpc` 模块
+- 生成 `.artifacts/rpc-integration-report/{index.html,junit.xml,summary.txt}`
+- 保留 Kubernetes Job 模式作为兼容入口，但 CI 默认不使用它
+
+**使用方法**:
+```bash
+GO_MALL_TEST_LOCAL=1 ./scripts/test-integration.sh
+```
+
+**兼容旧的 Kubernetes Job 模式**:
+```bash
+./scripts/test-integration.sh
+```
+
+### 6. go-ci-build.sh
+
+**用途**: 根据 `scripts/build_services.txt` 按白名单构建服务模块
+
+**使用方法**:
+```bash
+./scripts/go-ci-build.sh --all
+./scripts/go-ci-build.sh users payment
+```
+
+---
+
+### 7. go-ci-vet.sh / go-ci-vulncheck.sh
+
+**用途**: 根据 `scripts/go_ci_modules.txt` 对 workspace 模块逐个执行 `go vet` 或 `govulncheck`
+
+**使用方法**:
+```bash
+./scripts/go-ci-vet.sh
+./scripts/go-ci-vulncheck.sh
+```
+
+---
+
+### 8. update_configs.sh
 
 **用途**: 批量更新数据库配置文件（Shell 版本）
 
@@ -127,7 +199,7 @@ make build         # 通过 Makefile 构建
 
 ---
 
-### 5. update_configs.py
+### 9. update_configs.py
 
 **用途**: 批量更新数据库配置文件（Python 版本）
 
@@ -140,6 +212,43 @@ make build         # 通过 Makefile 构建
 ```bash
 python3 ./scripts/update_configs.py
 ```
+
+---
+
+### 10. rag
+
+**用途**: 仓库内 RAG CLI，先检索本仓库，再调用模型回答或进入自主修复循环
+
+**子命令**:
+- `index`: 重建 `.artifacts/rag/rag.db` 中的本地索引
+- `ask`: 检索仓库上下文并生成带文件/行号引用的回答
+- `loop`: 在独立 git worktree 中执行“检索 -> 改代码 -> 跑白名单命令 -> 失败再修复”的闭环
+- `resume`: 继续上一个未完成 session
+- `doctor`: 检查 Anthropic 兼容鉴权、本地写权限、git worktree 和默认白名单命令
+
+**使用方法**:
+```bash
+./scripts/rag doctor
+./scripts/rag index
+./scripts/rag ask "checkout 服务的状态回滚逻辑在哪"
+./scripts/rag loop "修复 checkout 单测失败" --dry-run
+
+# Minimax / Anthropic-compatible gateway:
+ANTHROPIC_BASE_URL=https://your-gateway.example.com
+ANTHROPIC_AUTH_TOKEN=...
+./scripts/rag ask "inventory 预扣减逻辑在哪"
+```
+
+**环境变量**:
+```bash
+ANTHROPIC_AUTH_TOKEN=...   # 可选，Anthropic-compatible Bearer token，优先于 API key
+ANTHROPIC_API_KEY=...      # 可选，Anthropic 原生 x-api-key
+ANTHROPIC_MODEL=...        # 可选，默认 claude-sonnet-4-20250514
+ANTHROPIC_BASE_URL=...     # 可选，兼容代理
+ANTHROPIC_VERSION=...      # 可选，默认 2023-06-01
+```
+
+说明：这不是新增 `minimax` backend，而是对现有 `anthropic` backend 增加兼容鉴权扩展；接口仍然是 `POST /v1/messages`。
 
 ---
 
@@ -158,6 +267,10 @@ make staticcheck   # 运行 staticcheck
 # 构建和测试
 make build         # 构建所有服务
 make test          # 运行测试
+make integration-up
+make integration-down
+make ci-build
+make ci-vet
 make tidy          # 整理依赖
 
 # 安装工具

@@ -1,0 +1,47 @@
+SCIP 增量刷新说明
+
+作用
+- `bash .codex/utils/build_scip_workspace.sh all`：全量重建 `go.work` 的 17 个模块。
+- `bash .codex/utils/build_scip_workspace.sh services/order`：只刷新单个模块。
+
+前置依赖
+- `go`
+- `jq`
+- `scip-go`
+- `scip`
+- `go1.25.1`
+- `go.work`
+
+何时用单模块
+- 只改了某个 `go.work` 注册模块里的 `.go`、`go.mod`、`.proto`、`.pb`、`.pb.go`。
+- 需要尽快让 `graph_tool.sh` 命中新代码。
+
+何时用全量
+- 改动跨多个模块。
+- 改动依赖关系不清楚。
+- 索引明显失真或缺失。
+
+推荐给 Codex 的用法
+- 改了模块内代码后，先跑单模块刷新。
+- 只查精确符号时，再用 `bash .codex/utils/graph_tool.sh NewServiceManager`。
+- 改的是 `run.go`、`cmd/server/main.go` 这类非模块文件时，不刷新 SCIP，直接依赖 `gopls` / `rg` 回退。
+
+示例
+- 全量：`bash .codex/utils/build_scip_workspace.sh all`
+- 单模块：`bash .codex/utils/build_scip_workspace.sh services/gateway`
+- 自动同步：`bash .codex/utils/sync_scip_workspace.sh services/order/internal/logic/foo.go`
+
+成功输出
+- 会看到 `目标模块:`、`成功:`、`=== 完成:` 这类固定提示。
+- 输出目录默认是 `/tmp/scip-index`。
+
+常见失败原因
+- `scip-go` 或 `jq` 未安装。
+- 传入了未注册到 `go.work` 的路径。
+- 模块目录不存在。
+- `scip-go index` 因代码或依赖错误失败。
+
+给 Codex 的操作建议
+- 只要改动落在 `go.work` 模块内，就主动调用单模块刷新。
+- 如果一次改了多个模块，直接用全量刷新。
+- 自动同步失败只告警，不要阻断后续检索。

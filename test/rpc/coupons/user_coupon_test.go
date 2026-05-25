@@ -2,7 +2,7 @@ package coupons
 
 import (
 	"context"
-	"github.com/falconfan123/Go-mall/services/coupons/pb"
+	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -17,8 +17,7 @@ func Test_ListUserCouponsLogic_ListUserCoupons(t *testing.T) {
 		UserId: 1,
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	assert.Equal(t, uint32(0), userCoupons.StatusCode)
 	for _, coupon := range userCoupons.UserCoupons {
@@ -35,8 +34,7 @@ func Test_ClaimCouponLogic_ClaimCoupon(t *testing.T) {
 		CouponId: "ZK20250214001",
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	t.Log(res)
 }
@@ -48,8 +46,7 @@ func Test_ClaimCouponLogic_ClaimCoupon_AlreadyClaimed(t *testing.T) {
 		CouponId: "67508ec1ea7111ef86d80242ac120005",
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	t.Log(res)
 }
@@ -61,8 +58,7 @@ func Test_ClaimCouponLogic_ClaimCoupon_OutOfStock(t *testing.T) {
 		CouponId: "679e623cea7111ef86d80242ac120005",
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	t.Log(res)
 }
@@ -74,8 +70,7 @@ func Test_ClaimCouponLogic_ClaimCoupon_Rollback(t *testing.T) {
 		CouponId: "679e623cea7111ef86d80242ac120005",
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	t.Log(res)
 }
@@ -90,8 +85,7 @@ func Test_ListCouponUsagesLogic_ListCouponUsages(t *testing.T) {
 		UserId: 1,
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	assert.Equal(t, uint32(0), couponUsages.StatusCode)
 	for _, couponUsage := range couponUsages.Usages {

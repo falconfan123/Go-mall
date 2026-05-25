@@ -1,0 +1,93 @@
+name: Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rpc-integration:
+    name: RPC Integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GO_MALL_TEST_LOCAL: "1"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: false
+
+      - name: Restore Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('.go-version', 'go.sum', 'go.work.sum', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Sync workspace
+        run: go work sync
+
+      - name: Start integration stack
+        run: bash scripts/ci-rpc-stack.sh start
+
+      - name: Verify dependency ports
+        run: |
+          for port in 2379 5432 5672 6379 9200 8088; do
+            timeout 2 bash -lc "</dev/tcp/127.0.0.1/${port}"
+          done
+
+      - name: Verify service ports
+        run: |
+          for port in 10000 10001 10002 10003 10004 10005 10006 10007 10008 10009 8888; do
+            timeout 2 bash -lc "</dev/tcp/127.0.0.1/${port}"
+          done
+
+      - name: Run RPC integration tests
+        run: make test-integration
+
+      - name: Snapshot dependency logs
+        if: always()
+        run: bash scripts/ci-rpc-stack.sh snapshot-dependency-logs
+
+      - name: Upload integration report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpc-integration-report
+          if-no-files-found: ignore
+          path: .artifacts/rpc-integration-report/*
+
+      - name: Upload service logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpc-service-logs
+          if-no-files-found: ignore
+          path: scripts/logs/*.log
+
+      - name: Upload dependency logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpc-dependency-logs
+          if-no-files-found: ignore
+          path: .artifacts/dependency-logs/*.log
+
+      - name: Stop integration stack
+        if: always()
+        run: bash scripts/ci-rpc-stack.sh stop

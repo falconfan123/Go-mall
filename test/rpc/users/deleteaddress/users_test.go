@@ -2,9 +2,10 @@ package deleteaddress
 
 import (
 	"context"
-	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/users/pb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -15,7 +16,7 @@ var users_client users.UsersClient
 
 func initusers() {
 
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("users", biz.UsersRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
@@ -25,16 +26,14 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
+	user := seed.CreateUser(t, users_client)
 	//这里可以从token中获取user——id
 	resp, err := users_client.DeleteAddress(context.Background(), &users.DeleteAddressRequest{
-
-		AddressId: 2,
-		UserId:    1,
+		AddressId: user.AddressID,
+		UserId:    user.UserID,
 	})
 	if err != nil {
-		fmt.Println("delete address error", err)
-		t.Log("delete address error", err)
+		t.Fatal(err)
 	}
-	fmt.Println("delete success", resp)
 	t.Log("deletesuccess", resp)
 }

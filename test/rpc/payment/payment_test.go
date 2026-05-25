@@ -2,8 +2,9 @@ package payment
 
 import (
 	"context"
-	"fmt"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/services/payment/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"testing"
@@ -12,7 +13,7 @@ import (
 var payment_client payment.PaymentClient
 
 func initpayment() {
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", 10006),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("payment", biz.PaymentRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)

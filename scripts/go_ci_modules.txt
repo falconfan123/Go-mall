@@ -1,0 +1,19 @@
+# Workspace-managed Go modules validated by CI.
+common
+dal
+services/activity
+services/admin
+services/audit
+services/auths
+services/carts
+services/checkout
+services/coupons
+services/gateway
+services/inventory
+services/order
+services/payment
+services/product
+services/search
+services/system
+services/users
+tools/rag

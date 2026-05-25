@@ -3,7 +3,7 @@ package coupons
 import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/services/coupons/pb"
+	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -19,8 +19,7 @@ func Test_LockCouponLogic_LockCoupon(t *testing.T) {
 			PreOrderId:   pid,
 		})
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 		assert.Equal(t, int32(code.Success), res.StatusCode)
 	})
@@ -31,8 +30,7 @@ func Test_LockCouponLogic_LockCoupon(t *testing.T) {
 			PreOrderId:   pid,
 		})
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 		t.Log(res)
 		lock, err := couponsClient.LockCoupon(context.Background(), &coupons.LockCouponReq{
@@ -41,8 +39,7 @@ func Test_LockCouponLogic_LockCoupon(t *testing.T) {
 			PreOrderId:   pid,
 		})
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 		assert.Equal(t, int32(code.CouponsAlreadyLocked), lock.StatusCode)
 
@@ -59,8 +56,7 @@ func Test_UnlockCouponLogic_UnlockCoupon(t *testing.T) {
 			PreOrderId:   pid,
 		})
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 		assert.Equal(t, int32(code.Success), res.StatusCode)
 		unlock, err := couponsClient.ReleaseCoupon(context.Background(), &coupons.ReleaseCouponReq{
@@ -69,8 +65,7 @@ func Test_UnlockCouponLogic_UnlockCoupon(t *testing.T) {
 			PreOrderId:   pid,
 		})
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 		assert.Equal(t, int32(code.Success), unlock.StatusCode)
 	})
@@ -98,8 +93,7 @@ func Test_ListCouponsUsageLogic_ListCouponsUsage(t *testing.T) {
 		UserId: 1,
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	t.Log(res.Usages)
 }
@@ -120,7 +114,9 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 			OriginAmount:   100,
 			PreOrderId:     poid,
 		})
-		assert.NoError(t, err)
+		if err != nil {
+			t.Fatal(err)
+		}
 		t.Log(res)
 	})
 	t.Run("优惠券不存在", func(t *testing.T) {
@@ -133,8 +129,7 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 			OriginAmount:   100,
 		})
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 
 		assert.Equal(t, int32(code.CouponsNotExist), res.StatusCode)
@@ -149,7 +144,9 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 			DiscountAmount: 100,
 			OriginAmount:   100,
 		})
-		assert.NoError(t, err) // 事务错误处理方式特殊
+		if err != nil {
+			t.Fatal(err)
+		} // 事务错误处理方式特殊
 		assert.Equal(t, int32(code.CouponStatusInvalid), res.StatusCode)
 
 	})
@@ -166,8 +163,9 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 			DiscountAmount: 100,
 			OriginAmount:   100,
 		})
-
-		assert.NoError(t, err)
+		if err != nil {
+			t.Fatal(err)
+		}
 		assert.Equal(t, int32(code.Success), res.GetStatusCode())
 		// 第二次使用
 		res2, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
@@ -177,8 +175,9 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 			DiscountAmount: 100,
 			OriginAmount:   100,
 		})
-
-		assert.NoError(t, err)
+		if err != nil {
+			t.Fatal(err)
+		}
 		// 第一次使用后状态就变了
 		assert.Equal(t, int32(code.CouponStatusInvalid), res2.GetStatusCode())
 	})

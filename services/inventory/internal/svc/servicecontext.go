@@ -35,9 +35,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		InventoryModel: inventory.NewInventoryModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 	}
 
-	// 执行缓存预热
+	// 执行缓存预热，失败只记录日志，避免把短暂的数据库/缓存异常放大成服务不可用
 	if err := svcCtx.PreheatInventoryCache(); err != nil {
-		panic(fmt.Sprintf("缓存预热失败: %v", err))
+		logx.Errorf("缓存预热失败: %v", err)
 	}
 	decreaseInventoryShashal, err := svcCtx.predecreaseloadScript()
 	if err != nil {

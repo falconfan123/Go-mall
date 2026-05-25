@@ -9,8 +9,9 @@ import (
 	gorse "github.com/falconfan123/Go-mall/common/utils/gorse"
 	"github.com/falconfan123/Go-mall/dal/model/products/categories"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
-	"github.com/falconfan123/Go-mall/services/inventory/pb"
-	"github.com/falconfan123/Go-mall/services/product/pb"
+	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
+	product "github.com/falconfan123/Go-mall/services/product/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"github.com/olivere/elastic/v7"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
@@ -29,12 +30,43 @@ import (
 var product_client product.ProductCatalogServiceClient
 
 func initproduct() {
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.ProductRpcPort),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("product", biz.ProductRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
 	product_client = product.NewProductCatalogServiceClient(conn)
+}
+
+func hasQiniuConfig() bool {
+	return os.Getenv("QINIU_ACCESSKEY") != "" &&
+		os.Getenv("QINIU_SECRETKEY") != "" &&
+		os.Getenv("QINIU_BUCKET") != "" &&
+		os.Getenv("QINIU_DOMAIN") != ""
+}
+
+func hasGorseConfig() bool {
+	return os.Getenv("GORSE_HOST") != "" && os.Getenv("GORSE_APIKEY") != ""
+}
+
+func createProductFixture(t *testing.T, picture []byte, categories []string) int64 {
+	t.Helper()
+	initproduct()
+	resp, err := product_client.CreateProduct(context.Background(), &product.CreateProductReq{
+		Name:        testenv.UniqueName("product"),
+		Description: "integration test product",
+		Price:       122,
+		Stock:       5000,
+		Picture:     picture,
+		Categories:  categories,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.GetStatusCode() != 0 {
+		t.Fatalf("create product rejected: %s", resp.GetStatusMsg())
+	}
+	return resp.GetProductId()
 }
 func TestGetallProduct(t *testing.T) {
 	initproduct()
@@ -48,9 +80,12 @@ func TestGetallProduct(t *testing.T) {
 	t.Log(" success", resp)
 }
 func TestProductsCreateRpc(t *testing.T) {
+	if !hasQiniuConfig() {
+		t.Skip("qiniu not configured")
+	}
 	initproduct()
 	resp, err := product_client.CreateProduct(context.Background(), &product.CreateProductReq{
-		Name:        "小米测试dddd",
+		Name:        testenv.UniqueName("product-qiniu"),
 		Description: "手机信息2",
 		Price:       122,
 		Stock:       5000,
@@ -61,13 +96,13 @@ func TestProductsCreateRpc(t *testing.T) {
 		t.Fatal(err)
 
 	}
-	fmt.Println(" success", resp)
 	t.Log(" success", resp)
 }
 func TestProductsGetRpc(t *testing.T) {
+	id := createProductFixture(t, nil, []string{"get"})
 	initproduct()
 	resp, err := product_client.GetProduct(context.Background(), &product.GetProductReq{
-		Id: 2,
+		Id: uint32(id),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -76,9 +111,10 @@ func TestProductsGetRpc(t *testing.T) {
 	t.Log(" success", resp)
 }
 func TestProductsUpdateRpc(t *testing.T) {
+	id := createProductFixture(t, nil, []string{"update"})
 	initproduct()
 	resp, err := product_client.UpdateProduct(context.Background(), &product.UpdateProductReq{
-		Id:          7,
+		Id:          id,
 		Name:        "we1",
 		Description: "dsd",
 		Price:       21,
@@ -89,24 +125,23 @@ func TestProductsUpdateRpc(t *testing.T) {
 		t.Fatal(err)
 
 	}
-	fmt.Println(" success", resp)
 	t.Log(" success", resp)
 }
 func TestProductsDeleteRpc(t *testing.T) {
+	id := createProductFixture(t, nil, []string{"delete"})
 	initproduct()
 	resp, err := product_client.DeleteProduct(context.Background(), &product.DeleteProductReq{
-		Id: 1111,
+		Id: id,
 	})
 	if err != nil {
 		t.Fatal(err)
 
 	}
-	fmt.Println(" success", resp)
 	t.Log(" success", resp)
 }
 
 func TestQueryProduct(t *testing.T) {
-
+	createProductFixture(t, nil, []string{"智能手机"})
 	initproduct()
 	resp, err := product_client.QueryProduct(context.Background(), &product.QueryProductReq{
 		New:      true,
@@ -116,7 +151,7 @@ func TestQueryProduct(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(" success", resp)
+	t.Log(" success", resp)
 }
 
 func TestLoadProduct2EsAndGorse(t *testing.T) {
@@ -124,6 +159,9 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
 	gorseAddr := os.Getenv("GORSE_HOST")
 	gorseApikey := os.Getenv("GORSE_APIKEY")
+	if esAddress == "" || mysqlAddress == "" || gorseAddr == "" || gorseApikey == "" {
+		t.Skip("elasticsearch/mysql/gorse not configured")
+	}
 
 	ctx := context.TODO()
 	client, err := elastic.NewClient(elastic.SetURL(esAddress),
@@ -180,6 +218,9 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 	}
 }
 func TestProductRecommend(t *testing.T) {
+	if !hasGorseConfig() {
+		t.Skip("gorse not configured")
+	}
 	initproduct()
 	recommendProduct, err := product_client.RecommendProduct(context.Background(), &product.RecommendProductReq{
 		UserId:   93,
@@ -198,15 +239,16 @@ func TestProductRecommend(t *testing.T) {
 }
 
 func TestLoad2Inventory(t *testing.T) {
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.InventoryRpcPort),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("inventory", biz.InventoryRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
 	client := inventory.NewInventoryClient(conn)
-	//client.
-	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
 	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
+	if mysqlAddress == "" {
+		t.Skip("MYSQL_DATA_SOURCE not configured")
+	}
 	productsModel := product2.NewProductsModel(sqlx.NewMysql(mysqlAddress))
 	products, err := productsModel.QueryAllProducts(context.Background())
 	if err != nil {
@@ -238,6 +280,9 @@ const (
 
 func TestPicture(t *testing.T) {
 	imagePath := "a.jpg" // 替换为实际的图片文件路径
+	if _, err := os.Stat(imagePath); err != nil {
+		t.Skip("image fixture not found")
+	}
 	base64Str, err := imageToBase64(imagePath)
 	if err != nil {
 		fmt.Printf("转换失败: %v\n", err)

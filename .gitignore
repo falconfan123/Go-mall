@@ -46,6 +46,7 @@ key/
 .trae/
 .claude/
 .cursorrules
+.codex/
 
 # Temp files
 tmp/
@@ -53,6 +54,10 @@ tmp/
 *.bak
 *.log
 .gocache/
+.artifacts/
+dump.lsif
+scripts/__pycache__/
+scripts/logs/
 
 # Project specific
 *.trace

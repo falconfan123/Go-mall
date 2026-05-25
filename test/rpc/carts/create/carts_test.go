@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/carts/pb"
+	carts "github.com/falconfan123/Go-mall/services/carts/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"testing"
@@ -13,7 +14,7 @@ import (
 var carts_client carts.CartClient
 
 func initCarts() {
-	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.CartsRpcPort),
+	conn, err := grpc.NewClient(testenv.ServiceAddr("carts", biz.CartsRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)

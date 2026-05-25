@@ -17,8 +17,8 @@ import (
 var (
 	couponUsageFieldNames          = builder.RawFieldNames(&CouponUsage{})
 	couponUsageRows                = strings.Join(couponUsageFieldNames, ",")
-	couponUsageRowsExpectAutoSet   = strings.Join(stringx.Remove(couponUsageFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	couponUsageRowsWithPlaceHolder = strings.Join(stringx.Remove(couponUsageFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	couponUsageRowsExpectAutoSet   = strings.Join(stringx.Remove(couponUsageFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
+	couponUsageRowsWithPlaceHolder = strings.Join(stringx.Remove(couponUsageFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
 )
 
 type (
@@ -49,18 +49,18 @@ type (
 func newCouponUsageModel(conn sqlx.SqlConn) *defaultCouponUsageModel {
 	return &defaultCouponUsageModel{
 		conn:  conn,
-		table: "`coupon_usage`",
+		table: "coupon_usage",
 	}
 }
 
 func (m *defaultCouponUsageModel) Delete(ctx context.Context, id uint64) error {
-	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where \"id\" = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
 func (m *defaultCouponUsageModel) FindOne(ctx context.Context, id uint64) (*CouponUsage, error) {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", couponUsageRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"id\" = $1 limit 1", couponUsageRows, m.table)
 	var resp CouponUsage
 	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
 	switch err {
@@ -80,7 +80,7 @@ func (m *defaultCouponUsageModel) Insert(ctx context.Context, data *CouponUsage)
 }
 
 func (m *defaultCouponUsageModel) Update(ctx context.Context, data *CouponUsage) error {
-	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, couponUsageRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set \"order_id\" = $1, \"coupon_id\" = $2, \"user_id\" = $3, \"coupon_type\" = $4, \"origin_value\" = $5, \"discount_amount\" = $6, \"applied_at\" = $7 where \"id\" = $8", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.CouponId, data.UserId, data.CouponType, data.OriginValue, data.DiscountAmount, data.AppliedAt, data.Id)
 	return err
 }

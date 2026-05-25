@@ -38,7 +38,7 @@ func (m *customCheckoutItemsModel) WithSession(session sqlx.Session) CheckoutIte
 }
 
 func (m *customCheckoutItemsModel) FindItemsByPreOrder(ctx context.Context, preOrderId string) ([]*CheckoutItems, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE pre_order_id = ?", m.table)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE \"pre_order_id\" = $1", m.table)
 	var items []*CheckoutItems
 	err := m.conn.QueryRowsCtx(ctx, &items, query, preOrderId)
 	if err != nil {
@@ -47,10 +47,16 @@ func (m *customCheckoutItemsModel) FindItemsByPreOrder(ctx context.Context, preO
 	return items, nil
 }
 func (m *customCheckoutItemsModel) FindItemsByPreOrderIds(ctx context.Context, preOrderIds []string) (map[string][]*checkout.CheckoutItem, error) {
-	preOrders := strings.Join(preOrderIds, ",")
-	query := fmt.Sprintf("SELECT * FROM %s WHERE pre_order_id IN (?)", m.table)
+	if len(preOrderIds) == 0 {
+		return map[string][]*checkout.CheckoutItem{}, nil
+	}
+	query := fmt.Sprintf("SELECT * FROM %s WHERE \"pre_order_id\" IN (%s)", m.table, strings.Join(makePlaceholders(len(preOrderIds)), ","))
 	items := make([]*CheckoutItems, 0)
-	err := m.conn.QueryRowsCtx(ctx, &items, query, preOrders)
+	args := make([]any, 0, len(preOrderIds))
+	for _, id := range preOrderIds {
+		args = append(args, id)
+	}
+	err := m.conn.QueryRowsCtx(ctx, &items, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,4 +84,12 @@ func (m *customCheckoutItemsModel) FindItemsByPreOrderIds(ctx context.Context, p
 	}
 
 	return itemsMap, nil
+}
+
+func makePlaceholders(n int) []string {
+	placeholders := make([]string, n)
+	for i := range placeholders {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+	}
+	return placeholders
 }

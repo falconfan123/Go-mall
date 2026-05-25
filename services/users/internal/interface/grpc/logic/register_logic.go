@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/dto"
@@ -42,10 +43,20 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 	resp, err := l.svcCtx.AuthAppService.Register(l.ctx, req)
 	if err != nil {
-		l.Logger.Errorw("register failed", logx.Field("err", err))
+		l.Logger.Errorw("register failed",
+			logx.Field("err", err),
+			logx.Field("username", req.Username),
+			logx.Field("email", req.Email),
+		)
+		statusMsg := code.ServerErrorMsg
+		if resp != nil && resp.StatusMsg != "" {
+			statusMsg = fmt.Sprintf("%s: %s", resp.StatusMsg, err.Error())
+		} else {
+			statusMsg = fmt.Sprintf("%s: %v", code.ServerErrorMsg, err)
+		}
 		return &users.RegisterResponse{
 			StatusCode: uint32(code.ServerError),
-			StatusMsg:  code.ServerErrorMsg,
+			StatusMsg:  statusMsg,
 		}, nil
 	}
 

@@ -2,10 +2,11 @@ package login
 
 import (
 	"context"
-	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/services/auths/pb"
-	"github.com/falconfan123/Go-mall/services/users/pb"
+	auths "github.com/falconfan123/Go-mall/services/auths/pb"
+	users "github.com/falconfan123/Go-mall/services/users/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"sync"
 	"testing"
 
@@ -19,12 +20,12 @@ var once1 sync.Once
 
 func initusers() {
 	once1.Do(func() {
-		conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort),
+		conn, err := grpc.NewClient(testenv.ServiceAddr("users", biz.UsersRpcPort),
 			grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			panic(err)
 		}
-		conn1, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.AuthsRpcPort),
+		conn1, err := grpc.NewClient(testenv.ServiceAddr("auths", biz.AuthsRpcPort),
 			grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			panic(err)
@@ -37,10 +38,12 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
+	user := seed.CreateUser(t, users_client)
+
 	// 测试用户名登录（推荐方式）
 	resp, err := users_client.Login(context.Background(), &users.LoginRequest{
-		Username: "testuser",
-		Password: "1234567",
+		Username: user.Username,
+		Password: user.Password,
 	})
 	if err != nil {
 
@@ -51,14 +54,14 @@ func TestUsersRpc(t *testing.T) {
 		auths_res, err := auths_client.GenerateToken(context.Background(), &auths.AuthGenReq{
 			UserId:   resp.UserId,
 			Username: resp.UserName,
+			ClientIp: "127.0.0.1",
 		})
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("login success", resp, auths_res)
 		t.Log("login success", resp)
+		t.Log("auths success", auths_res)
 	} else {
-		fmt.Println("login failed", resp)
 		t.Log("login failed", resp)
 	}
 
@@ -67,19 +70,18 @@ func TestUsersRpc(t *testing.T) {
 // TestLoginWithEmail 测试邮箱登录（兼容模式）
 func TestLoginWithEmail(t *testing.T) {
 	initusers()
+	user := seed.CreateUser(t, users_client)
 	resp, err := users_client.Login(context.Background(), &users.LoginRequest{
-		Email:    "test9@test.com",
-		Password: "1234567",
+		Email:    user.Email,
+		Password: user.Password,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if resp.StatusCode == 0 {
-		fmt.Println("email login success", resp)
 		t.Log("email login success", resp)
 	} else {
-		fmt.Println("email login failed", resp)
 		t.Log("email login failed", resp)
 	}
 }

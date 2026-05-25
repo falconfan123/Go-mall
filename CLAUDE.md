@@ -14,6 +14,8 @@
 
 **【重要】完成任何任务后，必须自动提交所有更改并创建 PR，除非用户明确要求不提交。**
 
+**【重要】从现在起，你在 `services/` 下修改任何业务代码、新增任何 API 功能后，必须在后台自动触发 `make mock` 和 `make test-unit`。如果单测失败，或者你写的新代码导致覆盖率跌破 `63.6%`，你必须在原地启动自我修复循环，直到单测全绿才能向我（人类）交付。**
+
 The role of this file is to describe common mistakes and confusion points that agents might encounter as they work in this project. If you ever encounter something in the project that surprises you, please alert the developer working with you and indicate that this is the case in the AgentMD file to help prevent future agents from having the same issue
 
 ## go-zero 开发规范

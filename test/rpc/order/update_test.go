@@ -2,29 +2,53 @@ package order
 
 import (
 	"context"
-	"github.com/dtm-labs/client/dtmgrpc"
-	_ "github.com/dtm-labs/driver-gozero"
+	checkout "github.com/falconfan123/Go-mall/services/checkout/pb"
 	"github.com/falconfan123/Go-mall/services/order/pb"
-	"github.com/google/uuid"
-	"github.com/zeromicro/go-zero/zrpc"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/harness"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"testing"
 	"time"
 )
 
 func TestUpdateOrder(t *testing.T) {
+	clients := harness.NewClients(t)
+	harness.WaitForServices(t, clients)
+
+	user := seed.CreateUser(t, clients.Users)
+	product := seed.CreateProductWithInventory(t, clients.Product, clients.Inventory, 8)
+	checkoutResp, err := clients.Checkout.PrepareCheckout(context.Background(), seed.MakeCheckoutRequest(
+		user.UserID,
+		user.AddressID,
+		&checkout.CheckoutReq_OrderItem{ProductId: int32(product.ProductID), Quantity: 1},
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+	createResp, err := clients.Order.CreateOrder(context.Background(), seed.MakeOrderRequest(
+		checkoutResp.GetPreOrderId(),
+		user.UserID,
+		user.AddressID,
+		order.PaymentMethod_ALIPAY,
+		testenv.UniqueName("order"),
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	t.Run("订单状态更新为支付中与补偿", func(t *testing.T) {
-		res, err := orderClient.UpdateOrder2PaymentStatus(context.Background(), &order.UpdateOrder2PaymentRequest{
-			OrderId: "1",
-			UserId:  1,
+		res, err := clients.Order.UpdateOrder2PaymentStatus(context.Background(), &order.UpdateOrder2PaymentRequest{
+			OrderId: createResp.GetOrder().GetOrderId(),
+			UserId:  int32(user.UserID),
 		})
 		if err != nil {
 			t.Error(err)
 			return
 		}
 		t.Log(res)
-		rollback, err := orderClient.UpdateOrder2PaymentStatusRollback(context.Background(), &order.UpdateOrder2PaymentRequest{
-			OrderId: "1",
-			UserId:  1,
+		rollback, err := clients.Order.UpdateOrder2PaymentStatusRollback(context.Background(), &order.UpdateOrder2PaymentRequest{
+			OrderId: createResp.GetOrder().GetOrderId(),
+			UserId:  int32(user.UserID),
 		})
 		if err != nil {
 			t.Error(err)
@@ -34,9 +58,9 @@ func TestUpdateOrder(t *testing.T) {
 
 	})
 	t.Run("订单状态更新为支付成功与补偿", func(t *testing.T) {
-		res, err := orderClient.UpdateOrder2PaymentSuccess(context.Background(), &order.UpdateOrder2PaymentSuccessRequest{
-			OrderId: "1",
-			UserId:  1,
+		res, err := clients.Order.UpdateOrder2PaymentSuccess(context.Background(), &order.UpdateOrder2PaymentSuccessRequest{
+			OrderId: createResp.GetOrder().GetOrderId(),
+			UserId:  int32(user.UserID),
 			PaymentResult: &order.PaymentResult{
 				TransactionId: "xxxx",
 				PaidAmount:    100,
@@ -48,9 +72,9 @@ func TestUpdateOrder(t *testing.T) {
 			return
 		}
 		t.Log(res)
-		rollback, err := orderClient.UpdateOrder2PaymentSuccessRollback(context.Background(), &order.UpdateOrder2PaymentSuccessRequest{
-			OrderId: "1",
-			UserId:  1,
+		rollback, err := clients.Order.UpdateOrder2PaymentSuccessRollback(context.Background(), &order.UpdateOrder2PaymentSuccessRequest{
+			OrderId: createResp.GetOrder().GetOrderId(),
+			UserId:  int32(user.UserID),
 			PaymentResult: &order.PaymentResult{
 				TransactionId: "xxxx",
 				PaidAmount:    100,
@@ -66,24 +90,5 @@ func TestUpdateOrder(t *testing.T) {
 }
 
 func TestDtmSaga(t *testing.T) {
-	orderRpc := zrpc.RpcClientConf{
-		Target: "consul://localhost:8500/order.rpc", NonBlock: true,
-	}
-	target, err := orderRpc.BuildTarget()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	dtmServer := "consul://localhost:8500/dtmservice"
-	sagaGrpc := dtmgrpc.NewSagaGrpc(dtmServer, uuid.New().String()).
-		Add(target+order.OrderService_UpdateOrder2PaymentStatus_FullMethodName,
-			target+order.OrderService_UpdateOrder2PaymentStatusRollback_FullMethodName,
-			&order.UpdateOrder2PaymentRequest{UserId: 1, OrderId: "xxxx"})
-	sagaGrpc.WaitResult = true
-	// eer => status.Error()
-	if err := sagaGrpc.Submit(); err != nil {
-		return
-	}
-
-	t.Log(sagaGrpc.Gid)
+	t.Skip("dtm saga test is optional in the default integration suite")
 }

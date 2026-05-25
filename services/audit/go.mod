@@ -11,9 +11,12 @@ require (
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/falconfan123/Go-mall/common v0.0.0-20260312153719-88b43b07ae7d
 	github.com/falconfan123/Go-mall/dal v0.0.0-00010101000000-000000000000
+	github.com/lib/pq v1.12.3
 	github.com/streadway/amqp v1.1.0
+	github.com/stretchr/testify v1.11.1
 	github.com/zeromicro/go-zero v1.10.1
 	go.opentelemetry.io/otel/trace v1.42.0
+	go.uber.org/mock v0.6.0
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
 )
@@ -80,7 +83,6 @@ require (
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
-	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect

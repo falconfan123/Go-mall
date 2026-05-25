@@ -53,21 +53,22 @@ func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, pro
 
 		// 阶段2: 创建锁记录（30分钟有效期）
 		if err := m.LockOrder(ctx, session, orderID, userID, m.lockreturntable); err != nil {
-			return nil
+			return err
 		}
 
 		// 阶段3: 批量锁定库存记录
 		query := fmt.Sprintf(`
-		SELECT product_id, total, sold 
+		SELECT "product_id", "total", "sold"
 		FROM %s 
-		WHERE product_id IN (?)
-		FOR UPDATE  -- 行级锁
+		WHERE "product_id" IN (?)
+		FOR UPDATE
 	`, m.table)
 
 		query, args, err := sqlx1.In(query, productIDs)
 		if err != nil {
 			return err
 		}
+		query = sqlx1.Rebind(sqlx1.DOLLAR, query)
 
 		var inventories []*Inventory
 		if err := session.QueryRowsCtx(ctx, &inventories, query, args...); err != nil {
@@ -94,7 +95,7 @@ func (m *customInventoryModel) BatchReturn(ctx context.Context, session sqlx.Ses
 	// 阶段3: 批量更新
 	var updateBuilder strings.Builder
 	updateBuilder.WriteString(fmt.Sprintf("UPDATE %s SET ", m.table))
-	updateBuilder.WriteString("sold = CASE product_id ")
+	updateBuilder.WriteString(`sold = CASE "product_id" `)
 
 	// 构建WHEN条件
 	whenCases := make([]string, len(productIDs))
@@ -102,20 +103,21 @@ func (m *customInventoryModel) BatchReturn(ctx context.Context, session sqlx.Ses
 		whenCases[i] = fmt.Sprintf("WHEN %d THEN sold - %d", pid, quantities[i])
 	}
 	updateBuilder.WriteString(strings.Join(whenCases, " "))
-	updateBuilder.WriteString(" END, total = CASE product_id ")
+	updateBuilder.WriteString(` END, total = CASE "product_id" `)
 
 	whenCases = whenCases[:0]
 	for i, pid := range productIDs {
 		whenCases = append(whenCases, fmt.Sprintf("WHEN %d THEN total + %d", pid, quantities[i]))
 	}
 	updateBuilder.WriteString(strings.Join(whenCases, " "))
-	updateBuilder.WriteString(" END WHERE product_id IN (?)")
+	updateBuilder.WriteString(` END WHERE "product_id" IN (?)`)
 
 	// 执行更新
 	updateQuery, updateArgs, err := sqlx1.In(updateBuilder.String(), productIDs)
 	if err != nil {
 		return err
 	}
+	updateQuery = sqlx1.Rebind(sqlx1.DOLLAR, updateQuery)
 
 	res, err := session.ExecCtx(ctx, updateQuery, updateArgs...)
 	if err != nil {
@@ -132,7 +134,7 @@ func (m *customInventoryModel) BatchReturn(ctx context.Context, session sqlx.Ses
 }
 func (m *customInventoryModel) ReturnInventory(ctx context.Context, productId int32, quantity int32) (cnt int64, err error) {
 	var inventory Inventory
-	query := fmt.Sprintf("select * from %s where \"product_id\" = ? for update", m.table)
+	query := fmt.Sprintf("select * from %s where \"product_id\" = $1 for update", m.table)
 	if err := m.conn.QueryRowCtx(ctx, &inventory, query, productId); err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
 			return 0, err
@@ -140,7 +142,7 @@ func (m *customInventoryModel) ReturnInventory(ctx context.Context, productId in
 		return 0, biz.ErrInventoryDecreaseFailed
 	}
 	cnt = inventory.Total + int64(quantity)
-	query = fmt.Sprintf("UPDATE %s SET sold = sold - ?, total = total + ? WHERE product_id = ?", m.table)
+	query = fmt.Sprintf("UPDATE %s SET sold = sold - $1, total = total + $2 WHERE \"product_id\" = $3", m.table)
 	res, err := m.conn.ExecCtx(ctx, query, quantity, quantity, productId)
 	if err != nil {
 		return 0, biz.ErrInventoryDecreaseFailed
@@ -155,7 +157,7 @@ func (m *customInventoryModel) ReturnInventory(ctx context.Context, productId in
 
 func (m *customInventoryModel) UpdateOrCreate(ctx context.Context, inventory Inventory) error {
 	var exists bool
-	query := fmt.Sprintf("select exists(select 1 from %s where \"product_id\" = ?)", m.table)
+	query := fmt.Sprintf("select exists(select 1 from %s where \"product_id\" = $1)", m.table)
 	err := m.conn.QueryRowCtx(ctx, &exists, query, inventory.ProductId)
 	if err != nil {
 		return err
@@ -180,7 +182,7 @@ func (m *customInventoryModel) LockOrder(
 	table string,
 ) error {
 
-	query := fmt.Sprintf("INSERT INTO  %s  (order_id, user_id) VALUES (?, ?)", table)
+	query := fmt.Sprintf("INSERT INTO  %s  (order_id, user_id) VALUES ($1, $2)", table)
 	_, err := session.ExecCtx(ctx, query, orderID, userID)
 	if err != nil {
 		return err
@@ -197,25 +199,23 @@ func (m *customInventoryModel) FindLockOrder(
 	userID int64,
 	table string,
 ) (bool, error) {
-	// 构建 SQL 查询语
 	query := fmt.Sprintf(`
-	SELECT COUNT(*) 
-	FROM %s 
-	WHERE order_id = ? AND user_id = ? 
-	FOR UPDATE`,
-		table)
+	SELECT 1
+	FROM %s
+	WHERE order_id = $1 AND user_id = $2
+	LIMIT 1
+	FOR UPDATE`, table)
 
-	var count int
-	err := session.QueryRowCtx(ctx, &count, query, orderID, userID)
+	var found int
+	err := session.QueryRowCtx(ctx, &found, query, orderID, userID)
 	if err != nil {
+		if errors.Is(err, sqlx.ErrNotFound) {
+			return false, nil
+		}
 		return false, err
 	}
 
-	if count > 0 {
-		return true, nil
-	}
-
-	return false, nil
+	return true, nil
 
 }
 func (m *customInventoryModel) BatchDecreaseInventoryAtom(
@@ -243,16 +243,17 @@ func (m *customInventoryModel) BatchDecreaseInventoryAtom(
 
 		// --- 阶段3: 批量锁定库存记录 ---
 		query := fmt.Sprintf(`
-            SELECT product_id, total, sold 
+            SELECT "product_id", "total", "sold"
             FROM %s 
-            WHERE product_id IN (?)
-            FOR UPDATE`, m.table) // 排他锁
+            WHERE "product_id" IN (?)
+            FOR UPDATE`, m.table)
 
 		// 处理IN查询参数化
 		query, args, err := sqlx1.In(query, productIDs)
 		if err != nil {
 			return fmt.Errorf("build IN query failed: %w", err)
 		}
+		query = sqlx1.Rebind(sqlx1.DOLLAR, query)
 
 		var inventories []*Inventory
 		if err := session.QueryRowsCtx(ctx, &inventories, query, args...); err != nil {
@@ -288,7 +289,7 @@ func (m *customInventoryModel) Batchdecrease(ctx context.Context, session sqlx.S
 	// 阶段3: 批量更新
 	var updateBuilder strings.Builder
 	updateBuilder.WriteString(fmt.Sprintf("UPDATE %s SET ", m.table))
-	updateBuilder.WriteString("sold = CASE product_id ")
+	updateBuilder.WriteString(`sold = CASE "product_id" `)
 
 	// 构建WHEN条件
 	whenCases := make([]string, len(productIDs))
@@ -296,20 +297,21 @@ func (m *customInventoryModel) Batchdecrease(ctx context.Context, session sqlx.S
 		whenCases[i] = fmt.Sprintf("WHEN %d THEN sold + %d", pid, quantities[i])
 	}
 	updateBuilder.WriteString(strings.Join(whenCases, " "))
-	updateBuilder.WriteString(" END, total = CASE product_id ")
+	updateBuilder.WriteString(` END, total = CASE "product_id" `)
 
 	whenCases = whenCases[:0]
 	for i, pid := range productIDs {
 		whenCases = append(whenCases, fmt.Sprintf("WHEN %d THEN total - %d", pid, quantities[i]))
 	}
 	updateBuilder.WriteString(strings.Join(whenCases, " "))
-	updateBuilder.WriteString(" END WHERE product_id IN (?)")
+	updateBuilder.WriteString(` END WHERE "product_id" IN (?)`)
 
 	// 执行更新
 	updateQuery, updateArgs, err := sqlx1.In(updateBuilder.String(), productIDs)
 	if err != nil {
 		return err
 	}
+	updateQuery = sqlx1.Rebind(sqlx1.DOLLAR, updateQuery)
 
 	res, err := session.ExecCtx(ctx, updateQuery, updateArgs...)
 	if err != nil {
@@ -330,7 +332,7 @@ func (m *customInventoryModel) DecreaseInventoryAtom(ctx context.Context, produc
 		// --------------- check ---------------
 
 		var inventory Inventory
-		query := fmt.Sprintf("select * from %s where \"product_id\" = ? for update", m.table)
+		query := fmt.Sprintf("select * from %s where \"product_id\" = $1 for update", m.table)
 		if err := session.QueryRowCtx(ctx, &inventory, query, productId); err != nil {
 			if errors.Is(err, sqlx.ErrNotFound) {
 				return err
@@ -344,7 +346,7 @@ func (m *customInventoryModel) DecreaseInventoryAtom(ctx context.Context, produc
 
 		// --------------- update ---------------
 
-		query = fmt.Sprintf("UPDATE %s SET sold = sold + ?, total = total - ? WHERE product_id = ?", m.table)
+		query = fmt.Sprintf("UPDATE %s SET sold = sold + $1, total = total - $2 WHERE \"product_id\" = $3", m.table)
 		res, err := session.ExecCtx(ctx, query, quantity, quantity, productId)
 		if err != nil {
 			return biz.ErrInventoryDecreaseFailed

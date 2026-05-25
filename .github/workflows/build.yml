@@ -1,0 +1,59 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  matrix:
+    name: Resolve Build Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.services.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read service whitelist
+        id: services
+        run: echo "matrix=$(python3 scripts/ci_matrix.py scripts/build_services.txt)" >>"$GITHUB_OUTPUT"
+
+  build-services:
+    name: Build ${{ matrix.service }}
+    needs:
+      - matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJson(needs.matrix.outputs.services) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: false
+
+      - name: Restore Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('.go-version', 'go.sum', 'go.work.sum', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build service
+        run: bash scripts/go-ci-build.sh ${{ matrix.service }}

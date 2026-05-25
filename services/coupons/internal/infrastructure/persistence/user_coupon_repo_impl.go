@@ -45,9 +45,19 @@ func (r *UserCouponRepositoryImpl) GetByUserIDAndCouponID(ctx context.Context, u
 
 // ListByUserID 查询用户的优惠券列表
 func (r *UserCouponRepositoryImpl) ListByUserID(ctx context.Context, userID int64, status *entity.UserCouponStatus, page, pageSize int) ([]*entity.UserCoupon, int64, error) {
-	// 简化实现，实际需要根据状态分页查询
-	// 返回空列表
-	return []*entity.UserCoupon{}, 0, nil
+	pageCoupons, err := r.userCouponModel.QueryUserCoupons(ctx, int32(userID), int32(page), int32(pageSize))
+	if err != nil {
+		return nil, 0, err
+	}
+	result := make([]*entity.UserCoupon, 0, len(pageCoupons))
+	for _, uc := range pageCoupons {
+		domain := r.convertToDomain(uc)
+		if status != nil && domain.Status != *status {
+			continue
+		}
+		result = append(result, domain)
+	}
+	return result, int64(len(result)), nil
 }
 
 // Save 保存用户优惠券
@@ -70,8 +80,17 @@ func (r *UserCouponRepositoryImpl) Delete(ctx context.Context, id int64) error {
 
 // CountByUserIDAndCouponID 统计用户领取某优惠券的数量
 func (r *UserCouponRepositoryImpl) CountByUserIDAndCouponID(ctx context.Context, userID int64, couponID string) (int64, error) {
-	// 简化实现，需要自定义查询
-	return 0, nil
+	status, err := r.userCouponModel.GetStatusByUserIdCouponId(ctx, int32(userID), couponID)
+	if err != nil {
+		if err == usercouponmodel.ErrNotFound {
+			return 0, nil
+		}
+		return 0, err
+	}
+	if status == nil {
+		return 0, nil
+	}
+	return 1, nil
 }
 
 // FindAvailableByUserID 查询用户可用的优惠券
