@@ -82,7 +82,7 @@ func (m *defaultProductsModel) Insert(ctx context.Context, data *Products) (sql.
 }
 
 func (m *defaultProductsModel) Update(ctx context.Context, data *Products) error {
-	query := fmt.Sprintf("update %s set %s where id = $6", m.table, productsRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set name = $1, description = $2, picture = $3, price = $4, stock = $5 where id = $6", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, data.Name, data.Description, data.Picture, data.Price, data.Stock, data.Id)
 	return err
 }

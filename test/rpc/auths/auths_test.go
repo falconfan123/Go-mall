@@ -2,11 +2,10 @@ package auths
 
 import (
 	"context"
-	"github.com/falconfan123/Go-mall/common/consts/biz"
-	"github.com/falconfan123/Go-mall/common/utils/token"
 	"sync"
 	"testing"
 
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -40,13 +39,18 @@ func setupGRPCConnection(t *testing.T) {
 func TestAuthenticationLogic_Authentication(t *testing.T) {
 	setupGRPCConnection(t)
 
-	jwtToken, err := token.GenerateJWT(4, "test", clientIP, biz.ShortTokenExpire)
+	tokenResp, err := client.GenerateToken(context.Background(), &auths.AuthGenReq{
+		UserId:   4,
+		Username: "test",
+		ClientIp: clientIP,
+	})
 	if err != nil {
-		t.Fatalf("GenerateJWT failed: %v", err)
+		t.Fatalf("GenerateToken failed: %v", err)
 	}
+	assert.Equal(t, uint32(0), tokenResp.StatusCode)
 
 	res, err := client.Authentication(context.Background(), &auths.AuthReq{
-		Token: jwtToken, ClientIp: clientIP,
+		Token: tokenResp.GetShortToken(), ClientIp: clientIP,
 	})
 	if err != nil {
 		t.Fatalf("Authentication failed: %v", err)

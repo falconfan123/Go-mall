@@ -47,18 +47,12 @@ func (m *customOrderItemsModel) QueryOrderItemsByOrderID(ctx context.Context, or
 }
 
 func (m *customOrderItemsModel) BulkInsert(session sqlx.Session, items []*OrderItems) error {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, orderItemsRowsExpectAutoSet)
-	bulkInserter, err := sqlx.NewBulkInserter(sqlx.NewSqlConnFromSession(session), query)
-	if err != nil {
-		return err
-	}
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6)", m.table, orderItemsRowsExpectAutoSet)
 	for _, item := range items {
-		err = bulkInserter.Insert(item.OrderId, item.ProductId, item.Quantity, item.Price, item.ProductName, item.ProductDesc)
-		if err != nil {
+		if _, err := session.ExecCtx(context.Background(), query, item.OrderId, item.ProductId, item.Quantity, item.Price, item.ProductName, item.ProductDesc); err != nil {
 			return err
 		}
 	}
-	bulkInserter.Flush()
 	return nil
 }
 

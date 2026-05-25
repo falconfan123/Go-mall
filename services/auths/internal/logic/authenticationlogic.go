@@ -3,6 +3,8 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/token"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
@@ -29,9 +31,26 @@ func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 
 func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes, error) {
 	res := new(auths.AuthsRes)
+	clientIP := in.GetClientIp()
+	if clientIP == "" {
+		res.StatusCode = code.NotWithClientIP
+		res.StatusMsg = code.NotWithClientIPMsg
+		l.Logger.Infow("client ip is empty", logx.Field("access_token", in.Token))
+		return res, nil
+	}
+
 	// parse token
 	claims, err := token.ParseJWT(in.Token)
 	if err != nil {
+		if userID, deviceID, expireTime, shortErr := token.VerifyShortToken(in.Token, biz.TokenSignSecret); shortErr == nil {
+			l.Logger.Infow("short token validated successfully",
+				logx.Field("user_id", userID),
+				logx.Field("device_id", deviceID),
+				logx.Field("expire_time", expireTime))
+			res.UserId = userID
+			return res, nil
+		}
+
 		res.StatusCode = code.TokenValid
 		res.StatusMsg = code.TokenInvalidMsg
 		if errors.Is(err, jwt.ErrTokenExpired) {
@@ -41,13 +60,6 @@ func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes
 		l.Logger.Infow("token parse failed",
 			logx.Field("err", err),
 			logx.Field("access_token", in.Token))
-		return res, nil
-	}
-	clientIP := in.GetClientIp()
-	if clientIP == "" {
-		res.StatusCode = code.NotWithClientIP
-		res.StatusMsg = code.NotWithClientIPMsg
-		l.Logger.Infow("client ip is empty", logx.Field("access_token", in.Token))
 		return res, nil
 	}
 	// check if the client IP has changed
@@ -67,6 +79,14 @@ func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes
 		return nil, err
 	}
 	issuedAt := claims.RegisteredClaims.IssuedAt
+	if issuedAt == nil {
+		l.Logger.Infow("jwt missing issued_at",
+			logx.Field("user_id", claims.UserID),
+			logx.Field("access_token", fmt.Sprintf("%T", claims)))
+		res.StatusCode = code.TokenValid
+		res.StatusMsg = code.TokenInvalidMsg
+		return res, nil
+	}
 	if issuedAt.Before(logoutTime) {
 		res.StatusCode = code.AuthExpiredByLogout
 		res.StatusMsg = code.AuthExpiredByLogoutMsg

@@ -43,14 +43,27 @@ port_in_use() {
   lsof -Pi :"$1" -sTCP:LISTEN -t >/dev/null 2>&1
 }
 
+can_connect_tcp() {
+  local host="$1"
+  local port="$2"
+
+  if command -v nc >/dev/null 2>&1; then
+    nc -z "$host" "$port" >/dev/null 2>&1
+    return
+  fi
+
+  (exec 3<>"/dev/tcp/$host/$port") >/dev/null 2>&1
+}
+
 wait_for_port() {
   local port="$1"
-  local attempts="${2:-60}"
-  local sleep_secs="${3:-1}"
+  local host="${2:-127.0.0.1}"
+  local attempts="${3:-60}"
+  local sleep_secs="${4:-1}"
   local i
 
   for ((i = 1; i <= attempts; i++)); do
-    if port_in_use "$port"; then
+    if can_connect_tcp "$host" "$port"; then
       return 0
     fi
     sleep "$sleep_secs"
@@ -165,7 +178,7 @@ start_dependencies() {
 
   local port
   for port in "${DEPENDENCY_PORTS[@]}"; do
-    if ! wait_for_port "$port"; then
+    if ! wait_for_port "$port" 127.0.0.1; then
       echo "dependency port not ready: $port" >&2
       exit 1
     fi
@@ -238,7 +251,7 @@ start_service() {
   local pid=$!
   echo "$name:$pid:$port" >>"$PID_FILE"
 
-  if ! wait_for_port "$port" 90 1; then
+  if ! wait_for_port "$port" 127.0.0.1 90 1; then
     tail -n 120 "$log_file" >&2 || true
     echo "service failed to listen: $name" >&2
     exit 1
@@ -258,7 +271,7 @@ start_services() {
 scan_ports() {
   local port
   for port in "${CORE_PORTS[@]}"; do
-    if ! wait_for_port "$port" 10 1; then
+    if ! wait_for_port "$port" 127.0.0.1 10 1; then
       echo "core port not ready: $port" >&2
       exit 1
     fi
@@ -276,7 +289,7 @@ status() {
   local spec
   for spec in "${SERVICES[@]}"; do
     IFS=: read -r name _ _ port <<<"$spec"
-    if port_in_use "$port"; then
+    if can_connect_tcp 127.0.0.1 "$port"; then
       echo "$name:$port ready"
     else
       echo "$name:$port missing" >&2

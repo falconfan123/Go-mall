@@ -89,8 +89,51 @@ func (r *CheckoutRepositoryImpl) Delete(ctx context.Context, preOrderID string) 
 
 // ListByUserID 查询用户的预订单列表
 func (r *CheckoutRepositoryImpl) ListByUserID(ctx context.Context, userID int64, page, pageSize int) ([]*entity.Checkout, int64, error) {
-	// 简化实现，实际需要分页查询
-	return []*entity.Checkout{}, 0, nil
+	total, err := r.checkoutModel.CountByUserId(ctx, uint32(userID))
+	if err != nil {
+		return nil, 0, err
+	}
+	if total == 0 {
+		return []*entity.Checkout{}, 0, nil
+	}
+
+	rows, err := r.checkoutModel.FindByUserId(ctx, uint32(userID), int32(page), int32(pageSize))
+	if err != nil {
+		return nil, 0, err
+	}
+	if len(rows) == 0 {
+		return []*entity.Checkout{}, total, nil
+	}
+
+	preOrderIDs := make([]string, 0, len(rows))
+	for _, row := range rows {
+		preOrderIDs = append(preOrderIDs, row.PreOrderId)
+	}
+
+	itemsMap, err := r.checkoutItemsModel.FindItemsByPreOrderIds(ctx, preOrderIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	checkouts := make([]*entity.Checkout, 0, len(rows))
+	for _, row := range rows {
+		domainItems := make([]*entity.CheckoutItem, 0, len(itemsMap[row.PreOrderId]))
+		for _, item := range itemsMap[row.PreOrderId] {
+			domainItems = append(domainItems, &entity.CheckoutItem{
+				PreOrderID: row.PreOrderId,
+				ProductID:  int64(item.ProductId),
+				Quantity:   int(item.Quantity),
+				Price:      item.Price,
+				Snapshot: &entity.ProductSnapshot{
+					ProductName:  item.ProductName,
+					ProductImage: item.ProductDesc,
+				},
+			})
+		}
+		checkouts = append(checkouts, r.convertToDomain(row, domainItems))
+	}
+
+	return checkouts, total, nil
 }
 
 // FindExpired 查找已过期的预订单
@@ -113,7 +156,7 @@ func (r *CheckoutRepositoryImpl) IncreaseStock(ctx context.Context, items []*ent
 
 // getItemsByPreOrderID 根据预订单ID查询商品项
 func (r *CheckoutRepositoryImpl) getItemsByPreOrderID(ctx context.Context, preOrderID string) ([]*entity.CheckoutItem, error) {
-	query := "SELECT id, pre_order_id, product_id, quantity, price, snapshot, created_at FROM checkout_items WHERE pre_order_id = ?"
+	query := "SELECT id, pre_order_id, product_id, quantity, price, snapshot, created_at FROM checkout_items WHERE pre_order_id = $1"
 	var items []checkoutmodel.CheckoutItems
 	err := r.conn.QueryRowsCtx(ctx, &items, query, preOrderID)
 	if err != nil {
@@ -148,7 +191,7 @@ func (r *CheckoutRepositoryImpl) getItemsByPreOrderID(ctx context.Context, preOr
 
 // deleteItemsByPreOrderID 根据预订单ID删除商品项
 func (r *CheckoutRepositoryImpl) deleteItemsByPreOrderID(ctx context.Context, preOrderID string) error {
-	query := "DELETE FROM checkout_items WHERE pre_order_id = ?"
+	query := "DELETE FROM checkout_items WHERE pre_order_id = $1"
 	_, err := r.conn.ExecCtx(ctx, query, preOrderID)
 	return err
 }

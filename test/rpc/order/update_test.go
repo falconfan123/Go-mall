@@ -58,6 +58,15 @@ func TestUpdateOrder(t *testing.T) {
 
 	})
 	t.Run("订单状态更新为支付成功与补偿", func(t *testing.T) {
+		_, err := clients.Order.UpdateOrder2PaymentStatus(context.Background(), &order.UpdateOrder2PaymentRequest{
+			OrderId: createResp.GetOrder().GetOrderId(),
+			UserId:  int32(user.UserID),
+		})
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
 		res, err := clients.Order.UpdateOrder2PaymentSuccess(context.Background(), &order.UpdateOrder2PaymentSuccessRequest{
 			OrderId: createResp.GetOrder().GetOrderId(),
 			UserId:  int32(user.UserID),

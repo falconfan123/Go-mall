@@ -187,29 +187,32 @@ CREATE INDEX idx_carts_product_id ON carts(product_id);
 -- Checkout tables
 DROP TABLE IF EXISTS checkouts CASCADE;
 CREATE TABLE checkouts (
-  id BIGSERIAL PRIMARY KEY,
+  pre_order_id VARCHAR(64) PRIMARY KEY,
   user_id BIGINT NOT NULL,
   address_id BIGINT NOT NULL,
-  coupon_id BIGINT,
-  status INTEGER NOT NULL DEFAULT 0,
-  total_amount DECIMAL(10, 2) NOT NULL,
-  discount_amount DECIMAL(10, 2) DEFAULT 0,
-  final_amount DECIMAL(10, 2) NOT NULL,
+  coupon_id VARCHAR(255) DEFAULT NULL,
+  original_amount BIGINT NOT NULL,
+  final_amount BIGINT NOT NULL,
+  status SMALLINT NOT NULL DEFAULT 0,
+  expire_time BIGINT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_checkouts_user_id ON checkouts(user_id);
+CREATE INDEX idx_checkouts_user_status ON checkouts(user_id, status);
+CREATE INDEX idx_checkouts_expire_time ON checkouts(expire_time);
 
 DROP TABLE IF EXISTS checkout_items CASCADE;
 CREATE TABLE checkout_items (
   id BIGSERIAL PRIMARY KEY,
-  checkout_id BIGINT NOT NULL,
+  pre_order_id VARCHAR(64) NOT NULL,
   product_id BIGINT NOT NULL,
   quantity INTEGER NOT NULL,
-  price DECIMAL(10, 2) NOT NULL,
+  price BIGINT NOT NULL,
+  snapshot JSONB NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX idx_checkout_items_checkout_id ON checkout_items(checkout_id);
+CREATE INDEX idx_checkout_items_pre_order_id ON checkout_items(pre_order_id);
 CREATE INDEX idx_checkout_items_product_id ON checkout_items(product_id);
 
 -- Order tables
