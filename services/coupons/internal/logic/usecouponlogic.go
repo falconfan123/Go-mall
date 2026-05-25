@@ -106,6 +106,9 @@ func (l *UseCouponLogic) UseCoupon(in *couponspb.UseCouponReq) (*couponspb.Empty
 		return nil, err
 	}
 
+	if res.StatusCode != code.Success {
+		return res, nil
+	}
 	l.Logger.Infow("use coupon success", logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId),
 		logx.Field("order_id", in.OrderId), logx.Field("pre_order_id", in.PreOrderId))
 	return res, nil

@@ -101,13 +101,14 @@ DROP TABLE IF EXISTS user_coupons CASCADE;
 CREATE TABLE user_coupons (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL,
-  coupon_id BIGINT NOT NULL,
+  coupon_id VARCHAR(36) NOT NULL,
   status INTEGER NOT NULL DEFAULT 0,
-  order_id BIGINT,
+  order_id VARCHAR(64),
   used_at TIMESTAMP DEFAULT NULL,
-  expires_at TIMESTAMP DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_id, coupon_id),
+  UNIQUE (order_id)
 );
 CREATE INDEX idx_user_coupons_user_id ON user_coupons(user_id);
 CREATE INDEX idx_user_coupons_coupon_id ON user_coupons(coupon_id);
@@ -115,30 +116,55 @@ CREATE INDEX idx_user_coupons_coupon_id ON user_coupons(coupon_id);
 DROP TABLE IF EXISTS coupon_usage CASCADE;
 CREATE TABLE coupon_usage (
   id BIGSERIAL PRIMARY KEY,
-  user_coupon_id BIGINT NOT NULL,
-  order_id BIGINT NOT NULL,
-  used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  order_id VARCHAR(64) NOT NULL,
+  coupon_id VARCHAR(36) NOT NULL,
+  user_id BIGINT NOT NULL,
+  coupon_type INTEGER NOT NULL,
+  origin_value BIGINT NOT NULL,
+  discount_amount BIGINT NOT NULL,
+  applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX idx_coupon_usage_user_coupon_id ON coupon_usage(user_coupon_id);
 CREATE INDEX idx_coupon_usage_order_id ON coupon_usage(order_id);
+CREATE INDEX idx_coupon_usage_user_id ON coupon_usage(user_id);
 
 DROP TABLE IF EXISTS coupons CASCADE;
 CREATE TABLE coupons (
-  id BIGSERIAL PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  description TEXT,
   type INTEGER NOT NULL,
-  discount_value DECIMAL(10, 2) NOT NULL,
-  min_order_amount DECIMAL(10, 2) DEFAULT 0,
-  total_quantity INTEGER NOT NULL DEFAULT 0,
-  used_quantity INTEGER NOT NULL DEFAULT 0,
-  per_user_limit INTEGER DEFAULT 1,
-  starts_at TIMESTAMP DEFAULT NULL,
-  ends_at TIMESTAMP DEFAULT NULL,
+  value BIGINT NOT NULL,
+  min_amount BIGINT NOT NULL DEFAULT 0,
+  start_time TIMESTAMP NOT NULL,
+  end_time TIMESTAMP NOT NULL,
+  status INTEGER NOT NULL DEFAULT 1,
+  total_count INTEGER NOT NULL DEFAULT 0,
+  remaining_count INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP DEFAULT NULL
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX idx_coupons_status ON coupons(status);
+CREATE INDEX idx_coupons_time ON coupons(start_time, end_time);
+
+INSERT INTO coupons (id, name, type, value, min_amount, start_time, end_time, status, total_count, remaining_count) VALUES
+('67508ec1ea7111ef86d80242ac120005', '已领取测试券', 1, 10000, 10000, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 100, 99),
+('ZK20250214001', '八折测试券', 2, 80, 0, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 100, 100),
+('FJ20250214001', '立减测试券', 3, 100, 0, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 100, 100),
+('LOCK20250525001', '锁定测试券', 3, 100, 0, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 100, 100),
+('RELEASE20250525001', '释放测试券', 3, 100, 0, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 100, 100),
+('USE20250525001', '使用测试券', 3, 100, 0, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 100, 100),
+('USED20250525001', '已使用测试券', 3, 100, 0, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 100, 100),
+('DUP20250525001', '重复使用测试券', 3, 100, 0, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 100, 100),
+('679e623cea7111ef86d80242ac120005', '售罄测试券', 1, 100, 0, '2025-01-01 00:00:00', '2027-01-01 00:00:00', 1, 1, 0)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO user_coupons (user_id, coupon_id, status) VALUES
+(1, '67508ec1ea7111ef86d80242ac120005', 1),
+(1, 'LOCK20250525001', 1),
+(1, 'RELEASE20250525001', 1),
+(1, 'USE20250525001', 1),
+(1, 'USED20250525001', 3),
+(1, 'DUP20250525001', 1)
+ON CONFLICT (user_id, coupon_id) DO NOTHING;
 
 -- Cart table
 DROP TABLE IF EXISTS carts CASCADE;

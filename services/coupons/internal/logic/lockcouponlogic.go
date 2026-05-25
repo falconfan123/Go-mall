@@ -38,8 +38,18 @@ func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyR
 
 	// --------------- transact ---------------
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
-		// 1.检查优惠券状态
-		expired, err := l.svcCtx.CouponsModel.CheckExpirationAndStatus(l.ctx, session, in.UserCouponId)
+		// 1.检查用户优惠券状态
+		userCoupon, err := l.svcCtx.UserCouponsModel.GetUserCouponByUserIdCouponIdWithLock(l.ctx, session, uint64(in.UserId), in.UserCouponId)
+		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				res.StatusCode = code.CouponsNotExist
+				res.StatusMsg = code.CouponsNotExistMsg
+				return nil
+			}
+			logx.Errorw("check user coupon status error", logx.Field("err", err))
+			return err
+		}
+		expired, err := l.svcCtx.CouponsModel.CheckExpirationAndStatus(l.ctx, session, userCoupon.CouponId)
 		if err != nil {
 			if errors.Is(err, sqlx.ErrNotFound) {
 				res.StatusCode = code.CouponsNotExist
@@ -54,19 +64,13 @@ func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyR
 			res.StatusMsg = code.CouponsExpiredMsg
 			return nil
 		}
-		// 2. 校验用户优惠券状态
-		userCoupon, err := l.svcCtx.UserCouponsModel.GetUserCouponByUserIdCouponIdWithLock(l.ctx, session, uint64(in.UserId), in.UserCouponId)
-		if err != nil {
-			if errors.Is(err, sqlx.ErrNotFound) {
-				res.StatusCode = code.CouponsNotExist
-				res.StatusMsg = code.CouponsNotExistMsg
-				return nil
-			}
-			logx.Errorw("check user coupon status error", logx.Field("err", err))
-			return err
-		}
 		// 校验优惠券状态是否可用
 		if coupons.CouponStatus(userCoupon.Status) != coupons.CouponStatus_COUPON_STATUS_AVAILABLE {
+			if coupons.CouponStatus(userCoupon.Status) == coupons.CouponStatus_COUPON_STATUS_LOCKED {
+				res.StatusCode = code.CouponsAlreadyLocked
+				res.StatusMsg = code.CouponsAlreadyLockedMsg
+				return nil
+			}
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg
 			return nil
@@ -83,7 +87,7 @@ func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyR
 		return nil, status.Error(codes.Internal, code.ServerErrorMsg) // 触发重试
 	}
 	if res.StatusCode != code.Success {
-		return nil, status.Error(codes.Aborted, res.StatusMsg)
+		return res, nil
 	}
-	return &coupons.EmptyResp{}, nil
+	return res, nil
 }

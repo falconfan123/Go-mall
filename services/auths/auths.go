@@ -8,6 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/auths/internal/server"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
 	auths "github.com/falconfan123/Go-mall/services/auths/pb"
+	_ "github.com/lib/pq"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

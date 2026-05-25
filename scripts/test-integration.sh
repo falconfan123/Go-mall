@@ -7,6 +7,8 @@ GO_CMD="${GO_CMD:-go}"
 GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.8}"
 REPORT_DIR="${RPC_INTEGRATION_REPORT_DIR:-$ROOT_DIR/.artifacts/rpc-integration-report}"
 RAW_LOG="$REPORT_DIR/go-test.jsonl"
+STACK_SCRIPT="$ROOT_DIR/scripts/ci-rpc-stack.sh"
+LOCAL_ONLY_MODE="${GO_MALL_TEST_LOCAL_ONLY:-0}"
 
 generate_report() {
   local log_path="$1"
@@ -28,42 +30,68 @@ generate_report() {
   return 0
 }
 
+write_startup_failure_report() {
+  local message="$1"
+
+  mkdir -p "$REPORT_DIR"
+  printf '%s\n' "RPC Integration Test Report" \
+    "packages: 0" \
+    "tests: 0" \
+    "failures: 1" \
+    "skipped: 0" \
+    "duration: 0s" \
+    "" \
+    "failed tests:" \
+    "- startup/bootstrap: ${message}" >"$REPORT_DIR/summary.txt"
+
+  cat >"$REPORT_DIR/junit.xml" <<EOF
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites name="rpc-integration" tests="1" failures="1" skipped="0" time="0">
+  <testsuite name="startup" tests="1" failures="1" skipped="0" time="0">
+    <testcase classname="startup" name="bootstrap" time="0">
+      <failure message="${message}">${message}</failure>
+    </testcase>
+  </testsuite>
+</testsuites>
+EOF
+
+  cat >"$REPORT_DIR/index.html" <<EOF
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>RPC Integration Test Report</title></head>
+<body>
+  <h1>RPC Integration Test Report</h1>
+  <p>startup/bootstrap failed</p>
+  <pre>${message}</pre>
+</body>
+</html>
+EOF
+}
+
 mkdir -p "$REPORT_DIR"
 rm -f "$REPORT_DIR"/{go-test.jsonl,junit.xml,index.html,summary.txt}
 
-if [[ "${GO_MALL_TEST_LOCAL:-}" == "1" ]]; then
+run_local_tests() {
   cd "$ROOT_DIR/test/rpc"
-  MONITOR_LOG="$REPORT_DIR/stack-monitor.log"
-  rm -f "$MONITOR_LOG"
-  monitor_pid=""
+  generate_report "$RAW_LOG" env GOWORK=off GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" test -json -count=1 ./...
+}
 
-  env GO_MALL_TEST_LOCAL=1 GOWORK=off GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" run ./cmd/readycheck -mode wait
-
-  cleanup_monitor() {
-    if [[ -n "${monitor_pid:-}" ]] && kill -0 "$monitor_pid" 2>/dev/null; then
-      kill "$monitor_pid" 2>/dev/null || true
-      wait "$monitor_pid" 2>/dev/null || true
-    fi
-  }
-
-  env GO_MALL_TEST_LOCAL=1 GO_MALL_TEST_TIMEOUT="${GO_MALL_TEST_TIMEOUT:-30m}" GOWORK=off GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" \
-    "$GO_CMD" run ./cmd/readycheck -mode monitor -timeout "${GO_MALL_TEST_TIMEOUT:-30m}" >"$MONITOR_LOG" 2>&1 &
-  monitor_pid=$!
-  trap cleanup_monitor EXIT
-
-  if generate_report "$RAW_LOG" env GO_MALL_TEST_LOCAL=1 GOWORK=off GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" test -json -count=1 ./...; then
-    cleanup_monitor
+if [[ "$LOCAL_ONLY_MODE" == "1" ]]; then
+  if run_local_tests; then
     exit 0
   else
     status=$?
-    if kill -0 "$monitor_pid" 2>/dev/null; then
-      cleanup_monitor
-    else
-      if ! wait "$monitor_pid"; then
-        echo "stack monitor detected failure:" >&2
-        cat "$MONITOR_LOG" >&2 || true
-        status=1
-      fi
+    exit "$status"
+  fi
+fi
+
+if [[ "${GO_MALL_TEST_LOCAL:-}" == "1" ]]; then
+  if "$STACK_SCRIPT" run-local-suite env GO_MALL_TEST_LOCAL_ONLY=1 GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" GO_CMD="$GO_CMD" bash "$0"; then
+    exit 0
+  else
+    status=$?
+    if [[ ! -f "$REPORT_DIR/summary.txt" ]]; then
+      write_startup_failure_report "local integration bootstrap failed before go test execution"
     fi
     exit "$status"
   fi

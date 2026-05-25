@@ -33,6 +33,8 @@ help:
 	@echo "  make mock         - 生成 mocks"
 	@echo "  make ci-build     - 按 CI 白名单构建服务"
 	@echo "  make ci-vet       - 按 workspace 模块运行 go vet"
+	@echo "  make configure-branch-protection - 配置 main 分支 CI 门禁和 auto-merge"
+	@echo "  make submit-ci MSG='...' - 自动提交、建 PR、等待 CI 并自动合并"
 	@echo "  make tidy         - 整理依赖"
 	@echo "  make rag ARGS='doctor' - 运行仓库内 RAG CLI"
 	@echo ""
@@ -145,6 +147,14 @@ integration-up:
 integration-down:
 	@echo -e "$(BLUE)停止 CI 本地集成环境...$(NC)"
 	@bash scripts/ci-rpc-stack.sh stop
+
+configure-branch-protection:
+	@echo -e "$(BLUE)配置 main 分支保护与 CI 门禁...$(NC)"
+	@bash scripts/configure-branch-protection.sh
+
+submit-ci:
+	@echo -e "$(BLUE)自动提交并等待 CI 合并...$(NC)"
+	@bash scripts/submit-with-ci.sh "$(MSG)"
 
 # 模拟 CI 检查 (跳过测试)
 ci:

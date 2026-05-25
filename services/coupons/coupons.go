@@ -8,6 +8,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/coupons/internal/server"
 	"github.com/falconfan123/Go-mall/services/coupons/internal/svc"
 	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
+	_ "github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"

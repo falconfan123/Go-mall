@@ -99,7 +99,7 @@ func (m *customUserCouponsModel) CheckUserCouponExistWithLock(ctx context.Contex
 }
 
 func (m *customUserCouponsModel) QueryUserCoupons(ctx context.Context, userId, page, pageSize int32) ([]*UserCoupons, error) {
-	query := fmt.Sprintf("select %s from %s where \"user_id\" = $1 order by \"created_at\" desc limit $2 offset $3", userCouponsRows, m.table)
+	query := fmt.Sprintf("select id, user_id, coupon_id, status, order_id, used_at, created_at, updated_at from %s where \"user_id\" = $1 order by \"created_at\" desc limit $2 offset $3", m.table)
 	var resp []*UserCoupons
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, pageSize, (page-1)*pageSize)
 	switch {

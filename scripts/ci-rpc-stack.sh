@@ -8,11 +8,13 @@ STATE_DIR="${GO_MALL_CI_STATE_DIR:-$ROOT_DIR/.artifacts/ci-rpc-stack}"
 PID_FILE="$STATE_DIR/pids.txt"
 LOG_DIR="${GO_MALL_CI_LOG_DIR:-$ROOT_DIR/scripts/logs}"
 DEPENDENCY_LOG_DIR="${GO_MALL_CI_DEPENDENCY_LOG_DIR:-$ROOT_DIR/.artifacts/dependency-logs}"
-EXIT_DIR="$STATE_DIR/exits"
-BIN_DIR="$STATE_DIR/bin"
-MONITOR_PID_FILE="$STATE_DIR/monitor.pid"
+CONFIG_DIR="$STATE_DIR/configs"
 GO_CMD="${GO_CMD:-go}"
 GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.8}"
+ETCD_HOST_LOCAL="${GO_MALL_CI_ETCD_HOST:-127.0.0.1:2379}"
+POSTGRES_HOST_LOCAL="${GO_MALL_CI_POSTGRES_HOST:-127.0.0.1}"
+REDIS_HOST_LOCAL="${GO_MALL_CI_REDIS_HOST:-127.0.0.1}"
+ELASTICSEARCH_HOST_LOCAL="${GO_MALL_CI_ELASTICSEARCH_HOST:-127.0.0.1}"
 
 DEPENDENCY_PORTS=(2379 5432 5672 6379 9200 8088)
 CORE_PORTS=(10000 10001 10002 10003 10004 10005 10006 10007 10008 10009 10010 10011 10012 8888)
@@ -35,15 +37,10 @@ SERVICES=(
   "gateway:services/gateway:gateway.go:8888"
 )
 
-mkdir -p "$STATE_DIR" "$LOG_DIR" "$DEPENDENCY_LOG_DIR" "$EXIT_DIR" "$BIN_DIR"
+mkdir -p "$STATE_DIR" "$LOG_DIR" "$DEPENDENCY_LOG_DIR" "$CONFIG_DIR"
 
 port_in_use() {
   lsof -Pi :"$1" -sTCP:LISTEN -t >/dev/null 2>&1
-}
-
-listener_pid() {
-  local port="$1"
-  lsof -ti :"$port" -sTCP:LISTEN 2>/dev/null | head -n 1
 }
 
 wait_for_port() {
@@ -59,72 +56,6 @@ wait_for_port() {
     sleep "$sleep_secs"
   done
   return 1
-}
-
-pid_alive() {
-  local pid="$1"
-  [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null
-}
-
-tail_service_log() {
-  local name="$1"
-  local log_file="$LOG_DIR/$name.log"
-  if [[ -f "$log_file" ]]; then
-    tail -n 120 "$log_file" >&2 || true
-  fi
-}
-
-last_service_log_line() {
-  local name="$1"
-  local log_file="$LOG_DIR/$name.log"
-  if [[ -f "$log_file" ]]; then
-    tail -n 1 "$log_file" 2>/dev/null || true
-  fi
-}
-
-wait_for_service_ready() {
-  local name="$1"
-  local pid="$2"
-  local port="$3"
-  local attempts="${4:-90}"
-  local sleep_secs="${5:-1}"
-  local i
-
-  for ((i = 1; i <= attempts; i++)); do
-    if ! pid_alive "$pid"; then
-      echo "service process exited before listen: $name" >&2
-      tail_service_log "$name"
-      return 1
-    fi
-    if port_in_use "$port"; then
-      return 0
-    fi
-    sleep "$sleep_secs"
-  done
-
-  echo "service failed to listen: $name" >&2
-  tail_service_log "$name"
-  return 1
-}
-
-assert_service_healthy() {
-  local name="$1"
-  local pid="$2"
-  local port="$3"
-
-  if ! pid_alive "$pid"; then
-    echo "service process not running: $name" >&2
-    tail_service_log "$name"
-    return 1
-  fi
-
-  if ! port_in_use "$port"; then
-    echo "service port not ready: $name:$port" >&2
-    tail_service_log "$name"
-    return 1
-  fi
-
-  return 0
 }
 
 wait_for_container_health() {
@@ -177,16 +108,34 @@ cleanup_ports() {
 
 reset_logs() {
   rm -f "$LOG_DIR"/*.log "$DEPENDENCY_LOG_DIR"/*.log
-  rm -f "$EXIT_DIR"/*.status
+  rm -f "$CONFIG_DIR"/*.yaml
 }
 
-json_escape() {
-  local value="$1"
-  python3 - <<'PY' "$value"
-import json
-import sys
-print(json.dumps(sys.argv[1]))
-PY
+render_service_config() {
+  local service_dir="$1"
+  local service_name="$2"
+  local source_config
+  local rendered_config
+
+  source_config="$service_dir/etc/${service_name}.yaml"
+  if [[ "$service_name" == "gateway" ]]; then
+    source_config="$service_dir/etc/gateway.yaml"
+  fi
+
+  if [[ ! -f "$source_config" ]]; then
+    echo "$source_config"
+    return 0
+  fi
+
+  rendered_config="$CONFIG_DIR/${service_name}.yaml"
+  sed \
+    -e "s/localhost:2379/${ETCD_HOST_LOCAL}/g" \
+    -e "s/postgres:\\/\\/root:fht3825099@localhost:/postgres:\\/\\/root:fht3825099@${POSTGRES_HOST_LOCAL}:/g" \
+    -e "s/Host: localhost:6379/Host: ${REDIS_HOST_LOCAL}:6379/g" \
+    -e "s/Addr: \"http:\\/\\/localhost:9200\"/Addr: \"http:\\/\\/${ELASTICSEARCH_HOST_LOCAL}:9200\"/g" \
+    -e "s/http:\\/\\/localhost:9200/http:\\/\\/${ELASTICSEARCH_HOST_LOCAL}:9200/g" \
+    "$source_config" >"$rendered_config"
+  echo "$rendered_config"
 }
 
 postgres_exec() {
@@ -260,13 +209,14 @@ start_service() {
   local port="$4"
   local service_dir="$ROOT_DIR/$rel_dir"
   local log_file="$LOG_DIR/$name.log"
-  local exit_file="$EXIT_DIR/$name.status"
-  local bin_file="$BIN_DIR/$name"
+  local config_file
 
   if [[ ! -f "$service_dir/$entrypoint" ]]; then
     echo "entrypoint not found for $name: $service_dir/$entrypoint" >&2
     exit 1
   fi
+
+  config_file="$(render_service_config "$service_dir" "$name")"
 
   if port_in_use "$port"; then
     lsof -ti :"$port" | xargs kill -KILL 2>/dev/null || true
@@ -274,42 +224,25 @@ start_service() {
   fi
 
   echo "starting $name on $port"
-  rm -f "$exit_file"
-  (
-    cd "$service_dir"
-    env GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" build -o "$bin_file" "$entrypoint"
-  )
   if command -v setsid >/dev/null 2>&1; then
-    nohup setsid bash -lc "
+    setsid bash -lc "
       cd '$service_dir'
-      '$bin_file' > '$log_file' 2>&1 < /dev/null
-      status=\$?
-      printf 'exit_code=%s\nfinished_at=%s\n' \"\$status\" \"\$(date -u +%Y-%m-%dT%H:%M:%SZ)\" > '$exit_file'
-      exit \"\$status\"
-    " >/dev/null 2>&1 < /dev/null &
+      exec env GOTOOLCHAIN='$GOTOOLCHAIN_VALUE' '$GO_CMD' run '$entrypoint' -f '$config_file' > '$log_file' 2>&1
+    " &
   else
-    nohup bash -lc "
-      cd '$service_dir'
-      '$bin_file' > '$log_file' 2>&1 < /dev/null
-      status=\$?
-      printf 'exit_code=%s\nfinished_at=%s\n' \"\$status\" \"\$(date -u +%Y-%m-%dT%H:%M:%SZ)\" > '$exit_file'
-      exit \"\$status\"
-    " >/dev/null 2>&1 < /dev/null &
+    (
+      cd "$service_dir"
+      exec env GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" run "$entrypoint" -f "$config_file" >"$log_file" 2>&1
+    ) &
   fi
-  local launcher_pid=$!
-
-  if ! wait_for_service_ready "$name" "$launcher_pid" "$port" 90 1; then
-    exit 1
-  fi
-
-  local pid
-  pid="$(listener_pid "$port")"
-  if [[ -z "$pid" ]]; then
-    echo "service listener pid not found: $name:$port" >&2
-    tail_service_log "$name"
-    exit 1
-  fi
+  local pid=$!
   echo "$name:$pid:$port" >>"$PID_FILE"
+
+  if ! wait_for_port "$port" 90 1; then
+    tail -n 120 "$log_file" >&2 || true
+    echo "service failed to listen: $name" >&2
+    exit 1
+  fi
 }
 
 start_services() {
@@ -323,13 +256,13 @@ start_services() {
 }
 
 scan_ports() {
-  local name pid port
-  while IFS=: read -r name pid port; do
-    [[ -z "${name:-}" ]] && continue
-    if ! assert_service_healthy "$name" "$pid" "$port"; then
+  local port
+  for port in "${CORE_PORTS[@]}"; do
+    if ! wait_for_port "$port" 10 1; then
+      echo "core port not ready: $port" >&2
       exit 1
     fi
-  done <"$PID_FILE"
+  done
 }
 
 snapshot_dependency_logs() {
@@ -340,59 +273,16 @@ snapshot_dependency_logs() {
 }
 
 status() {
-  local name pid port
-  while IFS=: read -r name pid port; do
-    [[ -z "${name:-}" ]] && continue
-    if assert_service_healthy "$name" "$pid" "$port"; then
+  local spec
+  for spec in "${SERVICES[@]}"; do
+    IFS=: read -r name _ _ port <<<"$spec"
+    if port_in_use "$port"; then
       echo "$name:$port ready"
     else
+      echo "$name:$port missing" >&2
       return 1
     fi
-  done <"$PID_FILE"
-}
-
-inspect_stack_json() {
-  local first=1
-  local name pid port
-  printf '['
-  while IFS=: read -r name pid port; do
-    [[ -z "${name:-}" ]] && continue
-    local alive="false"
-    local listening="false"
-    local exit_code=""
-    local finished_at=""
-    local exit_file="$EXIT_DIR/$name.status"
-    local log_path="$LOG_DIR/$name.log"
-    local last_log_line
-    last_log_line="$(last_service_log_line "$name")"
-
-    if pid_alive "$pid"; then
-      alive="true"
-    fi
-    if port_in_use "$port"; then
-      listening="true"
-    fi
-    if [[ -f "$exit_file" ]]; then
-      exit_code="$(awk -F= '/^exit_code=/{print $2}' "$exit_file" | tail -n 1)"
-      finished_at="$(awk -F= '/^finished_at=/{print $2}' "$exit_file" | tail -n 1)"
-    fi
-
-    if [[ "$first" -eq 0 ]]; then
-      printf ','
-    fi
-    first=0
-    printf '{"name":%s,"pid":%s,"port":%s,"alive":%s,"listening":%s,"exitCode":%s,"finishedAt":%s,"logPath":%s,"lastLogLine":%s}' \
-      "$(json_escape "$name")" \
-      "${pid:-0}" \
-      "${port:-0}" \
-      "$alive" \
-      "$listening" \
-      "$(json_escape "$exit_code")" \
-      "$(json_escape "$finished_at")" \
-      "$(json_escape "$log_path")" \
-      "$(json_escape "$last_log_line")"
-  done <"$PID_FILE"
-  printf ']'
+  done
 }
 
 stop_stack() {
@@ -400,6 +290,24 @@ stop_stack() {
   cleanup_processes
   cleanup_ports
   docker compose -f "$DEPEND_STACK" down >/dev/null 2>&1 || true
+}
+
+run_local_suite() {
+  local status=0
+
+  trap 'status=$?; stop_stack; exit "$status"' EXIT
+
+  reset_logs
+  cleanup_processes
+  cleanup_ports
+  start_dependencies
+  reconcile_postgres
+  reconcile_rabbitmq
+  start_services
+  scan_ports
+  status
+
+  "$@"
 }
 
 command="${1:-start}"
@@ -421,18 +329,19 @@ case "$command" in
   status)
     status
     ;;
-  inspect)
-    if [[ "${2:-}" == "--json" ]]; then
-      inspect_stack_json
-    else
-      status
-    fi
-    ;;
   snapshot-dependency-logs)
     snapshot_dependency_logs
     ;;
+  run-local-suite)
+    shift
+    if [[ $# -eq 0 ]]; then
+      echo "usage: ci-rpc-stack.sh run-local-suite <command> [args...]" >&2
+      exit 1
+    fi
+    run_local_suite "$@"
+    ;;
   *)
-    echo "usage: ci-rpc-stack.sh [start|stop|status|inspect [--json]|snapshot-dependency-logs]" >&2
+    echo "usage: ci-rpc-stack.sh [start|stop|status|snapshot-dependency-logs|run-local-suite]" >&2
     exit 1
     ;;
 esac
