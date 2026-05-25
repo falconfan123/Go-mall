@@ -58,6 +58,8 @@ For a direct local run against already-available services:
 GO_MALL_TEST_LOCAL=1 make test-integration
 ```
 
+For direct `go test` invocations inside `test/rpc`, always export `GO_MALL_TEST_LOCAL=1` first. Without it, the suite resolves service names to `*.svc.cluster.local` and will fail with environment-level resolver errors instead of local RPC results.
+
 ## CI Expectations
 
 CI validates the following in the test job:

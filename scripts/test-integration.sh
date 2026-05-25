@@ -33,10 +33,38 @@ rm -f "$REPORT_DIR"/{go-test.jsonl,junit.xml,index.html,summary.txt}
 
 if [[ "${GO_MALL_TEST_LOCAL:-}" == "1" ]]; then
   cd "$ROOT_DIR/test/rpc"
-  if generate_report "$RAW_LOG" env GOWORK=off GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" test -json -count=1 ./...; then
+  MONITOR_LOG="$REPORT_DIR/stack-monitor.log"
+  rm -f "$MONITOR_LOG"
+  monitor_pid=""
+
+  env GO_MALL_TEST_LOCAL=1 GOWORK=off GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" run ./cmd/readycheck -mode wait
+
+  cleanup_monitor() {
+    if [[ -n "${monitor_pid:-}" ]] && kill -0 "$monitor_pid" 2>/dev/null; then
+      kill "$monitor_pid" 2>/dev/null || true
+      wait "$monitor_pid" 2>/dev/null || true
+    fi
+  }
+
+  env GO_MALL_TEST_LOCAL=1 GO_MALL_TEST_TIMEOUT="${GO_MALL_TEST_TIMEOUT:-30m}" GOWORK=off GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" \
+    "$GO_CMD" run ./cmd/readycheck -mode monitor -timeout "${GO_MALL_TEST_TIMEOUT:-30m}" >"$MONITOR_LOG" 2>&1 &
+  monitor_pid=$!
+  trap cleanup_monitor EXIT
+
+  if generate_report "$RAW_LOG" env GO_MALL_TEST_LOCAL=1 GOWORK=off GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" test -json -count=1 ./...; then
+    cleanup_monitor
     exit 0
   else
     status=$?
+    if kill -0 "$monitor_pid" 2>/dev/null; then
+      cleanup_monitor
+    else
+      if ! wait "$monitor_pid"; then
+        echo "stack monitor detected failure:" >&2
+        cat "$MONITOR_LOG" >&2 || true
+        status=1
+      fi
+    fi
     exit "$status"
   fi
 fi

@@ -15,6 +15,7 @@ type (
 	ProductsModel interface {
 		productsModel
 		WithSession(session sqlx.Session) ProductsModel
+		InsertReturningID(ctx context.Context, data *Products) (int64, error)
 		FindPage(ctx context.Context, offset, limit int) ([]*Products, error)
 		Count(ctx context.Context) (int64, error)
 		FindProductIsExist(ctx context.Context, productID int64) (bool, error)
@@ -104,4 +105,18 @@ func (m *defaultProductsModel) FindProductIsExist(ctx context.Context, productID
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (m *defaultProductsModel) InsertReturningID(ctx context.Context, data *Products) (int64, error) {
+	query := fmt.Sprintf(
+		"INSERT INTO %s (%s) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		m.table,
+		productsRowsExpectAutoSet,
+	)
+	var id int64
+	err := m.conn.QueryRowCtx(ctx, &id, query, data.Name, data.Description, data.Picture, data.Price, data.Stock)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }

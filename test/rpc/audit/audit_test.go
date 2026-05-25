@@ -3,7 +3,6 @@ package audit
 import (
 	"context"
 	audit "github.com/falconfan123/Go-mall/services/audit/pb"
-	"sync"
 	"testing"
 	"time"
 
@@ -15,19 +14,30 @@ import (
 )
 
 var auditClient audit.AuditClient
-var auditOnce sync.Once
+var auditConn *grpc.ClientConn
 
 func setupAuditClient(t *testing.T) {
-	auditOnce.Do(func() {
-		conn, err := grpc.NewClient(
-			testenv.ServiceAddr("audit", biz.AuditRpcPort),
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
-		if err != nil {
-			t.Fatalf("连接审计服务失败: %v", err)
-		}
-		auditClient = audit.NewAuditClient(conn)
-	})
+	t.Helper()
+
+	if auditClient != nil {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(
+		ctx,
+		testenv.ServiceAddr("audit", biz.AuditRpcPort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
+	if err != nil {
+		t.Fatalf("连接审计服务失败: %v", err)
+	}
+
+	auditConn = conn
+	auditClient = audit.NewAuditClient(conn)
 }
 
 func TestCreateAuditLog(t *testing.T) {
@@ -52,7 +62,12 @@ func TestCreateAuditLog(t *testing.T) {
 
 		// 调用服务
 		resp, err := auditClient.CreateAuditLog(ctx, validReq)
-		assert.NoError(t, err)
+		if err != nil {
+			t.Fatalf("CreateAuditLog failed: %v", err)
+		}
+		if resp == nil {
+			t.Fatal("CreateAuditLog returned nil response")
+		}
 		assert.Equal(t, uint32(0), resp.StatusCode)
 		assert.True(t, resp.Ok)
 	})

@@ -39,6 +39,23 @@ CREATE TABLE return_lock (
 );
 CREATE INDEX idx_return_lock_order_user ON return_lock(order_id, user_id);
 
+-- Users table
+DROP TABLE IF EXISTS users CASCADE;
+CREATE TABLE users (
+  user_id BIGSERIAL PRIMARY KEY,
+  username VARCHAR(255) DEFAULT NULL,
+  email VARCHAR(255) DEFAULT NULL,
+  password_hash VARCHAR(512) DEFAULT NULL,
+  avatar_url VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  user_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+  logout_at TIMESTAMP DEFAULT NULL,
+  login_at TIMESTAMP DEFAULT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_username ON users(username);
+
 -- User address table
 DROP TABLE IF EXISTS user_address CASCADE;
 CREATE TABLE user_address (
@@ -49,7 +66,7 @@ CREATE TABLE user_address (
   province VARCHAR(255) NOT NULL,
   city VARCHAR(255) NOT NULL,
   detailed_address TEXT NOT NULL,
-  is_default INTEGER NOT NULL DEFAULT 0,
+  is_default BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP DEFAULT NULL

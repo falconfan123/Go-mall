@@ -85,7 +85,7 @@ func (m *defaultUserAddressesModel) Insert(ctx context.Context, data *UserAddres
 }
 
 func (m *defaultUserAddressesModel) Update(ctx context.Context, data *UserAddresses) error {
-	query := fmt.Sprintf("update %s set %s where address_id = $1", m.table, userAddressesRowsWithPlaceHolder)
+	query := fmt.Sprintf("update %s set %s where address_id = $9", m.table, userAddressesRowsWithPlaceHolder)
 	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress, data.IsDefault, data.DeletedAt, data.AddressId)
 	return err
 }

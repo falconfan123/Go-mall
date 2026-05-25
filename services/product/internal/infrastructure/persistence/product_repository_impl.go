@@ -43,11 +43,7 @@ func (r *ProductRepositoryImpl) Save(ctx context.Context, productAgg *aggregate.
 
 	if productAgg.ID == 0 {
 		// 新建
-		result, err := r.productModel.Insert(ctx, productData)
-		if err != nil {
-			return err
-		}
-		id, err := result.LastInsertId()
+		id, err := r.productModel.InsertReturningID(ctx, productData)
 		if err != nil {
 			return err
 		}

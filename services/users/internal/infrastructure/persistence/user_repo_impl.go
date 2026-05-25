@@ -44,11 +44,7 @@ func (r *UserRepositoryImpl) Save(ctx context.Context, user *aggregate.User) (in
 		LoginAt:      sql.NullTime{Time: user.LastLoginTime, Valid: !user.LastLoginTime.IsZero()},
 	}
 
-	res, err := r.userModel.Insert(ctx, u)
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
+	return r.userModel.InsertReturningID(ctx, u)
 }
 
 // Update 更新用户

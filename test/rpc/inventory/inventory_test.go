@@ -16,23 +16,34 @@ import (
 )
 
 var invClient inventory.InventoryClient
-var once2 sync.Once
+var invConn *grpc.ClientConn
+var invClientMu sync.Mutex
 
 func setupInventoryClient(t *testing.T) {
-	once2.Do(func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		conn, err := grpc.DialContext(
-			ctx,
-			testenv.ServiceAddr("inventory", biz.InventoryRpcPort),
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-			grpc.WithBlock(),
-		)
-		if err != nil {
-			t.Fatalf("连接库存服务失败: %v", err)
-		}
-		invClient = inventory.NewInventoryClient(conn)
-	})
+	t.Helper()
+
+	invClientMu.Lock()
+	defer invClientMu.Unlock()
+
+	if invClient != nil {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(
+		ctx,
+		testenv.ServiceAddr("inventory", biz.InventoryRpcPort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
+	if err != nil {
+		t.Fatalf("连接库存服务失败: %v", err)
+	}
+
+	invConn = conn
+	invClient = inventory.NewInventoryClient(conn)
 }
 
 func TestInventoryService(t *testing.T) {

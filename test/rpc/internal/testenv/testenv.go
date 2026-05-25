@@ -21,6 +21,13 @@ const (
 	DefaultServiceDomain = "svc.cluster.local"
 )
 
+func RequireLocalMode() error {
+	if LocalMode() {
+		return nil
+	}
+	return fmt.Errorf("%s=1 is required for local RPC tests; current service resolution target is %s", LocalEnv, ServiceAddr("users", 10001))
+}
+
 var (
 	endpointsOnce sync.Once
 	endpoints     map[string]string
