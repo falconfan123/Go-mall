@@ -12,7 +12,6 @@ type Config struct {
 	PostgresConfig PostgresConfig
 	RedisConf      redis.RedisConf
 	ElasticSearch  config.ElasticSearchConfig
-	QiNiu          QiNiu
 	InventoryRpc   zrpc.RpcClientConf
 	GorseConfig    config.GorseConfig
 	Minio          Minio
@@ -30,13 +29,6 @@ type Minio struct {
 type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
-}
-
-type QiNiu struct {
-	AccessKey string
-	SecretKey string
-	Bucket    string
-	Domain    string
 }
 
 type PrometheusExtConf struct {

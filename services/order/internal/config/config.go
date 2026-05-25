@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	commonconfig "github.com/falconfan123/Go-mall/common/config"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -18,25 +18,13 @@ type Config struct {
 	CheckoutRpc    zrpc.RpcClientConf
 	CouponRpc      zrpc.RpcClientConf
 	UserRpc        zrpc.RpcClientConf
-	RabbitMQConfig RabbitMQConfig
+	RabbitMQConfig commonconfig.RabbitMQConfig
 	PrometheusExt  PrometheusExtConf
 }
 
 type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
-}
-
-type RabbitMQConfig struct {
-	Host  string
-	Port  int
-	User  string
-	Pass  string
-	VHost string
-}
-
-func (r *RabbitMQConfig) Dns() string {
-	return fmt.Sprintf("amqp://%s:%s@%s:%d/%s", r.User, r.Pass, r.Host, r.Port, r.VHost)
 }
 
 type PrometheusExtConf struct {

@@ -1,6 +1,10 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+	"strings"
+)
 
 type PostgresConfig struct {
 	DataSource  string
@@ -24,12 +28,22 @@ type GorseConfig struct {
 }
 
 func (r *RabbitMQConfig) Dns() string {
+	vhost := strings.TrimSpace(r.VHost)
+	if vhost == "" {
+		vhost = "/"
+	}
+
+	escapedVHost := "%2F"
+	if vhost != "/" {
+		escapedVHost = url.PathEscape(strings.TrimPrefix(vhost, "/"))
+	}
+
 	return fmt.Sprintf(
 		"amqp://%s:%s@%s:%d/%s",
 		r.User,
 		r.Pass,
 		r.Host,
 		r.Port,
-		r.VHost,
+		escapedVHost,
 	)
 }

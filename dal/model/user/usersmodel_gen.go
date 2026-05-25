@@ -94,13 +94,13 @@ func (m *defaultUsersModel) FindOneByEmail(ctx context.Context, email sql.NullSt
 }
 
 func (m *defaultUsersModel) Insert(ctx context.Context, data *Users) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (%s)", m.table, usersRowsExpectAutoSet, usersRowsWithPlaceHolder)
-	resp, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Username, data.Email, data.PasswordHash, data.AvatarUrl, data.CreatedAt, data.UserDeleted, data.LogoutAt, data.LoginAt, data.UpdatedAt)
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7)", m.table, usersRowsExpectAutoSet)
+	resp, err := m.conn.ExecCtx(ctx, query, data.Username, data.Email, data.PasswordHash, data.AvatarUrl, data.UserDeleted, data.LogoutAt, data.LoginAt)
 	return resp, err
 }
 
 func (m *defaultUsersModel) Update(ctx context.Context, data *Users) error {
-	query := fmt.Sprintf("update %s set %s where user_id = $%d", m.table, usersRowsWithPlaceHolder, 11)
-	_, err := m.conn.ExecCtx(ctx, query, data.Username, data.Email, data.PasswordHash, data.AvatarUrl, data.CreatedAt, data.UserDeleted, data.LogoutAt, data.LoginAt, data.UpdatedAt, data.UserId)
+	query := fmt.Sprintf("update %s set %s where user_id = $8", m.table, usersRowsWithPlaceHolder)
+	_, err := m.conn.ExecCtx(ctx, query, data.Username, data.Email, data.PasswordHash, data.AvatarUrl, data.UserDeleted, data.LogoutAt, data.LoginAt, data.UserId)
 	return err
 }

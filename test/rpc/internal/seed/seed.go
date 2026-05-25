@@ -87,7 +87,7 @@ func CreateProductWithInventory(t *testing.T, productClient productpb.ProductCat
 		Price:       price,
 		Stock:       stock,
 		Picture:     []byte("integration"),
-		Categories:  []string{"integration"},
+		Categories:  []string{"1"},
 	})
 	if err != nil {
 		t.Fatalf("create product failed: %v", err)

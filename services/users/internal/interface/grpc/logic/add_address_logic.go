@@ -37,7 +37,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		IsDefault:       in.IsDefault, // bool type
 	}
 
-	res, err := l.svcCtx.UserAddressesModel.Insert(l.ctx, newAddress)
+	id, err := l.svcCtx.UserAddressesModel.InsertReturningID(l.ctx, newAddress)
 	if err != nil {
 		l.Logger.Errorw("add address failed", logx.Field("err", err))
 		return &users.AddAddressResponse{
@@ -45,8 +45,6 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			StatusMsg:  code.ServerErrorMsg,
 		}, nil
 	}
-
-	id, _ := res.LastInsertId()
 
 	return &users.AddAddressResponse{
 		StatusCode: 0,

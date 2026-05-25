@@ -4,14 +4,21 @@ import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
+const (
+	lockCouponCode      = "LOCK20250525001"
+	releaseCouponCode   = "RELEASE20250525001"
+	useCouponCode       = "USE20250525001"
+	usedCouponCode      = "USED20250525001"
+	duplicateCouponCode = "DUP20250525001"
+)
+
 func Test_LockCouponLogic_LockCoupon(t *testing.T) {
-	uci := uuid.New().String()[:8]
-	pid := uuid.New().String()[:8]
+	uci := lockCouponCode
+	pid := "pre-lock-coupon"
 	t.Run("正常情况", func(t *testing.T) {
 		res, err := couponsClient.LockCoupon(context.Background(), &coupons.LockCouponReq{
 			UserId:       1,
@@ -47,8 +54,8 @@ func Test_LockCouponLogic_LockCoupon(t *testing.T) {
 }
 
 func Test_UnlockCouponLogic_UnlockCoupon(t *testing.T) {
-	uci := uuid.New().String()[:8]
-	pid := uuid.New().String()[:8]
+	uci := releaseCouponCode
+	pid := "pre-release-coupon"
 	t.Run("正常情况", func(t *testing.T) {
 		res, err := couponsClient.LockCoupon(context.Background(), &coupons.LockCouponReq{
 			UserId:       1,
@@ -100,31 +107,40 @@ func Test_ListCouponsUsageLogic_ListCouponsUsage(t *testing.T) {
 
 // 记录使用优惠券
 func Test_UseCouponLogic_UseCoupon(t *testing.T) {
-	cid := "FJ20250214001"
-	poid := uuid.New().String()
-	oid := uuid.New().String()
 	uid := 1
 
 	t.Run("正常情况", func(t *testing.T) {
-		res, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
-			UserId:         1,
-			CouponId:       cid,
-			OrderId:        oid,
-			DiscountAmount: 100,
-			OriginAmount:   100,
-			PreOrderId:     poid,
+		preOrderID := "pre-use-coupon"
+		orderID := "order-use-coupon"
+		lock, err := couponsClient.LockCoupon(context.Background(), &coupons.LockCouponReq{
+			UserId:       int32(uid),
+			UserCouponId: useCouponCode,
+			PreOrderId:   preOrderID,
 		})
 		if err != nil {
 			t.Fatal(err)
 		}
-		t.Log(res)
+		assert.Equal(t, int32(code.Success), lock.StatusCode)
+
+		res, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
+			UserId:         1,
+			CouponId:       useCouponCode,
+			OrderId:        orderID,
+			DiscountAmount: 100,
+			OriginAmount:   100,
+			PreOrderId:     preOrderID,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, int32(code.Success), res.StatusCode)
 	})
 	t.Run("优惠券不存在", func(t *testing.T) {
 		invalidCid := "INVALID_CID"
 		res, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
 			UserId:         int32(uid),
 			CouponId:       invalidCid,
-			OrderId:        uuid.NewString(),
+			OrderId:        "order-invalid-coupon",
 			DiscountAmount: 100,
 			OriginAmount:   100,
 		})
@@ -136,11 +152,10 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 		t.Log(res)
 	})
 	t.Run("优惠券状态非锁定", func(t *testing.T) {
-		// 先设置优惠券为已使用状态
 		res, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
 			UserId:         int32(uid),
-			CouponId:       cid,
-			OrderId:        uuid.NewString(),
+			CouponId:       usedCouponCode,
+			OrderId:        "order-used-coupon",
 			DiscountAmount: 100,
 			OriginAmount:   100,
 		})
@@ -151,15 +166,23 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 
 	})
 	t.Run("重复使用优惠券", func(t *testing.T) {
-		// TODO 将状态改为未使用
-		oid := uuid.NewString()
-		poid := uuid.New().String()
-		// 第一次使用
+		preOrderID := "pre-duplicate-coupon"
+		orderID := "order-duplicate-coupon"
+		lock, err := couponsClient.LockCoupon(context.Background(), &coupons.LockCouponReq{
+			UserId:       int32(uid),
+			UserCouponId: duplicateCouponCode,
+			PreOrderId:   preOrderID,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, int32(code.Success), lock.StatusCode)
+
 		res, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
-			PreOrderId:     poid,
+			PreOrderId:     preOrderID,
 			UserId:         int32(uid),
-			CouponId:       cid,
-			OrderId:        oid,
+			CouponId:       duplicateCouponCode,
+			OrderId:        orderID,
 			DiscountAmount: 100,
 			OriginAmount:   100,
 		})
@@ -170,8 +193,8 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 		// 第二次使用
 		res2, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
 			UserId:         int32(uid),
-			CouponId:       cid,
-			OrderId:        oid,
+			CouponId:       duplicateCouponCode,
+			OrderId:        orderID,
 			DiscountAmount: 100,
 			OriginAmount:   100,
 		})

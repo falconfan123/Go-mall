@@ -12,7 +12,6 @@ import (
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
 	"github.com/olivere/elastic/v7"
-	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strconv"
@@ -42,23 +41,13 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 			logx.Field("product_id", in.Id))
 		return nil, err
 	}
-	var pictureUrl string
-	if len(in.Picture) != 0 {
-		zone, _ := storage.GetZone(l.svcCtx.Config.QiNiu.AccessKey, l.svcCtx.Config.QiNiu.Bucket)
-		url, err := UploadImage(in.Picture, zone, l.svcCtx.Config)
-		if err != nil {
-			l.Logger.Errorw("product picture upload failed",
-				logx.Field("err", err))
-			return nil, err
-		}
-		pictureUrl = url
-	}
+	picture := string(in.Picture)
 
 	productRes := &product2.Products{
 		Id:          in.Id,
 		Name:        in.Name,
 		Description: sql.NullString{String: in.Description, Valid: in.Description != ""},
-		Picture:     sql.NullString{String: pictureUrl, Valid: pictureUrl != ""},
+		Picture:     sql.NullString{String: picture, Valid: picture != ""},
 		Price:       in.Price,
 		Stock:       in.Stock,
 	}

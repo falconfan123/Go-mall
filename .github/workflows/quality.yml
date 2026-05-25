@@ -180,3 +180,32 @@ jobs:
 
       - name: Run govulncheck across workspace modules
         run: bash scripts/go-ci-vulncheck.sh
+
+  quality-summary:
+    name: Quality
+    if: ${{ always() }}
+    needs:
+      - mock-consistency
+      - unit-tests
+      - coverage
+      - go-vet
+      - govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check quality jobs
+        run: |
+          failures=0
+          for result in \
+            "${{ needs.mock-consistency.result }}" \
+            "${{ needs.unit-tests.result }}" \
+            "${{ needs.coverage.result }}" \
+            "${{ needs.go-vet.result }}" \
+            "${{ needs.govulncheck.result }}"; do
+            if [[ "${result}" != "success" ]]; then
+              failures=1
+            fi
+          done
+          if [[ "${failures}" -ne 0 ]]; then
+            echo "quality workflow has failed jobs"
+            exit 1
+          fi

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"strings"
 	"time"
 )
 
@@ -52,7 +51,7 @@ func (m *customCouponsModel) GetCouponTypeByID(ctx context.Context, session sqlx
 }
 
 func (m *customCouponsModel) FindOneWithLock(ctx context.Context, session sqlx.Session, id string) (*Coupons, error) {
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE \"id\" = $1 FOR SHARE", couponsRows, m.table)
+	query := fmt.Sprintf("SELECT id, name, type, value, min_amount, start_time, end_time, status, total_count, remaining_count, created_at, updated_at FROM %s WHERE \"id\" = $1 FOR SHARE", m.table)
 	var resp Coupons
 	err := session.QueryRowCtx(ctx, &resp, query, id)
 	return &resp, err
@@ -60,7 +59,7 @@ func (m *customCouponsModel) FindOneWithLock(ctx context.Context, session sqlx.S
 
 func (m *customCouponsModel) DecreaseStockWithSession(ctx context.Context, session sqlx.Session, id string, num int) error {
 	query := fmt.Sprintf(
-		"UPDATE %s SET remaining_count = remaining_count - ? WHERE id = ? AND remaining_count >= ?",
+		"UPDATE %s SET remaining_count = remaining_count - $1 WHERE id = $2 AND remaining_count >= $3",
 		m.table,
 	)
 	_, err := session.ExecCtx(ctx, query, num, id, num)
@@ -68,23 +67,13 @@ func (m *customCouponsModel) DecreaseStockWithSession(ctx context.Context, sessi
 }
 
 func (m *customCouponsModel) QueryCoupons(ctx context.Context, page, pageSize, ctype int32) ([]*Coupons, error) {
-	query := fmt.Sprintf("SELECT %s FROM %s", couponsRows, m.table)
-
-	// 构建WHERE条件
-	var where []string
-	var args []interface{}
+	query := fmt.Sprintf("SELECT id, name, type, value, min_amount, start_time, end_time, status, total_count, remaining_count, created_at, updated_at FROM %s", m.table)
+	args := make([]interface{}, 0, 3)
 
 	if ctype != 0 {
-		where = append(where, "\"type\" = $1")
+		query += " WHERE \"type\" = $1"
 		args = append(args, ctype)
 	}
-
-	// 组合WHERE条件
-	if len(where) > 0 {
-		query += " WHERE " + strings.Join(where, " AND ")
-	}
-
-	// 添加分页
 	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", len(args)+1, len(args)+2)
 	args = append(args, pageSize, (page-1)*pageSize)
 

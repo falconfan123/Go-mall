@@ -3,10 +3,12 @@ package register
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
 	users "github.com/falconfan123/Go-mall/services/users/pb"
 	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
-	"testing"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -35,7 +37,16 @@ func TestUsersRpc(t *testing.T) {
 		ConfirmPassword: "password123",
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("register failed: %v", err)
+	}
+	if resp == nil {
+		t.Fatal("register returned nil response")
+	}
+	if resp.GetStatusCode() != uint32(code.Success) {
+		t.Fatalf("register rejected: code=%d msg=%s", resp.GetStatusCode(), resp.GetStatusMsg())
+	}
+	if resp.GetUserId() == 0 {
+		t.Fatalf("register returned empty user id: %+v", resp)
 	}
 	fmt.Println("register success", resp)
 	t.Log("register success", resp)

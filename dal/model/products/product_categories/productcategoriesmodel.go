@@ -34,12 +34,12 @@ func (m *customProductCategoriesModel) WithSession(session sqlx.Session) Product
 	return NewProductCategoriesModel(sqlx.NewSqlConnFromSession(session))
 }
 func (m *customProductCategoriesModel) DeleteByProductId(ctx context.Context, productId int64) error {
-	query := fmt.Sprintf("delete from %s where `product_id` = ?", m.table)
+	query := fmt.Sprintf("delete from %s where product_id = $1", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, productId)
 	return err
 }
 func (m *customProductCategoriesModel) FindCategoriesByIds(ctx context.Context, productId int64) ([]string, error) {
-	query := fmt.Sprintf("select `category_id` from %s where `product_id` = ?", m.table)
+	query := fmt.Sprintf("select category_id from %s where product_id = $1", m.table)
 
 	// 定义一个切片用于存储查询结果
 	var categoryIds []string

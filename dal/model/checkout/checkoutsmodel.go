@@ -64,7 +64,7 @@ func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderId(ctx context.Context,
 	return &resp, err
 }
 func (m *customCheckoutsModel) CountByUserId(ctx context.Context, userId uint32) (int64, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE user_id = ?", m.table)
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE \"user_id\" = $1", m.table)
 	var count int64
 	err := m.conn.QueryRowCtx(ctx, &count, query, userId)
 	if err != nil {

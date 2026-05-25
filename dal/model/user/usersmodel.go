@@ -16,6 +16,7 @@ type (
 	UsersModel interface {
 		usersModel
 		withSession(session sqlx.Session) UsersModel
+		InsertReturningID(ctx context.Context, data *Users) (int64, error)
 		UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error
 		UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error
 		FindAllEmails() ([]string, error)
@@ -44,6 +45,33 @@ func NewUsersModel(conn sqlx.SqlConn) UsersModel {
 
 func (m *customUsersModel) withSession(session sqlx.Session) UsersModel {
 	return NewUsersModel(sqlx.NewSqlConnFromSession(session))
+}
+
+func (m *customUsersModel) InsertReturningID(ctx context.Context, data *Users) (int64, error) {
+	query := fmt.Sprintf(
+		"insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7) returning user_id",
+		m.table,
+		usersRowsExpectAutoSet,
+	)
+
+	var id int64
+	err := m.conn.QueryRowCtx(
+		ctx,
+		&id,
+		query,
+		data.Username,
+		data.Email,
+		data.PasswordHash,
+		data.AvatarUrl,
+		data.UserDeleted,
+		data.LogoutAt,
+		data.LoginAt,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
 func (m *customUsersModel) UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error {

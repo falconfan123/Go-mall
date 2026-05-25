@@ -21,6 +21,7 @@ type (
 
 		FindAllByUserId(ctx context.Context, userId int32) ([]*UserAddresses, error)
 		DeleteByAddressIdandUserId(ctx context.Context, addressId uint64, userId int32) error
+		InsertReturningID(ctx context.Context, data *UserAddresses) (int64, error)
 		InsertWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error)
 		GetUserAddressbyIdAndUserId(ctx context.Context, addressId uint64, userId int32) (*UserAddresses, error)
 		UpdateWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error)
@@ -108,6 +109,34 @@ func (m *customUserAddressesModel) BatchUpdateDeFaultWithSession(ctx context.Con
 		}
 	}
 	return nil
+}
+
+func (m *customUserAddressesModel) InsertReturningID(ctx context.Context, data *UserAddresses) (int64, error) {
+	query := fmt.Sprintf(
+		"insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7, $8) returning address_id",
+		m.table,
+		userAddressesRowsExpectAutoSet,
+	)
+
+	var id int64
+	err := m.conn.QueryRowCtx(
+		ctx,
+		&id,
+		query,
+		data.UserId,
+		data.RecipientName,
+		data.PhoneNumber,
+		data.Province,
+		data.City,
+		data.DetailedAddress,
+		data.IsDefault,
+		data.DeletedAt,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
 func (m *customUserAddressesModel) InsertWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error) {

@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	checkoutsFieldNames          = builder.RawFieldNames(&Checkouts{})
+	checkoutsFieldNames          = builder.RawFieldNames(&Checkouts{}, true)
 	checkoutsRows                = strings.Join(checkoutsFieldNames, ",")
 	checkoutsRowsExpectAutoSet   = strings.Join(stringx.Remove(checkoutsFieldNames, "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
-	checkoutsRowsWithPlaceHolder = strings.Join(stringx.Remove(checkoutsFieldNames, "pre_order_id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), "=?,") + "=?"
+	checkoutsRowsWithPlaceHolder = builder.PostgreSqlJoin(stringx.Remove(checkoutsFieldNames, "pre_order_id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"))
 )
 
 type (
@@ -78,7 +78,7 @@ func (m *defaultCheckoutsModel) FindOne(ctx context.Context, preOrderId string) 
 }
 
 func (m *defaultCheckoutsModel) Insert(ctx context.Context, data *Checkouts) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?)", m.table, checkoutsRowsExpectAutoSet)
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7, $8)", m.table, checkoutsRowsExpectAutoSet)
 	ret, err := m.conn.ExecCtx(ctx, query, data.PreOrderId, data.UserId, data.AddressId, data.CouponId, data.OriginalAmount, data.FinalAmount, data.Status, data.ExpireTime)
 	return ret, err
 }

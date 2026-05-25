@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGES_FILE="$ROOT_DIR/scripts/coverage_packages.txt"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.8}"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.10}"
 THRESHOLD="${COVERAGE_THRESHOLD:-30}"
 PROFILE_PATH="${COVERAGE_OUT:-$ROOT_DIR/.artifacts/coverage/coverage.out}"
 SUMMARY_PATH="${COVERAGE_SUMMARY:-$ROOT_DIR/.artifacts/coverage/summary.txt}"

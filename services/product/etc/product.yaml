@@ -44,12 +44,6 @@ RedisConf:
 ElasticSearch:
   Addr: http://localhost:9200
   IndexName: products
-#七牛云
-QiNiu:
-  accessKey: JfDRw6TYF7B-MXNjIivW1zxcZ6PrSHAHYksBcZOt
-  secretKey: ubXESZ4C3bpTh9P0yKTXmzOPXEbpaBgvzFkecWIu
-  bucket: jjzzchtt-mall
-  domain: ssa12nnvu.hn-bkt.clouddn.com
 
 GorseConfig:
   GorseAddr: http://localhost:8088

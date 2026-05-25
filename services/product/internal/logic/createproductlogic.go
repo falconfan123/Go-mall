@@ -10,7 +10,6 @@ import (
 	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
-	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strconv"
 
@@ -40,23 +39,13 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		return nil, err
 	}
 	var productId int64
-	var pictureUrl string
-	if len(in.Picture) != 0 {
-		zone, _ := storage.GetZone(l.svcCtx.Config.QiNiu.AccessKey, l.svcCtx.Config.QiNiu.Bucket)
-		url, err := UploadImage(in.Picture, zone, l.svcCtx.Config)
-		if err != nil {
-			l.Logger.Errorw("product picture upload failed",
-				logx.Field("err", err))
-			return nil, err
-		}
-		pictureUrl = url
-	}
+	picture := string(in.Picture)
 
 	// 创建 Products 结构体实例
 	productRes := &product2.Products{
 		Name:        in.Name,
 		Description: sql.NullString{String: in.Description, Valid: in.Description != ""},
-		Picture:     sql.NullString{String: pictureUrl, Valid: pictureUrl != ""},
+		Picture:     sql.NullString{String: picture, Valid: picture != ""},
 		Price:       in.Price, // 注意类型转换
 		Stock:       in.Stock,
 	}
@@ -68,11 +57,8 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		// 通过 withSession 生成支持事务的 productCategoriesModel 实例
 		productCategoriesModel := pc.NewProductCategoriesModel(l.svcCtx.Postgres).WithSession(session)
 		// 得到图片对应url
-		result, err := productModel.Insert(l.ctx, productRes)
-		if err != nil {
-			return err
-		}
-		productId, err = result.LastInsertId()
+		var err error
+		productId, err = productModel.InsertReturningID(l.ctx, productRes)
 		if err != nil {
 			return err
 		}

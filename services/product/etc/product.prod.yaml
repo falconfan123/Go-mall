@@ -41,12 +41,6 @@ Telemetry:
 # Elasticsearch 配置
 ElasticSearch:
   Addr: ${ELASTICSEARCH_HOST}
-#七牛云
-QiNiu:
-  accessKey: ${QINIU_ACCESSKEY}
-  secretKey: ${QINIU_SECRETKEY}
-  bucket: ${QINIU_BUCKET}
-  domain: ${QINIU_DOMAIN}
 
 # Redis
 RedisConf:

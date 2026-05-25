@@ -54,14 +54,11 @@ func Test_GetCouponLogic_GetCoupon(t *testing.T) {
 }
 
 func Test_CalculateCouponLogic_CalculateCoupon(t *testing.T) {
-	var price = 299900
 	productID := 3
 
 	t.Run("折扣优惠券", func(t *testing.T) {
-		disCount := 80
+		discountRate := 80 // CouponType_DISCOUNT 的 value 表示折后百分比，80 = 实付 80%
 		quanity := 2
-		discountAmount := price * quanity * (100 - disCount) / 100
-		final := price*quanity - discountAmount
 		//	ZK20250214001
 		coupon, err2 := couponsClient.CalculateCoupon(context.Background(), &coupons.CalculateCouponReq{
 			CouponId: "ZK20250214001",
@@ -77,7 +74,8 @@ func Test_CalculateCouponLogic_CalculateCoupon(t *testing.T) {
 			t.Fatal(err2)
 		}
 		assert.Equal(t, uint32(0), coupon.StatusCode)
-		assert.Equal(t, final, coupon.FinalAmount)
+		expectedFinal := coupon.OriginAmount * int64(discountRate) / 100
+		assert.Equal(t, expectedFinal, coupon.FinalAmount)
 
 	})
 }
