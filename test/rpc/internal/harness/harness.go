@@ -353,7 +353,7 @@ func waitForRPC(ctx context.Context, name string, fn func(context.Context) error
 			switch status.Code(err) {
 			case codes.Unavailable, codes.DeadlineExceeded, codes.Canceled:
 			default:
-				return nil
+				return enrichStackError(name, err)
 			}
 		}
 

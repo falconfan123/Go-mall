@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -30,6 +31,10 @@ type Config struct {
 // InitJaeger 初始化Jaeger追踪
 func InitJaeger(cfg *Config) (func(context.Context) error, error) {
 	if cfg == nil || !cfg.Enabled {
+		return nil, nil
+	}
+
+	if strings.TrimSpace(cfg.JaegerEndpoint) == "" && strings.TrimSpace(cfg.OtelEndpoint) == "" {
 		return nil, nil
 	}
 
@@ -74,6 +79,10 @@ func InitJaeger(cfg *Config) (func(context.Context) error, error) {
 // InitWithOtelCollector 使用OpenTelemetry Collector初始化追踪
 func InitWithOtelCollector(cfg *Config) (func(context.Context) error, error) {
 	if cfg == nil || !cfg.Enabled {
+		return nil, nil
+	}
+
+	if strings.TrimSpace(cfg.OtelEndpoint) == "" {
 		return nil, nil
 	}
 

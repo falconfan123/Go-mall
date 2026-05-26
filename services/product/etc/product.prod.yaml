@@ -54,6 +54,7 @@ GorseConfig:
   GorseApikey: ${GORSE_APIKEY}
 
 Minio:
+  Enabled: ${MINIO_ENABLED}
   Endpoint: ${MINIO_ENDPOINT}
   AccessKey: ${MINIO_ACCESS_KEY}
   SecretKey: ${MINIO_SECRET_KEY}

@@ -39,28 +39,32 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
-	// Initialize MinIO Client
-	minioClient, err := minio.New(c.Minio.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(c.Minio.AccessKey, c.Minio.SecretKey, ""),
-		Secure: c.Minio.UseSSL,
-	})
-	if err != nil {
-		logx.Errorw("minio init error", logx.Field("err", err))
-		// Should we panic? Maybe just log error for now, or panic if critical.
-		// For development, let's panic to ensure we know it's broken.
-		panic(err)
-	}
-
-	// Ensure bucket exists
-	ctx := context.Background()
-	exists, err := minioClient.BucketExists(ctx, c.Minio.Bucket)
-	if err != nil {
-		logx.Errorw("minio check bucket error", logx.Field("err", err))
-	} else if !exists {
-		err = minioClient.MakeBucket(ctx, c.Minio.Bucket, minio.MakeBucketOptions{})
+	var minioClient *minio.Client
+	minioEnabled := c.Minio.Enabled && c.Minio.Endpoint != "" && c.Minio.Bucket != ""
+	if minioEnabled {
+		minioClient, err = minio.New(c.Minio.Endpoint, &minio.Options{
+			Creds:  credentials.NewStaticV4(c.Minio.AccessKey, c.Minio.SecretKey, ""),
+			Secure: c.Minio.UseSSL,
+		})
 		if err != nil {
-			logx.Errorw("minio make bucket error", logx.Field("err", err))
+			logx.Errorw("minio init error", logx.Field("err", err))
+		} else {
+			ctx := context.Background()
+			exists, bucketErr := minioClient.BucketExists(ctx, c.Minio.Bucket)
+			if bucketErr != nil {
+				logx.Errorw("minio check bucket error", logx.Field("err", bucketErr))
+			} else if !exists {
+				bucketErr = minioClient.MakeBucket(ctx, c.Minio.Bucket, minio.MakeBucketOptions{})
+				if bucketErr != nil {
+					logx.Errorw("minio make bucket error", logx.Field("err", bucketErr))
+				}
+			}
 		}
+	} else if c.Minio.Enabled {
+		logx.Infow("minio disabled due to incomplete config",
+			logx.Field("endpoint", c.Minio.Endpoint),
+			logx.Field("bucket", c.Minio.Bucket),
+		)
 	}
 
 	// 初始化 ES 客户端

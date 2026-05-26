@@ -37,7 +37,33 @@ SERVICES=(
   "gateway:services/gateway:gateway.go:8888"
 )
 
+STARTUP_PHASES=(
+  "system activity auths users inventory carts audit"
+  "product"
+  "coupons"
+  "checkout"
+  "order"
+  "payment"
+  "admin"
+  "gateway"
+)
+
 mkdir -p "$STATE_DIR" "$LOG_DIR" "$DEPENDENCY_LOG_DIR" "$CONFIG_DIR"
+
+service_spec() {
+  local target="$1"
+  local spec
+
+  for spec in "${SERVICES[@]}"; do
+    IFS=: read -r name rel_dir entrypoint port <<<"$spec"
+    if [[ "$name" == "$target" ]]; then
+      printf '%s\n' "$spec"
+      return 0
+    fi
+  done
+
+  return 1
+}
 
 port_in_use() {
   lsof -Pi :"$1" -sTCP:LISTEN -t >/dev/null 2>&1
@@ -78,10 +104,16 @@ wait_for_container_health() {
   local i
 
   for ((i = 1; i <= attempts; i++)); do
-    local status
+    local status state
     status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container" 2>/dev/null || true)"
+    state="$(docker inspect --format '{{.State.Status}}' "$container" 2>/dev/null || true)"
     if [[ "$status" == "healthy" || "$status" == "running" ]]; then
       return 0
+    fi
+    if [[ "$state" == "exited" || "$state" == "dead" || "$state" == "removing" ]]; then
+      docker logs "$container" >"$DEPENDENCY_LOG_DIR/${container#go-mall-}.log" 2>&1 || true
+      echo "dependency failed to start: container $container exited ($state)" >&2
+      return 1
     fi
     sleep "$sleep_secs"
   done
@@ -124,6 +156,76 @@ reset_logs() {
   rm -f "$CONFIG_DIR"/*.yaml
 }
 
+process_alive() {
+  local pid="$1"
+  [[ -n "$pid" ]] || return 1
+  kill -0 "$pid" 2>/dev/null
+}
+
+service_log_path() {
+  local name="$1"
+  printf '%s/%s.log\n' "$LOG_DIR" "$name"
+}
+
+service_last_log_line() {
+  local name="$1"
+  local log_file
+  log_file="$(service_log_path "$name")"
+  if [[ -f "$log_file" ]]; then
+    tail -n 1 "$log_file" 2>/dev/null || true
+  fi
+}
+
+service_pid() {
+  local name="$1"
+  if [[ -f "$PID_FILE" ]]; then
+    while IFS=: read -r service pid _; do
+      if [[ "$service" == "$name" ]]; then
+        printf '%s\n' "$pid"
+        return 0
+      fi
+    done <"$PID_FILE"
+  fi
+  return 1
+}
+
+inspect_stack() {
+  local format="${1:-text}"
+  local records=()
+  local spec
+
+  for spec in "${SERVICES[@]}"; do
+    IFS=: read -r name _ _ port <<<"$spec"
+    local pid=""
+    local alive="false"
+    local listening="false"
+    local exit_code=""
+    local finished_at=""
+    local log_path
+    local last_log
+
+    pid="$(service_pid "$name" || true)"
+    if [[ -n "$pid" ]] && process_alive "$pid"; then
+      alive="true"
+    fi
+    if can_connect_tcp 127.0.0.1 "$port"; then
+      listening="true"
+    fi
+    log_path="$(service_log_path "$name")"
+    last_log="$(service_last_log_line "$name")"
+
+    if [[ "$format" == "json" ]]; then
+      records+=("{\"name\":\"$name\",\"pid\":${pid:-0},\"port\":$port,\"alive\":$alive,\"listening\":$listening,\"exitCode\":\"$exit_code\",\"finishedAt\":\"$finished_at\",\"logPath\":\"$log_path\",\"lastLogLine\":$(printf '%s' "$last_log" | jq -Rsa .)}")
+    else
+      printf '%s pid=%s port=%s alive=%s listening=%s last_log=%q\n' "$name" "${pid:-0}" "$port" "$alive" "$listening" "$last_log"
+    fi
+  done
+
+  if [[ "$format" == "json" ]]; then
+    printf '[%s]\n' "$(IFS=,; echo "${records[*]}")"
+  fi
+}
+
 render_service_config() {
   local service_dir="$1"
   local service_name="$2"
@@ -147,6 +249,9 @@ render_service_config() {
     -e "s/Host: localhost:6379/Host: ${REDIS_HOST_LOCAL}:6379/g" \
     -e "s/Addr: \"http:\\/\\/localhost:9200\"/Addr: \"http:\\/\\/${ELASTICSEARCH_HOST_LOCAL}:9200\"/g" \
     -e "s/http:\\/\\/localhost:9200/http:\\/\\/${ELASTICSEARCH_HOST_LOCAL}:9200/g" \
+    -e "s/Endpoint: http:\\/\\/localhost:14268\\/api\\/traces/Endpoint: \"\"/g" \
+    -e "s/Sampler: 1.0/Sampler: 0.0/g" \
+    -e "s/Endpoint: localhost:9000/Endpoint: \"\"/g" \
     "$source_config" >"$rendered_config"
   echo "$rendered_config"
 }
@@ -256,15 +361,37 @@ start_service() {
     echo "service failed to listen: $name" >&2
     exit 1
   fi
+
+  sleep 1
+  if ! process_alive "$pid"; then
+    tail -n 120 "$log_file" >&2 || true
+    echo "service exited during startup: $name" >&2
+    exit 1
+  fi
+}
+
+start_service_by_name() {
+  local name="$1"
+  local spec
+
+  spec="$(service_spec "$name")" || {
+    echo "unknown service: $name" >&2
+    exit 1
+  }
+
+  IFS=: read -r _ rel_dir entrypoint port <<<"$spec"
+  start_service "$name" "$rel_dir" "$entrypoint" "$port"
 }
 
 start_services() {
   : >"$PID_FILE"
 
-  local spec
-  for spec in "${SERVICES[@]}"; do
-    IFS=: read -r name rel_dir entrypoint port <<<"$spec"
-    start_service "$name" "$rel_dir" "$entrypoint" "$port"
+  local phase
+  local service_name
+  for phase in "${STARTUP_PHASES[@]}"; do
+    for service_name in $phase; do
+      start_service_by_name "$service_name"
+    done
   done
 }
 
@@ -289,7 +416,9 @@ status() {
   local spec
   for spec in "${SERVICES[@]}"; do
     IFS=: read -r name _ _ port <<<"$spec"
-    if can_connect_tcp 127.0.0.1 "$port"; then
+    local pid
+    pid="$(service_pid "$name" || true)"
+    if [[ -n "$pid" ]] && process_alive "$pid" && can_connect_tcp 127.0.0.1 "$port"; then
       echo "$name:$port ready"
     else
       echo "$name:$port missing" >&2
@@ -342,6 +471,14 @@ case "$command" in
   status)
     status
     ;;
+  inspect)
+    shift
+    if [[ "${1:-}" == "--json" ]]; then
+      inspect_stack json
+    else
+      inspect_stack text
+    fi
+    ;;
   snapshot-dependency-logs)
     snapshot_dependency_logs
     ;;
@@ -354,7 +491,7 @@ case "$command" in
     run_local_suite "$@"
     ;;
   *)
-    echo "usage: ci-rpc-stack.sh [start|stop|status|snapshot-dependency-logs|run-local-suite]" >&2
+    echo "usage: ci-rpc-stack.sh [start|stop|status|inspect [--json]|snapshot-dependency-logs|run-local-suite]" >&2
     exit 1
     ;;
 esac

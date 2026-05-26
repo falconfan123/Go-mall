@@ -29,6 +29,13 @@ func NewGetUploadURLLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetU
 
 // MinIO 预签名上传接口
 func (l *GetUploadURLLogic) GetUploadURL(in *product.GetUploadURLReq) (*product.GetUploadURLResp, error) {
+	if !l.svcCtx.Config.Minio.Enabled || l.svcCtx.MinioClient == nil {
+		return &product.GetUploadURLResp{
+			StatusCode: 503,
+			StatusMsg:  "object storage is disabled",
+		}, nil
+	}
+
 	// 1. Define bucket and key
 	bucketName := l.svcCtx.Config.Minio.Bucket
 	objectName := fmt.Sprintf("products/%d/%s.jpg", time.Now().Year(), uuid.New().String())

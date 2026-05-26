@@ -24,6 +24,7 @@ type Minio struct {
 	SecretKey string
 	Bucket    string
 	UseSSL    bool
+	Enabled   bool
 }
 
 type PostgresConfig struct {
