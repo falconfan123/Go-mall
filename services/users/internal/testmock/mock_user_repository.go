@@ -192,20 +192,6 @@ func (mr *MockUserRepositoryMockRecorder) Update(ctx, user any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockUserRepository)(nil).Update), ctx, user)
 }
 
-// UpdateLoginTime mocks base method.
-func (m *MockUserRepository) UpdateLoginTime(ctx context.Context, userID int64, loginTime time.Time) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateLoginTime", ctx, userID, loginTime)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateLoginTime indicates an expected call of UpdateLoginTime.
-func (mr *MockUserRepositoryMockRecorder) UpdateLoginTime(ctx, userID, loginTime any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLoginTime", reflect.TypeOf((*MockUserRepository)(nil).UpdateLoginTime), ctx, userID, loginTime)
-}
-
 // UpdateAddress mocks base method.
 func (m *MockUserRepository) UpdateAddress(ctx context.Context, userID int64, address *entity.Address) error {
 	m.ctrl.T.Helper()
@@ -218,6 +204,20 @@ func (m *MockUserRepository) UpdateAddress(ctx context.Context, userID int64, ad
 func (mr *MockUserRepositoryMockRecorder) UpdateAddress(ctx, userID, address any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAddress", reflect.TypeOf((*MockUserRepository)(nil).UpdateAddress), ctx, userID, address)
+}
+
+// UpdateLoginTime mocks base method.
+func (m *MockUserRepository) UpdateLoginTime(ctx context.Context, userID int64, loginTime time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateLoginTime", ctx, userID, loginTime)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateLoginTime indicates an expected call of UpdateLoginTime.
+func (mr *MockUserRepositoryMockRecorder) UpdateLoginTime(ctx, userID, loginTime any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLoginTime", reflect.TypeOf((*MockUserRepository)(nil).UpdateLoginTime), ctx, userID, loginTime)
 }
 
 // UpdateLogoutTime mocks base method.
