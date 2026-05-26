@@ -19,6 +19,8 @@ type UserRepository interface {
 	Save(ctx context.Context, user *aggregate.User) (int64, error)
 	// Update 更新用户
 	Update(ctx context.Context, user *aggregate.User) error
+	// UpdateLoginTime 更新登录时间
+	UpdateLoginTime(ctx context.Context, userID int64, loginTime time.Time) error
 	// FindByID 根据ID查找用户
 	FindByID(ctx context.Context, userID int64) (*aggregate.User, error)
 	// FindByEmail 根据邮箱查找用户

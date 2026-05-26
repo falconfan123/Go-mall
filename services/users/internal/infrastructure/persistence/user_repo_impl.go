@@ -67,6 +67,11 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *aggregate.User) e
 	return err
 }
 
+// UpdateLoginTime 更新登录时间
+func (r *UserRepositoryImpl) UpdateLoginTime(ctx context.Context, userID int64, loginTime time.Time) error {
+	return r.userModel.UpdateLoginTime(ctx, userID, loginTime)
+}
+
 // FindByID 根据ID查找用户
 func (r *UserRepositoryImpl) FindByID(ctx context.Context, userID int64) (*aggregate.User, error) {
 	u, err := r.userModel.FindOne(ctx, userID)

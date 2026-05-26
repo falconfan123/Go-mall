@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/token"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/dto"
@@ -12,6 +13,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/users/internal/domain/repository"
 	"github.com/falconfan123/Go-mall/services/users/internal/domain/valueobject"
 	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logx"
 	"time"
 )
 
@@ -201,9 +203,16 @@ func (s *AuthAppService) Login(ctx context.Context, req *dto.LoginRequest) (*dto
 
 	// 4. 记录登录信息
 	user.RecordLogin(req.IP)
-	err = s.userRepo.Update(ctx, user)
+	err = s.userRepo.UpdateLoginTime(ctx, user.ID, user.LastLoginTime)
 	if err != nil {
-		// 记录日志，但不影响登录流程
+		logx.WithContext(ctx).Errorw("update login time failed",
+			logx.Field("user_id", user.ID),
+			logx.Field("err", err),
+		)
+		return &dto.LoginResponse{
+			StatusCode: uint32(code.ServerError),
+			StatusMsg:  code.ServerErrorMsg,
+		}, err
 	}
 
 	// 5. 生成令牌
@@ -249,7 +258,14 @@ func (s *AuthAppService) Logout(ctx context.Context, req *dto.LogoutRequest) (*d
 	// 1. 更新登出时间
 	err := s.userRepo.UpdateLogoutTime(ctx, int64(req.UserID), time.Now())
 	if err != nil {
-		// 记录日志，但返回成功
+		logx.WithContext(ctx).Errorw("update logout time failed",
+			logx.Field("user_id", req.UserID),
+			logx.Field("err", err),
+		)
+		return &dto.LogoutResponse{
+			StatusCode: uint32(code.ServerError),
+			StatusMsg:  code.ServerErrorMsg,
+		}, err
 	}
 
 	// 2. 发布登出事件

@@ -48,18 +48,20 @@ func (l *ListProductsLogic) ListProducts(in *product.ListProductsReq) (*product.
 	var nextCursor int64
 	var hasMore bool
 
-	// Base URL for MinIO
-	protocol := "http"
-	if l.svcCtx.Config.Minio.UseSSL {
-		protocol = "https"
+	minioBase := ""
+	if l.svcCtx.Config.Minio.Enabled && l.svcCtx.Config.Minio.Endpoint != "" {
+		protocol := "http"
+		if l.svcCtx.Config.Minio.UseSSL {
+			protocol = "https"
+		}
+		minioBase = fmt.Sprintf("%s://%s/%s/", protocol, l.svcCtx.Config.Minio.Endpoint, l.svcCtx.Config.Minio.Bucket)
 	}
-	minioBase := fmt.Sprintf("%s://%s/%s/", protocol, l.svcCtx.Config.Minio.Endpoint, l.svcCtx.Config.Minio.Bucket)
 
 	respProducts = make([]*product.Product, 0)
 	for _, p := range products {
 		thumbnailUrl := p.Picture.String
 		// If picture is a relative path (not starting with http) and not empty, prepend MinIO domain
-		if len(thumbnailUrl) > 0 && (len(thumbnailUrl) < 4 || thumbnailUrl[:4] != "http") {
+		if minioBase != "" && len(thumbnailUrl) > 0 && (len(thumbnailUrl) < 4 || thumbnailUrl[:4] != "http") {
 			thumbnailUrl = minioBase + thumbnailUrl
 		}
 

@@ -206,6 +206,20 @@ func (mr *MockUserRepositoryMockRecorder) UpdateAddress(ctx, userID, address any
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAddress", reflect.TypeOf((*MockUserRepository)(nil).UpdateAddress), ctx, userID, address)
 }
 
+// UpdateLoginTime mocks base method.
+func (m *MockUserRepository) UpdateLoginTime(ctx context.Context, userID int64, loginTime time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateLoginTime", ctx, userID, loginTime)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateLoginTime indicates an expected call of UpdateLoginTime.
+func (mr *MockUserRepositoryMockRecorder) UpdateLoginTime(ctx, userID, loginTime any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLoginTime", reflect.TypeOf((*MockUserRepository)(nil).UpdateLoginTime), ctx, userID, loginTime)
+}
+
 // UpdateLogoutTime mocks base method.
 func (m *MockUserRepository) UpdateLogoutTime(ctx context.Context, userID int64, logoutTime time.Time) error {
 	m.ctrl.T.Helper()
