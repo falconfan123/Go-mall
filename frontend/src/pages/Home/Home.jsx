@@ -51,7 +51,14 @@ export default function Home() {
       </div>
 
       {/* Quick Links */}
-      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4">
+        <Link
+          to="/search"
+          className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow text-center"
+        >
+          <span className="text-2xl mb-2 block">🔍</span>
+          <span className="text-gray-700 font-medium">智能搜索</span>
+        </Link>
         <Link
           to="/products"
           className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow text-center"

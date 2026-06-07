@@ -8,7 +8,10 @@ import ProductDetail from './pages/Products/ProductDetail';
 import Cart from './pages/Cart/Cart';
 import FlashSale from './pages/FlashSale/FlashSale';
 import Payment from './pages/Payment/Payment';
+import PaymentSuccess from './pages/Payment/PaymentSuccess';
+import PaymentCancel from './pages/Payment/PaymentCancel';
 import Orders from './pages/Orders/Orders';
+import Search from './pages/Search/Search';
 import { useAuthStore } from './store/authStore';
 
 function PrivateRoute({ children }) {
@@ -29,7 +32,10 @@ function App() {
           <Route path="cart" element={<Cart />} />
           <Route path="flash" element={<FlashSale />} />
           <Route path="payment" element={<Payment />} />
+          <Route path="payment/success" element={<PaymentSuccess />} />
+          <Route path="payment/cancel" element={<PaymentCancel />} />
           <Route path="orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
+          <Route path="search" element={<Search />} />
         </Route>
       </Routes>
     </BrowserRouter>

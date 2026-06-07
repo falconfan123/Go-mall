@@ -1,6 +1,7 @@
 Name: gateway
 Host: 0.0.0.0
 Port: 8888
+Timeout: 12000
 
 Log:
   Mode: "console"
@@ -25,6 +26,24 @@ Upstreams:
       - Method: post
         Path: /douyin/user/register
         RpcPath: users.Users/Register
+      - Method: post
+        Path: /api/v1/users/login
+        RpcPath: users.Users/Login
+      - Method: post
+        Path: /api/v1/users/register
+        RpcPath: users.Users/Register
+      - Method: post
+        Path: /api/v1/users/logout
+        RpcPath: users.Users/Logout
+      - Method: get
+        Path: /api/v1/users/me
+        RpcPath: users.Users/GetUser
+      - Method: post
+        Path: /api/v1/users/addresses
+        RpcPath: users.Users/AddAddress
+      - Method: get
+        Path: /api/v1/users/address
+        RpcPath: users.Users/GetAddress
 
   - Grpc:
       Etcd:
@@ -36,6 +55,15 @@ Upstreams:
       - Method: get
         Path: /douyin/product/list
         RpcPath: product.ProductCatalogService/ListProducts
+      - Method: get
+        Path: /douyin/product/detail
+        RpcPath: product.ProductCatalogService/GetProduct
+      - Method: get
+        Path: /api/v1/products
+        RpcPath: product.ProductCatalogService/ListProducts
+      - Method: get
+        Path: /api/v1/products/detail
+        RpcPath: product.ProductCatalogService/GetProduct
 
   - Grpc:
       Etcd:
@@ -47,6 +75,27 @@ Upstreams:
       - Method: get
         Path: /douyin/cart/list
         RpcPath: carts.Cart/CartItemList
+      - Method: post
+        Path: /douyin/cart/add
+        RpcPath: carts.Cart/CreateCartItem
+      - Method: post
+        Path: /douyin/cart/sub
+        RpcPath: carts.Cart/SubCartItem
+      - Method: post
+        Path: /douyin/cart/delete
+        RpcPath: carts.Cart/DeleteCartItem
+      - Method: get
+        Path: /api/v1/cart/items
+        RpcPath: carts.Cart/CartItemList
+      - Method: post
+        Path: /api/v1/cart/items
+        RpcPath: carts.Cart/CreateCartItem
+      - Method: post
+        Path: /api/v1/cart/items/sub
+        RpcPath: carts.Cart/SubCartItem
+      - Method: post
+        Path: /api/v1/cart/items/delete
+        RpcPath: carts.Cart/DeleteCartItem
 
   - Grpc:
       Etcd:
@@ -61,6 +110,21 @@ Upstreams:
       - Method: get
         Path: /douyin/order/list
         RpcPath: order.OrderService/ListOrders
+      - Method: post
+        Path: /api/v1/orders
+        RpcPath: order.OrderService/CreateOrder
+      - Method: get
+        Path: /api/v1/orders
+        RpcPath: order.OrderService/ListOrders
+      - Method: get
+        Path: /api/v1/orders/detail
+        RpcPath: order.OrderService/GetOrder
+      - Method: post
+        Path: /api/v1/orders/cancel
+        RpcPath: order.OrderService/CancelOrder
+      - Method: post
+        Path: /api/v1/orders/seckill
+        RpcPath: order.OrderService/Seckill
 
   - Grpc:
       Etcd:
@@ -72,6 +136,9 @@ Upstreams:
       - Method: post
         Path: /douyin/checkout/prepare
         RpcPath: checkout.CheckoutService/PrepareCheckout
+      - Method: post
+        Path: /api/v1/checkout/prepare
+        RpcPath: checkout.CheckoutService/PrepareCheckout
 
   - Grpc:
       Etcd:
@@ -79,21 +146,20 @@ Upstreams:
           - localhost:2379
         Key: payment.rpc
       NonBlock: true
+      Timeout: 10000
     Mappings:
       - Method: post
         Path: /douyin/payment/create
         RpcPath: payment.Payment/CreatePayment
-
-  - Grpc:
-      Etcd:
-        Hosts:
-          - localhost:2379
-        Key: inventory.rpc
-      NonBlock: true
-    Mappings:
       - Method: get
-        Path: /douyin/inventory/detail
-        RpcPath: inventory.Inventory/GetInventory
+        Path: /api/v1/payments
+        RpcPath: payment.Payment/ListPayments
+      - Method: get
+        Path: /api/v1/payments/status
+        RpcPath: payment.Payment/GetPaymentStatus
+      - Method: post
+        Path: /api/v1/payments
+        RpcPath: payment.Payment/CreatePayment
 
   - Grpc:
       Etcd:
@@ -105,6 +171,9 @@ Upstreams:
       - Method: get
         Path: /api/v1/activity/token
         RpcPath: activity.Activity/Token
+      - Method: get
+        Path: /api/v1/activity/status
+        RpcPath: activity.Activity/CheckSeckillStatus
 
   - Grpc:
       Etcd:
@@ -117,7 +186,8 @@ Upstreams:
         Path: /api/v1/system/time
         RpcPath: system.System/Time
 
-  - Grpc:
+  - Name: auths
+    Grpc:
       Etcd:
         Hosts:
           - localhost:2379
@@ -127,17 +197,23 @@ Upstreams:
       - Method: post
         Path: /api/v1/auth/validate
         RpcPath: auths.Auths/ValidateToken
+      - Method: post
+        Path: /api/v1/auth/refresh
+        RpcPath: auths.Auths/RenewToken
 
   - Grpc:
       Etcd:
         Hosts:
           - localhost:2379
-        Key: coupons.rpc
+        Key: search.rpc
       NonBlock: true
     Mappings:
       - Method: get
-        Path: /douyin/coupon/list
-        RpcPath: coupons.Coupons/ListCoupons
+        Path: /api/v1/search
+        RpcPath: search.SearchService/Search
+      - Method: post
+        Path: /api/v1/search/parse
+        RpcPath: search.SearchService/ParseQuery
 
   - Grpc:
       Etcd:
