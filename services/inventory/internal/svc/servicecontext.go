@@ -64,7 +64,7 @@ func (s *ServiceContext) PreheatInventoryCache() error {
 
 	for _, inv := range inventories {
 		productKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, inv.ProductId)
-		if err := s.Rdb.Setex(productKey, strconv.Itoa(int(inv.Total)), int(biz.InventoryCacheTTL.Seconds())); err != nil {
+		if err := s.Rdb.Set(productKey, strconv.Itoa(int(inv.Total))); err != nil {
 			return fmt.Errorf("缓存库存数据失败: %v", err)
 		}
 	}

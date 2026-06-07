@@ -85,6 +85,7 @@ func (r *CartRepositoryImpl) Save(ctx context.Context, cart *aggregate.Cart) err
 		if exists && existingID > 0 {
 			// 更新现有项 - 只更新数量和价格等字段，不更新 id
 			cartData := &cartmodel.Carts{
+				Id: int64(existingID),
 				UserId: sql.NullInt64{
 					Int64: cart.UserID,
 					Valid: true,

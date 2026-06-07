@@ -27,10 +27,22 @@ func NewListPaymentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *List
 func (l *ListPaymentsLogic) ListPayments(in *payment.PaymentListReq) (*payment.PaymentListResp, error) {
 	var queryErr error
 	paymentModel := l.svcCtx.PaymentModel
+	page := int32(1)
+	pageSize := int32(100)
+	if in.Pagination != nil {
+		if in.Pagination.Page > 0 {
+			page = in.Pagination.Page
+		}
+		if in.Pagination.PageSize > 0 {
+			pageSize = in.Pagination.PageSize
+		}
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
 
-	// 查询商品列表
-	offset := (in.Pagination.Page - 1) * in.Pagination.PageSize
-	payments, queryErr := paymentModel.FindPage(l.ctx, in.UserId, int(offset), int(in.Pagination.PageSize))
+	offset := (page - 1) * pageSize
+	payments, queryErr := paymentModel.FindPage(l.ctx, in.UserId, int(offset), int(pageSize))
 	// 统一错误处理
 	if queryErr != nil {
 		if errors.Is(queryErr, sqlx.ErrNotFound) {
@@ -50,6 +62,7 @@ func (l *ListPaymentsLogic) ListPayments(in *payment.PaymentListReq) (*payment.P
 			OrderId:        p.OrderId.String,
 			OriginalAmount: p.OriginalAmount,
 			PaidAmount:     p.PaidAmount.Int64,
+			PaymentMethod:  paymentMethodEnum(p.PaymentMethod),
 			TransactionId:  p.TransactionId.String,
 			PayUrl:         p.PayUrl.String,
 			ExpireTime:     p.ExpireTime,
@@ -63,4 +76,11 @@ func (l *ListPaymentsLogic) ListPayments(in *payment.PaymentListReq) (*payment.P
 	return &payment.PaymentListResp{
 		Payments: items,
 	}, nil
+}
+
+func paymentMethodEnum(method string) payment.PaymentMethod {
+	if method == "stripe" {
+		return payment.PaymentMethod_STRIPE
+	}
+	return payment.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
 }

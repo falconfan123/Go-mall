@@ -14,34 +14,23 @@ Go-Mall 是一个基于 Go-Zero 微服务架构的现代电商平台，包含以
 
 ## 测试环境准备
 
-### 1. 启动后端服务
+### 1. 启动本地联调环境
 
-确保所有微服务和API服务正常运行。可以使用以下命令启动：
-
-```bash
-# 启动所有服务（包含依赖）
-docker-compose up -d
-
-# 或者启动最小化服务
-./start-minimal.sh
-
-# 或者单独启动各个服务
-./start.sh
-```
-
-### 2. 启动前端
+优先使用统一脚本启动依赖、后端和前端：
 
 ```bash
-# 进入前端目录
-cd frontend
-
-# 启动前端服务器（需要安装 http-server 或使用其他方式）
-# 如果没有安装 http-server，可以使用 Python 或 Node.js 启动
-python3 -m http.server 3000
-
-# 或使用 Node.js
-npx http-server -p 3000
+./scripts/start-unified.sh
 ```
+
+常用辅助命令：
+
+```bash
+./scripts/start-unified.sh status
+./scripts/start-unified.sh stop
+./scripts/start-unified.sh restart
+```
+
+前端固定地址为 `http://127.0.0.1:3000`，网关固定地址为 `http://127.0.0.1:8888`。
 
 ### 3. 数据库初始化
 
@@ -63,7 +52,7 @@ mysql -u root -p < insert_test_products.sql
 **功能说明**：展示平台介绍和主要功能入口
 
 **测试步骤**：
-1. 访问 `http://localhost:3000`
+1. 访问 `http://127.0.0.1:3000`
 2. 确认页面显示"欢迎来到 Go-Mall"标题
 3. 确认三个功能卡片显示（高性能、安全可靠、分布式事务）
 4. 点击"浏览商品"按钮，确认跳转到商品列表页

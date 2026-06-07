@@ -29,8 +29,9 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, error) {
 	// 调用应用服务处理登出逻辑
 	req := &dto.LogoutRequest{
-		UserID: in.UserId,
-		IP:     "", // 从ctx获取IP，这里暂时留空
+		UserID:    in.UserId,
+		LongToken: in.LongToken,
+		IP:        in.Ip,
 	}
 
 	resp, err := l.svcCtx.AuthAppService.Logout(l.ctx, req)

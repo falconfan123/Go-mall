@@ -21,7 +21,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = async () => {
     setAdding(true);
-    const success = await addItem(id, quantity);
+    const success = await addItem(currentProduct, quantity);
     setAdding(false);
     if (success) {
       toast.success('添加成功');

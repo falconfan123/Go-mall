@@ -9,7 +9,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/services/auths/internal/logic"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
-	auths "github.com/falconfan123/Go-mall/services/auths/pb"
+	"github.com/falconfan123/Go-mall/services/auths/pb/auths"
 )
 
 type AuthsServer struct {
@@ -21,12 +21,6 @@ func NewAuthsServer(svcCtx *svc.ServiceContext) *AuthsServer {
 	return &AuthsServer{
 		svcCtx: svcCtx,
 	}
-}
-
-// Authentication 验证用户token合法
-func (s *AuthsServer) Authentication(ctx context.Context, in *auths.AuthReq) (*auths.AuthsRes, error) {
-	l := logic.NewAuthenticationLogic(ctx, s.svcCtx)
-	return l.Authentication(in)
 }
 
 // GenerateToken 生成token

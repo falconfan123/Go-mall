@@ -33,11 +33,23 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		Username: in.Username,
 		Password: in.Password,
 		IP:       in.Ip,
+		DeviceID: in.DeviceId,
 	}
 
 	resp, err := l.svcCtx.AuthAppService.Login(l.ctx, req)
 	if err != nil {
 		l.Logger.Errorw("login failed", logx.Field("err", err))
+		if resp != nil {
+			return &users.LoginResponse{
+				StatusCode:     resp.StatusCode,
+				StatusMsg:      resp.StatusMsg,
+				UserId:         resp.UserID,
+				ShortToken:     resp.ShortToken,
+				LongToken:      resp.LongToken,
+				ShortExpiresIn: resp.ShortExpiresIn,
+				LongExpiresIn:  resp.LongExpiresIn,
+			}, nil
+		}
 		return &users.LoginResponse{
 			StatusCode: uint32(code.ServerError),
 			StatusMsg:  code.ServerErrorMsg,
@@ -45,10 +57,12 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	}
 
 	return &users.LoginResponse{
-		StatusCode:   resp.StatusCode,
-		StatusMsg:    resp.StatusMsg,
-		UserId:       resp.UserID,
-		AccessToken:  resp.AccessToken,
-		RefreshToken: resp.RefreshToken,
+		StatusCode:     resp.StatusCode,
+		StatusMsg:      resp.StatusMsg,
+		UserId:         resp.UserID,
+		ShortToken:     resp.ShortToken,
+		LongToken:      resp.LongToken,
+		ShortExpiresIn: resp.ShortExpiresIn,
+		LongExpiresIn:  resp.LongExpiresIn,
 	}, nil
 }

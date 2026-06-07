@@ -33,23 +33,27 @@ func NewCreatePaymentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 	}
 }
 
+func (l *CreatePaymentLogic) stripeFailureResp(orderID string, err error) (*payment.PaymentResp, error) {
+	statusMsg := stripeLogic.UserFacingCreatePaymentError(err)
+	l.Logger.Errorw("create stripe payment link failed",
+		logx.Field("order_id", orderID),
+		logx.Field("err", err),
+		logx.Field("status_msg", statusMsg),
+	)
+	return &payment.PaymentResp{
+		StatusCode: code.ServerError,
+		StatusMsg:  statusMsg,
+	}, nil
+}
+
 func ConvertModelToPaymentItem(p *paymentM.Payments) *payment.PaymentItem {
-	var method payment.PaymentMethod
-	switch p.PaymentMethod {
-	case "alipay":
-		method = payment.PaymentMethod_ALIPAY
-	case "wx_pay":
-		method = payment.PaymentMethod_WECHAT_PAY
-	default:
-		method = payment.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED
-	}
 	return &payment.PaymentItem{
 		PaymentId:      p.PaymentId,
 		PreOrderId:     p.PreOrderId,
 		OrderId:        p.OrderId.String,
 		OriginalAmount: p.OriginalAmount,
 		PaidAmount:     p.PaidAmount.Int64,
-		PaymentMethod:  method,
+		PaymentMethod:  payment.PaymentMethod_STRIPE,
 		TransactionId:  p.TransactionId.String,
 		PayUrl:         p.PayUrl.String,
 		ExpireTime:     p.ExpireTime,
@@ -70,10 +74,37 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 
 	}
 	if !errors.Is(err, sqlx.ErrNotFound) {
+		if in.PaymentMethod == payment.PaymentMethod_STRIPE &&
+			existingPayment.PaymentMethod != "stripe" &&
+			payment.PaymentStatus(existingPayment.Status) == payment.PaymentStatus_PAYMENT_STATUS_UNPAID {
+			stripeItems := []*stripeLogic.PaymentItem{
+				{
+					Name:        "Order Payment",
+					Description: fmt.Sprintf("Order #%s", in.OrderId),
+					Quantity:    1,
+					Price:       existingPayment.PaidAmount.Int64,
+				},
+			}
+			payURL, stripeErr := l.svcCtx.StripeProcessor.CreatePaymentLink(l.ctx, in.OrderId, existingPayment.PaidAmount.Int64, stripeItems, map[string]string{
+				"order_id":   in.OrderId,
+				"user_id":    fmt.Sprintf("%d", in.UserId),
+				"payment_id": existingPayment.PaymentId,
+				"pay_amount": fmt.Sprintf("%d", existingPayment.PaidAmount.Int64),
+			})
+			if stripeErr != nil {
+				return l.stripeFailureResp(in.OrderId, stripeErr)
+			}
+			existingPayment.PaymentMethod = "stripe"
+			existingPayment.PayUrl = sql.NullString{String: payURL, Valid: true}
+			existingPayment.UpdatedAt = time.Now()
+			if err := l.svcCtx.PaymentModel.Update(l.ctx, existingPayment); err != nil {
+				return nil, err
+			}
+		}
+
 		res.StatusCode = code.PaymentExist
 		res.StatusMsg = code.PaymentExistMsg
 		res.Payment = ConvertModelToPaymentItem(existingPayment)
-		// 幂等性校验通过，直接返回已存在的支付单
 		return res, nil
 	}
 	// 2. 获取预订单信息（调用订单服务）
@@ -93,40 +124,30 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 
 	originalAmount := getOrderInfo.Order.OriginalAmount
 	payableAmount := getOrderInfo.Order.PayableAmount
-	fmt.Println(payableAmount)
 	// 3. 生成支付单信息
 	paymentId := generateUUID()
-	fmt.Printf("Receive PaymentMethod: %v\n", in.PaymentMethod)
-	// 4. 调用第三方支付生成支付链接（此处根据不同渠道简单模拟返回 URL）
-	if in.PaymentMethod == payment.PaymentMethod_PAYMENT_METHOD_UNSPECIFIED {
+	// 4. 仅支持 Stripe 支付
+	if in.PaymentMethod != payment.PaymentMethod_STRIPE {
 		res.StatusCode = code.PaymentMethodNotSupport
 		res.StatusMsg = code.PaymentMethodNotSupportMsg
 		return res, nil
 	}
-	var payUrl string
-
-	// 根据支付方式生成支付链接
-	switch in.PaymentMethod {
-	case payment.PaymentMethod_STRIPE:
-		// 使用 Stripe 生成支付链接
-		stripeItems := []*stripeLogic.PaymentItem{
-			{
-				Name:        "Order Payment",
-				Description: fmt.Sprintf("Order #%s", in.OrderId),
-				Quantity:    1,
-				Price:       payableAmount,
-			},
-		}
-		payUrl, err = l.svcCtx.StripeProcessor.CreatePaymentLink(l.ctx, in.OrderId, payableAmount, stripeItems)
-		if err != nil {
-			return nil, err
-		}
-	default:
-		// 默认使用支付宝
-		payUrl, err = GenerateAlipayPaymentURL(l.svcCtx, payableAmount, 1800, in.OrderId)
-		if err != nil {
-			return nil, err
-		}
+	stripeItems := []*stripeLogic.PaymentItem{
+		{
+			Name:        "Order Payment",
+			Description: fmt.Sprintf("Order #%s", in.OrderId),
+			Quantity:    1,
+			Price:       payableAmount,
+		},
+	}
+	payUrl, err := l.svcCtx.StripeProcessor.CreatePaymentLink(l.ctx, in.OrderId, payableAmount, stripeItems, map[string]string{
+		"order_id":   in.OrderId,
+		"user_id":    fmt.Sprintf("%d", in.UserId),
+		"payment_id": paymentId,
+		"pay_amount": fmt.Sprintf("%d", payableAmount),
+	})
+	if err != nil {
+		return l.stripeFailureResp(in.OrderId, err)
 	}
 	// 5. 构造支付单记录
 	newPayment := &paymentM.Payments{
@@ -178,16 +199,10 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 
 // PaymentMethodToString paymentMethodToString 将 proto 枚举转换为数据库存储的字符串
 func PaymentMethodToString(method payment.PaymentMethod) string {
-	switch method {
-	case payment.PaymentMethod_WECHAT_PAY:
-		return "wx_pay"
-	case payment.PaymentMethod_ALIPAY:
-		return "alipay"
-	case payment.PaymentMethod_STRIPE:
-		return "stripe"
-	default:
+	if method != payment.PaymentMethod_STRIPE {
 		return "unknown"
 	}
+	return "stripe"
 }
 
 // generateUUID 生成一个支付单ID（UUID格式）

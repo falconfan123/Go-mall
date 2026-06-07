@@ -92,16 +92,35 @@ func (m *defaultPaymentsModel) Insert(ctx context.Context, data *Payments) (sql.
 }
 
 func (m *defaultPaymentsModel) Update(ctx context.Context, data *Payments) error {
-	// Use PostgreSQL $1, $2, ... placeholders
-	fields := strings.Split(paymentsRowsWithPlaceHolder, "=?")
-	setClauses := make([]string, len(fields))
-	for i := range fields {
-		if fields[i] != "" {
-			setClauses[i] = fmt.Sprintf("%s = $%d", fields[i], i+1)
-		}
-	}
-	query := fmt.Sprintf("update %s set %s where \"payment_id\" = $%d", m.table, strings.Join(setClauses, ", "), len(fields))
-	_, err := m.conn.ExecCtx(ctx, query, data.PreOrderId, data.OrderId, data.UserId, data.OriginalAmount, data.PaidAmount, data.PaymentMethod, data.TransactionId, data.PayUrl, data.ExpireTime, data.Status, data.PaidAt, data.PaymentId)
+	query := fmt.Sprintf(`update %s set
+		"pre_order_id" = $1,
+		"order_id" = $2,
+		"user_id" = $3,
+		"original_amount" = $4,
+		"paid_amount" = $5,
+		"payment_method" = $6,
+		"transaction_id" = $7,
+		"pay_url" = $8,
+		"expire_time" = $9,
+		"status" = $10,
+		"paid_at" = $11
+		where "payment_id" = $12`, m.table)
+	_, err := m.conn.ExecCtx(
+		ctx,
+		query,
+		data.PreOrderId,
+		data.OrderId,
+		data.UserId,
+		data.OriginalAmount,
+		data.PaidAmount,
+		data.PaymentMethod,
+		data.TransactionId,
+		data.PayUrl,
+		data.ExpireTime,
+		data.Status,
+		data.PaidAt,
+		data.PaymentId,
+	)
 	return err
 }
 

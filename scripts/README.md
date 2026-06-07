@@ -63,47 +63,70 @@ make build         # 通过 Makefile 构建
 
 ### 3. start-unified.sh
 
-**用途**: Go-Mall 统一启动脚本（增强版）
+**用途**: Go-Mall 本地联调唯一启动入口
 
 **功能**:
-- 自动清理旧进程和占用端口
-- 启动所有微服务（auths, audit, users, inventory, product, carts, coupons, order, checkout, payment）
-- 启动所有 API 网关（user-api, product-api, carts-api, order-api, checkout-api, payment-api, coupon-api, flash-api）
-- 启动主网关（gateway）
-- 启动前端（frontend）
+- 启动 `construct/depend/docker-compose.yaml` 中的依赖容器
+- 校准 Postgres / RabbitMQ 本地账号与初始化数据
+- 按固定顺序启动全部后端 RPC 与 gateway
+- 启动 `stripe listen --forward-to http://127.0.0.1:11112/stripe/webhook`
+- 在 `frontend/` 执行 `npm run dev -- --host 127.0.0.1 --port 3000`
+- 将后端和前端 PID 统一写入 `/tmp/go-mall-pids.txt`
+- 输出日志到 `scripts/logs/*.log`
+- 支持 `status` / `stop` / `restart`
 
-**服务端口映射**:
+**统一命令接口**:
+```bash
+# 首次使用前先登录 Stripe CLI
+stripe login
+
+# 启动依赖 + 后端 + 前端
+./scripts/start-unified.sh
+
+# 查看当前状态
+./scripts/start-unified.sh status
+
+# 停止统一脚本拉起的进程与依赖
+./scripts/start-unified.sh stop
+
+# 完整重启
+./scripts/start-unified.sh restart
+```
+
+**后端端口映射**:
 | 服务 | 端口 | 类型 |
 |------|------|------|
 | auths | 10000 | RPC |
-| audit | 10008 | RPC |
 | users | 10001 | RPC |
-| inventory | 10011 | RPC |
 | product | 10002 | RPC |
 | carts | 10003 | RPC |
-| coupons | 10009 | RPC |
 | order | 10004 | RPC |
 | checkout | 10005 | RPC |
 | payment | 10006 | RPC |
-| user-api | 8001 | API |
-| product-api | 8002 | API |
-| carts-api | 8003 | API |
-| order-api | 8004 | API |
-| checkout-api | 8005 | API |
-| payment-api | 8006 | API |
-| coupon-api | 8009 | API |
-| flash-api | 8008 | API |
+| inventory | 10007 | RPC |
+| audit | 10008 | RPC |
+| coupons | 10009 | RPC |
+| system | 10010 | RPC |
+| activity | 10011 | RPC |
+| admin | 10012 | RPC |
 | gateway | 8888 | Gateway |
-| frontend | 3000 | Frontend |
+| frontend | 3000 | Vite |
 
-**使用方法**:
-```bash
-# 启动核心服务（默认）
-./scripts/start-unified.sh
+**固定访问地址**:
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| Frontend | http://127.0.0.1:3000 | 本地前端联调入口 |
+| Gateway | http://127.0.0.1:8888 | 网关入口 |
+| RabbitMQ 管理台 | http://127.0.0.1:15672 | admin / admin |
+| Gorse | http://127.0.0.1:8088 | 推荐服务控制台 |
+| Grafana | http://127.0.0.1:3001 | 日志可视化 |
+| Loki | http://127.0.0.1:3100 | 日志 API |
+| Stripe webhook | http://127.0.0.1:11112/stripe/webhook | 本地 webhook 接收端 |
 
-# 停止所有服务
-./scripts/start-unified.sh stop
-```
+**Stripe 本地支付链路说明**:
+- 统一启动脚本会自动拉起 `stripe listen --forward-to http://127.0.0.1:11112/stripe/webhook`
+- 如未登录 Stripe CLI，启动会直接失败并提示先执行 `stripe login`
+- 查看转发日志：`tail -f scripts/logs/stripe-listen.log`
 
 ---
 

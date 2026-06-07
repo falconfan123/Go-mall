@@ -6,6 +6,7 @@ option go_package = "./payment";
 service Payment {
   rpc CreatePayment (PaymentReq) returns (PaymentResp);
   rpc ListPayments (PaymentListReq) returns (PaymentListResp);
+  rpc GetPaymentStatus (PaymentStatusReq) returns (PaymentStatusResp);
 }
 
 enum PaymentStatus {
@@ -66,4 +67,17 @@ message PaymentListResp {
   int32 status_code = 1;
   string status_msg = 2;
   repeated PaymentItem payments = 3;
+}
+
+message PaymentStatusReq {
+  string payment_id = 1;
+  string order_id = 2;
+}
+
+message PaymentStatusResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+  PaymentItem payment = 3;
+  int32 order_status = 4;
+  int32 order_payment_status = 5;
 }

@@ -2,10 +2,12 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	inventorymodel "github.com/falconfan123/Go-mall/dal/model/inventory"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/svc"
 	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
 
@@ -48,6 +50,24 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 			resp.StatusCode = code.InvalidParams
 			resp.StatusMsg = code.InvalidParamsMsg
 			return resp, nil
+		}
+		if _, err := l.svcCtx.EnsureInventoryCacheCtx(l.ctx, int64(item.ProductId)); err != nil {
+			switch {
+			case errors.Is(err, inventorymodel.ErrNotFound):
+				l.Logger.Infow("商品库存不存在",
+					logx.Field("product_id", item.ProductId),
+				)
+				resp.StatusCode = code.ProductNotFoundInventory
+				resp.StatusMsg = code.ProductNotFoundInventoryMsg
+				return resp, nil
+			default:
+				l.Logger.Errorw("回源库存并回填缓存失败",
+					logx.Field("err", err),
+					logx.Field("product_id", item.ProductId),
+					logx.Field("pre_order_id", in.PreOrderId),
+				)
+				return nil, status.Error(codes.Internal, "系统繁忙")
+			}
 		}
 		productKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId)
 		keys[i+1] = productKey

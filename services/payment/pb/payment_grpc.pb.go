@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Payment_CreatePayment_FullMethodName = "/payment.Payment/CreatePayment"
-	Payment_ListPayments_FullMethodName  = "/payment.Payment/ListPayments"
+	Payment_CreatePayment_FullMethodName    = "/payment.Payment/CreatePayment"
+	Payment_ListPayments_FullMethodName     = "/payment.Payment/ListPayments"
+	Payment_GetPaymentStatus_FullMethodName = "/payment.Payment/GetPaymentStatus"
 )
 
 // PaymentClient is the client API for Payment service.
@@ -29,6 +30,7 @@ const (
 type PaymentClient interface {
 	CreatePayment(ctx context.Context, in *PaymentReq, opts ...grpc.CallOption) (*PaymentResp, error)
 	ListPayments(ctx context.Context, in *PaymentListReq, opts ...grpc.CallOption) (*PaymentListResp, error)
+	GetPaymentStatus(ctx context.Context, in *PaymentStatusReq, opts ...grpc.CallOption) (*PaymentStatusResp, error)
 }
 
 type paymentClient struct {
@@ -59,12 +61,23 @@ func (c *paymentClient) ListPayments(ctx context.Context, in *PaymentListReq, op
 	return out, nil
 }
 
+func (c *paymentClient) GetPaymentStatus(ctx context.Context, in *PaymentStatusReq, opts ...grpc.CallOption) (*PaymentStatusResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PaymentStatusResp)
+	err := c.cc.Invoke(ctx, Payment_GetPaymentStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PaymentServer is the server API for Payment service.
 // All implementations must embed UnimplementedPaymentServer
 // for forward compatibility.
 type PaymentServer interface {
 	CreatePayment(context.Context, *PaymentReq) (*PaymentResp, error)
 	ListPayments(context.Context, *PaymentListReq) (*PaymentListResp, error)
+	GetPaymentStatus(context.Context, *PaymentStatusReq) (*PaymentStatusResp, error)
 	mustEmbedUnimplementedPaymentServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedPaymentServer) CreatePayment(context.Context, *PaymentReq) (*
 }
 func (UnimplementedPaymentServer) ListPayments(context.Context, *PaymentListReq) (*PaymentListResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListPayments not implemented")
+}
+func (UnimplementedPaymentServer) GetPaymentStatus(context.Context, *PaymentStatusReq) (*PaymentStatusResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPaymentStatus not implemented")
 }
 func (UnimplementedPaymentServer) mustEmbedUnimplementedPaymentServer() {}
 func (UnimplementedPaymentServer) testEmbeddedByValue()                 {}
@@ -138,6 +154,24 @@ func _Payment_ListPayments_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Payment_GetPaymentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PaymentStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentServer).GetPaymentStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Payment_GetPaymentStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentServer).GetPaymentStatus(ctx, req.(*PaymentStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Payment_ServiceDesc is the grpc.ServiceDesc for Payment service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var Payment_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPayments",
 			Handler:    _Payment_ListPayments_Handler,
+		},
+		{
+			MethodName: "GetPaymentStatus",
+			Handler:    _Payment_GetPaymentStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

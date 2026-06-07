@@ -10,29 +10,20 @@ type Config struct {
 	zrpc.RpcServerConf
 	PostgresConfig config.PostgresConfig
 	RedisConf      redis.RedisConf
-	Alipay         AlipayConfig
 	Stripe         StripeConfig
 	OrderRpc       zrpc.RpcClientConf
 	RabbitMQConfig config.RabbitMQConfig
 	PrometheusExt  PrometheusExtConf
 }
 
-type AlipayConfig struct {
-	AppId           string
-	PrivateKey      string
-	AlipayPublicKey string
-	NotifyURL       string
-	NotifyPath      string
-	NotifyPort      int
-	ReturnURL       string
-}
-
 type StripeConfig struct {
-	APIKey        string `env:"STRIPE_API_KEY"`
-	SuccessURL    string
-	CancelURL     string
-	WebhookSecret string
-	WebhookPort   int
+	APIKey            string
+	SuccessURL        string
+	CancelURL         string
+	WebhookSecret     string
+	WebhookPort       int
+	RequestTimeoutMs  int64
+	MaxNetworkRetries int64
 }
 
 type PrometheusExtConf struct {

@@ -2,7 +2,6 @@ package biz
 
 import (
 	"errors"
-	"time"
 )
 
 const (
@@ -12,9 +11,6 @@ const (
 	InventoryKeyPrefix        = "inventory:%d"
 	InventoryDeductLockPrefix = "inventory:deduct:lock"
 	InventoryProductKey       = "inventory:product"
-
-	// 库存缓存 TTL - 5分钟，数据变更时会主动更新
-	InventoryCacheTTL = 5 * time.Minute
 )
 
 var (

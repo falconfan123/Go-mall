@@ -3,10 +3,6 @@ syntax = "proto3";
 package auths;
 option go_package = "./auths";
 
-message AuthReq {
-  string token = 1;
-  string client_ip = 2;
-}
 message AuthGenReq {
   uint32 user_id = 1;
   string username = 2;
@@ -19,12 +15,6 @@ message AuthRenewalReq {
   string client_ip = 3;
 }
 
-message AuthsRes{
-  uint32 status_code = 1;
-  string status_msg = 2;
-
-  uint32 user_id = 3; // 用户id
-}
 message AuthGenRes {
   uint32 status_code = 1;
   string status_msg = 2;
@@ -44,8 +34,9 @@ message AuthRenewalRes {
 
 // 用于网关验证的请求
 message AuthValidateReq {
-  string token = 1; // 令牌（短令牌或长令牌）
-  string client_ip = 2;
+  string short_token = 1; // 短令牌
+  string long_token = 2; // 长令牌
+  string client_ip = 3;
 }
 
 // 用于网关验证的响应
@@ -53,6 +44,7 @@ message AuthValidateRes {
   uint32 status_code = 1;
   string status_msg = 2;
   uint32 user_id = 3;
+  bool needs_refresh = 4;
 }
 
 // 用于登出的请求
@@ -69,8 +61,6 @@ message LogoutRes {
 
 
 service Auths {
-  //  Authentication 验证用户token合法
-  rpc Authentication (AuthReq) returns (AuthsRes);
   // GenerateToken 生成token
   rpc GenerateToken (AuthGenReq) returns (AuthGenRes);
   // RenewToken 续期身份

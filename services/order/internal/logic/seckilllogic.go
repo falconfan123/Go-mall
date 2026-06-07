@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
+	"github.com/falconfan123/Go-mall/common/consts/biz"
+	inventory "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/order/internal/mq/seckill"
 	"github.com/falconfan123/Go-mall/services/order/internal/svc"
 	order "github.com/falconfan123/Go-mall/services/order/pb"
@@ -70,6 +73,10 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 	pathKey := in.PathKey
 	activityId := productId
 	nowTime := time.Now().UnixMilli()
+
+	if err := l.ensureSeckillStock(activityId, productId); err != nil {
+		logx.Errorf("ensure seckill stock failed: activityId=%d productId=%d err=%v", activityId, productId, err)
+	}
 
 	logx.Infof("Seckill request: userId=%d, productId=%d, activityId=%d, pathKey=%s", userId, productId, activityId, pathKey)
 
@@ -145,6 +152,33 @@ func (l *SeckillLogic) Seckill(in *order.SeckillRequest) (*order.SeckillResponse
 	default:
 		return &order.SeckillResponse{StatusCode: 1, StatusMsg: msg, Message: "秒杀失败"}, nil
 	}
+}
+
+func (l *SeckillLogic) ensureSeckillStock(activityId, productId int64) error {
+	stockKey := fmt.Sprintf("act_%d_stock", activityId)
+	exists, err := l.svcCtx.RedisClient.ExistsCtx(l.ctx, stockKey)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+
+	resp, err := l.svcCtx.InventoryRpc.GetInventory(l.ctx, &inventory.GetInventoryReq{
+		ProductId: int32(productId),
+	})
+	if err != nil {
+		return err
+	}
+	if resp.GetStatusCode() != 0 {
+		return fmt.Errorf("inventory status=%d msg=%s", resp.GetStatusCode(), resp.GetStatusMsg())
+	}
+
+	if err := l.svcCtx.RedisClient.SetexCtx(l.ctx, stockKey, strconv.FormatInt(resp.GetInventory(), 10), int(biz.SeckillCacheTTL.Seconds())); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ClearPurchasedRecord 清除用户的购买记录（用于测试或重试）

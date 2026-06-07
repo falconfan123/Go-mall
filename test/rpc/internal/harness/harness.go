@@ -11,7 +11,7 @@ import (
 
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	auditpb "github.com/falconfan123/Go-mall/services/audit/pb"
-	authspb "github.com/falconfan123/Go-mall/services/auths/pb"
+	authspb "github.com/falconfan123/Go-mall/services/auths/pb/auths"
 	cartspb "github.com/falconfan123/Go-mall/services/carts/pb"
 	checkoutpb "github.com/falconfan123/Go-mall/services/checkout/pb"
 	couponspb "github.com/falconfan123/Go-mall/services/coupons/pb"

@@ -3,7 +3,7 @@ package login
 import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
-	auths "github.com/falconfan123/Go-mall/services/auths/pb"
+	auths "github.com/falconfan123/Go-mall/services/auths/pb/auths"
 	users "github.com/falconfan123/Go-mall/services/users/pb"
 	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
 	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"

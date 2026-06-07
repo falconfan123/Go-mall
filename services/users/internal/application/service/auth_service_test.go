@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	authsclient "github.com/falconfan123/Go-mall/services/auths/authsclient"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/dto"
 	appevent "github.com/falconfan123/Go-mall/services/users/internal/application/event"
 	"github.com/falconfan123/Go-mall/services/users/internal/domain/aggregate"
@@ -16,6 +17,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/users/internal/domain/repository"
 	"github.com/falconfan123/Go-mall/services/users/internal/domain/valueobject"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
 )
 
 func TestAuthAppServiceRegister(t *testing.T) {
@@ -25,11 +27,7 @@ func TestAuthAppServiceRegister(t *testing.T) {
 		saveID: 101,
 	}
 	publisher := &stubUserEventPublisher{}
-	service := NewAuthAppService(repo, publisher, &AuthConfig{
-		AccessExpire:  3600,
-		RefreshExpire: 7200,
-		Secret:        "secret",
-	})
+	service := NewAuthAppService(repo, publisher, &stubAuthsClient{})
 
 	resp, err := service.Register(context.Background(), &dto.RegisterRequest{
 		Email:           "user@example.com",
@@ -40,8 +38,8 @@ func TestAuthAppServiceRegister(t *testing.T) {
 	require.NoError(t, err)
 	require.EqualValues(t, code.Success, resp.StatusCode)
 	require.EqualValues(t, 101, resp.UserID)
-	require.NotEmpty(t, resp.AccessToken)
-	require.NotEmpty(t, resp.RefreshToken)
+	require.NotEmpty(t, resp.ShortToken)
+	require.NotEmpty(t, resp.LongToken)
 	require.NotNil(t, repo.savedUser)
 	require.Equal(t, "user@example.com", repo.savedUser.Username)
 
@@ -55,10 +53,7 @@ func TestAuthAppServiceRegisterRejectsDuplicateUsername(t *testing.T) {
 
 	service := NewAuthAppService(&stubUserRepository{
 		existsByUsername: true,
-	}, &stubUserEventPublisher{}, &AuthConfig{
-		AccessExpire:  3600,
-		RefreshExpire: 7200,
-	})
+	}, &stubUserEventPublisher{}, &stubAuthsClient{})
 
 	resp, err := service.Register(context.Background(), &dto.RegisterRequest{
 		Username:        "fan",
@@ -81,10 +76,7 @@ func TestAuthAppServiceLogin(t *testing.T) {
 		userByAccount: user,
 	}
 	publisher := &stubUserEventPublisher{}
-	service := NewAuthAppService(repo, publisher, &AuthConfig{
-		AccessExpire:  3600,
-		RefreshExpire: 7200,
-	})
+	service := NewAuthAppService(repo, publisher, &stubAuthsClient{})
 
 	resp, err := service.Login(context.Background(), &dto.LoginRequest{
 		Username: "fan",
@@ -112,10 +104,7 @@ func TestAuthAppServiceLoginFailsWhenLoginTimeUpdateFails(t *testing.T) {
 	service := NewAuthAppService(&stubUserRepository{
 		userByAccount:  user,
 		updateLoginErr: errors.New("write failed"),
-	}, &stubUserEventPublisher{}, &AuthConfig{
-		AccessExpire:  3600,
-		RefreshExpire: 7200,
-	})
+	}, &stubUserEventPublisher{}, &stubAuthsClient{})
 
 	resp, err := service.Login(context.Background(), &dto.LoginRequest{
 		Username: "fan",
@@ -131,10 +120,7 @@ func TestAuthAppServiceLoginUserNotFound(t *testing.T) {
 
 	service := NewAuthAppService(&stubUserRepository{
 		findByAccountErr: repository.ErrUserNotFound,
-	}, &stubUserEventPublisher{}, &AuthConfig{
-		AccessExpire:  3600,
-		RefreshExpire: 7200,
-	})
+	}, &stubUserEventPublisher{}, &stubAuthsClient{})
 
 	resp, err := service.Login(context.Background(), &dto.LoginRequest{
 		Username: "fan",
@@ -149,12 +135,13 @@ func TestAuthAppServiceLogoutFailsWhenLogoutTimeUpdateFails(t *testing.T) {
 
 	service := NewAuthAppService(&stubUserRepositoryWithLogoutError{
 		err: errors.New("write failed"),
-	}, &stubUserEventPublisher{}, &AuthConfig{
-		AccessExpire:  3600,
-		RefreshExpire: 7200,
-	})
+	}, &stubUserEventPublisher{}, &stubAuthsClient{})
 
-	resp, err := service.Logout(context.Background(), &dto.LogoutRequest{UserID: 9})
+	resp, err := service.Logout(context.Background(), &dto.LogoutRequest{
+		UserID:    9,
+		LongToken: "long-token",
+		IP:        "127.0.0.1",
+	})
 	require.Error(t, err)
 	require.EqualValues(t, code.ServerError, resp.StatusCode)
 }
@@ -239,6 +226,8 @@ type stubUserEventPublisher struct {
 	loggedIn   atomic.Int32
 }
 
+type stubAuthsClient struct{}
+
 type stubUserRepositoryWithLogoutError struct {
 	stubUserRepository
 	err error
@@ -256,6 +245,32 @@ func (s *stubUserEventPublisher) PublishUserRegistered(*domainevent.UserRegister
 func (s *stubUserEventPublisher) PublishUserLoggedIn(*domainevent.UserLoggedInEvent) error {
 	s.loggedIn.Add(1)
 	return nil
+}
+
+func (s *stubAuthsClient) GenerateToken(context.Context, *authsclient.AuthGenReq, ...grpc.CallOption) (*authsclient.AuthGenRes, error) {
+	return &authsclient.AuthGenRes{
+		StatusCode:     code.Success,
+		StatusMsg:      code.SuccessMsg,
+		ShortToken:     "short-token",
+		LongToken:      "long-token",
+		ShortExpiresIn: time.Now().Add(24 * time.Hour).Unix(),
+		LongExpiresIn:  time.Now().Add(30 * 24 * time.Hour).Unix(),
+	}, nil
+}
+
+func (s *stubAuthsClient) RenewToken(context.Context, *authsclient.AuthRenewalReq, ...grpc.CallOption) (*authsclient.AuthRenewalRes, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubAuthsClient) ValidateToken(context.Context, *authsclient.AuthValidateReq, ...grpc.CallOption) (*authsclient.AuthValidateRes, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubAuthsClient) Logout(context.Context, *authsclient.LogoutReq, ...grpc.CallOption) (*authsclient.LogoutRes, error) {
+	return &authsclient.LogoutRes{
+		StatusCode: code.Success,
+		StatusMsg:  code.SuccessMsg,
+	}, nil
 }
 
 func (s *stubUserEventPublisher) PublishUserLoggedOut(*domainevent.UserLoggedOutEvent) error {

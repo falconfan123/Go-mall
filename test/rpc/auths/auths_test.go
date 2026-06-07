@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	auths "github.com/falconfan123/Go-mall/services/auths/pb"
+	auths "github.com/falconfan123/Go-mall/services/auths/pb/auths"
 	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 
 	"github.com/stretchr/testify/assert"
@@ -35,8 +35,8 @@ func setupGRPCConnection(t *testing.T) {
 	})
 }
 
-// 验证token
-func TestAuthenticationLogic_Authentication(t *testing.T) {
+// 验证双令牌
+func TestAuthenticationLogic_ValidateToken(t *testing.T) {
 	setupGRPCConnection(t)
 
 	tokenResp, err := client.GenerateToken(context.Background(), &auths.AuthGenReq{
@@ -49,11 +49,13 @@ func TestAuthenticationLogic_Authentication(t *testing.T) {
 	}
 	assert.Equal(t, uint32(0), tokenResp.StatusCode)
 
-	res, err := client.Authentication(context.Background(), &auths.AuthReq{
-		Token: tokenResp.GetShortToken(), ClientIp: clientIP,
+	res, err := client.ValidateToken(context.Background(), &auths.AuthValidateReq{
+		ShortToken: tokenResp.GetShortToken(),
+		LongToken:  tokenResp.GetLongToken(),
+		ClientIp:   clientIP,
 	})
 	if err != nil {
-		t.Fatalf("Authentication failed: %v", err)
+		t.Fatalf("ValidateToken failed: %v", err)
 	}
 	assert.Equal(t, uint32(0), res.StatusCode)
 	t.Log(res)

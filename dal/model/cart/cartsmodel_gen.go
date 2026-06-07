@@ -99,7 +99,7 @@ func (m *defaultCartsModel) Insert(ctx context.Context, data *Carts) (sql.Result
 
 func (m *defaultCartsModel) Update(ctx context.Context, data *Carts) error {
 	query := fmt.Sprintf("update %s set %s where id = $1", m.table, cartsRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.ProductName, data.ProductImage, data.ProductPrice, data.Quantity, data.Checked, data.Id)
+	_, err := m.conn.ExecCtx(ctx, query, data.Id, data.UserId, data.ProductId, data.ProductName, data.ProductImage, data.ProductPrice, data.Quantity, data.Checked)
 	return err
 }
 
