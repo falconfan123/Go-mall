@@ -4,6 +4,8 @@ go 1.25.0
 
 replace github.com/falconfan123/Go-mall/common => ../../common
 
+replace github.com/falconfan123/Go-mall/services/auths => ../../services/auths
+
 require (
 	github.com/falconfan123/Go-mall/common v0.0.0-00010101000000-000000000000
 	github.com/zeromicro/go-zero v1.10.1
