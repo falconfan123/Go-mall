@@ -48,7 +48,7 @@ else
 fi
 
 cd "$ROOT_DIR"
-GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" work sync
+GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" work sync -offline
 
 for service in "${targets[@]}"; do
   if [[ ! " ${configured_services[*]} " =~ [[:space:]]${service}[[:space:]] ]]; then
