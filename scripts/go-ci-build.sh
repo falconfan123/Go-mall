@@ -50,6 +50,9 @@ fi
 cd "$ROOT_DIR"
 GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" work sync
 
+# Disable work mode when building individual services to prevent module resolution issues
+export GOWORK=disable
+
 for service in "${targets[@]}"; do
   if [[ ! " ${configured_services[*]} " =~ [[:space:]]${service}[[:space:]] ]]; then
     echo "service is not in build whitelist: $service" >&2
