@@ -1,6 +1,6 @@
 module github.com/falconfan123/Go-mall/common
 
-go 1.25.0
+go 1.25.11
 
 require (
 	github.com/falconfan123/Go-mall/services/auths v0.0.0-20260319170244-1dc6add73f57

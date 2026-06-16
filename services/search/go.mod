@@ -1,6 +1,6 @@
 module github.com/falconfan123/Go-mall/services/search
 
-go 1.25.0
+go 1.25.11
 
 require (
 	github.com/falconfan123/Go-mall/common v0.0.0

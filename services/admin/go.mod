@@ -1,6 +1,6 @@
 module github.com/falconfan123/Go-mall/services/admin
 
-go 1.25.0
+go 1.25.11
 
 require (
 	github.com/falconfan123/Go-mall/common v0.0.0-20260312153719-88b43b07ae7d

@@ -1,6 +1,6 @@
 module github.com/falconfan123/Go-mall/tools/rag
 
-go 1.25.0
+go 1.25.11
 
 require modernc.org/sqlite v1.18.2
 
