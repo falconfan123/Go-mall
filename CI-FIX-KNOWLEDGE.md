@@ -130,3 +130,11 @@ go mod tidy
 | Issue | PR | 问题 | 状态 |
 |-------|----|------|------|
 | #58 | #57 | Build (GOWORK), Mock Consistency, Coverage | 待修复 |
+| — | — | **事故复盘**: CI 修复链膨胀 (2026-06) | `postmortem-2026-06-ci-chain-explosion.md` |
+
+### 循环检测
+
+如果 ci-fix-monitor 发现同一个 PR 产生了 ≥2 个 ci-fix Issue，或连续 3 个 Issue 都是 fix-of-fix：
+- **暂停自动修复**，不要创建新 Issue
+- 检查原始 PR 的状态，定位工具链或配置层面的根因
+- 先修根因，再修具体代码
