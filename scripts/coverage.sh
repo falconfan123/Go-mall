@@ -35,7 +35,6 @@ cleanup() {
 trap cleanup EXIT
 
 cd "$ROOT_DIR"
-export GOWORK="$ROOT_DIR/go.work"
 
 for pkg in "${packages[@]}"; do
   safe_name="$(echo "$pkg" | tr '/.' '__')"

@@ -25,7 +25,6 @@ mkdir -p "$REPORT_DIR"
 rm -f "$REPORT_DIR"/{go-test.jsonl,junit.xml,index.html,summary.txt}
 
 cd "$ROOT_DIR"
-export GOWORK="$ROOT_DIR/go.work"
 if GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" test -json -race -count=1 "${packages[@]}" \
   | tee "$RAW_LOG" \
   | python3 "$ROOT_DIR/scripts/test_report.py" \
