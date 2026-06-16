@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGES_FILE="$ROOT_DIR/scripts/test_unit_packages.txt"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.10}"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.11}"
 REPORT_DIR="${UNIT_REPORT_DIR:-$ROOT_DIR/.artifacts/unit-report}"
 RAW_LOG="$REPORT_DIR/go-test.jsonl"
 
