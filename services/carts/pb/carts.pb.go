@@ -4,7 +4,7 @@
 // 	protoc        v6.33.1
 // source: carts.proto
 
-package carts
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -560,7 +560,7 @@ const file_carts_proto_rawDesc = "" +
 	"\fCartItemList\x12\x0f.carts.UserInfo\x1a\x1b.carts.CartItemListResponse\x12C\n" +
 	"\x0eCreateCartItem\x12\x16.carts.CartItemRequest\x1a\x19.carts.CreateCartResponse\x12=\n" +
 	"\vSubCartItem\x12\x16.carts.CartItemRequest\x1a\x16.carts.SubCartResponse\x12B\n" +
-	"\x0eDeleteCartItem\x12\x16.carts.CartItemRequest\x1a\x18.carts.EmptyCartResponseB\tZ\a./cartsb\x06proto3"
+	"\x0eDeleteCartItem\x12\x16.carts.CartItemRequest\x1a\x18.carts.EmptyCartResponseB6Z4github.com/falconfan123/Go-mall/services/carts/pb;pbb\x06proto3"
 
 var (
 	file_carts_proto_rawDescOnce sync.Once
