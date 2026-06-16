@@ -177,7 +177,7 @@ func (l *CreateOrderLogic) CreateOrder(in *orderpb.CreateOrderRequest) (*orderpb
 			logx.Field("order_id", orderID),
 			logx.Field("pre_order_id", in.PreOrderId),
 			logx.Field("user_id", in.UserId))
-			return nil, status.Error(codes.Internal, code.CreateOrderFailedMsg)
+		return nil, status.Error(codes.Internal, code.CreateOrderFailedMsg)
 	}
 
 	res.StatusCode = code.Success
