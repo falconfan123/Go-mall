@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/falconfan123/Go-mall/services/checkout/internal/domain/entity"
 	"github.com/falconfan123/Go-mall/services/checkout/internal/domain/valueobject"
 	"github.com/stretchr/testify/require"
 )
@@ -42,4 +43,37 @@ func TestCheckoutAggregateInvalidItemAndExpiration(t *testing.T) {
 
 	err := checkout.CreateFromCart(nil, &valueobject.Address{}, 30)
 	require.Error(t, err)
+}
+
+func TestCheckoutAggregateStateGetters(t *testing.T) {
+	t.Parallel()
+
+	checkout := NewCheckoutAggregate("pre-3", 11, 22, 30)
+	require.True(t, checkout.IsPending())
+	require.Equal(t, "pre-3", checkout.GetPreOrderID())
+	require.Equal(t, int64(11), checkout.GetUserID())
+	require.Equal(t, int64(22), checkout.GetAddressID())
+	require.Equal(t, int64(0), checkout.GetOriginalAmount())
+	require.Len(t, checkout.GetItems(), 0)
+
+	require.NoError(t, checkout.AddItem(1001, "product", "img", 2, 120))
+	require.Equal(t, 2, checkout.GetTotalQuantity())
+	require.Len(t, checkout.GetItems(), 1)
+	require.Greater(t, checkout.GetExpireTime().Unix(), int64(0))
+
+	loaded := LoadCheckout(checkout.GetCheckout())
+	require.Same(t, checkout.GetCheckout(), loaded.GetCheckout())
+}
+
+func TestCheckoutAggregateCancelAndExpire(t *testing.T) {
+	t.Parallel()
+
+	checkout := NewCheckoutAggregate("pre-4", 1, 2, 30)
+	require.NoError(t, checkout.Cancel())
+	require.False(t, checkout.IsPending())
+
+	expiring := NewCheckoutAggregate("pre-5", 1, 2, 30)
+	expiring.Expire()
+	require.False(t, expiring.IsPending())
+	require.Equal(t, entity.CheckoutStatusExpired, expiring.GetCheckout().Status)
 }

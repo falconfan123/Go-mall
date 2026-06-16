@@ -1,51 +1,0 @@
-
-ù
-
-inventory/inventory.proto	inventory"¬
-InventoryReq3
-items (2.inventory.InventoryReq.ItemsRitems 
-pre_order_id (	R
-preOrderId
-user_id (RuserIdB
-Items
-
-product_id (R	productId
-quantity (Rquantity"0
-GetInventoryReq
-
-product_id (R	productId"ì
-UpdateInventoryReq9
-items (2#.inventory.UpdateInventoryReq.ItemsRitemsB
-Items
-
-product_id (R	productId
-quantity (Rquantity"7
-BatchGetInventoryReq
-product_ids (R
-productIds"p
-PreInventoryRecord
-
-product_id (R	productId
-quantity (Rquantity
-expire_time (R
-expireTime"O
-InventoryResp
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg"è
-GetInventoryResp
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg
-	inventory (R	inventory
-
-sold_count (R	soldCount2¬
-	InventoryG
-GetInventory.inventory.GetInventoryReq.inventory.GetInventoryRespJ
-UpdateInventory.inventory.UpdateInventoryReq.inventory.InventoryRespI
-DecreasePreInventory.inventory.InventoryReq.inventory.InventoryRespF
-DecreaseInventory.inventory.InventoryReq.inventory.InventoryRespG
-ReturnPreInventory.inventory.InventoryReq.inventory.InventoryRespD
-ReturnInventory.inventory.InventoryReq.inventory.InventoryRespBZ./inventorybproto3

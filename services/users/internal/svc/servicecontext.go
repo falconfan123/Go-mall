@@ -3,6 +3,7 @@ package svc
 import (
 	"github.com/falconfan123/Go-mall/dal/model/user"
 	"github.com/falconfan123/Go-mall/dal/model/user_address"
+	authsclient "github.com/falconfan123/Go-mall/services/auths/authsclient"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/event"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/service"
 	"github.com/falconfan123/Go-mall/services/users/internal/config"
@@ -10,6 +11,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/users/internal/infrastructure/persistence"
 	_ "github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
@@ -26,13 +28,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// 初始化事件发布器（暂时用空实现，后面可以替换为RabbitMQ实现）
 	var eventPublisher event.EventPublisher = &NoopEventPublisher{}
 
+	authsRpc := authsclient.NewAuths(zrpc.MustNewClient(c.AuthsRpc))
+
 	// 初始化应用服务
-	authConfig := &service.AuthConfig{
-		AccessExpire:  c.AuthConfig.AccessExpire,
-		RefreshExpire: c.AuthConfig.AccessExpire * 2,
-		Secret:        c.AuthConfig.AccessSecret,
-	}
-	authAppService := service.NewAuthAppService(userRepo, eventPublisher, authConfig)
+	authAppService := service.NewAuthAppService(userRepo, eventPublisher, authsRpc)
 
 	return &ServiceContext{
 		Config:             c,

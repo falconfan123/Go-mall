@@ -2,11 +2,11 @@ package messaging
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/falconfan123/Go-mall/services/product/internal/application/event"
 	domainevent "github.com/falconfan123/Go-mall/services/product/internal/domain/event"
 	"github.com/streadway/amqp"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // RabbitMQEventPublisher RabbitMQ事件发布器实现
@@ -27,7 +27,7 @@ func NewRabbitMQEventPublisher(channel *amqp.Channel) event.ProductEventPublishe
 		nil,              // 其他参数
 	)
 	if err != nil {
-		fmt.Printf("failed to declare exchange: %v\n", err)
+		logx.Errorw("failed to declare product exchange", logx.Field("err", err))
 	}
 
 	return &RabbitMQEventPublisher{
@@ -73,10 +73,10 @@ func (p *RabbitMQEventPublisher) publishEvent(routingKey string, event interface
 		},
 	)
 	if err != nil {
-		fmt.Printf("failed to publish event %s: %v\n", routingKey, err)
+		logx.Errorw("failed to publish product event", logx.Field("routing_key", routingKey), logx.Field("err", err))
 		return err
 	}
 
-	fmt.Printf("published event %s: %s\n", routingKey, string(body))
+	logx.Infow("published product event", logx.Field("routing_key", routingKey))
 	return nil
 }

@@ -35,6 +35,7 @@ help:
 	@echo "  make ci-vet       - 按 workspace 模块运行 go vet"
 	@echo "  make configure-branch-protection - 配置 main 分支 CI 门禁和 auto-merge"
 	@echo "  make submit-ci MSG='...' - 自动提交、建 PR、等待 CI 并自动合并"
+	@echo "  make gatekeeper   - 运行 Gatekeeper 主守门人检查"
 	@echo "  make tidy         - 整理依赖"
 	@echo "  make rag ARGS='doctor' - 运行仓库内 RAG CLI"
 	@echo ""
@@ -105,6 +106,10 @@ test-integration:
 	@echo -e "$(BLUE)运行集成测试...$(NC)"
 	@bash scripts/test-integration.sh
 
+test-gateway-smoke:
+	@echo -e "$(BLUE)运行 Gateway Smoke 测试...$(NC)"
+	@GO_MALL_TEST_LOCAL=1 bash scripts/test-gateway-smoke.sh
+
 coverage:
 	@echo -e "$(BLUE)生成覆盖率报告...$(NC)"
 	@bash scripts/coverage.sh
@@ -155,6 +160,11 @@ configure-branch-protection:
 submit-ci:
 	@echo -e "$(BLUE)自动提交并等待 CI 合并...$(NC)"
 	@bash scripts/submit-with-ci.sh "$(MSG)"
+
+# 运行 Gatekeeper 主守门人检查
+gatekeeper:
+	@echo -e "$(BLUE)运行 Gatekeeper 主守门人检查...$(NC)"
+	@bash scripts/gatekeeper.sh
 
 # 模拟 CI 检查 (跳过测试)
 ci:

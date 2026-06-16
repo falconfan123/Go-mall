@@ -1,24 +1,0 @@
-
-³
-audit/audit.protoaudit"Ï
-CreateAuditLogReq
-user_id (RuserId
-action_type (	R
-actionType-
-action_description (	RactionDescription!
-target_table (	RtargetTable
-	target_id (RtargetId
-old_data (	RoldData
-new_data (	RnewData
-	create_at (RcreateAt
-	client_ip	 (	RclientIp!
-service_name
- (	RserviceName"c
-CreateAuditLogRes
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg
-ok (Rok2M
-AuditD
-CreateAuditLog.audit.CreateAuditLogReq.audit.CreateAuditLogResB	Z./auditbproto3

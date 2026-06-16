@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-var (
-	ErrUserNotFound = errors.New("user not found")
-)
-
 // UserRepositoryImpl 用户仓储实现
 type UserRepositoryImpl struct {
 	userModel daluser.UsersModel
@@ -77,7 +73,7 @@ func (r *UserRepositoryImpl) FindByID(ctx context.Context, userID int64) (*aggre
 	u, err := r.userModel.FindOne(ctx, userID)
 	if err != nil {
 		if err == daluser.ErrNotFound {
-			return nil, ErrUserNotFound
+			return nil, repository.ErrUserNotFound
 		}
 		return nil, err
 	}
@@ -89,7 +85,7 @@ func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, email *valueobject
 	u, err := r.userModel.FindOneByEmail(ctx, sql.NullString{String: email.Value(), Valid: true})
 	if err != nil {
 		if err == daluser.ErrNotFound {
-			return nil, ErrUserNotFound
+			return nil, repository.ErrUserNotFound
 		}
 		return nil, err
 	}
@@ -101,7 +97,7 @@ func (r *UserRepositoryImpl) FindByUsernameOrEmail(ctx context.Context, account 
 	u, err := r.userModel.FindOneByEmailOrUsername(ctx, account)
 	if err != nil {
 		if err == daluser.ErrNotFound {
-			return nil, ErrUserNotFound
+			return nil, repository.ErrUserNotFound
 		}
 		return nil, err
 	}

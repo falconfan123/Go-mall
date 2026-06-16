@@ -129,6 +129,8 @@ jobs:
   go-vet:
     name: Go Vet
     runs-on: ubuntu-latest
+    env:
+      GOWORK: 'off'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -155,6 +157,8 @@ jobs:
   govulncheck:
     name: Govulncheck
     runs-on: ubuntu-latest
+    env:
+      GOWORK: 'off'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

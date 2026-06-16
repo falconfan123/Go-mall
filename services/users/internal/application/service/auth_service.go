@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
-	"github.com/falconfan123/Go-mall/common/utils/token"
+	authsclient "github.com/falconfan123/Go-mall/services/auths/authsclient"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/dto"
 	"github.com/falconfan123/Go-mall/services/users/internal/application/event"
 	"github.com/falconfan123/Go-mall/services/users/internal/domain/aggregate"
@@ -21,26 +21,19 @@ import (
 type AuthAppService struct {
 	userRepo       repository.UserRepository
 	eventPublisher event.EventPublisher
-	authConfig     *AuthConfig
-}
-
-// AuthConfig 认证配置
-type AuthConfig struct {
-	AccessExpire  int64  // 访问令牌有效期（秒）
-	RefreshExpire int64  // 刷新令牌有效期（秒）
-	Secret        string // JWT密钥
+	authsClient    authsclient.Auths
 }
 
 // NewAuthAppService 创建认证应用服务
 func NewAuthAppService(
 	userRepo repository.UserRepository,
 	eventPublisher event.EventPublisher,
-	authConfig *AuthConfig,
+	authsClient authsclient.Auths,
 ) *AuthAppService {
 	return &AuthAppService{
 		userRepo:       userRepo,
 		eventPublisher: eventPublisher,
-		authConfig:     authConfig,
+		authsClient:    authsClient,
 	}
 }
 
@@ -126,7 +119,7 @@ func (s *AuthAppService) Register(ctx context.Context, req *dto.RegisterRequest)
 	user.ID = userID
 
 	// 7. 生成令牌
-	accessToken, refreshToken, err := s.generateTokens(userID, req.IP)
+	shortToken, longToken, shortExpiresIn, longExpiresIn, err := s.generateTokens(ctx, userID, username, req.IP, req.DeviceID)
 	if err != nil {
 		return &dto.RegisterResponse{
 			StatusCode: uint32(code.ServerError),
@@ -156,11 +149,13 @@ func (s *AuthAppService) Register(ctx context.Context, req *dto.RegisterRequest)
 
 	// 9. 返回响应
 	return &dto.RegisterResponse{
-		StatusCode:   0,
-		StatusMsg:    "success",
-		UserID:       uint32(userID),
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		StatusCode:     0,
+		StatusMsg:      "success",
+		UserID:         uint32(userID),
+		ShortToken:     shortToken,
+		LongToken:      longToken,
+		ShortExpiresIn: shortExpiresIn,
+		LongExpiresIn:  longExpiresIn,
 	}, nil
 }
 
@@ -216,7 +211,7 @@ func (s *AuthAppService) Login(ctx context.Context, req *dto.LoginRequest) (*dto
 	}
 
 	// 5. 生成令牌
-	accessToken, refreshToken, err := s.generateTokens(user.ID, req.IP)
+	shortToken, longToken, shortExpiresIn, longExpiresIn, err := s.generateTokens(ctx, user.ID, user.Username, req.IP, req.DeviceID)
 	if err != nil {
 		return &dto.LoginResponse{
 			StatusCode: uint32(code.ServerError),
@@ -245,18 +240,45 @@ func (s *AuthAppService) Login(ctx context.Context, req *dto.LoginRequest) (*dto
 
 	// 7. 返回响应
 	return &dto.LoginResponse{
-		StatusCode:   0,
-		StatusMsg:    "success",
-		UserID:       uint32(user.ID),
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		StatusCode:     0,
+		StatusMsg:      "success",
+		UserID:         uint32(user.ID),
+		ShortToken:     shortToken,
+		LongToken:      longToken,
+		ShortExpiresIn: shortExpiresIn,
+		LongExpiresIn:  longExpiresIn,
 	}, nil
 }
 
 // Logout 用户登出
 func (s *AuthAppService) Logout(ctx context.Context, req *dto.LogoutRequest) (*dto.LogoutResponse, error) {
+	if req.LongToken == "" {
+		return &dto.LogoutResponse{
+			StatusCode: uint32(code.TokenInvalid),
+			StatusMsg:  "长令牌不能为空",
+		}, nil
+	}
+
+	logoutRes, err := s.authsClient.Logout(ctx, &authsclient.LogoutReq{
+		LongToken: req.LongToken,
+		ClientIp:  req.IP,
+	})
+	if err != nil {
+		logx.WithContext(ctx).Errorw("auths logout failed", logx.Field("err", err))
+		return &dto.LogoutResponse{
+			StatusCode: uint32(code.ServerError),
+			StatusMsg:  code.ServerErrorMsg,
+		}, err
+	}
+	if logoutRes.StatusCode != code.Success {
+		return &dto.LogoutResponse{
+			StatusCode: logoutRes.StatusCode,
+			StatusMsg:  logoutRes.StatusMsg,
+		}, nil
+	}
+
 	// 1. 更新登出时间
-	err := s.userRepo.UpdateLogoutTime(ctx, int64(req.UserID), time.Now())
+	err = s.userRepo.UpdateLogoutTime(ctx, int64(req.UserID), time.Now())
 	if err != nil {
 		logx.WithContext(ctx).Errorw("update logout time failed",
 			logx.Field("user_id", req.UserID),
@@ -289,29 +311,26 @@ func (s *AuthAppService) Logout(ctx context.Context, req *dto.LogoutRequest) (*d
 	}, nil
 }
 
-// 辅助方法：生成访问令牌和刷新令牌
-func (s *AuthAppService) generateTokens(userID int64, ip string) (accessToken string, refreshToken string, err error) {
-	// 生成访问令牌
-	accessToken, err = token.GenerateJWT(
-		uint32(userID),
-		"", // role
-		ip,
-		time.Duration(s.authConfig.AccessExpire)*time.Second,
-	)
+// 辅助方法：通过 auths 服务生成双令牌
+func (s *AuthAppService) generateTokens(
+	ctx context.Context,
+	userID int64,
+	username string,
+	ip string,
+	deviceID string,
+) (shortToken string, longToken string, shortExpiresIn int64, longExpiresIn int64, err error) {
+	resp, err := s.authsClient.GenerateToken(ctx, &authsclient.AuthGenReq{
+		UserId:   uint32(userID),
+		Username: username,
+		ClientIp: ip,
+		DeviceId: deviceID,
+	})
 	if err != nil {
-		return "", "", err
+		return "", "", 0, 0, err
+	}
+	if resp.StatusCode != code.Success {
+		return "", "", 0, 0, errors.New(resp.StatusMsg)
 	}
 
-	// 生成刷新令牌
-	refreshToken, err = token.GenerateJWT(
-		uint32(userID),
-		"",
-		ip,
-		time.Duration(s.authConfig.RefreshExpire)*time.Second,
-	)
-	if err != nil {
-		return accessToken, "", err // 访问令牌生成成功的话，尽量返回
-	}
-
-	return accessToken, refreshToken, nil
+	return resp.ShortToken, resp.LongToken, resp.ShortExpiresIn, resp.LongExpiresIn, nil
 }

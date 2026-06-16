@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/falconfan123/Go-mall/tools/rag/internal/anthropic"
+	"github.com/falconfan123/Go-mall/tools/rag/internal/deepseek"
 	"github.com/falconfan123/Go-mall/tools/rag/internal/indexer"
 	"github.com/falconfan123/Go-mall/tools/rag/internal/loop"
 	"github.com/falconfan123/Go-mall/tools/rag/internal/model"
@@ -364,6 +365,10 @@ func sessionID() string {
 
 func NewAnthropicClient() (model.Client, error) {
 	return anthropic.NewFromEnv()
+}
+
+func NewDeepSeekClient() (model.Client, error) {
+	return deepseek.NewFromEnv()
 }
 
 func IsNotFound(err error) bool {

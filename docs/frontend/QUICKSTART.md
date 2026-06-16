@@ -2,45 +2,37 @@
 
 ## 🚀 一键启动
 
-### 方式一：使用启动脚本（推荐）
+优先使用仓库统一脚本，不再手工拆分前端和后端启动顺序：
 
 ```bash
-cd /Users/fan/go-mall
-./start-all.sh
+cd /Users/fan/.superset/projects/Go-mall
+./scripts/start-unified.sh
+```
+
+常用命令：
+
+```bash
+./scripts/start-unified.sh status
+./scripts/start-unified.sh stop
+./scripts/start-unified.sh restart
 ```
 
 这个脚本会同时启动：
-- ✅ 前端服务器 (http://localhost:3000)
-- ✅ 后端微服务
-- ✅ 显示所有访问地址
-
-### 方式二：分别启动
-
-#### 1. 启动前端
-
-```bash
-cd /Users/fan/go-mall/frontend
-python3 -m http.server 3000
-# 然后访问: http://localhost:3000
-```
-
-#### 2. 启动后端
-
-在另一个终端窗口：
-
-```bash
-cd /Users/fan/go-mall
-go run run.go -services=auths,users,product,inventory
-```
+- ✅ `construct/depend/docker-compose.yaml` 里的本地依赖
+- ✅ 全部后端 RPC 与 gateway
+- ✅ 前端 Vite 开发服务器 (`http://127.0.0.1:3000`)
 
 ## 📱 访问地址
 
 | 服务 | 地址 | 说明 |
 |------|------|------|
-| 🌐 前端界面 | http://localhost:3000 | 电商平台首页 |
+| 🌐 前端界面 | http://127.0.0.1:3000 | 电商平台首页 |
+| 🚪 Gateway | http://127.0.0.1:8888 | 网关入口 |
 | 🔧 Consul UI | http://localhost:8500 | 服务注册中心 |
 | 🔍 Elasticsearch | http://localhost:9200 | 搜索引擎 |
-| 🐰 RabbitMQ | http://localhost:15672 | 消息队列 (admin/admin) |
+| 🐰 RabbitMQ | http://127.0.0.1:15672 | 消息队列 (admin/admin) |
+| 🤖 Gorse | http://127.0.0.1:8088 | 推荐服务控制台 |
+| 📊 Grafana | http://127.0.0.1:3001 | 日志可视化 |
 
 ## 🎯 前端功能
 
@@ -119,7 +111,7 @@ go-mall/
 ├── dal/               # 数据访问层
 ├── common/            # 公共模块
 ├── run.go             # 后端启动文件
-├── start-all.sh       # 一键启动脚本
+├── scripts/start-unified.sh  # 本地联调统一启动脚本
 └── QUICKSTART.md      # 本文档
 ```
 
@@ -148,32 +140,28 @@ const API_BASE = {
 ### 端口被占用
 
 ```bash
-# 查找占用端口的进程
-lsof -ti:3000 | xargs kill -9
+# 查看当前统一脚本管理的状态
+./scripts/start-unified.sh status
 
-# 或清理所有相关端口
-lsof -ti:3000,10000,10001,10002,8001,8002 | xargs kill -9
+# 停止并清理统一脚本拉起的环境
+./scripts/start-unified.sh stop
 ```
 
 ### 前端无法访问
 
-确认前端服务器正在运行：
+确认统一脚本状态：
 ```bash
-ps aux | grep "python3.*http.server"
+./scripts/start-unified.sh status
 ```
 
 ### 后端服务无法启动
 
-1. 确认基础设施服务正在运行：
-   - MySQL: localhost:3306
-   - Redis: localhost:6379
-   - Consul: localhost:8500
-   - Elasticsearch: localhost:9200
+1. 先执行 `./scripts/start-unified.sh status`，确认依赖、后端、前端是否都已就绪。
 
 2. 查看日志：
    ```bash
-   tail -f /tmp/auths.log
-   tail -f /tmp/users.log
+   tail -f scripts/logs/frontend.log
+   tail -f scripts/logs/gateway.log
    ```
 
 ## 📝 许可证

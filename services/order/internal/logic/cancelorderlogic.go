@@ -96,20 +96,22 @@ func (l *CancelOrderLogic) CancelOrder(in *order.CancelOrderRequest) (*order.Emp
 		res.StatusMsg = releaseCheckout.StatusMsg
 		return res, nil
 	}
-	couponRes, err := l.svcCtx.CouponRpc.ReleaseCoupon(l.ctx, &coupons.ReleaseCouponReq{
-		PreOrderId:   orderRes.PreOrderId,
-		UserId:       int32(in.UserId),
-		Reason:       in.CancelReason,
-		UserCouponId: orderRes.CouponId,
-	})
-	if err != nil {
-		l.Logger.Errorw("call rpc ReleaseCoupon failed", logx.Field("err", err))
-		return nil, err
-	}
-	if couponRes.StatusCode != code.Success {
-		res.StatusCode = couponRes.StatusCode
-		res.StatusMsg = couponRes.StatusMsg
-		return res, nil
+	if orderRes.CouponId != "" {
+		couponRes, err := l.svcCtx.CouponRpc.ReleaseCoupon(l.ctx, &coupons.ReleaseCouponReq{
+			PreOrderId:   orderRes.PreOrderId,
+			UserId:       int32(in.UserId),
+			Reason:       in.CancelReason,
+			UserCouponId: orderRes.CouponId,
+		})
+		if err != nil {
+			l.Logger.Errorw("call rpc ReleaseCoupon failed", logx.Field("err", err))
+			return nil, err
+		}
+		if couponRes.StatusCode != code.Success {
+			res.StatusCode = couponRes.StatusCode
+			res.StatusMsg = couponRes.StatusMsg
+			return res, nil
+		}
 	}
 	orderItems, err := l.svcCtx.OrderItemModel.QueryOrderItemsByOrderID(l.ctx, orderRes.OrderId)
 	if err != nil {

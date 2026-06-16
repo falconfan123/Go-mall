@@ -70,7 +70,7 @@ export default function Cart() {
         {/* 购物车项 */}
         <div className="divide-y divide-gray-200">
           {items.map((item) => (
-            <div key={item.id} className="p-4 flex items-center gap-4">
+            <div key={item.product_id || item.id} className="p-4 flex items-center gap-4">
               <img
                 src={item.image || item.image_url || 'https://via.placeholder.com/80?text=No+Image'}
                 alt={item.name}
@@ -86,14 +86,14 @@ export default function Cart() {
               <div className="flex items-center gap-2">
                 <button
                   className="px-2 py-1 border rounded hover:bg-gray-50"
-                  onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                  onClick={() => handleQuantityChange(item.product_id || item.id, item.quantity - 1)}
                 >
                   -
                 </button>
                 <span className="w-8 text-center">{item.quantity}</span>
                 <button
                   className="px-2 py-1 border rounded hover:bg-gray-50"
-                  onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                  onClick={() => handleQuantityChange(item.product_id || item.id, item.quantity + 1)}
                 >
                   +
                 </button>
@@ -104,10 +104,10 @@ export default function Cart() {
                 </p>
                 <button
                   className="text-sm text-red-600 hover:text-red-700"
-                  onClick={() => handleRemove(item.id)}
-                  disabled={removingId === item.id}
+                  onClick={() => handleRemove(item.product_id || item.id)}
+                  disabled={removingId === (item.product_id || item.id)}
                 >
-                  {removingId === item.id ? '移除中...' : '移除'}
+                  {removingId === (item.product_id || item.id) ? '移除中...' : '移除'}
                 </button>
               </div>
             </div>

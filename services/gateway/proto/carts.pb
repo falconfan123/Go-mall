@@ -1,51 +1,0 @@
-
-£	
-carts/carts.protocarts"
-UserInfo
-id (Rid"ô
-CartItemListResponse
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg
-total (Rtotal+
-data (2.carts.CartInfoResponseRdata"ê
-CartInfoResponse
-id (Rid
-user_id (RuserId
-
-product_id (R	productId
-quantity (Rquantity
-checked (Rchecked"d
-CreateCartResponse
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg
-id (Rid"a
-SubCartResponse
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg
-id (Rid"˚
-CartItemRequest
-id (Rid
-user_id (RuserId
-
-product_id (R	productId!
-product_name (	RproductName#
-product_image (	RproductImage"
-productPrice (RproductPrice
-quantity (Rquantity
-checked (Rchecked"S
-EmptyCartResponse
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg2å
-Cart<
-CartItemList.carts.UserInfo.carts.CartItemListResponseC
-CreateCartItem.carts.CartItemRequest.carts.CreateCartResponse=
-SubCartItem.carts.CartItemRequest.carts.SubCartResponseB
-DeleteCartItem.carts.CartItemRequest.carts.EmptyCartResponseB	Z./cartsbproto3

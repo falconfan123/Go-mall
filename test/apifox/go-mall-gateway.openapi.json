@@ -120,10 +120,56 @@
         }
       }
     },
-    "/douyin/user": {
+    "/api/v1/users/login": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Login",
+        "description": "Generated from gateway mapping users.Users/Login.",
+        "operationId": "users_Users_Login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/register": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Register",
+        "description": "Generated from gateway mapping users.Users/Register.",
+        "operationId": "users_Users_Register",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/me": {
       "get": {
         "tags": [
-          "user"
+          "users"
         ],
         "summary": "GetUser",
         "description": "Generated from gateway mapping users.Users/GetUser.",
@@ -143,10 +189,10 @@
         }
       }
     },
-    "/douyin/user/address/add": {
+    "/api/v1/users/addresses": {
       "post": {
         "tags": [
-          "user"
+          "users"
         ],
         "summary": "AddAddress",
         "description": "Generated from gateway mapping users.Users/AddAddress.",
@@ -166,14 +212,14 @@
         }
       }
     },
-    "/douyin/user/address/list": {
+    "/api/v1/users/address": {
       "get": {
         "tags": [
-          "user"
+          "users"
         ],
-        "summary": "ListAddresses",
-        "description": "Generated from gateway mapping users.Users/ListAddresses.",
-        "operationId": "users_Users_ListAddresses",
+        "summary": "GetAddress",
+        "description": "Generated from gateway mapping users.Users/GetAddress.",
+        "operationId": "users_Users_GetAddress",
         "parameters": [],
         "responses": {
           "200": {
@@ -212,10 +258,56 @@
         }
       }
     },
-    "/douyin/product": {
+    "/douyin/product/detail": {
       "get": {
         "tags": [
           "product"
+        ],
+        "summary": "GetProduct",
+        "description": "Generated from gateway mapping product.ProductCatalogService/GetProduct.",
+        "operationId": "product_ProductCatalogService_GetProduct",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "ListProducts",
+        "description": "Generated from gateway mapping product.ProductCatalogService/ListProducts.",
+        "operationId": "product_ProductCatalogService_ListProducts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/detail": {
+      "get": {
+        "tags": [
+          "products"
         ],
         "summary": "GetProduct",
         "description": "Generated from gateway mapping product.ProductCatalogService/GetProduct.",
@@ -350,6 +442,96 @@
         }
       }
     },
+    "/api/v1/cart/items": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "CartItemList",
+        "description": "Generated from gateway mapping carts.Cart/CartItemList.",
+        "operationId": "carts_Cart_CartItemList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "CreateCartItem",
+        "description": "Generated from gateway mapping carts.Cart/CreateCartItem.",
+        "operationId": "carts_Cart_CreateCartItem",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cart/items/delete": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "DeleteCartItem",
+        "description": "Generated from gateway mapping carts.Cart/DeleteCartItem.",
+        "operationId": "carts_Cart_DeleteCartItem",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cart/items/sub": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "SubCartItem",
+        "description": "Generated from gateway mapping carts.Cart/SubCartItem.",
+        "operationId": "carts_Cart_SubCartItem",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/douyin/order/create": {
       "post": {
         "tags": [
@@ -396,35 +578,36 @@
         }
       }
     },
-    "/api/v1/order/detail": {
+    "/api/v1/orders": {
+      "post": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "CreateOrder",
+        "description": "Generated from gateway mapping order.OrderService/CreateOrder.",
+        "operationId": "order_OrderService_CreateOrder",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "tags": [
-          "order"
+          "orders"
         ],
-        "summary": "查询订单详情",
-        "description": "Generated from gateway mapping order.OrderService/GetOrder.",
-        "operationId": "order_OrderService_GetOrder",
-        "parameters": [
-          {
-            "name": "order_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "ORDER-001"
-          },
-          {
-            "name": "user_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "example": 1001
-          }
-        ],
+        "summary": "ListOrders",
+        "description": "Generated from gateway mapping order.OrderService/ListOrders.",
+        "operationId": "order_OrderService_ListOrders",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "成功",
@@ -439,12 +622,35 @@
         }
       }
     },
-    "/api/v1/order/cancel": {
+    "/api/v1/orders/detail": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "GetOrder",
+        "description": "Generated from gateway mapping order.OrderService/GetOrder.",
+        "operationId": "order_OrderService_GetOrder",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/cancel": {
       "post": {
         "tags": [
-          "order"
+          "orders"
         ],
-        "summary": "取消订单",
+        "summary": "CancelOrder",
         "description": "Generated from gateway mapping order.OrderService/CancelOrder.",
         "operationId": "order_OrderService_CancelOrder",
         "parameters": [],
@@ -459,50 +665,15 @@
               }
             }
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "order_id": {
-                    "type": "string"
-                  },
-                  "user_id": {
-                    "type": "integer",
-                    "format": "int32"
-                  },
-                  "cancel_reason": {
-                    "type": "string"
-                  },
-                  "initiative": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "order_id",
-                  "user_id"
-                ]
-              },
-              "example": {
-                "order_id": "ORDER-001",
-                "user_id": 1001,
-                "cancel_reason": "manual test",
-                "initiative": true
-              }
-            }
-          }
         }
       }
     },
-    "/api/v1/order/seckill": {
+    "/api/v1/orders/seckill": {
       "post": {
         "tags": [
-          "order"
+          "orders"
         ],
-        "summary": "提交秒杀订单",
+        "summary": "Seckill",
         "description": "Generated from gateway mapping order.OrderService/Seckill.",
         "operationId": "order_OrderService_Seckill",
         "parameters": [],
@@ -514,22 +685,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/GenericResponse"
                 }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SeckillRequest"
-              },
-              "example": {
-                "path_key": "seckill-token-demo",
-                "product_id": 1,
-                "user_id": 1001,
-                "address_id": 1
               }
             }
           }
@@ -683,6 +838,29 @@
       "post": {
         "tags": [
           "payment"
+        ],
+        "summary": "CreatePayment",
+        "description": "Generated from gateway mapping payment.Payment/CreatePayment.",
+        "operationId": "payment_Payment_CreatePayment",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments": {
+      "post": {
+        "tags": [
+          "payments"
         ],
         "summary": "CreatePayment",
         "description": "Generated from gateway mapping payment.Payment/CreatePayment.",
@@ -1143,367 +1321,6 @@
           {
             "name": "id",
             "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/user/info": {
-      "get": {
-        "tags": [
-          "frontend-user"
-        ],
-        "summary": "Frontend contract for /douyin/user/info",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_get__douyin_user_info",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/product/detail": {
-      "get": {
-        "tags": [
-          "frontend-product"
-        ],
-        "summary": "Frontend contract for /douyin/product/detail",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_get__douyin_product_detail",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/product/search": {
-      "get": {
-        "tags": [
-          "frontend-product"
-        ],
-        "summary": "Frontend contract for /douyin/product/search",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_get__douyin_product_search",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/cart/update": {
-      "put": {
-        "tags": [
-          "frontend-cart"
-        ],
-        "summary": "Frontend contract for /douyin/cart/update",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_put__douyin_cart_update",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/cart/remove": {
-      "delete": {
-        "tags": [
-          "frontend-cart"
-        ],
-        "summary": "Frontend contract for /douyin/cart/remove",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_delete__douyin_cart_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/cart/clear": {
-      "delete": {
-        "tags": [
-          "frontend-cart"
-        ],
-        "summary": "Frontend contract for /douyin/cart/clear",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_delete__douyin_cart_clear",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/order/detail": {
-      "get": {
-        "tags": [
-          "frontend-order"
-        ],
-        "summary": "Frontend contract for /douyin/order/detail",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_get__douyin_order_detail",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/order/cancel": {
-      "post": {
-        "tags": [
-          "frontend-order"
-        ],
-        "summary": "Frontend contract for /douyin/order/cancel",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_post__douyin_order_cancel",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/payment/status": {
-      "get": {
-        "tags": [
-          "frontend-payment"
-        ],
-        "summary": "Frontend contract for /douyin/payment/status",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_get__douyin_payment_status",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/flash/list": {
-      "get": {
-        "tags": [
-          "frontend-flash"
-        ],
-        "summary": "Frontend contract for /douyin/flash/list",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_get__douyin_flash_list",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/flash/detail": {
-      "get": {
-        "tags": [
-          "frontend-flash"
-        ],
-        "summary": "Frontend contract for /douyin/flash/detail",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_get__douyin_flash_detail",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/douyin/flash/status": {
-      "get": {
-        "tags": [
-          "frontend-flash"
-        ],
-        "summary": "Frontend contract for /douyin/flash/status",
-        "description": "Derived from frontend/src/services/api.js. Use this path in Apifox Mock when the backend route is not implemented yet.",
-        "operationId": "frontend_get__douyin_flash_status",
-        "parameters": [
-          {
-            "name": "activity_id",
-            "in": "query",
             "required": true,
             "schema": {
               "type": "string"

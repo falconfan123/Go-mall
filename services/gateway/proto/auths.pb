@@ -1,44 +1,0 @@
-
-¤
-auths/auths.protoauths"<
-AuthReq
-token (	Rtoken
-	client_ip (	RclientIp"^
-
-AuthGenReq
-user_id (RuserId
-username (	Rusername
-	client_ip (	RclientIp"R
-AuthRenewalReq#
-refresh_token (	RrefreshToken
-	client_ip (	RclientIp"c
-AuthsRes
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg
-user_id (RuserId"³
-
-AuthGenRes
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg!
-access_token (	RaccessToken#
-refresh_token (	RrefreshToken
-
-expires_in (R	expiresIn"·
-AuthRenewalRes
-status_code (R
-statusCode
-
-status_msg (	R	statusMsg!
-access_token (	RaccessToken#
-refresh_token (	RrefreshToken
-
-expires_in (R	expiresIn2­
-Auths1
-Authentication.auths.AuthReq.auths.AuthsRes5
-GenerateToken.auths.AuthGenReq.auths.AuthGenRes:
-
-RenewToken.auths.AuthRenewalReq.auths.AuthRenewalResB	Z./authsbproto3

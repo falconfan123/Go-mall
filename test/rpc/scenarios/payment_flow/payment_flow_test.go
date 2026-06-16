@@ -45,7 +45,7 @@ func TestPaymentHappyPath(t *testing.T) {
 	paymentResp, err := clients.Payment.CreatePayment(ctx, &paymentpb.PaymentReq{
 		UserId:        user.UserID,
 		OrderId:       orderID,
-		PaymentMethod: paymentpb.PaymentMethod_ALIPAY,
+		PaymentMethod: paymentpb.PaymentMethod_STRIPE,
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, 0, int(paymentResp.GetStatusCode()))

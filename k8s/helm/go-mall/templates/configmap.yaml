@@ -293,15 +293,21 @@ data:
           - Method: post
             Path: /douyin/user/register
             RpcPath: users.Users/Register
+          - Method: post
+            Path: /api/v1/users/login
+            RpcPath: users.Users/Login
+          - Method: post
+            Path: /api/v1/users/register
+            RpcPath: users.Users/Register
           - Method: get
-            Path: /douyin/user
+            Path: /api/v1/users/me
             RpcPath: users.Users/GetUser
           - Method: post
-            Path: /douyin/user/address/add
+            Path: /api/v1/users/addresses
             RpcPath: users.Users/AddAddress
           - Method: get
-            Path: /douyin/user/address/list
-            RpcPath: users.Users/ListAddresses
+            Path: /api/v1/users/address
+            RpcPath: users.Users/GetAddress
 
       - Grpc:
           Etcd:
@@ -314,7 +320,13 @@ data:
             Path: /douyin/product/list
             RpcPath: product.ProductCatalogService/ListProducts
           - Method: get
-            Path: /douyin/product
+            Path: /douyin/product/detail
+            RpcPath: product.ProductCatalogService/GetProduct
+          - Method: get
+            Path: /api/v1/products
+            RpcPath: product.ProductCatalogService/ListProducts
+          - Method: get
+            Path: /api/v1/products/detail
             RpcPath: product.ProductCatalogService/GetProduct
           - Method: post
             Path: /douyin/product/upload
@@ -339,6 +351,18 @@ data:
           - Method: post
             Path: /douyin/cart/sub
             RpcPath: carts.Cart/SubCartItem
+          - Method: get
+            Path: /api/v1/cart/items
+            RpcPath: carts.Cart/CartItemList
+          - Method: post
+            Path: /api/v1/cart/items
+            RpcPath: carts.Cart/CreateCartItem
+          - Method: post
+            Path: /api/v1/cart/items/delete
+            RpcPath: carts.Cart/DeleteCartItem
+          - Method: post
+            Path: /api/v1/cart/items/sub
+            RpcPath: carts.Cart/SubCartItem
 
       - Grpc:
           Etcd:
@@ -353,14 +377,20 @@ data:
           - Method: get
             Path: /douyin/order/list
             RpcPath: order.OrderService/ListOrders
+          - Method: post
+            Path: /api/v1/orders
+            RpcPath: order.OrderService/CreateOrder
           - Method: get
-            Path: /api/v1/order/detail
+            Path: /api/v1/orders
+            RpcPath: order.OrderService/ListOrders
+          - Method: get
+            Path: /api/v1/orders/detail
             RpcPath: order.OrderService/GetOrder
           - Method: post
-            Path: /api/v1/order/cancel
+            Path: /api/v1/orders/cancel
             RpcPath: order.OrderService/CancelOrder
           - Method: post
-            Path: /api/v1/order/seckill
+            Path: /api/v1/orders/seckill
             RpcPath: order.OrderService/Seckill
 
       - Grpc:
@@ -395,6 +425,9 @@ data:
         Mappings:
           - Method: post
             Path: /douyin/payment/create
+            RpcPath: payment.Payment/CreatePayment
+          - Method: post
+            Path: /api/v1/payments
             RpcPath: payment.Payment/CreatePayment
 
       - Grpc:

@@ -1,91 +1,177 @@
-import { create } from 'zustand';
-import { userApi } from '../services/api';
+import { create } from "zustand";
+import {
+  getErrorMessage,
+  getLongToken,
+  getShortToken,
+  getStatusCode,
+  getStatusMsg,
+  normalizeUser,
+  userApi,
+} from "../services/api";
 
-// 设备ID管理
-const getDeviceId = () => {
-  const DEVICE_ID_KEY = 'device_id';
+const DEVICE_ID_KEY = "device_id";
+
+function getDeviceId() {
   let deviceId = localStorage.getItem(DEVICE_ID_KEY);
   if (!deviceId) {
-    deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    deviceId = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
     localStorage.setItem(DEVICE_ID_KEY, deviceId);
   }
   return deviceId;
-};
+}
 
 export const useAuthStore = create((set, get) => ({
-  user: null,
-  longToken: localStorage.getItem('longToken') || null,
-  shortToken: localStorage.getItem('shortToken') || null,
+  user: (() => {
+    const raw = localStorage.getItem("user");
+    if (!raw) {
+      return null;
+    }
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  })(),
+  longToken: localStorage.getItem("longToken") || null,
+  shortToken: localStorage.getItem("shortToken") || null,
   loading: false,
   error: null,
 
-  // 登录
   login: async (credentials) => {
     set({ loading: true, error: null });
     try {
-      // 添加 device_id
-      const data = { ...credentials, device_id: getDeviceId() };
-      const response = await userApi.login(data);
-      const { long_token, short_token, user } = response.data;
-      localStorage.setItem('longToken', long_token);
-      localStorage.setItem('shortToken', short_token);
+      const response = await userApi.login({
+        ...credentials,
+        email: credentials.email || "",
+        username: credentials.username || "",
+        ip: "127.0.0.1",
+        device_id: getDeviceId(),
+      });
+
+      const data = response.data || {};
+      if (getStatusCode(data) !== 0) {
+        set({ error: getStatusMsg(data, "登录失败"), loading: false });
+        return false;
+      }
+
+      const shortToken = getShortToken(data);
+      const longToken = getLongToken(data);
+
+      localStorage.setItem("shortToken", shortToken);
+      localStorage.setItem("longToken", longToken);
+
+      const user = normalizeUser({
+        user_id: data.user_id ?? data.userId,
+        username: data.user_name ?? data.userName ?? credentials.username,
+        email: credentials.email,
+      });
+      localStorage.setItem("user", JSON.stringify(user));
+
       set({
         user,
-        longToken: long_token,
-        shortToken: short_token,
+        longToken,
+        shortToken,
         loading: false,
+        error: null,
       });
+
+      await get().fetchUserInfo();
       return true;
     } catch (error) {
-      set({ error: error.response?.data?.message || '登录失败', loading: false });
+      set({ error: getErrorMessage(error, "登录失败"), loading: false });
       return false;
     }
   },
 
-  // 注册
-  register: async (data) => {
+  register: async (payload) => {
     set({ loading: true, error: null });
     try {
-      const response = await userApi.register(data);
-      return response.data;
+      const response = await userApi.register({
+        username: payload.username,
+        password: payload.password,
+        confirm_password: payload.confirm_password || payload.password,
+        email: payload.email || "",
+        ip: "127.0.0.1",
+        device_id: getDeviceId(),
+      });
+      const data = response.data || {};
+      if (getStatusCode(data) !== 0) {
+        set({ error: getStatusMsg(data, "注册失败"), loading: false });
+        return false;
+      }
+      set({ loading: false, error: null });
+      return true;
     } catch (error) {
-      set({ error: error.response?.data?.message || '注册失败', loading: false });
+      set({ error: getErrorMessage(error, "注册失败"), loading: false });
       return false;
     }
   },
 
-  // 获取用户信息
   fetchUserInfo: async () => {
+    const current = get().user;
+    if (!current?.user_id) {
+      return null;
+    }
+
     try {
-      const response = await userApi.info();
-      set({ user: response.data });
+      const response = await userApi.info(current.user_id);
+      const data = response.data || {};
+      if (getStatusCode(data) !== 0) {
+        return null;
+      }
+
+      const user = normalizeUser(data);
+      localStorage.setItem("user", JSON.stringify(user));
+      set({ user });
+      return user;
     } catch (error) {
-      console.error('Failed to fetch user info:', error);
+      console.error("Failed to fetch user info:", error);
+      return null;
     }
   },
 
-  // 设置短令牌
   setShortToken: (token) => {
-    localStorage.setItem('shortToken', token);
+    localStorage.setItem("shortToken", token);
     set({ shortToken: token });
   },
 
-  // 登出
-  logout: () => {
-    localStorage.removeItem('longToken');
-    localStorage.removeItem('shortToken');
-    set({ user: null, longToken: null, shortToken: null });
+  logout: async () => {
+    const { user, longToken } = get();
+    if (longToken) {
+      try {
+        await userApi.logout({
+          user_id: user?.user_id || 0,
+          long_token: longToken,
+          ip: "127.0.0.1",
+        });
+      } catch (error) {
+        console.error("Failed to notify logout:", error);
+      }
+    }
+
+    localStorage.removeItem("longToken");
+    localStorage.removeItem("shortToken");
+    localStorage.removeItem("user");
+    set({
+      user: null,
+      longToken: null,
+      shortToken: null,
+      error: null,
+      loading: false,
+    });
   },
 
-  // 检查登录状态
-  checkAuth: () => {
-    const { longToken } = get();
-    if (longToken) {
-      get().fetchUserInfo();
+  checkAuth: async () => {
+    const { longToken, shortToken, user } = get();
+    if (!longToken && !shortToken) {
+      return;
+    }
+    if (user?.user_id) {
+      await get().fetchUserInfo();
     }
   },
 }));

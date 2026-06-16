@@ -3,7 +3,12 @@ package stripe
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/stripe/stripe-go/v81"
@@ -16,23 +21,56 @@ type StripeProcessor struct {
 	successURL    string
 	cancelURL     string
 	webhookSecret string
+	client        session.Client
 }
 
 func NewStripeProcessor(cfg config.StripeConfig) *StripeProcessor {
-	if cfg.APIKey == "" {
+	apiKey := strings.TrimSpace(cfg.APIKey)
+	if apiKey == "" {
+		apiKey = strings.TrimSpace(os.Getenv("STRIPE_API_KEY"))
+	}
+	if apiKey == "" {
 		logx.Info("Stripe API key is empty, Stripe payment will not work")
 	}
-	stripe.Key = cfg.APIKey
+	stripe.Key = apiKey
+
+	requestTimeout := time.Duration(cfg.RequestTimeoutMs) * time.Millisecond
+	if requestTimeout <= 0 {
+		requestTimeout = 8 * time.Second
+	}
+
+	maxNetworkRetries := cfg.MaxNetworkRetries
+	if maxNetworkRetries < 0 {
+		maxNetworkRetries = 0
+	}
+
+	backend := stripe.GetBackendWithConfig(stripe.APIBackend, &stripe.BackendConfig{
+		HTTPClient: &http.Client{
+			Timeout: requestTimeout,
+		},
+		MaxNetworkRetries: stripe.Int64(maxNetworkRetries),
+	})
+
+	webhookSecret := strings.TrimSpace(cfg.WebhookSecret)
+	if webhookSecret == "" {
+		webhookSecret = strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET"))
+	}
+
 	return &StripeProcessor{
-		apiKey:        cfg.APIKey,
+		apiKey:        apiKey,
 		successURL:    cfg.SuccessURL,
 		cancelURL:     cfg.CancelURL,
-		webhookSecret: cfg.WebhookSecret,
+		webhookSecret: webhookSecret,
+		client:        session.Client{B: backend, Key: apiKey},
 	}
 }
 
 // CreatePaymentLink creates a Stripe Checkout payment link
-func (s *StripeProcessor) CreatePaymentLink(ctx context.Context, orderID string, amount int64, items []*PaymentItem) (string, error) {
+func (s *StripeProcessor) CreatePaymentLink(ctx context.Context, orderID string, amount int64, items []*PaymentItem, metadata map[string]string) (string, error) {
+	if strings.TrimSpace(s.apiKey) == "" || strings.Contains(strings.ToLower(s.apiKey), "placeholder") {
+		return "", errors.New("Stripe API key is not configured")
+	}
+
 	var lineItems []*stripe.CheckoutSessionLineItemParams
 
 	// If no items provided, create a default line item for the order
@@ -65,20 +103,27 @@ func (s *StripeProcessor) CreatePaymentLink(ctx context.Context, orderID string,
 
 	// Marshal items to JSON for metadata
 	itemsJSON, _ := json.Marshal(items)
-	metadata := map[string]string{
+	sessionMetadata := map[string]string{
 		"order_id": orderID,
 		"items":    string(itemsJSON),
 	}
-
-	params := &stripe.CheckoutSessionParams{
-		Metadata:   metadata,
-		LineItems:  lineItems,
-		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String(fmt.Sprintf("%s?order_id=%s", s.successURL, orderID)),
-		CancelURL:  stripe.String(fmt.Sprintf("%s?order_id=%s", s.cancelURL, orderID)),
+	for key, value := range metadata {
+		if value == "" {
+			continue
+		}
+		sessionMetadata[key] = value
 	}
 
-	result, err := session.New(params)
+	params := &stripe.CheckoutSessionParams{
+		Metadata:   sessionMetadata,
+		LineItems:  lineItems,
+		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL: stripe.String(buildReturnURL(s.successURL, sessionMetadata)),
+		CancelURL:  stripe.String(buildReturnURL(s.cancelURL, sessionMetadata)),
+	}
+	params.Context = ctx
+
+	result, err := s.client.New(params)
 	if err != nil {
 		logx.Errorw("Failed to create Stripe payment link", logx.Field("error", err))
 		return "", err
@@ -93,10 +138,43 @@ func (s *StripeProcessor) GetWebhookSecret() string {
 	return s.webhookSecret
 }
 
+func buildReturnURL(baseURL string, metadata map[string]string) string {
+	if baseURL == "" {
+		return ""
+	}
+
+	query := fmt.Sprintf("?order_id=%s", metadata["order_id"])
+	if paymentID := metadata["payment_id"]; paymentID != "" {
+		query += fmt.Sprintf("&payment_id=%s", paymentID)
+	}
+	return baseURL + query
+}
+
 // PaymentItem represents an item in the payment
 type PaymentItem struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Quantity    int64  `json:"quantity"`
 	Price       int64  `json:"price"`
+}
+
+func UserFacingCreatePaymentError(err error) string {
+	if err == nil {
+		return "Stripe 支付创建失败，请稍后重试"
+	}
+
+	message := strings.ToLower(strings.TrimSpace(err.Error()))
+	switch {
+	case errors.Is(err, context.DeadlineExceeded):
+		return "Stripe 请求超时，请稍后重试"
+	case strings.Contains(message, "api key is not configured"):
+		return "Stripe API key 未配置"
+	case strings.Contains(message, "lookup api.stripe.com"),
+		strings.Contains(message, "no such host"),
+		strings.Contains(message, "dial tcp"),
+		strings.Contains(message, "i/o timeout"):
+		return "Stripe 服务暂时不可用，请检查当前开发机到 api.stripe.com 的网络和 DNS 后重试"
+	default:
+		return "Stripe 支付创建失败，请稍后重试"
+	}
 }

@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	inventory2 "github.com/falconfan123/Go-mall/dal/model/inventory"
@@ -35,14 +34,6 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.UpdateInventoryReq)
 			l.Logger.Errorw("quantity must be greater than 0", logx.Field("quantity", item.Quantity), logx.Field("product_id", item.ProductId))
 			return nil, biz.ErrInvalidInventory
 		}
-		tostr := fmt.Sprintf("%d", item.Quantity)
-		// 设置库存缓存，TTL 5分钟，确保数据最终一致性
-		err := l.svcCtx.Rdb.Setex(fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId), tostr, int(biz.InventoryCacheTTL.Seconds()))
-
-		if err != nil {
-			l.Logger.Errorw("update inventory failed", logx.Field("product_id", item.ProductId), logx.Field("err", err))
-			return nil, err
-		}
 		//执行sql
 		if err := l.svcCtx.InventoryModel.UpdateOrCreate(l.ctx, inventory2.Inventory{
 			ProductId: int64(item.ProductId),
@@ -50,6 +41,13 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.UpdateInventoryReq)
 		}); err != nil {
 			l.Logger.Errorw("update inventory error", logx.Field("error", err.Error()), logx.Field("product_id", item.ProductId))
 			return nil, err
+		}
+
+		if err := l.svcCtx.SetInventoryCacheCtx(l.ctx, int64(item.ProductId), int64(item.Quantity)); err != nil {
+			l.Logger.Errorw("update inventory cache failed",
+				logx.Field("product_id", item.ProductId),
+				logx.Field("err", err),
+			)
 		}
 	}
 	return &inventory.InventoryResp{}, nil

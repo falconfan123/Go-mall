@@ -12,6 +12,12 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	ErrInvalidTokenFormat = errors.New("invalid token format")
+	ErrInvalidSignature   = errors.New("invalid signature")
+	ErrTokenExpired       = errors.New("token expired")
+)
+
 // GenerateSessionID 生成 SessionID (UUID)
 func GenerateSessionID() string {
 	return uuid.New().String()
@@ -30,7 +36,7 @@ func SignSessionID(sessionID string, secret string) string {
 func VerifySessionID(signedToken string, secret string) (string, error) {
 	parts := strings.Split(signedToken, ".")
 	if len(parts) != 2 {
-		return "", errors.New("invalid token format")
+		return "", ErrInvalidTokenFormat
 	}
 	sessionID := parts[0]
 	signature := parts[1]
@@ -40,7 +46,7 @@ func VerifySessionID(signedToken string, secret string) (string, error) {
 	expectedSignature := hex.EncodeToString(h.Sum(nil))
 
 	if signature != expectedSignature {
-		return "", errors.New("invalid signature")
+		return "", ErrInvalidSignature
 	}
 	return sessionID, nil
 }
@@ -70,7 +76,7 @@ func GenerateShortToken(userID uint32, deviceID string, expireDuration time.Dura
 func VerifyShortToken(shortToken string, secret string) (uint32, string, int64, error) {
 	parts := strings.Split(shortToken, ".")
 	if len(parts) != 4 {
-		return 0, "", 0, errors.New("invalid token format")
+		return 0, "", 0, ErrInvalidTokenFormat
 	}
 
 	var userID uint32
@@ -87,12 +93,12 @@ func VerifyShortToken(shortToken string, secret string) (uint32, string, int64, 
 	expectedSignature := hex.EncodeToString(h.Sum(nil))
 
 	if signature != expectedSignature {
-		return 0, "", 0, errors.New("invalid signature")
+		return 0, "", 0, ErrInvalidSignature
 	}
 
 	// 验证过期时间
 	if time.Now().Unix() > expireTime {
-		return 0, "", 0, errors.New("token expired")
+		return 0, "", 0, ErrTokenExpired
 	}
 
 	return userID, deviceID, expireTime, nil

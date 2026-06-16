@@ -1,5 +1,5 @@
 # Promtail 配置 - 抓取各服务的日志
-# 确保日志目录存在: mkdir -p /Users/fan/go-mall/scripts/logs
+# 确保日志目录存在: mkdir -p ../scripts/logs
 
 server:
   http_listen_port: 9080
@@ -21,7 +21,7 @@ scrape_configs:
         labels:
           service: gateway
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/gateway.log
+          __path__: /var/log/go-mall/gateway.log
 
   # Payment 服务日志
   - job_name: payment
@@ -31,7 +31,7 @@ scrape_configs:
         labels:
           service: payment
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/payment.log
+          __path__: /var/log/go-mall/payment.log
 
   # Order 服务日志
   - job_name: order
@@ -41,7 +41,7 @@ scrape_configs:
         labels:
           service: order
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/order.log
+          __path__: /var/log/go-mall/order.log
 
   # Product 服务日志
   - job_name: product
@@ -51,7 +51,7 @@ scrape_configs:
         labels:
           service: product
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/product.log
+          __path__: /var/log/go-mall/product.log
 
   # Inventory 服务日志
   - job_name: inventory
@@ -61,7 +61,7 @@ scrape_configs:
         labels:
           service: inventory
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/inventory.log
+          __path__: /var/log/go-mall/inventory.log
 
   # Users 服务日志
   - job_name: users
@@ -71,7 +71,7 @@ scrape_configs:
         labels:
           service: users
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/users.log
+          __path__: /var/log/go-mall/users.log
 
   # Cart 服务日志
   - job_name: carts
@@ -81,7 +81,7 @@ scrape_configs:
         labels:
           service: carts
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/carts.log
+          __path__: /var/log/go-mall/carts.log
 
   # Checkout 服务日志
   - job_name: checkout
@@ -91,7 +91,7 @@ scrape_configs:
         labels:
           service: checkout
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/checkout.log
+          __path__: /var/log/go-mall/checkout.log
 
   # Auths 服务日志
   - job_name: auths
@@ -101,7 +101,7 @@ scrape_configs:
         labels:
           service: auths
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/auths.log
+          __path__: /var/log/go-mall/auths.log
 
   # System 服务日志
   - job_name: system
@@ -111,7 +111,7 @@ scrape_configs:
         labels:
           service: system
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/system.log
+          __path__: /var/log/go-mall/system.log
 
   # Activity 服务日志
   - job_name: activity
@@ -121,7 +121,7 @@ scrape_configs:
         labels:
           service: activity
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/activity.log
+          __path__: /var/log/go-mall/activity.log
 
   # Audit 服务日志
   - job_name: audit
@@ -131,7 +131,7 @@ scrape_configs:
         labels:
           service: audit
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/audit.log
+          __path__: /var/log/go-mall/audit.log
 
   # Coupons 服务日志
   - job_name: coupons
@@ -141,4 +141,4 @@ scrape_configs:
         labels:
           service: coupons
           env: development
-          __path__: /Users/fan/go-mall/scripts/logs/coupons.log
+          __path__: /var/log/go-mall/coupons.log

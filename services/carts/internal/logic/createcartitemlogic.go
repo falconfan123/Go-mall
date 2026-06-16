@@ -6,7 +6,6 @@ import (
 	"github.com/falconfan123/Go-mall/services/carts/internal/application/dto"
 	"github.com/falconfan123/Go-mall/services/carts/internal/svc"
 	carts "github.com/falconfan123/Go-mall/services/carts/pb"
-	"strconv"
 
 	"google.golang.org/grpc/metadata"
 
@@ -28,15 +27,10 @@ func NewCreateCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 }
 
 func (l *CreateCartItemLogic) CreateCartItem(in *carts.CartItemRequest) (*carts.CreateCartResponse, error) {
-	// Read user_id from metadata
 	md, ok := metadata.FromIncomingContext(l.ctx)
 	if ok {
-		uis := md.Get("user_id")
-		if len(uis) > 0 {
-			uid, _ := strconv.Atoi(uis[0])
-			if uid > 0 {
-				in.UserId = int32(uid)
-			}
+		if userID := userIDFromMetadata(md); userID > 0 {
+			in.UserId = userID
 		}
 	}
 

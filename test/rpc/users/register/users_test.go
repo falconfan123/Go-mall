@@ -35,6 +35,7 @@ func TestUsersRpc(t *testing.T) {
 		Email:           fmt.Sprintf("%s@example.com", name),
 		Password:        "password123",
 		ConfirmPassword: "password123",
+		Ip:              "127.0.0.1",
 	})
 	if err != nil {
 		t.Fatalf("register failed: %v", err)

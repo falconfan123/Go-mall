@@ -185,69 +185,6 @@ run_vet() {
     fi
 }
 
-# 运行 staticcheck
-run_staticcheck() {
-    print_header "运行 staticcheck"
-
-    # staticcheck 检查较慢，使用缓存
-    if staticcheck ./... 2>&1; then
-        print_success "staticcheck 检查通过"
-    else
-        print_error "staticcheck 检查失败"
-        return 1
-    fi
-}
-
-# 运行 golint
-run_golint() {
-    print_header "运行 golint"
-
-    if command -v golint &> /dev/null; then
-        if golint -set_exit_status ./... 2>&1; then
-            print_success "golint 检查通过"
-        else
-            print_error "golint 检查失败"
-            return 1
-        fi
-    else
-        print_warning "跳过 golint (未安装)"
-    fi
-}
-
-# 运行 revive
-run_revive() {
-    print_header "运行 revive"
-
-    if command -v revive &> /dev/null; then
-        # 使用默认规则
-        if revive ./... 2>&1; then
-            print_success "revive 检查通过"
-        else
-            print_error "revive 检查失败"
-            return 1
-        fi
-    else
-        print_warning "跳过 revive (未安装)"
-    fi
-}
-
-# 运行 errcheck
-run_errcheck() {
-    print_header "运行 errcheck"
-
-    if command -v errcheck &> /dev/null; then
-        # 只检查主要服务目录
-        if errcheck -blank ./services/... 2>&1; then
-            print_success "errcheck 检查通过"
-        else
-            print_error "errcheck 检查失败"
-            return 1
-        fi
-    else
-        print_warning "跳过 errcheck (未安装)"
-    fi
-}
-
 # 检查依赖
 check_deps() {
     print_header "检查依赖"
@@ -318,12 +255,6 @@ main() {
     # 代码质量检查
     check_format
     run_vet
-
-    # 静态分析 (可跳过某些如果工具缺失)
-    run_staticcheck || true
-    run_golint || true
-    run_revive || true
-    run_errcheck || true
 
     # 依赖和构建
     check_deps

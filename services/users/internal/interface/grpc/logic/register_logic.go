@@ -39,6 +39,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 		Password:        in.Password,
 		ConfirmPassword: in.ConfirmPassword,
 		IP:              in.Ip,
+		DeviceID:        in.DeviceId,
 	}
 
 	resp, err := l.svcCtx.AuthAppService.Register(l.ctx, req)
@@ -61,10 +62,12 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	}
 
 	return &users.RegisterResponse{
-		StatusCode:   resp.StatusCode,
-		StatusMsg:    resp.StatusMsg,
-		UserId:       resp.UserID,
-		AccessToken:  resp.AccessToken,
-		RefreshToken: resp.RefreshToken,
+		StatusCode:     resp.StatusCode,
+		StatusMsg:      resp.StatusMsg,
+		UserId:         resp.UserID,
+		ShortToken:     resp.ShortToken,
+		LongToken:      resp.LongToken,
+		ShortExpiresIn: resp.ShortExpiresIn,
+		LongExpiresIn:  resp.LongExpiresIn,
 	}, nil
 }

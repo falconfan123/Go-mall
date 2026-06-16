@@ -9,7 +9,7 @@ import (
 func TestPaymentEntityLifecycle(t *testing.T) {
 	t.Parallel()
 
-	payment := NewPayment("pay-1", "pre-1", "ord-1", 1, 1000, 900, PaymentMethodAlipay, "url", 30)
+	payment := NewPayment("pay-1", "pre-1", "ord-1", 1, 1000, 900, PaymentMethodStripe, "url", 30)
 	require.True(t, payment.CanPay())
 
 	require.NoError(t, payment.Pay("tx-1"))
@@ -22,7 +22,7 @@ func TestPaymentEntityLifecycle(t *testing.T) {
 func TestPaymentMethodFromString(t *testing.T) {
 	t.Parallel()
 
-	require.Equal(t, PaymentMethodWechat, PaymentMethodFromString("wx_pay"))
+	require.Equal(t, PaymentMethodStripe, PaymentMethodFromString("stripe"))
 	require.Equal(t, PaymentMethodUnknown, PaymentMethodFromString("unknown"))
-	require.Equal(t, "alipay", PaymentMethodAlipay.String())
+	require.Equal(t, "stripe", PaymentMethodStripe.String())
 }

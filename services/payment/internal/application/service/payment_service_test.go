@@ -21,7 +21,7 @@ func TestPaymentAppServiceCreateAndGet(t *testing.T) {
 	createResp, err := service.CreatePayment(context.Background(), &dto.CreatePaymentReq{
 		UserID:        1,
 		OrderID:       "ord-1",
-		PaymentMethod: 1,
+		PaymentMethod: 3,
 	})
 	require.NoError(t, err)
 	require.EqualValues(t, code.Success, createResp.StatusCode)
@@ -36,13 +36,13 @@ func TestPaymentAppServiceCreateAndGet(t *testing.T) {
 func TestPaymentAppServiceIdempotencyAndUnsupportedMethod(t *testing.T) {
 	t.Parallel()
 
-	existing := entity.NewPayment("pay-1", "pre-1", "ord-1", 1, 1000, 900, entity.PaymentMethodAlipay, "url", 30)
+	existing := entity.NewPayment("pay-1", "pre-1", "ord-1", 1, 1000, 900, entity.PaymentMethodStripe, "url", 30)
 	service := NewPaymentAppService(&stubPaymentRepository{paymentByOrder: existing})
 
 	resp, err := service.CreatePayment(context.Background(), &dto.CreatePaymentReq{
 		UserID:        1,
 		OrderID:       "ord-1",
-		PaymentMethod: 1,
+		PaymentMethod: 3,
 	})
 	require.NoError(t, err)
 	require.EqualValues(t, code.PaymentExist, resp.StatusCode)

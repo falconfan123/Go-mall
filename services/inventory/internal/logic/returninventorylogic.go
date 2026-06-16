@@ -64,5 +64,15 @@ func (l *ReturnInventoryLogic) ReturnInventory(in *inventory.InventoryReq) (*inv
 		return nil, err
 	}
 
+	for _, item := range in.Items {
+		if _, err := l.svcCtx.AdjustInventoryCacheCtx(l.ctx, int64(item.ProductId), int64(item.Quantity)); err != nil {
+			l.Logger.Errorw("return inventory cache adjust failed",
+				logx.Field("err", err),
+				logx.Field("product_id", item.ProductId),
+				logx.Field("pre_order_id", in.PreOrderId),
+			)
+		}
+	}
+
 	return res, nil
 }

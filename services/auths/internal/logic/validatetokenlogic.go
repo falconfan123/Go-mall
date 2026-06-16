@@ -3,13 +3,14 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/common/utils/token"
 	"github.com/falconfan123/Go-mall/services/auths/internal/svc"
-	"github.com/falconfan123/Go-mall/services/auths/pb"
+	auths "github.com/falconfan123/Go-mall/services/auths/pb/auths"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,33 +31,48 @@ func NewValidateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 
 // ValidateToken 验证长短令牌
 // 优先验证短令牌，如果短令牌过期或无效，则验证长令牌
-func (l *ValidateTokenLogic) ValidateToken(in *pb.AuthValidateReq) (*pb.AuthValidateRes, error) {
-	res := new(pb.AuthValidateRes)
-	tk := in.GetToken()
+func (l *ValidateTokenLogic) ValidateToken(in *auths.AuthValidateReq) (*auths.AuthValidateRes, error) {
+	res := new(auths.AuthValidateRes)
+	shortToken := in.GetShortToken()
+	longToken := in.GetLongToken()
+	clientIP := in.GetClientIp()
 
-	// 1. 首先尝试验证短令牌
-	if tk != "" {
-		userID, deviceID, expireTime, err := token.VerifyShortToken(tk, biz.TokenSignSecret)
-		if err == nil {
-			// 短令牌验证成功
-			l.Logger.Infow("short token validated successfully",
-				logx.Field("user_id", userID),
-				logx.Field("device_id", deviceID),
-				logx.Field("expire_time", expireTime))
-
-			res.StatusCode = code.Success
-			res.StatusMsg = "success"
-			res.UserId = userID
-			return res, nil
-		}
-
-		// 短令牌验证失败，可能过期或无效
-		l.Logger.Infow("short token validation failed, trying long token", logx.Field("err", err))
+	if clientIP == "" {
+		res.StatusCode = code.NotWithClientIP
+		res.StatusMsg = code.NotWithClientIPMsg
+		return res, nil
 	}
 
-	// 2. 短令牌验证失败，尝试验证长令牌
-	// Token可能是长令牌，需要验证长令牌
-	sessionID, err := token.VerifyLongToken(tk, biz.TokenSignSecret)
+	if shortToken == "" {
+		res.StatusCode = code.AuthBlank
+		res.StatusMsg = code.AuthBlankMsg
+		return res, nil
+	}
+
+	// 1. 优先验证短令牌
+	userID, deviceID, expireTime, err := token.VerifyShortToken(shortToken, biz.TokenSignSecret)
+	shortTokenExpired := errors.Is(err, token.ErrTokenExpired)
+	if err != nil && !shortTokenExpired {
+		l.Logger.Infow("short token validation failed without fallback", logx.Field("err", err))
+		res.StatusCode = code.TokenInvalid
+		res.StatusMsg = "令牌非法，请重新登录"
+		return res, nil
+	}
+
+	if longToken == "" {
+		if shortTokenExpired {
+			res.StatusCode = code.AuthExpired
+			res.StatusMsg = code.AuthExpiredMsg
+			res.NeedsRefresh = true
+			return res, nil
+		}
+		res.StatusCode = code.AuthBlank
+		res.StatusMsg = "长令牌不能为空"
+		return res, nil
+	}
+
+	// 2. 无论短令牌是否过期，最终都要依赖 long token + session 做服务端裁决
+	sessionID, err := token.VerifyLongToken(longToken, biz.TokenSignSecret)
 	if err != nil {
 		l.Logger.Infow("long token validation failed", logx.Field("err", err))
 		res.StatusCode = code.TokenInvalid
@@ -64,7 +80,7 @@ func (l *ValidateTokenLogic) ValidateToken(in *pb.AuthValidateReq) (*pb.AuthVali
 		return res, nil
 	}
 
-	// 3. 根据SessionID查询Redis中的Session数据
+	// 3. 根据 SessionID 查询 Redis 中的 Session 数据
 	sessionKey := fmt.Sprintf("%s%s", biz.SessionKeyPrefix, sessionID)
 	sessionDataStr, err := l.svcCtx.Redis.Get(sessionKey)
 	if err != nil || sessionDataStr == "" {
@@ -74,29 +90,57 @@ func (l *ValidateTokenLogic) ValidateToken(in *pb.AuthValidateReq) (*pb.AuthVali
 		return res, nil
 	}
 
-	// 解析Session数据
 	var sessionData map[string]interface{}
-	err = json.Unmarshal([]byte(sessionDataStr), &sessionData)
-	if err != nil {
+	if err := json.Unmarshal([]byte(sessionDataStr), &sessionData); err != nil {
 		l.Logger.Errorw("parse session data failed", logx.Field("err", err))
 		res.StatusCode = code.ServerError
 		res.StatusMsg = "服务器错误"
 		return res, nil
 	}
 
-	userID := uint32(sessionData["user_id"].(float64))
-	deviceID := sessionData["device_id"].(string)
+	storedIP, _ := sessionData["client_ip"].(string)
+	if storedIP != "" && storedIP != clientIP {
+		res.StatusCode = code.AuthExpired
+		res.StatusMsg = "IP changed, please login again"
+		return res, nil
+	}
 
-	// 4. 生新的短令牌（有效期重新计算为1天）
-	_ = token.GenerateShortToken(userID, deviceID, biz.ShortTokenExpire, biz.TokenSignSecret)
+	sessionUserID := uint32(sessionData["user_id"].(float64))
+	sessionDeviceID, _ := sessionData["device_id"].(string)
 
-	l.Logger.Infow("long token validated successfully",
-		logx.Field("user_id", userID),
+	if !shortTokenExpired {
+		if sessionUserID != userID || (sessionDeviceID != "" && sessionDeviceID != deviceID) {
+			res.StatusCode = code.TokenInvalid
+			res.StatusMsg = "令牌非法，请重新登录"
+			return res, nil
+		}
+
+		l.Logger.Infow("short token validated successfully with active session",
+			logx.Field("user_id", userID),
+			logx.Field("device_id", deviceID),
+			logx.Field("expire_time", expireTime),
+			logx.Field("session_id", sessionID))
+
+		res.StatusCode = code.Success
+		res.StatusMsg = "success"
+		res.UserId = userID
+		return res, nil
+	}
+
+	// 4. 短令牌过期时，长令牌和 Session 仍有效，要求客户端刷新短令牌
+	if longToken == "" {
+		res.StatusCode = code.AuthExpired
+		res.StatusMsg = code.AuthExpiredMsg
+		res.NeedsRefresh = true
+		return res, nil
+	}
+	l.Logger.Infow("short token expired but session is still valid",
+		logx.Field("user_id", sessionUserID),
 		logx.Field("session_id", sessionID))
 
-	res.StatusCode = code.Success
-	res.StatusMsg = "success"
-	res.UserId = userID
-
+	res.StatusCode = code.AuthExpired
+	res.StatusMsg = code.TokenRenewedMsg
+	res.UserId = sessionUserID
+	res.NeedsRefresh = true
 	return res, nil
 }

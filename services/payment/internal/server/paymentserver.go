@@ -31,3 +31,8 @@ func (s *PaymentServer) ListPayments(ctx context.Context, in *payment.PaymentLis
 	l := logic.NewListPaymentsLogic(ctx, s.svcCtx)
 	return l.ListPayments(in)
 }
+
+func (s *PaymentServer) GetPaymentStatus(ctx context.Context, in *payment.PaymentStatusReq) (*payment.PaymentStatusResp, error) {
+	l := logic.NewGetPaymentStatusLogic(ctx, s.svcCtx)
+	return l.GetPaymentStatus(in)
+}

@@ -38,6 +38,12 @@ export function Navbar() {
               商品
             </Link>
             <Link
+              to="/search"
+              className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              智能搜索
+            </Link>
+            <Link
               to="/flash"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >

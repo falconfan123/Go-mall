@@ -50,8 +50,7 @@ type Payment struct {
 type PaymentMethod string
 
 const (
-	PaymentMethodAlipay  PaymentMethod = "alipay"  // 支付宝
-	PaymentMethodWechat  PaymentMethod = "wx_pay"  // 微信支付
+	PaymentMethodStripe  PaymentMethod = "stripe"  // Stripe 支付
 	PaymentMethodUnknown PaymentMethod = "unknown" // 未知
 )
 
@@ -130,10 +129,8 @@ func (p *Payment) CanPay() bool {
 // String 转换为字符串
 func (m PaymentMethod) String() string {
 	switch m {
-	case PaymentMethodAlipay:
-		return "alipay"
-	case PaymentMethodWechat:
-		return "wx_pay"
+	case PaymentMethodStripe:
+		return "stripe"
 	default:
 		return "unknown"
 	}
@@ -142,10 +139,8 @@ func (m PaymentMethod) String() string {
 // FromString 从字符串创建
 func PaymentMethodFromString(s string) PaymentMethod {
 	switch s {
-	case "alipay":
-		return PaymentMethodAlipay
-	case "wx_pay":
-		return PaymentMethodWechat
+	case "stripe":
+		return PaymentMethodStripe
 	default:
 		return PaymentMethodUnknown
 	}

@@ -8,8 +8,6 @@ import (
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/falconfan123/Go-mall/services/payment/internal/mq"
 	"github.com/falconfan123/Go-mall/services/payment/internal/stripe"
-	"github.com/smartwalle/alipay/v3"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -20,7 +18,6 @@ type ServiceContext struct {
 	Rdb             *redis.Redis
 	PaymentModel    payment.PaymentsModel
 	OrderRpc        order.OrderServiceClient
-	Alipay          *alipay.Client
 	StripeProcessor *stripe.StripeProcessor
 	PaymentMQ       *mq.PaymentDelayMQ
 	Model           sqlx.SqlConn
@@ -33,25 +30,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// 	logx.Errorw("创建延迟队列失败", logx.LogField{Key: "err", Value: err})
 	// 	panic(err)
 	// }
-	var alipayClient *alipay.Client
-	// 1. 只有配置有效时才创建支付宝客户端
-	if c.Alipay.AppId != "" && c.Alipay.PrivateKey != "" {
-		var err error
-		alipayClient, err = alipay.New(c.Alipay.AppId, c.Alipay.PrivateKey, false)
-		if err != nil {
-			logx.Errorw("创建支付宝客户端失败", logx.LogField{Key: "err", Value: err})
-			panic(err)
-		}
-		// 加载支付宝公钥用于验签
-		if c.Alipay.AlipayPublicKey != "" {
-			if err := alipayClient.LoadAliPayPublicKey(c.Alipay.AlipayPublicKey); err != nil {
-				logx.Errorw("加载支付宝公钥失败", logx.LogField{Key: "err", Value: err})
-				panic(err)
-			}
-		}
-	}
-
-	// 2. 创建 Stripe 处理器
 	stripeProcessor := stripe.NewStripeProcessor(c.Stripe)
 
 	return &ServiceContext{
@@ -59,7 +37,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Rdb:             redis.MustNewRedis(c.RedisConf),
 		PaymentModel:    payment.NewPaymentsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		OrderRpc:        order.NewOrderServiceClient(zrpc.MustNewClient(c.OrderRpc).Conn()),
-		Alipay:          alipayClient,
 		StripeProcessor: stripeProcessor,
 		PaymentMQ:       nil, // 暂时设置为nil
 		Model:           sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource),

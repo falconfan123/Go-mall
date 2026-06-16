@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SearchService_ParseQuery_FullMethodName = "/pb.SearchService/ParseQuery"
-	SearchService_Search_FullMethodName     = "/pb.SearchService/Search"
+	SearchService_ParseQuery_FullMethodName = "/search.SearchService/ParseQuery"
+	SearchService_Search_FullMethodName     = "/search.SearchService/Search"
 )
 
 // SearchServiceClient is the client API for SearchService service.
@@ -146,7 +146,7 @@ func _SearchService_Search_Handler(srv interface{}, ctx context.Context, dec fun
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var SearchService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.SearchService",
+	ServiceName: "search.SearchService",
 	HandlerType: (*SearchServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

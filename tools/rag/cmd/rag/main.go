@@ -138,6 +138,7 @@ func run() error {
 		fmt.Printf("anthropic_auth_token: %t\n", report.AuthTokenReady)
 		fmt.Printf("anthropic_api_key: %t\n", report.APIKeyReady)
 		fmt.Printf("auth_ready: %t\n", report.AuthReady)
+		fmt.Printf("deepseek_api_key: %t\n", os.Getenv("DEEPSEEK_API_KEY") != "")
 		if len(report.IndexedSources) > 0 {
 			fmt.Println("indexed_sources:")
 			for name, count := range report.IndexedSources {
@@ -161,6 +162,8 @@ func loadModel(name string) (model.Client, error) {
 	switch strings.TrimSpace(name) {
 	case "", "anthropic":
 		return app.NewAnthropicClient()
+	case "deepseek":
+		return app.NewDeepSeekClient()
 	case "none":
 		return nil, nil
 	default:
@@ -180,7 +183,7 @@ func newFlagSet(name string) *flag.FlagSet {
 }
 
 func parseGlobalArgs(args []string) (repoRoot string, backend string, rest []string, err error) {
-	backend = "anthropic"
+	backend = "deepseek"
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		switch {

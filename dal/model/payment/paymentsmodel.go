@@ -20,7 +20,7 @@ type (
 		UpdateInfoByOrderId(ctx context.Context, newData *Payments) error
 		Count(ctx context.Context) (int64, error)
 		FindPage(ctx context.Context, userId uint32, offset, limit int) ([]*Payments, error)
-		FindOneByOrderId(ctx context.Context, pre_order_id string) (*Payments, error)
+		FindOneByOrderId(ctx context.Context, orderID string) (*Payments, error)
 		CheckExistByOrderId(ctx context.Context, orderID string) (bool, error)
 		FindExpired(ctx context.Context, limit int) ([]*Payments, error)
 	}
@@ -31,7 +31,7 @@ type (
 )
 
 func (m *customPaymentsModel) CheckExistByOrderId(ctx context.Context, orderID string) (bool, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE \"pre_order_id\" = $1", m.table)
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE \"order_id\" = $1", m.table)
 	var count int64
 	err := m.conn.QueryRowCtx(ctx, &count, query, orderID)
 	if err != nil {
@@ -87,9 +87,7 @@ func (m *defaultPaymentsModel) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 func (m *defaultPaymentsModel) FindOneByOrderId(ctx context.Context, orderID string) (*Payments, error) {
-	// PostgreSQL doesn't support "LIMIT n FOR SHARE", using "LIMIT n"
-	// 注意：这里实际查询的是 pre_order_id 字段
-	query := fmt.Sprintf("select %s from %s where \"pre_order_id\" = $1 limit 1", paymentsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where \"order_id\" = $1 limit 1", paymentsRows, m.table)
 	var resp Payments
 	err := m.conn.QueryRowCtx(ctx, &resp, query, orderID)
 	switch {

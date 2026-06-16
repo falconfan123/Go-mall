@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
 
@@ -71,10 +72,25 @@ func (l *ListProductsLogic) ListProducts(in *product.ListProductsReq) (*product.
 			Description:  p.Description.String,
 			Picture:      p.Picture.String,
 			Price:        p.Price,
+			Stock:        p.Stock,
 			ThumbnailUrl: thumbnailUrl,
 			CratedAt:     p.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:    p.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
+
+		inventoryResp, err := l.svcCtx.InventoryRpc.GetInventory(l.ctx, &inventoryclient.GetInventoryReq{
+			ProductId: int32(p.Id),
+		})
+		if err != nil {
+			l.Logger.Errorw("call InventoryRpc failed, use stock from products table",
+				logx.Field("err", err),
+				logx.Field("product_id", p.Id),
+			)
+		} else {
+			respProducts[len(respProducts)-1].Stock = inventoryResp.Inventory
+			respProducts[len(respProducts)-1].Sold = inventoryResp.SoldCount
+		}
+
 		nextCursor = p.Id
 	}
 

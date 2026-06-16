@@ -31,6 +31,8 @@ jobs:
     needs:
       - matrix
     runs-on: ubuntu-latest
+    env:
+      GOWORK: 'off'
     strategy:
       fail-fast: false
       matrix:

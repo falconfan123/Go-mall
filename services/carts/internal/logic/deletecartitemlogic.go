@@ -5,7 +5,6 @@ import (
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	"github.com/falconfan123/Go-mall/services/carts/internal/svc"
 	carts "github.com/falconfan123/Go-mall/services/carts/pb"
-	"strconv"
 	"strings"
 
 	"google.golang.org/grpc/metadata"
@@ -28,15 +27,10 @@ func NewDeleteCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 }
 
 func (l *DeleteCartItemLogic) DeleteCartItem(in *carts.CartItemRequest) (*carts.EmptyCartResponse, error) {
-	// Read user_id from metadata
 	md, ok := metadata.FromIncomingContext(l.ctx)
 	if ok {
-		uis := md.Get("user_id")
-		if len(uis) > 0 {
-			uid, _ := strconv.Atoi(uis[0])
-			if uid > 0 {
-				in.UserId = int32(uid)
-			}
+		if userID := userIDFromMetadata(md); userID > 0 {
+			in.UserId = userID
 		}
 	}
 

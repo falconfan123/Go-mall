@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
@@ -13,6 +12,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/product/internal/domain/repository"
 	"github.com/falconfan123/Go-mall/services/product/internal/domain/valueobject"
 	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // ProductAppService 商品应用服务，编排业务流程
@@ -97,8 +97,7 @@ func (s *ProductAppService) CreateProduct(ctx context.Context, req *dto.CreatePr
 		Stock:       product.Stock.Value(),
 	}
 	if err := s.eventPub.PublishProductCreated(evt); err != nil {
-		// 日志记录错误，不影响主流程
-		fmt.Printf("failed to publish product created event: %v\n", err)
+		logx.Errorw("failed to publish product created event", logx.Field("err", err), logx.Field("product_id", product.ID))
 	}
 
 	// 5. 返回响应
@@ -194,7 +193,7 @@ func (s *ProductAppService) UpdateProduct(ctx context.Context, req *dto.UpdatePr
 			Price:       newPrice.Value(),
 		}
 		if err := s.eventPub.PublishProductUpdated(evt); err != nil {
-			fmt.Printf("failed to publish product updated event: %v\n", err)
+			logx.Errorw("failed to publish product updated event", logx.Field("err", err), logx.Field("product_id", product.ID))
 		}
 	}
 
@@ -235,7 +234,7 @@ func (s *ProductAppService) DeleteProduct(ctx context.Context, req *dto.DeletePr
 		ProductID: req.ID,
 	}
 	if err := s.eventPub.PublishProductDeleted(evt); err != nil {
-		fmt.Printf("failed to publish product deleted event: %v\n", err)
+		logx.Errorw("failed to publish product deleted event", logx.Field("err", err), logx.Field("product_id", req.ID))
 	}
 
 	// 4. 返回响应
@@ -354,7 +353,7 @@ func (s *ProductAppService) DecreaseStock(ctx context.Context, productID int64, 
 		ChangedAmount: -quantity,
 	}
 	if err := s.eventPub.PublishProductStockChanged(evt); err != nil {
-		fmt.Printf("failed to publish stock changed event: %v\n", err)
+		logx.Errorw("failed to publish product stock changed event", logx.Field("err", err), logx.Field("product_id", productID))
 	}
 
 	return nil

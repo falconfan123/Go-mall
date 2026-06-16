@@ -1,9 +1,10 @@
-import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-  const douyinProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:30088';
+  const env = loadEnv(mode, process.cwd(), "");
+  const douyinProxyTarget =
+    env.VITE_API_PROXY_TARGET || "http://127.0.0.1:8888";
   const apiProxyTarget = env.VITE_API_V1_PROXY_TARGET || douyinProxyTarget;
   const port = Number(env.VITE_PORT || 3000);
 
@@ -12,11 +13,11 @@ export default defineConfig(({ mode }) => {
     server: {
       port,
       proxy: {
-        '/douyin': {
+        "/douyin": {
           target: douyinProxyTarget,
           changeOrigin: true,
         },
-        '/api': {
+        "/api": {
           target: apiProxyTarget,
           changeOrigin: true,
         },

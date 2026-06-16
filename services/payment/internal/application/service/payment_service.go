@@ -49,10 +49,8 @@ func (s *PaymentAppService) CreatePayment(ctx context.Context, req *dto.CreatePa
 
 	var paymentMethod entity.PaymentMethod
 	switch req.PaymentMethod {
-	case 1:
-		paymentMethod = entity.PaymentMethodAlipay
-	case 2:
-		paymentMethod = entity.PaymentMethodWechat
+	case 3:
+		paymentMethod = entity.PaymentMethodStripe
 	default:
 		return &dto.CreatePaymentResp{
 			StatusCode: code.PaymentMethodNotSupport,
@@ -179,14 +177,10 @@ func (s *PaymentAppService) convertPaymentToDTO(payment *entity.Payment) *dto.Pa
 }
 
 func (s *PaymentAppService) paymentMethodToInt(method entity.PaymentMethod) int {
-	switch method {
-	case entity.PaymentMethodAlipay:
-		return 1
-	case entity.PaymentMethodWechat:
-		return 2
-	default:
+	if method != entity.PaymentMethodStripe {
 		return 0
 	}
+	return 3
 }
 
 func init() {

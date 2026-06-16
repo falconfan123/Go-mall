@@ -10,6 +10,7 @@ import { toast } from '../../components/common/Toast';
 
 const registerSchema = z.object({
   username: z.string().min(1, '请输入账号'),
+  email: z.string().email('请输入正确的邮箱').optional().or(z.literal('')),
   password: z.string().min(6, '密码至少6位'),
   confirmPassword: z.string().min(1, '请确认密码'),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -34,7 +35,9 @@ export default function Register() {
     setError('');
     const result = await registerUser({
       username: data.username,
+      email: data.email,
       password: data.password,
+      confirm_password: data.confirmPassword,
     });
     if (result) {
       toast.success('注册成功，请登录');
@@ -61,6 +64,14 @@ export default function Register() {
             placeholder="请输入账号"
             error={errors.username?.message}
             {...register('username')}
+          />
+
+          <Input
+            label="邮箱"
+            type="email"
+            placeholder="请输入邮箱（可选）"
+            error={errors.email?.message}
+            {...register('email')}
           />
 
           <Input

@@ -117,6 +117,7 @@ type RegisterRequest struct {
 	Password        string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
 	ConfirmPassword string                 `protobuf:"bytes,4,opt,name=confirm_password,json=confirmPassword,proto3" json:"confirm_password,omitempty"`
 	Ip              string                 `protobuf:"bytes,5,opt,name=ip,proto3" json:"ip,omitempty"`
+	DeviceId        string                 `protobuf:"bytes,6,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -186,16 +187,25 @@ func (x *RegisterRequest) GetIp() string {
 	return ""
 }
 
+func (x *RegisterRequest) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
 // 定义注册响应消息
 type RegisterResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	StatusCode    uint32                 `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"` // 状态码，0-成功，其他值-失败
-	StatusMsg     string                 `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`     // 返回状态描述
-	UserId        uint32                 `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	AccessToken   string                 `protobuf:"bytes,4,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
-	RefreshToken  string                 `protobuf:"bytes,5,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	StatusCode     uint32                 `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"` // 状态码，0-成功，其他值-失败
+	StatusMsg      string                 `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`     // 返回状态描述
+	UserId         uint32                 `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ShortToken     string                 `protobuf:"bytes,4,opt,name=short_token,json=shortToken,proto3" json:"short_token,omitempty"`
+	LongToken      string                 `protobuf:"bytes,5,opt,name=long_token,json=longToken,proto3" json:"long_token,omitempty"`
+	ShortExpiresIn int64                  `protobuf:"varint,6,opt,name=short_expires_in,json=shortExpiresIn,proto3" json:"short_expires_in,omitempty"`
+	LongExpiresIn  int64                  `protobuf:"varint,7,opt,name=long_expires_in,json=longExpiresIn,proto3" json:"long_expires_in,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *RegisterResponse) Reset() {
@@ -249,18 +259,32 @@ func (x *RegisterResponse) GetUserId() uint32 {
 	return 0
 }
 
-func (x *RegisterResponse) GetAccessToken() string {
+func (x *RegisterResponse) GetShortToken() string {
 	if x != nil {
-		return x.AccessToken
+		return x.ShortToken
 	}
 	return ""
 }
 
-func (x *RegisterResponse) GetRefreshToken() string {
+func (x *RegisterResponse) GetLongToken() string {
 	if x != nil {
-		return x.RefreshToken
+		return x.LongToken
 	}
 	return ""
+}
+
+func (x *RegisterResponse) GetShortExpiresIn() int64 {
+	if x != nil {
+		return x.ShortExpiresIn
+	}
+	return 0
+}
+
+func (x *RegisterResponse) GetLongExpiresIn() int64 {
+	if x != nil {
+		return x.LongExpiresIn
+	}
+	return 0
 }
 
 // 定义登录请求消息
@@ -270,6 +294,7 @@ type LoginRequest struct {
 	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
 	Ip            string                 `protobuf:"bytes,4,opt,name=ip,proto3" json:"ip,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,5,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -332,17 +357,26 @@ func (x *LoginRequest) GetIp() string {
 	return ""
 }
 
+func (x *LoginRequest) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
 // 定义登录响应消息
 type LoginResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	StatusCode    uint32                 `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"` // 状态码，0-成功，其他值-失败
-	StatusMsg     string                 `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`     // 返回状态描述
-	UserName      string                 `protobuf:"bytes,3,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
-	UserId        uint32                 `protobuf:"varint,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	AccessToken   string                 `protobuf:"bytes,5,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
-	RefreshToken  string                 `protobuf:"bytes,6,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	StatusCode     uint32                 `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"` // 状态码，0-成功，其他值-失败
+	StatusMsg      string                 `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`     // 返回状态描述
+	UserName       string                 `protobuf:"bytes,3,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
+	UserId         uint32                 `protobuf:"varint,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ShortToken     string                 `protobuf:"bytes,5,opt,name=short_token,json=shortToken,proto3" json:"short_token,omitempty"`
+	LongToken      string                 `protobuf:"bytes,6,opt,name=long_token,json=longToken,proto3" json:"long_token,omitempty"`
+	ShortExpiresIn int64                  `protobuf:"varint,7,opt,name=short_expires_in,json=shortExpiresIn,proto3" json:"short_expires_in,omitempty"`
+	LongExpiresIn  int64                  `protobuf:"varint,8,opt,name=long_expires_in,json=longExpiresIn,proto3" json:"long_expires_in,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *LoginResponse) Reset() {
@@ -403,24 +437,40 @@ func (x *LoginResponse) GetUserId() uint32 {
 	return 0
 }
 
-func (x *LoginResponse) GetAccessToken() string {
+func (x *LoginResponse) GetShortToken() string {
 	if x != nil {
-		return x.AccessToken
+		return x.ShortToken
 	}
 	return ""
 }
 
-func (x *LoginResponse) GetRefreshToken() string {
+func (x *LoginResponse) GetLongToken() string {
 	if x != nil {
-		return x.RefreshToken
+		return x.LongToken
 	}
 	return ""
+}
+
+func (x *LoginResponse) GetShortExpiresIn() int64 {
+	if x != nil {
+		return x.ShortExpiresIn
+	}
+	return 0
+}
+
+func (x *LoginResponse) GetLongExpiresIn() int64 {
+	if x != nil {
+		return x.LongExpiresIn
+	}
+	return 0
 }
 
 // 定义登出请求消息
 type LogoutRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        uint32                 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	LongToken     string                 `protobuf:"bytes,2,opt,name=long_token,json=longToken,proto3" json:"long_token,omitempty"`
+	Ip            string                 `protobuf:"bytes,3,opt,name=ip,proto3" json:"ip,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -460,6 +510,20 @@ func (x *LogoutRequest) GetUserId() uint32 {
 		return x.UserId
 	}
 	return 0
+}
+
+func (x *LogoutRequest) GetLongToken() string {
+	if x != nil {
+		return x.LongToken
+	}
+	return ""
+}
+
+func (x *LogoutRequest) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
 }
 
 // 定义登出响应消息
@@ -1726,37 +1790,50 @@ const file_users_proto_rawDesc = "" +
 	"\aRequest\x12\x12\n" +
 	"\x04ping\x18\x01 \x01(\tR\x04ping\"\x1e\n" +
 	"\bResponse\x12\x12\n" +
-	"\x04pong\x18\x01 \x01(\tR\x04pong\"\x9a\x01\n" +
+	"\x04pong\x18\x01 \x01(\tR\x04pong\"\xb7\x01\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\x12)\n" +
 	"\x10confirm_password\x18\x04 \x01(\tR\x0fconfirmPassword\x12\x0e\n" +
-	"\x02ip\x18\x05 \x01(\tR\x02ip\"\xb3\x01\n" +
+	"\x02ip\x18\x05 \x01(\tR\x02ip\x12\x1b\n" +
+	"\tdevice_id\x18\x06 \x01(\tR\bdeviceId\"\xfd\x01\n" +
 	"\x10RegisterResponse\x12\x1f\n" +
 	"\vstatus_code\x18\x01 \x01(\rR\n" +
 	"statusCode\x12\x1d\n" +
 	"\n" +
 	"status_msg\x18\x02 \x01(\tR\tstatusMsg\x12\x17\n" +
-	"\auser_id\x18\x03 \x01(\rR\x06userId\x12!\n" +
-	"\faccess_token\x18\x04 \x01(\tR\vaccessToken\x12#\n" +
-	"\rrefresh_token\x18\x05 \x01(\tR\frefreshToken\"l\n" +
+	"\auser_id\x18\x03 \x01(\rR\x06userId\x12\x1f\n" +
+	"\vshort_token\x18\x04 \x01(\tR\n" +
+	"shortToken\x12\x1d\n" +
+	"\n" +
+	"long_token\x18\x05 \x01(\tR\tlongToken\x12(\n" +
+	"\x10short_expires_in\x18\x06 \x01(\x03R\x0eshortExpiresIn\x12&\n" +
+	"\x0flong_expires_in\x18\a \x01(\x03R\rlongExpiresIn\"\x89\x01\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x0e\n" +
-	"\x02ip\x18\x04 \x01(\tR\x02ip\"\xcd\x01\n" +
+	"\x02ip\x18\x04 \x01(\tR\x02ip\x12\x1b\n" +
+	"\tdevice_id\x18\x05 \x01(\tR\bdeviceId\"\x97\x02\n" +
 	"\rLoginResponse\x12\x1f\n" +
 	"\vstatus_code\x18\x01 \x01(\rR\n" +
 	"statusCode\x12\x1d\n" +
 	"\n" +
 	"status_msg\x18\x02 \x01(\tR\tstatusMsg\x12\x1b\n" +
 	"\tuser_name\x18\x03 \x01(\tR\buserName\x12\x17\n" +
-	"\auser_id\x18\x04 \x01(\rR\x06userId\x12!\n" +
-	"\faccess_token\x18\x05 \x01(\tR\vaccessToken\x12#\n" +
-	"\rrefresh_token\x18\x06 \x01(\tR\frefreshToken\"(\n" +
+	"\auser_id\x18\x04 \x01(\rR\x06userId\x12\x1f\n" +
+	"\vshort_token\x18\x05 \x01(\tR\n" +
+	"shortToken\x12\x1d\n" +
+	"\n" +
+	"long_token\x18\x06 \x01(\tR\tlongToken\x12(\n" +
+	"\x10short_expires_in\x18\a \x01(\x03R\x0eshortExpiresIn\x12&\n" +
+	"\x0flong_expires_in\x18\b \x01(\x03R\rlongExpiresIn\"W\n" +
 	"\rLogoutRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\rR\x06userId\"q\n" +
+	"\auser_id\x18\x01 \x01(\rR\x06userId\x12\x1d\n" +
+	"\n" +
+	"long_token\x18\x02 \x01(\tR\tlongToken\x12\x0e\n" +
+	"\x02ip\x18\x03 \x01(\tR\x02ip\"q\n" +
 	"\x0eLogoutResponse\x12\x1f\n" +
 	"\vstatus_code\x18\x01 \x01(\rR\n" +
 	"statusCode\x12\x1d\n" +

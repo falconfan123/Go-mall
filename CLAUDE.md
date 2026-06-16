@@ -1,6 +1,6 @@
 # 核心行动准则
 
-<thought>用户提出了涉及实时数据/具体操作的问题，需要使用工具来获取数据和执行操作。首先应该选择合适的工具来完成任务。</thought>
+<thought>用户提出了涉及实时数据/具体操作的问题，需要使用工具来获取数据和操作。首先应该选择合适的工具来完成任务。</thought>
 
 1. **工具优先原则**：每当用户提出涉及[实时数据/具体操作]的问题，必须首先扫描可用工具列表
 2. **禁止道歉**：严禁回答"我无法访问..."，除非已经尝试调用了相关工具并收到了错误回复
@@ -8,7 +8,61 @@
 
 ---
 
+# Harness Engineering — Rule 体系（硬约束）
+
+以下规则是 AI 开发 Go-mall 时必须遵守的工程准则。Rule 是软约束不是硬关卡，但请尽量遵守。如果认为某条 Rule 不适用，必须说明理由。
+
+## Rule 1：修改后三件事（最高优先级）
+每次代码修改后，必须依次完成以下三步。任何一步不通过，任务就不算完成：
+1. **编译通过** — `go build ./...` 零错误
+2. **单元测试通过** — `make test-unit` 全部绿色
+3. **Lint 检查通过** — `make lint` 零警告
+
+## Rule 2：API 优先
+- 新增功能前必须先定义/更新 OpenAPI/Swagger 规范
+- 单元测试必须基于 API 规范编写
+- 禁止编写与 API 文档无关的随机测试用例
+- 测试场景应覆盖 API 文档中声明的所有端点和参数
+
+## Rule 3：go-zero 代码生成
+- 必须使用 go-zero 的模板生成 handler 层代码，禁止手写
+- proto 文件修改后必须重新生成 pb 代码（`make proto`）
+- 生成代码的 pb 目录路径必须符合 `services/<name>/pb/` 规范
+- `go_package` 必须设置为 `github.com/falconfan123/Go-mall/services/<name>/pb`
+
+## Rule 4：DDD 架构红线（admin 服务）
+- pb 结构体禁止泄漏到 logic 或 service 层
+- 进入 logic 层前必须将 pb 对象转换为内部领域对象
+- 业务逻辑严禁直接引用 pb 标签或传输协议类型
+- 违反此规则的 PR 必须驳回
+
+## Rule 5：提交纪律
+- 每次提交前必须运行 `./scripts/check.sh --skip-tests` 或 `make lint`
+- 提交信息必须遵循 conventional-commits 规范（feat/fix/docs/refactor/test/chore）
+- 每个提交对应一个逻辑单元，禁止超大提交
+- 完成功能后自动创建 PR，除非用户明确不要求
+
+## Rule 6：Mock 先行
+- 涉及外部依赖（DB、RPC、MQ）的单元测试必须使用 mock
+- 修改业务代码后必须运行 `make mock` 确保 mock 已更新
+- 禁止在单元测试中连接真实数据库或真实 RPC 服务
+- 新增接口后，确认 mockgen 覆盖了新的接口方法
+
+## Rule 7：分布式事务规范
+- 跨服务事务必须使用 DTM Saga 模式
+- 禁止引入其他分布式事务方案（本地消息表、TCC、2PC 等）
+- 每个 Saga 事务必须有对应的补偿逻辑
+- 补偿逻辑必须是幂等的
+
+---
+
 # Go-mall 项目规范
+
+## 本地启动约定
+
+- 遇到 `start program go-mall`、`启动 go-mall`、`拉起 go-mall 前后端`、`启动本地联调环境`、`重启 go-mall`、`停止 go-mall` 这类表达时，优先读取 `go-mall-start` skill。
+- 如果 skill 不可用，直接使用 `./scripts/start-unified.sh`、`./scripts/start-unified.sh status`、`./scripts/start-unified.sh stop`、`./scripts/start-unified.sh restart`。
+- 禁止重新手工拼装 Docker、Go、npm 的启动顺序，除非统一脚本本身失败。
 
 **【重要】每次代码修改并准备提交前，必须运行 `./scripts/check.sh --skip-tests` 或 `make lint` 确保本地检查通过后再提交。**
 
