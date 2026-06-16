@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STACK_SCRIPT="$ROOT_DIR/scripts/ci-rpc-stack.sh"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.10}"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-auto}"
 
 run_local_tests() {
   cd "$ROOT_DIR/test/rpc"

@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODULES_FILE="$ROOT_DIR/scripts/go_ci_modules.txt"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.10}"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-auto}"
 GOVULNCHECK_BIN="${GOVULNCHECK_BIN:-}"
 
 if [[ -z "$GOVULNCHECK_BIN" ]]; then

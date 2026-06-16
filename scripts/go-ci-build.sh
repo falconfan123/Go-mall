@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SERVICES_FILE="$ROOT_DIR/scripts/build_services.txt"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.10}"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-auto}"
 
 load_services() {
   local services=()
@@ -50,9 +50,6 @@ fi
 cd "$ROOT_DIR"
 GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" work sync
 
-# Disable work mode when building individual services to prevent module resolution issues
-export GOWORK=disable
-
 for service in "${targets[@]}"; do
   if [[ ! " ${configured_services[*]} " =~ [[:space:]]${service}[[:space:]] ]]; then
     echo "service is not in build whitelist: $service" >&2
@@ -68,6 +65,7 @@ for service in "${targets[@]}"; do
   echo "building $service"
   (
     cd "$service_dir"
+    unset GOWORK
     GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" build ./...
   )
 done

@@ -3,7 +3,6 @@
 ./services/audit/internal/domain/entity
 ./services/audit/internal/application/service
 ./services/auths/internal/domain/entity
-./services/auths/internal/application/service
 ./services/carts/internal/domain/valueobject
 ./services/carts/internal/domain/entity
 ./services/carts/internal/domain/aggregate
