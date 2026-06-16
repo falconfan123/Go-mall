@@ -96,7 +96,7 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	resp := &checkout.CheckoutDetailResp{
 		StatusCode: code.Success,
 		StatusMsg:  code.SuccessMsg,
-		Data:      orderData,
+		Data:       orderData,
 	}
 
 	return resp, nil
