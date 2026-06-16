@@ -413,7 +413,7 @@ var File_search_proto protoreflect.FileDescriptor
 
 const file_search_proto_rawDesc = "" +
 	"\n" +
-	"\fsearch.proto\x12\x02pb\")\n" +
+	"\fsearch.proto\x12\x06search\")\n" +
 	"\x11ParseQueryRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\"\xf0\x01\n" +
 	"\x12ParseQueryResponse\x12%\n" +
@@ -430,9 +430,9 @@ const file_search_proto_rawDesc = "" +
 	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\x12\x17\n" +
 	"\asort_by\x18\x05 \x01(\tR\x06sortBy\x12\x1d\n" +
 	"\n" +
-	"sort_order\x18\x06 \x01(\tR\tsortOrder\"\xa4\x01\n" +
-	"\x0eSearchResponse\x12*\n" +
-	"\aresults\x18\x01 \x03(\v2\x10.pb.SearchResultR\aresults\x12\x14\n" +
+	"sort_order\x18\x06 \x01(\tR\tsortOrder\"\xa8\x01\n" +
+	"\x0eSearchResponse\x12.\n" +
+	"\aresults\x18\x01 \x03(\v2\x14.search.SearchResultR\aresults\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\x12\x1f\n" +
@@ -446,11 +446,11 @@ const file_search_proto_rawDesc = "" +
 	"\timage_url\x18\x05 \x01(\tR\bimageUrl\x12\x1a\n" +
 	"\bcategory\x18\x06 \x01(\tR\bcategory\x12\x14\n" +
 	"\x05brand\x18\a \x01(\tR\x05brand\x12\x14\n" +
-	"\x05score\x18\b \x01(\x01R\x05score2}\n" +
-	"\rSearchService\x12;\n" +
+	"\x05score\x18\b \x01(\x01R\x05score2\x8d\x01\n" +
+	"\rSearchService\x12C\n" +
 	"\n" +
-	"ParseQuery\x12\x15.pb.ParseQueryRequest\x1a\x16.pb.ParseQueryResponse\x12/\n" +
-	"\x06Search\x12\x11.pb.SearchRequest\x1a\x12.pb.SearchResponseB4Z2github.com/falconfan123/Go-mall/services/search/pbb\x06proto3"
+	"ParseQuery\x12\x19.search.ParseQueryRequest\x1a\x1a.search.ParseQueryResponse\x127\n" +
+	"\x06Search\x12\x15.search.SearchRequest\x1a\x16.search.SearchResponseB4Z2github.com/falconfan123/Go-mall/services/search/pbb\x06proto3"
 
 var (
 	file_search_proto_rawDescOnce sync.Once
@@ -466,18 +466,18 @@ func file_search_proto_rawDescGZIP() []byte {
 
 var file_search_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_search_proto_goTypes = []any{
-	(*ParseQueryRequest)(nil),  // 0: pb.ParseQueryRequest
-	(*ParseQueryResponse)(nil), // 1: pb.ParseQueryResponse
-	(*SearchRequest)(nil),      // 2: pb.SearchRequest
-	(*SearchResponse)(nil),     // 3: pb.SearchResponse
-	(*SearchResult)(nil),       // 4: pb.SearchResult
+	(*ParseQueryRequest)(nil),  // 0: search.ParseQueryRequest
+	(*ParseQueryResponse)(nil), // 1: search.ParseQueryResponse
+	(*SearchRequest)(nil),      // 2: search.SearchRequest
+	(*SearchResponse)(nil),     // 3: search.SearchResponse
+	(*SearchResult)(nil),       // 4: search.SearchResult
 }
 var file_search_proto_depIdxs = []int32{
-	4, // 0: pb.SearchResponse.results:type_name -> pb.SearchResult
-	0, // 1: pb.SearchService.ParseQuery:input_type -> pb.ParseQueryRequest
-	2, // 2: pb.SearchService.Search:input_type -> pb.SearchRequest
-	1, // 3: pb.SearchService.ParseQuery:output_type -> pb.ParseQueryResponse
-	3, // 4: pb.SearchService.Search:output_type -> pb.SearchResponse
+	4, // 0: search.SearchResponse.results:type_name -> search.SearchResult
+	0, // 1: search.SearchService.ParseQuery:input_type -> search.ParseQueryRequest
+	2, // 2: search.SearchService.Search:input_type -> search.SearchRequest
+	1, // 3: search.SearchService.ParseQuery:output_type -> search.ParseQueryResponse
+	3, // 4: search.SearchService.Search:output_type -> search.SearchResponse
 	3, // [3:5] is the sub-list for method output_type
 	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

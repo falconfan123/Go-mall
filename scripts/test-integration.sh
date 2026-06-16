@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.10}"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.11}"
 REPORT_DIR="${RPC_INTEGRATION_REPORT_DIR:-$ROOT_DIR/.artifacts/rpc-integration-report}"
 RAW_LOG="$REPORT_DIR/go-test.jsonl"
 STACK_SCRIPT="$ROOT_DIR/scripts/ci-rpc-stack.sh"
@@ -86,7 +86,7 @@ if [[ "$LOCAL_ONLY_MODE" == "1" ]]; then
 fi
 
 if [[ "${GO_MALL_TEST_LOCAL:-}" == "1" ]]; then
-  if "$STACK_SCRIPT" run-local-suite env GO_MALL_TEST_LOCAL_ONLY=1 GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" GO_CMD="$GO_CMD" bash "$0"; then
+  if "$STACK_SCRIPT" run-local-suite env GO_MALL_TEST_LOCAL=1 GO_MALL_TEST_LOCAL_ONLY=1 GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" GO_CMD="$GO_CMD" bash "$0"; then
     exit 0
   else
     status=$?

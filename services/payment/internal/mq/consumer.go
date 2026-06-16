@@ -3,7 +3,6 @@ package mq
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	idempotency "github.com/falconfan123/Go-mall/common/utils/idempotency"
@@ -59,8 +58,6 @@ func (a *PaymentDelayMQ) consumer(ctx context.Context) {
 			}
 			continue
 		}
-
-		fmt.Println(msg)
 
 	}
 }

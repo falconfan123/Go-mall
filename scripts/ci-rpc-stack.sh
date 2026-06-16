@@ -10,14 +10,16 @@ LOG_DIR="${GO_MALL_CI_LOG_DIR:-$ROOT_DIR/scripts/logs}"
 DEPENDENCY_LOG_DIR="${GO_MALL_CI_DEPENDENCY_LOG_DIR:-$ROOT_DIR/.artifacts/dependency-logs}"
 CONFIG_DIR="$STATE_DIR/configs"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.10}"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.11}"
+STRIPE_API_KEY_VALUE="${GO_MALL_TEST_STRIPE_API_KEY:-sk_test_51QItbp03vhJsKPuLhafsMvAgW6cUattQas8EWX72d9vkZO13kSYs9TlpIU00g0pF3QjQR4zuwd0VQ0fRaU458nA300c9zfDYop}"
+STRIPE_WEBHOOK_SECRET_VALUE="${GO_MALL_TEST_STRIPE_WEBHOOK_SECRET:-whsec_a8b03f35ed1100de63b66e47eec1040a422026b264b92f7dd28681fb98591e07}"
 ETCD_HOST_LOCAL="${GO_MALL_CI_ETCD_HOST:-127.0.0.1:2379}"
 POSTGRES_HOST_LOCAL="${GO_MALL_CI_POSTGRES_HOST:-127.0.0.1}"
 REDIS_HOST_LOCAL="${GO_MALL_CI_REDIS_HOST:-127.0.0.1}"
 ELASTICSEARCH_HOST_LOCAL="${GO_MALL_CI_ELASTICSEARCH_HOST:-127.0.0.1}"
 
 DEPENDENCY_PORTS=(2379 5432 5672 6379 9200 8088)
-CORE_PORTS=(10000 10001 10002 10003 10004 10005 10006 10007 10008 10009 10010 10011 10012 8888)
+CORE_PORTS=(8081 10000 10001 10002 10003 10004 10005 10006 10007 10008 10009 10010 10011 10012 8888)
 DEPENDENCY_SERVICES=(postgres redis rabbitmq etcd elasticsearch gorse)
 
 SERVICES=(
@@ -32,6 +34,7 @@ SERVICES=(
   "payment:services/payment:payment.go:10006"
   "inventory:services/inventory:inventory.go:10007"
   "audit:services/audit:audit.go:10008"
+  "search:services/search:search.go:8081"
   "coupons:services/coupons:coupons.go:10009"
   "admin:services/admin:admin.go:10012"
   "gateway:services/gateway:gateway.go:8888"
@@ -40,6 +43,7 @@ SERVICES=(
 STARTUP_PHASES=(
   "system activity auths users inventory carts audit"
   "product"
+  "search"
   "coupons"
   "checkout"
   "order"
@@ -345,12 +349,12 @@ start_service() {
   if command -v setsid >/dev/null 2>&1; then
     setsid bash -lc "
       cd '$service_dir'
-      exec env GOTOOLCHAIN='$GOTOOLCHAIN_VALUE' '$GO_CMD' run '$entrypoint' -f '$config_file' > '$log_file' 2>&1
+      exec env GOTOOLCHAIN='$GOTOOLCHAIN_VALUE' STRIPE_API_KEY='$STRIPE_API_KEY_VALUE' STRIPE_WEBHOOK_SECRET='$STRIPE_WEBHOOK_SECRET_VALUE' '$GO_CMD' run '$entrypoint' -f '$config_file' > '$log_file' 2>&1
     " &
   else
     (
       cd "$service_dir"
-      exec env GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" run "$entrypoint" -f "$config_file" >"$log_file" 2>&1
+      exec env GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" STRIPE_API_KEY="$STRIPE_API_KEY_VALUE" STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET_VALUE" "$GO_CMD" run "$entrypoint" -f "$config_file" >"$log_file" 2>&1
     ) &
   fi
   local pid=$!

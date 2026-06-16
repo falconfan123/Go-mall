@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -35,25 +34,19 @@ func (l *ListOrdersLogic) ListOrders(in *order.ListOrdersRequest) (*order.ListOr
 	res := &order.ListOrdersResponse{}
 
 	l.Logger.Infow("ListOrders called", logx.Field("in", in))
-	fmt.Printf("ListOrders called. in=%+v\n", in)
 
 	// Try to get user_id from metadata if missing
 	if in.UserId == 0 {
 		if md, ok := metadata.FromIncomingContext(l.ctx); ok {
 			l.Logger.Infow("metadata received", logx.Field("md", md))
-			fmt.Printf("metadata received: %+v\n", md)
 			// Check injected user_id first
 			userIds := md.Get("gateway-user-id")
 			if len(userIds) == 0 {
 				userIds = md.Get("user_id")
 			}
 			if len(userIds) > 0 {
-				fmt.Printf("Found user_id in metadata: %v\n", userIds)
 				if id, err := strconv.Atoi(userIds[0]); err == nil {
 					in.UserId = uint32(id)
-					fmt.Printf("Set in.UserId to %d\n", in.UserId)
-				} else {
-					fmt.Printf("Atoi error: %v\n", err)
 				}
 			}
 

@@ -18,16 +18,20 @@ import (
 )
 
 type loginResp struct {
-	StatusCode        int    `json:"statusCode"`
-	StatusCodeLegacy  int    `json:"status_code"`
-	StatusMsg         string `json:"statusMsg"`
-	StatusMsgLegacy   string `json:"status_msg"`
-	UserID            uint32 `json:"userId"`
-	UserIDLegacy      uint32 `json:"user_id"`
-	AccessToken       string `json:"accessToken"`
-	AccessTokenLegacy string `json:"access_token"`
-	RefreshToken      string `json:"refreshToken"`
+	StatusCode         int    `json:"statusCode"`
+	StatusCodeLegacy   int    `json:"status_code"`
+	StatusMsg          string `json:"statusMsg"`
+	StatusMsgLegacy    string `json:"status_msg"`
+	UserID             uint32 `json:"userId"`
+	UserIDLegacy       uint32 `json:"user_id"`
+	AccessToken        string `json:"accessToken"`
+	AccessTokenLegacy  string `json:"access_token"`
+	RefreshToken       string `json:"refreshToken"`
 	RefreshTokenLegacy string `json:"refresh_token"`
+	ShortToken         string `json:"shortToken"`
+	ShortTokenLegacy   string `json:"short_token"`
+	LongToken          string `json:"longToken"`
+	LongTokenLegacy    string `json:"long_token"`
 }
 
 type getUserResp struct {
@@ -67,14 +71,14 @@ type cartListResp struct {
 	StatusCodeLegacy int    `json:"status_code"`
 	StatusMsg        string `json:"statusMsg"`
 	StatusMsgLegacy  string `json:"status_msg"`
-	Data       []struct {
-		ProductID    int32   `json:"productId"`
-		ProductIDLegacy int32 `json:"product_id"`
-		ProductName  string  `json:"productName"`
-		ProductNameLegacy string `json:"product_name"`
-		ProductPrice float64 `json:"productPrice"`
+	Data             []struct {
+		ProductID          int32   `json:"productId"`
+		ProductIDLegacy    int32   `json:"product_id"`
+		ProductName        string  `json:"productName"`
+		ProductNameLegacy  string  `json:"product_name"`
+		ProductPrice       float64 `json:"productPrice"`
 		ProductPriceLegacy float64 `json:"product_price"`
-		Quantity     int32   `json:"quantity"`
+		Quantity           int32   `json:"quantity"`
 	} `json:"data"`
 }
 
@@ -83,7 +87,7 @@ type addAddressResp struct {
 	StatusCodeLegacy int    `json:"status_code"`
 	StatusMsg        string `json:"statusMsg"`
 	StatusMsgLegacy  string `json:"status_msg"`
-	Data       *struct {
+	Data             *struct {
 		AddressID       uint64 `json:"addressId,string"`
 		AddressIDLegacy uint64 `json:"address_id,string"`
 	} `json:"data"`
@@ -103,7 +107,7 @@ type createOrderResp struct {
 	StatusCodeLegacy int    `json:"status_code"`
 	StatusMsg        string `json:"statusMsg"`
 	StatusMsgLegacy  string `json:"status_msg"`
-	Order      *struct {
+	Order            *struct {
 		OrderID          string `json:"orderId"`
 		OrderIDLegacy    string `json:"order_id"`
 		PreOrderID       string `json:"preOrderId"`
@@ -118,10 +122,10 @@ type listOrdersResp struct {
 	StatusCodeLegacy int    `json:"status_code"`
 	StatusMsg        string `json:"statusMsg"`
 	StatusMsgLegacy  string `json:"status_msg"`
-	Orders     []struct {
-		OrderID     string `json:"orderId"`
+	Orders           []struct {
+		OrderID       string `json:"orderId"`
 		OrderIDLegacy string `json:"order_id"`
-		OrderStatus int32  `json:"order_status"`
+		OrderStatus   int32  `json:"order_status"`
 	} `json:"orders"`
 }
 
@@ -130,7 +134,7 @@ type paymentResp struct {
 	StatusCodeLegacy int    `json:"status_code"`
 	StatusMsg        string `json:"statusMsg"`
 	StatusMsgLegacy  string `json:"status_msg"`
-	Payment    *struct {
+	Payment          *struct {
 		OrderID       string `json:"orderId"`
 		OrderIDLegacy string `json:"order_id"`
 	} `json:"payment"`
@@ -215,12 +219,20 @@ func TestGatewayHTTPHappyPath(t *testing.T) {
 	require.NoError(t, err)
 	gatewayhttp.RequireStatusOK(t, resp, body)
 	require.Equal(t, 0, pickInt(login.StatusCode, login.StatusCodeLegacy), string(body))
-	require.NotEmpty(t, pickString(login.AccessToken, login.AccessTokenLegacy), string(body))
-	require.NotEmpty(t, pickString(login.RefreshToken, login.RefreshTokenLegacy), string(body))
+	accessToken := pickString(
+		pickString(login.AccessToken, login.AccessTokenLegacy),
+		pickString(login.ShortToken, login.ShortTokenLegacy),
+	)
+	refreshToken := pickString(
+		pickString(login.RefreshToken, login.RefreshTokenLegacy),
+		pickString(login.LongToken, login.LongTokenLegacy),
+	)
+	require.NotEmpty(t, accessToken, string(body))
+	require.NotEmpty(t, refreshToken, string(body))
 
 	authGateway := gateway.WithTokens(
-		pickString(login.AccessToken, login.AccessTokenLegacy),
-		pickString(login.RefreshToken, login.RefreshTokenLegacy),
+		accessToken,
+		refreshToken,
 	).WithUserID(user.UserID)
 
 	var me getUserResp
@@ -382,7 +394,7 @@ func TestGatewayHTTPHappyPath(t *testing.T) {
 	resp, body, err = authGateway.DoJSON(ctx, "POST", "/api/v1/payments", nil, map[string]any{
 		"user_id":        user.UserID,
 		"order_id":       orderID,
-		"payment_method": 2,
+		"payment_method": 3,
 	}, &createdPayment)
 	require.NoError(t, err)
 	gatewayhttp.RequireStatusOK(t, resp, body)
@@ -408,10 +420,10 @@ func TestGatewayHTTPHappyPath(t *testing.T) {
 	require.NoError(t, err)
 
 	resp, body, err = authGateway.DoJSON(ctx, "POST", "/api/v1/orders/cancel", nil, map[string]any{
-		"order_id":       cancelOrderID,
-		"user_id":        user.UserID,
-		"cancel_reason":  "gateway smoke",
-		"initiative":     true,
+		"order_id":      cancelOrderID,
+		"user_id":       user.UserID,
+		"cancel_reason": "gateway smoke",
+		"initiative":    true,
 	}, nil)
 	require.NoError(t, err)
 	gatewayhttp.RequireStatusOK(t, resp, body)

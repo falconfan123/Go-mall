@@ -13,6 +13,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/inventory/internal/domain/repository"
 	"github.com/falconfan123/Go-mall/services/inventory/internal/domain/valueobject"
 	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // InventoryAppService 库存应用服务
@@ -107,7 +108,7 @@ func (s *InventoryAppService) PreDecreaseInventory(ctx context.Context, req *dto
 			UserID:     int64(req.UserID),
 		}
 		if err := s.eventPub.PublishInventoryPreDecreased(evt); err != nil {
-			fmt.Printf("failed to publish pre decreased event: %v\n", err)
+			logx.Errorw("failed to publish inventory pre decreased event", logx.Field("err", err), logx.Field("product_id", item.ProductID), logx.Field("pre_order_id", req.PreOrderID))
 		}
 	}
 
@@ -167,7 +168,7 @@ func (s *InventoryAppService) DecreaseInventory(ctx context.Context, req *dto.De
 			OrderID:   req.PreOrderID,
 		}
 		if err := s.eventPub.PublishInventoryDecreased(evt); err != nil {
-			fmt.Printf("failed to publish decreased event: %v\n", err)
+			logx.Errorw("failed to publish inventory decreased event", logx.Field("err", err), logx.Field("product_id", item.ProductID), logx.Field("order_id", req.PreOrderID))
 		}
 	}
 
@@ -217,7 +218,7 @@ func (s *InventoryAppService) ReturnPreInventory(ctx context.Context, req *dto.R
 			PreOrderID: req.PreOrderID,
 		}
 		if err := s.eventPub.PublishInventoryPreReturned(evt); err != nil {
-			fmt.Printf("failed to publish pre returned event: %v\n", err)
+			logx.Errorw("failed to publish inventory pre returned event", logx.Field("err", err), logx.Field("product_id", item.ProductID), logx.Field("pre_order_id", req.PreOrderID))
 		}
 	}
 
@@ -267,7 +268,7 @@ func (s *InventoryAppService) ReturnInventory(ctx context.Context, req *dto.Retu
 			OrderID:   req.OrderID,
 		}
 		if err := s.eventPub.PublishInventoryReturned(evt); err != nil {
-			fmt.Printf("failed to publish returned event: %v\n", err)
+			logx.Errorw("failed to publish inventory returned event", logx.Field("err", err), logx.Field("product_id", item.ProductID), logx.Field("order_id", req.OrderID))
 		}
 	}
 
@@ -317,7 +318,7 @@ func (s *InventoryAppService) UpdateInventory(ctx context.Context, req *dto.Upda
 				ChangedAmount: newStock.Value() - oldStock,
 			}
 			if err := s.eventPub.PublishInventoryUpdated(evt); err != nil {
-				fmt.Printf("failed to publish updated event: %v\n", err)
+				logx.Errorw("failed to publish inventory updated event", logx.Field("err", err), logx.Field("product_id", item.ProductID))
 			}
 		}
 

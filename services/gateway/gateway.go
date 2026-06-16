@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"flag"
 	"errors"
+	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -21,19 +21,17 @@ import (
 var configFile = flag.String("f", "etc/gateway.yaml", "the config file")
 
 var publicPaths = map[string]struct{}{
-	"/api/v1/users/login":    {},
-	"/api/v1/users/register": {},
-	"/api/v1/auth/refresh":   {},
-	"/api/v1/products":       {},
+	"/api/v1/users/login":     {},
+	"/api/v1/users/register":  {},
+	"/api/v1/auth/refresh":    {},
+	"/api/v1/products":        {},
 	"/api/v1/products/detail": {},
-	"/api/v1/activity/token":  {},
-	"/api/v1/activity/status": {},
 	"/api/v1/system/time":     {},
 	"/api/v1/payments/status": {},
-	"/douyin/user/login":     {},
-	"/douyin/user/register":  {},
-	"/douyin/product/list":   {},
-	"/douyin/product/detail": {},
+	"/douyin/user/login":      {},
+	"/douyin/user/register":   {},
+	"/douyin/product/list":    {},
+	"/douyin/product/detail":  {},
 }
 
 func main() {

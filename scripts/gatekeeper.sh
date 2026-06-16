@@ -7,6 +7,9 @@
 
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -26,7 +29,7 @@ echo ""
 
 # ── 1. 编译检查 ──────────────────────────────────────────────
 echo -e "${BLUE}[1/7] 编译检查${NC}"
-if go build ./... 2>&1; then
+if make build 2>&1; then
   pass "全部服务编译通过"
 else
   fail "编译失败 — 请修复后再提交"
@@ -46,21 +49,18 @@ echo ""
 echo -e "${BLUE}[3/7] 单元测试 + 覆盖率${NC}"
 COVERAGE_THRESHOLD=63.6
 if make test-unit 2>&1; then
-  # 提取覆盖率
-  COV=$(go test ./... -coverprofile=/tmp/gatekeeper_cov.out 2>/dev/null | grep 'total:' | awk '{print $3}' | sed 's/%//')
-  if [ -z "$COV" ]; then
-    # fallback: coverage.sh might generate it differently
-    COV=$(make coverage 2>/dev/null | grep 'total' | awk '{print $3}' | sed 's/%//' || echo "N/A")
-  fi
   pass "单元测试全部通过"
-  if [ "$COV" != "N/A" ] && [ -n "$COV" ]; then
-    if (( $(echo "$COV < $COVERAGE_THRESHOLD" | bc -l 2>/dev/null) )); then
-      fail "覆盖率 ${COV}% < 阈值 ${COVERAGE_THRESHOLD}% — 请补充测试"
-    else
+  if COVERAGE_OUTPUT=$(COVERAGE_THRESHOLD="$COVERAGE_THRESHOLD" make coverage-ci 2>&1); then
+    printf '%s\n' "$COVERAGE_OUTPUT"
+    COV=$(printf '%s\n' "$COVERAGE_OUTPUT" | awk -F= '/TOTAL_COVERAGE=/{print $2}' | tail -n 1)
+    if [ -n "$COV" ]; then
       pass "覆盖率 ${COV}% ≥ ${COVERAGE_THRESHOLD}%"
+    else
+      warn "覆盖率检查通过，但未解析到 TOTAL_COVERAGE"
     fi
   else
-    warn "覆盖率数据无法提取，请手动检查 make coverage-ci"
+    printf '%s\n' "$COVERAGE_OUTPUT"
+    fail "覆盖率检查失败 — 请运行 make coverage-ci"
   fi
 else
   fail "单元测试失败"
@@ -84,9 +84,9 @@ echo ""
 
 # ── 5. 硬编码密钥检查 ─────────────────────────────────────────
 echo -e "${BLUE}[5/7] 敏感信息扫描${NC}"
-SENSITIVE=$(grep -rn 'sk-[a-zA-Z0-9]\{20,\}' \
-  --include='*.go' --include='*.yaml' --include='*.json' --include='*.env*' \
-  . 2>/dev/null | grep -v 'vendor/' | grep -v 'pb/' | grep -v '.git/' || true)
+SENSITIVE=$(rg -n 'sk-[A-Za-z0-9]{20,}' \
+  --glob '*.go' --glob '*.yaml' --glob '*.json' --glob '*.env*' \
+  --glob '!vendor/**' --glob '!**/pb/**' --glob '!.git/**' --glob '!frontend/node_modules/**' . || true)
 if [ -z "$SENSITIVE" ]; then
   pass "未发现硬编码密钥"
 else
@@ -97,10 +97,18 @@ echo ""
 
 # ── 6. 调试代码检查 ───────────────────────────────────────────
 echo -e "${BLUE}[6/7] 调试代码检查${NC}"
-DEBUG=$(grep -rn 'fmt\.Print\|log\.Print\(f\|ln\)\?\|println\|debug\.Print' \
-  --include='*.go' . 2>/dev/null \
-  | grep -v '_test.go' | grep -v 'vendor/' | grep -v 'pb/' | grep -v '.git/' \
-  | grep -v 'log.Printf.*"%v' || true)
+DEBUG=$(rg -n '\bfmt\.Print(f|ln)?\b|\bprintln\b' \
+  --glob '*.go' \
+  --glob '!**/*_test.go' \
+  --glob '!vendor/**' \
+  --glob '!**/pb/**' \
+  --glob '!.git/**' \
+  --glob '!frontend/node_modules/**' \
+  --glob '!test/**' \
+  --glob '!cmd/**' \
+  --glob '!tools/**' \
+  --glob '!run.go' \
+  --glob '!services/*/*.go' . || true)
 if [ -z "$DEBUG" ]; then
   pass "未发现调试输出残留"
 else
@@ -111,11 +119,9 @@ echo ""
 
 # ── 7. TODO/FIXME 审计 ────────────────────────────────────────
 echo -e "${BLUE}[7/7] TODO/FIXME 审计${NC}"
-TODOS=$(grep -rn 'TODO\|FIXME\|HACK\|XXX\|BUG' \
-  --include='*.go' --include='*.jsx' --include='*.js' \
-  . 2>/dev/null \
-  | grep -v 'vendor/' | grep -v 'pb/' | grep -v '.git/' \
-  | grep -v 'node_modules/' || true)
+TODOS=$(rg -n '//.*\b(TODO|FIXME|HACK|XXX|BUG)\b|/\*.*\b(TODO|FIXME|HACK|XXX|BUG)\b' \
+  --glob '*.go' --glob '*.jsx' --glob '*.js' \
+  --glob '!vendor/**' --glob '!**/pb/**' --glob '!.git/**' --glob '!**/node_modules/**' . || true)
 TODO_COUNT=$(echo "$TODOS" | grep -c . || true)
 if [ "$TODO_COUNT" -eq 0 ]; then
   pass "零 TODO/FIXME 残留"
