@@ -6,6 +6,8 @@ replace github.com/falconfan123/Go-mall/common => ../../common
 
 replace github.com/falconfan123/Go-mall/dal => ../../dal
 
+replace github.com/falconfan123/Go-mall/services/carts => ../../services/carts
+
 require (
 	github.com/falconfan123/Go-mall/common v0.0.0-20260312153719-88b43b07ae7d
 	github.com/falconfan123/Go-mall/dal v0.0.0-00010101000000-000000000000
