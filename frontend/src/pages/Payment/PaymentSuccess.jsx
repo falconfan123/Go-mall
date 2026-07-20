@@ -94,6 +94,11 @@ export default function PaymentSuccess() {
   const requestInFlightRef = useRef(false);
   const refreshStatusRef = useRef(null);
 
+  // Determine if payment is in processing state
+  const isProcessingState = paymentState &&
+    !isPaidState(paymentState) &&
+    !isTerminalFailureState(paymentState);
+
   useEffect(() => {
     if (!paymentId) {
       setInitialLoading(false);
@@ -198,12 +203,21 @@ export default function PaymentSuccess() {
     };
   }, [orderId, paymentId]);
 
+  // Handle view order button click
+  const handleViewOrder = () => {
+    if (orderId) {
+      navigate(`/orders?highlight=${orderId}`);
+    } else {
+      navigate("/orders");
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-xl shadow-sm p-8">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Stripe 支付结果
+            支付结果
           </h2>
 
           {initialLoading ? (
@@ -226,6 +240,11 @@ export default function PaymentSuccess() {
                   <span>等待首次同步结果</span>
                 )}
               </div>
+              {isProcessingState && (
+                <p className="text-sm text-yellow-600">
+                  支付已完成，订单同步中。您可以先查看订单页面了解最新状态。
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -257,6 +276,12 @@ export default function PaymentSuccess() {
         </div>
 
         <div className="mt-6 flex justify-center gap-3">
+          <Button
+            variant="primary"
+            onClick={handleViewOrder}
+          >
+            查看订单
+          </Button>
           <Button
             variant="secondary"
             onClick={() => refreshStatusRef.current?.()}

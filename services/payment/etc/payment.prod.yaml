@@ -35,6 +35,17 @@ Alipay:
   NotifyPath: ${ALIPAY_NOTIFY_PATH}
   NotifyPort: ${ALIPAY_NOTIFY_PORT}
   ReturnURL: ${ALIPAY_RETURN_URL}
+
+# Stripe payment configuration
+# IMPORTANT: Must use publicly accessible domain, NOT 127.0.0.1 or localhost in production
+Stripe:
+  APIKey: ${STRIPE_API_KEY}
+  SuccessURL: ${STRIPE_SUCCESS_URL}
+  CancelURL: ${STRIPE_CANCEL_URL}
+  WebhookSecret: ${STRIPE_WEBHOOK_SECRET}
+  WebhookPort: 11112
+  RequestTimeoutMs: 8000
+  MaxNetworkRetries: 2
 # 指标监控配置
 DevServer:
   Enabled: true

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   getStatusCode,
   getStatusMsg,
@@ -16,11 +16,16 @@ import { toast } from "../../components/common/Toast";
 
 export default function Orders() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
   const [payingId, setPayingId] = useState(null);
+  const highlightedOrderRef = useRef(null);
+
+  // Get highlighted order ID from URL (passed from success page)
+  const highlightedOrderId = searchParams.get("highlight");
 
   useEffect(() => {
     if (!user) {
@@ -29,6 +34,13 @@ export default function Orders() {
       fetchOrders();
     }
   }, [user, navigate]);
+
+  // Scroll to highlighted order when orders are loaded
+  useEffect(() => {
+    if (highlightedOrderId && highlightedOrderRef.current && orders.length > 0) {
+      highlightedOrderRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [orders, highlightedOrderId]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -128,6 +140,24 @@ export default function Orders() {
     return classMap[status] || "bg-gray-100";
   };
 
+  // Check if order is in payment processing state
+  const isPaymentProcessing = (order) => {
+    // Order is pending payment (status 2) with payment_status 2 (payment in progress)
+    return order.order_status === 2 && order.payment_status === 2;
+  };
+
+  // Get payment status text for display
+  const getPaymentStatusText = (status) => {
+    const statusMap = {
+      1: "待支付",
+      2: "支付中",
+      3: "已支付",
+      4: "已过期",
+      5: "已退款",
+    };
+    return statusMap[status] || "未知";
+  };
+
   if (!user) {
     return (
       <div className="text-center py-12">
@@ -159,70 +189,111 @@ export default function Orders() {
       <h2 className="text-2xl font-bold text-gray-900 mb-6">我的订单</h2>
 
       <div className="space-y-4">
-        {orders.map((order) => (
-          <div
-            key={order.id || order.order_id}
-            className="bg-white rounded-xl shadow-sm p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <span className="text-sm text-gray-500">订单号: </span>
-                <span className="font-medium">{order.order_id}</span>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-sm ${getStatusClass(order.order_status)}`}
-              >
-                {getStatusText(order.order_status)}
-              </span>
-            </div>
+        {orders.map((order) => {
+          const isHighlighted = highlightedOrderId === order.order_id;
+          const paymentProcessing = isPaymentProcessing(order);
 
-            <div className="border-t border-b py-4 mb-4">
-              {order.items?.map((item, index) => (
-                <div key={index} className="flex justify-between mb-2">
-                  <span className="text-gray-600">
-                    {item.name} x {item.quantity}
-                  </span>
-                  <span className="font-medium">
-                    ¥{(item.price * item.quantity).toFixed(2)}
-                  </span>
+          return (
+            <div
+              key={order.id || order.order_id}
+              ref={isHighlighted ? highlightedOrderRef : null}
+              className={`bg-white rounded-xl shadow-sm p-6 ${
+                isHighlighted ? "ring-2 ring-blue-500" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <span className="text-sm text-gray-500">订单号: </span>
+                  <span className="font-medium">{order.order_id}</span>
+                  {isHighlighted && (
+                    <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
+                      新订单
+                    </span>
+                  )}
                 </div>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-gray-600">总计: </span>
-                <span className="text-xl font-bold text-blue-600">
-                  ¥{order.total_price.toFixed(2)}
+                <span
+                  className={`px-3 py-1 rounded-full text-sm ${getStatusClass(order.order_status)}`}
+                >
+                  {getStatusText(order.order_status)}
                 </span>
               </div>
-              <div className="flex gap-2">
-                {order.order_status === 1 || order.order_status === 2 ? (
-                  <>
-                    <Button
-                      size="small"
-                      loading={payingId === order.order_id}
+
+              {/* Payment status warning for orders in progress */}
+              {paymentProcessing && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    支付处理中，请稍后刷新查看最新状态。您可以{" "}
+                    <button
+                      className="underline font-medium"
+                      onClick={() => fetchOrders()}
+                    >
+                      刷新订单
+                    </button>{" "}
+                    或{" "}
+                    <button
+                      className="underline font-medium"
                       onClick={() => handlePay(order.order_id)}
                     >
-                      去支付
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="small"
-                      loading={cancellingId === order.order_id}
-                      onClick={() => handleCancel(order.order_id)}
-                    >
-                      取消订单
-                    </Button>
-                  </>
-                ) : null}
-                {order.order_status === 3 && (
-                  <Button size="small">查看物流</Button>
-                )}
+                      重新发起支付
+                    </button>
+                    。
+                  </p>
+                </div>
+              )}
+
+              <div className="border-t border-b py-4 mb-4">
+                {order.items?.map((item, index) => (
+                  <div key={index} className="flex justify-between mb-2">
+                    <span className="text-gray-600">
+                      {item.name} x {item.quantity}
+                    </span>
+                    <span className="font-medium">
+                      ¥{(item.price * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-gray-600">总计: </span>
+                  <span className="text-xl font-bold text-blue-600">
+                    ¥{order.total_price.toFixed(2)}
+                  </span>
+                  {order.payment_status && order.order_status !== 3 && (
+                    <span className="ml-2 text-sm text-gray-500">
+                      (支付状态: {getPaymentStatusText(order.payment_status)})
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {order.order_status === 1 || order.order_status === 2 ? (
+                    <>
+                      <Button
+                        size="small"
+                        loading={payingId === order.order_id}
+                        onClick={() => handlePay(order.order_id)}
+                      >
+                        去支付
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="small"
+                        loading={cancellingId === order.order_id}
+                        onClick={() => handleCancel(order.order_id)}
+                      >
+                        取消订单
+                      </Button>
+                    </>
+                  ) : null}
+                  {order.order_status === 3 && (
+                    <Button size="small">查看物流</Button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

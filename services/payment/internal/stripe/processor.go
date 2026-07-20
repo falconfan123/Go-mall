@@ -34,14 +34,16 @@ func NewStripeProcessor(cfg config.StripeConfig) *StripeProcessor {
 	}
 	stripe.Key = apiKey
 
+	// Increase default timeout to 8 seconds for better reliability
 	requestTimeout := time.Duration(cfg.RequestTimeoutMs) * time.Millisecond
 	if requestTimeout <= 0 {
 		requestTimeout = 8 * time.Second
 	}
 
+	// Enable network retries by default (2 retries)
 	maxNetworkRetries := cfg.MaxNetworkRetries
 	if maxNetworkRetries < 0 {
-		maxNetworkRetries = 0
+		maxNetworkRetries = 2
 	}
 
 	backend := stripe.GetBackendWithConfig(stripe.APIBackend, &stripe.BackendConfig{
@@ -56,10 +58,20 @@ func NewStripeProcessor(cfg config.StripeConfig) *StripeProcessor {
 		webhookSecret = strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET"))
 	}
 
+	// Resolve URLs from config or environment
+	successURL := strings.TrimSpace(cfg.SuccessURL)
+	if successURL == "" {
+		successURL = strings.TrimSpace(os.Getenv("STRIPE_SUCCESS_URL"))
+	}
+	cancelURL := strings.TrimSpace(cfg.CancelURL)
+	if cancelURL == "" {
+		cancelURL = strings.TrimSpace(os.Getenv("STRIPE_CANCEL_URL"))
+	}
+
 	return &StripeProcessor{
 		apiKey:        apiKey,
-		successURL:    cfg.SuccessURL,
-		cancelURL:     cfg.CancelURL,
+		successURL:    successURL,
+		cancelURL:     cancelURL,
 		webhookSecret: webhookSecret,
 		client:        session.Client{B: backend, Key: apiKey},
 	}
@@ -129,7 +141,12 @@ func (s *StripeProcessor) CreatePaymentLink(ctx context.Context, orderID string,
 		return "", err
 	}
 
-	logx.Infow("Created Stripe payment link", logx.Field("order_id", orderID), logx.Field("url", result.URL))
+	// Log the created URLs for debugging
+	logx.Infow("Created Stripe payment link",
+		logx.Field("order_id", orderID),
+		logx.Field("success_url", buildReturnURL(s.successURL, sessionMetadata)),
+		logx.Field("cancel_url", buildReturnURL(s.cancelURL, sessionMetadata)),
+		logx.Field("url", result.URL))
 	return result.URL, nil
 }
 
