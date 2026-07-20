@@ -6,6 +6,18 @@ import { Button } from '../../components/common/Button';
 import { Spinner } from '../../components/common/Spinner';
 import { toast } from '../../components/common/Toast';
 
+// Emoji 占位符生成器
+const EMOJIS = ['📱', '💻', '⌚', '🎧', '📷', '🎮', '📺', '🏠', '👕', '👟', '👜', '💄', '🧴', '☕', '🍳', '🧹', '💡', '🔌', '🔋', '⌨️'];
+const COLORS = ['f3f4f6', 'fee2e2', 'fef3c7', 'dcfce7', 'dbeafe', 'e0e7ff', 'fce7f3', 'f3e8ff'];
+
+const getPlaceholder = (id) => {
+  const index = id % EMOJIS.length;
+  const colorIndex = id % COLORS.length;
+  const emoji = EMOJIS[index];
+  const bgColor = COLORS[colorIndex];
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect fill='%23${bgColor}' width='80' height='80'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='24' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3E${encodeURIComponent(emoji)}%3C/text%3E%3C/svg%3E`;
+};
+
 export default function Cart() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -72,12 +84,9 @@ export default function Cart() {
           {items.map((item) => (
             <div key={item.product_id || item.id} className="p-4 flex items-center gap-4">
               <img
-                src={item.image || item.image_url || 'https://via.placeholder.com/80?text=No+Image'}
+                src={item.image || item.image_url || getPlaceholder(item.product_id || item.id)}
                 alt={item.name}
                 className="w-20 h-20 object-cover rounded-lg"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/80?text=No+Image';
-                }}
               />
               <div className="flex-1">
                 <h3 className="font-medium text-gray-900">{item.name}</h3>

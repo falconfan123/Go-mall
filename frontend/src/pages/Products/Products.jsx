@@ -7,6 +7,19 @@ import { Input } from "../../components/common/Input";
 import { Spinner } from "../../components/common/Spinner";
 import { toast } from "../../components/common/Toast";
 
+// Emoji 占位符生成器
+const EMOJIS = ['📱', '💻', '⌚', '🎧', '📷', '🎮', '📺', '🏠', '👕', '👟', '👜', '💄', '🧴', '☕', '🍳', '🧹', '💡', '🔌', '🔋', '⌨️'];
+const COLORS = ['f3f4f6', 'fee2e2', 'fef3c7', 'dcfce7', 'dbeafe', 'e0e7ff', 'fce7f3', 'f3e8ff'];
+
+// 根据商品ID生成固定的emoji和颜色
+const getPlaceholder = (productId) => {
+  const index = productId % EMOJIS.length;
+  const colorIndex = productId % COLORS.length;
+  const emoji = EMOJIS[index];
+  const bgColor = COLORS[colorIndex];
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect fill='%23${bgColor}' width='300' height='200'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='48' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3E${encodeURIComponent(emoji)}%3C/text%3E%3C/svg%3E`;
+};
+
 export default function Products() {
   const { products, loading, fetchProducts, searchProducts } =
     useProductStore();
@@ -80,13 +93,9 @@ export default function Products() {
               <Link to={`/products/${product.id}`}>
                 <div className="aspect-w-16 aspect-h-9 bg-gray-200">
                   <img
-                    src={product.image || "/placeholder.png"}
+                    src={product.image || product.image_url || getPlaceholder(product.id)}
                     alt={product.name}
                     className="object-cover w-full h-48"
-                    onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/300x200?text=No+Image";
-                    }}
                   />
                 </div>
               </Link>

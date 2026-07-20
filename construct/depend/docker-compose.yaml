@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: mall
       TZ: Asia/Shanghai
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - /Volumes/Fan/docker-data/depend/postgres-data:/var/lib/postgresql/data
       - ../../sql/init_all_tables_postgres.sql:/docker-entrypoint-initdb.d/01-init_all_tables_postgres.sql:ro
     networks:
       - mall
@@ -72,7 +72,7 @@ services:
       - "2379:2379"
       - "2380:2380"
     volumes:
-      - etcd-data:/etcd-data
+      - /Volumes/Fan/docker-data/depend/etcd-data:/etcd-data
     networks:
       - mall
     restart: unless-stopped
@@ -93,7 +93,7 @@ services:
       - "9200:9200"
       - "9300:9300"
     volumes:
-      - es-data:/usr/share/elasticsearch/data
+      - /Volumes/Fan/docker-data/depend/es-data:/usr/share/elasticsearch/data
     networks:
       - mall
     restart: unless-stopped
@@ -123,8 +123,8 @@ services:
       - /var/lib/gorse/master
     volumes:
       - ./conf/gorse.config.toml:/etc/gorse/config.toml:ro
-      - gorse-data:/var/lib/gorse
-      - gorse-logs:/var/log/gorse
+      - /Volumes/Fan/docker-data/depend/gorse-data:/var/lib/gorse
+      - /Volumes/Fan/docker-data/depend/gorse-logs:/var/log/gorse
     networks:
       - mall
     depends_on:
@@ -138,12 +138,7 @@ services:
       timeout: 5s
       retries: 8
 
-volumes:
-  postgres-data:
-  etcd-data:
-  es-data:
-  gorse-data:
-  gorse-logs:
+volumes: {}
 
 networks:
   mall:
