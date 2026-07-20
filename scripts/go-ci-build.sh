@@ -5,7 +5,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SERVICES_FILE="$ROOT_DIR/scripts/build_services.txt"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.11}"
+GO_VERSION="$(cat "$ROOT_DIR/.go-version" | tr -d '[:space:]')"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go${GO_VERSION}}"
 
 load_services() {
   local services=()

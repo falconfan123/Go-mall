@@ -5,7 +5,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODULES_FILE="$ROOT_DIR/scripts/go_ci_modules.txt"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.11}"
+# Read Go version from .go-version file
+GO_VERSION="$(cat "$ROOT_DIR/.go-version" | tr -d '[:space:]')"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go${GO_VERSION}}"
 GOVULNCHECK_BIN="${GOVULNCHECK_BIN:-}"
 
 if [[ -z "$GOVULNCHECK_BIN" ]]; then

@@ -4,7 +4,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.11}"
+GO_VERSION="$(cat "$ROOT_DIR/.go-version" | tr -d '[:space:]')"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go${GO_VERSION}}"
 REPORT_DIR="${RPC_INTEGRATION_REPORT_DIR:-$ROOT_DIR/.artifacts/rpc-integration-report}"
 RAW_LOG="$REPORT_DIR/go-test.jsonl"
 STACK_SCRIPT="$ROOT_DIR/scripts/ci-rpc-stack.sh"
