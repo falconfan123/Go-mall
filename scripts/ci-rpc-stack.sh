@@ -102,6 +102,63 @@ wait_for_port() {
   return 1
 }
 
+wait_for_http_ready() {
+  local url="$1"
+  local expected_pattern="$2"
+  local attempts="${3:-30}"
+  local sleep_secs="${4:-2}"
+  local i
+
+  for ((i = 1; i <= attempts; i++)); do
+    local response
+    response="$(curl -s --max-time 5 "$url" 2>/dev/null || true)"
+    if echo "$response" | grep -q "$expected_pattern"; then
+      return 0
+    fi
+    sleep "$sleep_secs"
+  done
+  return 1
+}
+
+wait_for_etcd_registration() {
+  local service_name="$1"
+  local config_file="$2"
+  local attempts="${3:-30}"
+  local sleep_secs="${4:-2}"
+  local i
+
+  # Extract Etcd.Key from the rendered config file
+  local etcd_key
+  etcd_key="$(grep -E '^\s*Key:' "$config_file" 2>/dev/null | head -1 | sed 's/.*Key:\s*//' | tr -d '[:space:]' || true)"
+
+  if [[ -z "$etcd_key" ]]; then
+    # No Etcd.Key configured for this service, skip registration check
+    return 0
+  fi
+
+  echo "waiting for $service_name to register in etcd (key: $etcd_key)"
+
+  for ((i = 1; i <= attempts; i++)); do
+    # Check if the key exists in etcd with at least one endpoint
+    local etcd_response
+    etcd_response="$(etcdctl --endpoints="http://${ETCD_HOST_LOCAL}" get "$etcd_key" --prefix 2>/dev/null || true)"
+
+    if [[ -n "$etcd_response" ]]; then
+      # Verify there's actually an endpoint (not just the key itself)
+      local endpoint_count
+      endpoint_count="$(etcdctl --endpoints="http://${ETCD_HOST_LOCAL}" get "$etcd_key" --prefix 2>/dev/null | grep -c '/' || echo "0")"
+      if [[ "$endpoint_count" -gt 0 ]]; then
+        echo "$service_name registered in etcd"
+        return 0
+      fi
+    fi
+    sleep "$sleep_secs"
+  done
+
+  echo "service failed to register in etcd: $service_name (key: $etcd_key)" >&2
+  return 1
+}
+
 wait_for_container_health() {
   local container="$1"
   local attempts="${2:-60}"
@@ -279,9 +336,13 @@ start_dependencies() {
   for service in "${DEPENDENCY_SERVICES[@]}"; do
     local container="go-mall-${service}"
     echo "waiting for $container"
-    # Skip health check for elasticsearch in CI - it takes too long to become healthy
+    # Use HTTP health check for elasticsearch instead of container health
     if [[ "$service" == "elasticsearch" ]]; then
-      sleep 30
+      if ! wait_for_http_ready "http://${ELASTICSEARCH_HOST_LOCAL}:9200/_cluster/health" "yellow\|green" 30 3; then
+        docker logs "$container" >"$DEPENDENCY_LOG_DIR/${service}.log" 2>&1 || true
+        echo "dependency not healthy: $container" >&2
+        exit 1
+      fi
       continue
     fi
     if ! wait_for_container_health "$container"; then
@@ -372,6 +433,13 @@ start_service() {
     exit 1
   fi
 
+  # Wait for service to register in etcd (if Etcd.Key is configured)
+  if ! wait_for_etcd_registration "$name" "$config_file" 30 2; then
+    tail -n 200 "$log_file" >&2 || true
+    echo "service failed to register in etcd: $name" >&2
+    exit 1
+  fi
+
   sleep 1
   if ! process_alive "$pid"; then
     tail -n 120 "$log_file" >&2 || true
@@ -386,7 +454,7 @@ start_service_by_name() {
 
   spec="$(service_spec "$name")" || {
     echo "unknown service: $name" >&2
-    exit 1
+    return 1
   }
 
   IFS=: read -r _ rel_dir entrypoint port <<<"$spec"
@@ -400,9 +468,41 @@ start_services() {
   local service_name
   for phase in "${STARTUP_PHASES[@]}"; do
     for service_name in $phase; do
-      start_service_by_name "$service_name"
+      if ! start_service_by_name "$service_name"; then
+        dump_failure_diagnostics "$service_name"
+        exit 1
+      fi
     done
   done
+}
+
+dump_failure_diagnostics() {
+  local failed_service="$1"
+
+  echo "=== DIAGNOSTIC: Startup failure for $failed_service ===" >&2
+  echo "" >&2
+
+  # Show failed service logs
+  echo "--- Failed service logs ($failed_service) ---" >&2
+  tail -n 200 "$LOG_DIR/${failed_service}.log" 2>/dev/null || echo "(no logs available)" >&2
+  echo "" >&2
+
+  # List etcd registered keys
+  echo "--- Registered etcd keys ---" >&2
+  etcdctl --endpoints="http://${ETCD_HOST_LOCAL}" get / --prefix 2>/dev/null | grep -E '^/' | head -50 || echo "(etcd not reachable)" >&2
+  echo "" >&2
+
+  # Show container status
+  echo "--- Container status ---" >&2
+  docker ps -a --filter "name=go-mall-" --format "table {{.Names}}\t{{.Status}}\t{{.State}}" 2>/dev/null || echo "(docker not available)" >&2
+  echo "" >&2
+
+  # Show service stack snapshot
+  echo "--- Service stack snapshot ---" >&2
+  inspect_stack 2>/dev/null || true
+  echo "" >&2
+
+  echo "=== END DIAGNOSTIC ===" >&2
 }
 
 scan_ports() {
