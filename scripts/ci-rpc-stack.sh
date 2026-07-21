@@ -454,10 +454,9 @@ start_service() {
   fi
 
   # Wait for service to register in etcd (if Etcd.Key is configured)
+  # Don't fail the entire startup if this times out - just log a warning
   if ! wait_for_etcd_registration "$name" "$config_file" 30 2; then
-    tail -n 200 "$log_file" >&2 || true
-    echo "service failed to register in etcd: $name" >&2
-    exit 1
+    echo "warning: $name may not be registered in etcd yet, continuing..." >&2
   fi
 
   sleep 1
