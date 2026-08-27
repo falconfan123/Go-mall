@@ -6,6 +6,18 @@ import { Button } from '../../components/common/Button';
 import { Spinner } from '../../components/common/Spinner';
 import { toast } from '../../components/common/Toast';
 
+// Emoji 占位符生成器
+const EMOJIS = ['📱', '💻', '⌚', '🎧', '📷', '🎮', '📺', '🏠', '👕', '👟', '👜', '💄', '🧴', '☕', '🍳', '🧹', '💡', '🔌', '🔋', '⌨️'];
+const COLORS = ['f3f4f6', 'fee2e2', 'fef3c7', 'dcfce7', 'dbeafe', 'e0e7ff', 'fce7f3', 'f3e8ff'];
+
+const getPlaceholder = (id) => {
+  const index = id % EMOJIS.length;
+  const colorIndex = id % COLORS.length;
+  const emoji = EMOJIS[index];
+  const bgColor = COLORS[colorIndex];
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23${bgColor}' width='400' height='400'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='64' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3E${encodeURIComponent(emoji)}%3C/text%3E%3C/svg%3E`;
+};
+
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -55,12 +67,9 @@ export default function ProductDetail() {
           {/* 商品图片 */}
           <div className="aspect-w-1 aspect-h-1 bg-gray-200 rounded-lg overflow-hidden">
             <img
-              src={currentProduct.image || currentProduct.image_url || 'https://via.placeholder.com/400x400?text=No+Image'}
+              src={currentProduct.image || currentProduct.image_url || getPlaceholder(currentProduct.id)}
               alt={currentProduct.name}
               className="object-cover w-full h-full"
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
-              }}
             />
           </div>
 

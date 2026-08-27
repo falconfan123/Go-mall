@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { create } from "zustand";
 import { useProductStore } from "../../store/productStore";
 import {
@@ -15,6 +15,18 @@ import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/common/Button";
 import { Spinner } from "../../components/common/Spinner";
 import { toast } from "../../components/common/Toast";
+
+// Emoji 占位符生成器
+const EMOJIS = ['⚡', '🔥', '💥', '🎁', '💎', '🚀', '⭐', '🎯'];
+const COLORS = ['fee2e2', 'fef3c7', 'dcfce7', 'dbeafe', 'e0e7ff', 'fce7f3', 'f3e8ff', 'ffedd5'];
+
+const getPlaceholder = (id) => {
+  const index = id % EMOJIS.length;
+  const colorIndex = id % COLORS.length;
+  const emoji = EMOJIS[index];
+  const bgColor = COLORS[colorIndex];
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect fill='%23${bgColor}' width='300' height='200'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='48' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3E${encodeURIComponent(emoji)}%3C/text%3E%3C/svg%3E`;
+};
 
 // 秒杀系统状态管理
 const useSeckillStore = create((set, get) => ({
@@ -141,20 +153,39 @@ export default function FlashSale() {
   const [submittingId, setSubmittingId] = useState(null);
   const [seckillAddressId, setSeckillAddressId] = useState(null);
 
+  // 使用 ref 来存储函数和状态引用，避免 useEffect 依赖变化导致重复执行
+  const syncServerTimeRef = React.useRef(syncServerTime);
+  const calculateButtonStateRef = React.useRef(calculateButtonState);
+  const fetchFlashProductsRef = React.useRef(fetchFlashProducts);
+  const flashProductsRef = React.useRef(flashProducts);
+  syncServerTimeRef.current = syncServerTime;
+  calculateButtonStateRef.current = calculateButtonState;
+  fetchFlashProductsRef.current = fetchFlashProducts;
+  flashProductsRef.current = flashProducts;
+
+  // 标记是否已初始化
+  const initializedRef = React.useRef(false);
+
   useEffect(() => {
-    fetchFlashProducts();
-    syncServerTime();
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    fetchFlashProductsRef.current();
+    syncServerTimeRef.current();
 
     // 每10秒同步一次时间
-    const timeInterval = setInterval(syncServerTime, 10000);
+    const timeInterval = setInterval(() => {
+      syncServerTimeRef.current();
+    }, 10000);
 
     // 每秒更新倒计时和按钮状态
     const buttonInterval = setInterval(() => {
+      const products = flashProductsRef.current;
       const newStates = {};
-      flashProducts.forEach((product) => {
+      products.forEach((product) => {
         const startTime =
           product.start_time || product.startTime || Date.now() - 1000;
-        newStates[product.id] = calculateButtonState(product.id, startTime);
+        newStates[product.id] = calculateButtonStateRef.current(product.id, startTime);
       });
       setButtonStates(newStates);
     }, 1000);
@@ -163,12 +194,15 @@ export default function FlashSale() {
       clearInterval(timeInterval);
       clearInterval(buttonInterval);
     };
-  }, [flashProducts, fetchFlashProducts, syncServerTime, calculateButtonState]);
+  }, []); // 空依赖数组，只在挂载时执行一次
 
   // 计算活动倒计时
+  const getServerTimeRef = React.useRef(getServerTime);
+  getServerTimeRef.current = getServerTime;
+
   useEffect(() => {
     const timer = setInterval(() => {
-      const now = getServerTime();
+      const now = getServerTimeRef.current();
       // 假设活动在2小时后结束
       const endTime = now + 2 * 60 * 60 * 1000;
       const diff = endTime - now;
@@ -183,7 +217,7 @@ export default function FlashSale() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [getServerTime]);
+  }, []);
 
   const ensureSeckillAddress = async () => {
     if (!user?.user_id) {
@@ -306,16 +340,9 @@ export default function FlashSale() {
               >
                 <div className="relative">
                   <img
-                    src={
-                      product.image ||
-                      "https://via.placeholder.com/300x200?text=Seckill"
-                    }
+                    src={product.image || product.image_url || getPlaceholder(productId)}
                     alt={product.name}
                     className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/300x200?text=Seckill";
-                    }}
                   />
                   <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-sm font-bold">
                     秒杀

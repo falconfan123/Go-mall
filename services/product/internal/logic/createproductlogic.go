@@ -10,6 +10,7 @@ import (
 	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
 	"github.com/falconfan123/Go-mall/services/product/internal/svc"
 	product "github.com/falconfan123/Go-mall/services/product/pb"
+	"github.com/olivere/elastic/v7"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strconv"
 
@@ -83,18 +84,7 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		return nil, err
 	}
 	// 创建文档（自动JSON序列化）
-	if _, err := l.svcCtx.EsClient.Index().
-		Index(biz.ProductEsIndexName).
-		Id(strconv.FormatInt(productId, 10)).
-		BodyJson(productRes).
-		Refresh("true").
-		Do(l.ctx); err != nil {
-		l.Logger.Errorw("product es creation failed",
-			logx.Field("err", err))
-		return res, nil
-	}
-
-	// 4. Update Inventory
+	// 4. 初始化库存，失败时补偿删除商品，避免留下无法结算的脏数据
 	if _, err := l.svcCtx.InventoryRpc.UpdateInventory(l.ctx, &inventoryclient.UpdateInventoryReq{
 		Items: []*inventoryclient.UpdateInventoryReq_Items{
 			{
@@ -103,10 +93,29 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 			},
 		},
 	}); err != nil {
-		l.Logger.Errorw("product inventory update failed", logx.Field("err", err))
+		l.Logger.Errorw("product inventory update failed",
+			logx.Field("err", err),
+			logx.Field("product_id", productId))
+		if rollbackErr := l.compensateProductCreation(productId); rollbackErr != nil {
+			return nil, fmt.Errorf("initialize inventory for product %d: %w (compensation failed: %v)", productId, err, rollbackErr)
+		}
+		return nil, fmt.Errorf("initialize inventory for product %d: %w", productId, err)
 	}
 
 	res.ProductId = productId
+
+	// 创建文档（自动JSON序列化）
+	if _, err := l.svcCtx.EsClient.Index().
+		Index(biz.ProductEsIndexName).
+		Id(strconv.FormatInt(productId, 10)).
+		BodyJson(productRes).
+		Refresh("true").
+		Do(l.ctx); err != nil {
+		l.Logger.Errorw("product es creation failed",
+			logx.Field("err", err),
+			logx.Field("product_id", productId))
+		return res, nil
+	}
 	return res, nil
 }
 
@@ -117,5 +126,34 @@ func (l *CreateProductLogic) checkSensitiveWords(text string) error {
 	if text == "敏感词" {
 		return fmt.Errorf("包含敏感词")
 	}
+	return nil
+}
+
+func (l *CreateProductLogic) compensateProductCreation(productID int64) error {
+	if err := l.svcCtx.Postgres.Transact(func(session sqlx.Session) error {
+		productModel := product2.NewProductsModel(l.svcCtx.Postgres).WithSession(session)
+		productCategoriesModel := pc.NewProductCategoriesModel(l.svcCtx.Postgres).WithSession(session)
+
+		if err := productCategoriesModel.DeleteByProductId(l.ctx, productID); err != nil {
+			return err
+		}
+
+		if err := productModel.Delete(l.ctx, productID); err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if _, err := l.svcCtx.EsClient.Delete().
+		Index(biz.ProductEsIndexName).
+		Id(strconv.FormatInt(productID, 10)).
+		Refresh("true").
+		Do(l.ctx); err != nil && !elastic.IsNotFound(err) {
+		return err
+	}
+
 	return nil
 }

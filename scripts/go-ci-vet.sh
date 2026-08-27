@@ -5,7 +5,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODULES_FILE="$ROOT_DIR/scripts/go_ci_modules.txt"
 GO_CMD="${GO_CMD:-go}"
-GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go1.25.11}"
+GO_VERSION="$(cat "$ROOT_DIR/.go-version" | tr -d '[:space:]')"
+GOTOOLCHAIN_VALUE="${GOTOOLCHAIN:-go${GO_VERSION}}"
 
 modules=()
 while IFS= read -r line; do

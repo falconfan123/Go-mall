@@ -68,6 +68,9 @@ test_assertion.go
 .github_token
 /data/
 
+# Docs (privacy - project internal documentation)
+/docs/
+
 # Compiled binaries
 *-srv
 *-service

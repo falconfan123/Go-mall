@@ -32,12 +32,16 @@ RedisConf:
 
 Stripe:
   APIKey: "sk_test_51QItbp03vhJsKPuLhafsMvAgW6cUattQas8EWX72d9vkZO13kSYs9TlpIU00g0pF3QjQR4zuwd0VQ0fRaU458nA300c9zfDYop"
+  # SuccessURL/CancelURL can also be set via env vars: STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL
+  # For local dev: http://127.0.0.1:3000/payment/success
+  # For production: https://your-domain.com/payment/success
+  # IMPORTANT: Non-local environments must use a publicly accessible domain, NOT 127.0.0.1 or localhost
   SuccessURL: "http://127.0.0.1:3000/payment/success"
   CancelURL: "http://127.0.0.1:3000/payment/cancel"
   WebhookSecret: "whsec_a8b03f35ed1100de63b66e47eec1040a422026b264b92f7dd28681fb98591e07"
   WebhookPort: 11112
-  RequestTimeoutMs: 5000
-  MaxNetworkRetries: 0
+  RequestTimeoutMs: 8000
+  MaxNetworkRetries: 2
 
 OrderRpc:
   Etcd:
