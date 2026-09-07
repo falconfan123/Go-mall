@@ -22,14 +22,17 @@ type (
 		FindAll(ctx context.Context) ([]*Inventory, error)
 		FindLockOrder(ctx context.Context, session sqlx.Session, order_id string, user_id int64, table string) (bool, error)
 		LockOrder(ctx context.Context, session sqlx.Session, order_id string, user_id int64, table string) error
+		UnlockOrder(ctx context.Context, session sqlx.Session, order_id string, user_id int64, table string) error
 		WithSession(session sqlx.Session) InventoryModel
 		UpdateOrCreate(ctx context.Context, inventory Inventory) error
 		BatchReturn(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error
 		DecreaseInventoryAtom(ctx context.Context, productId int32, quantity int32) (cnt int64, err error)
 		Batchdecrease(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error
 		BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32, orderID string, userID int64) error
+		BatchReturnInventoryAtomWithSession(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32, orderID string, userID int64) error
 		ReturnInventory(ctx context.Context, id int32, quantity int32) (cnt int64, err error)
 		BatchDecreaseInventoryAtom(ctx context.Context, productId []int32, quantity []int32, user_id int64, order_id string) error
+		BatchDecreaseInventoryAtomWithSession(ctx context.Context, session sqlx.Session, productId []int32, quantity []int32, user_id int64, order_id string) error
 	}
 
 	customInventoryModel struct {
@@ -39,8 +42,14 @@ type (
 
 func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32, orderID string, userID int64) error {
 
-	err := m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+	return m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		return m.BatchReturnInventoryAtomWithSession(ctx, session, productIDs, quantities, orderID, userID)
+	})
+}
 
+// BatchReturnInventoryAtomWithSession 在调用方事务内执行批量回补（saga 补偿分支 barrier 用）。
+func (m *customInventoryModel) BatchReturnInventoryAtomWithSession(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32, orderID string, userID int64) error {
+	{
 		// 阶段1: 幂等检查
 		isLocked, err := m.FindLockOrder(ctx, session, orderID, userID, m.lockreturntable)
 		if err != nil {
@@ -48,7 +57,7 @@ func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, pro
 		}
 		if isLocked {
 
-			return fmt.Errorf("订单 %s 已被锁定", orderID)
+			return fmt.Errorf("订单 %s 已被锁定: %w", orderID, biz.ErrReturnAlreadyLocked)
 		}
 
 		// 阶段2: 创建锁记录（30分钟有效期）
@@ -80,14 +89,17 @@ func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, pro
 			return err
 		}
 
+		// 阶段5: 释放扣减锁（补偿语义 = 完整回滚扣减侧 effect）。
+		// 7.2 探针③ live 发现：不释放则墓碑重试的新 gid（settle:{order}:r2）扣减阶段1
+		// 命中陈旧锁幂等跳过 → saga 报 succeed 但库存未扣（订单已支付货没跟上，静默漂移）。
+		if err := m.UnlockOrder(ctx, session, orderID, userID, m.lockdecreasetable); err != nil {
+			return err
+		}
+
 		return nil
 
-	})
-	if err != nil {
-		return err
 	}
 	return nil
-
 }
 
 func (m *customInventoryModel) BatchReturn(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error {
@@ -191,6 +203,19 @@ func (m *customInventoryModel) LockOrder(
 	return nil
 }
 
+// UnlockOrder 释放订单锁（补偿路径用：回滚扣减侧锁，保证同单重试可重新扣减）。
+func (m *customInventoryModel) UnlockOrder(
+	ctx context.Context,
+	session sqlx.Session,
+	orderID string,
+	userID int64,
+	table string,
+) error {
+	query := fmt.Sprintf("DELETE FROM %s WHERE order_id = $1 AND user_id = $2", table)
+	_, err := session.ExecCtx(ctx, query, orderID, userID)
+	return err
+}
+
 // FindLockOrder 幂等性检查
 func (m *customInventoryModel) FindLockOrder(
 	ctx context.Context,
@@ -227,63 +252,75 @@ func (m *customInventoryModel) BatchDecreaseInventoryAtom(
 ) error {
 
 	return m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
-		// 阶段1: 幂等检查
-		isLocked, err := m.FindLockOrder(ctx, session, orderID, userID, m.lockdecreasetable)
-		if err != nil {
-			return err
-		}
-		if isLocked {
-			return nil
-		}
+		return m.BatchDecreaseInventoryAtomWithSession(ctx, session, productIDs, quantities, userID, orderID)
+	})
+}
 
-		// 阶段2: 创建锁记录（30分钟有效期）
-		if err := m.LockOrder(ctx, session, orderID, userID, m.lockdecreasetable); err != nil {
-			return fmt.Errorf("创建锁失败: %w", err)
-		}
+// BatchDecreaseInventoryAtomWithSession 在调用方事务内执行批量扣减（saga 分支 barrier 用）。
+func (m *customInventoryModel) BatchDecreaseInventoryAtomWithSession(
+	ctx context.Context,
+	session sqlx.Session,
+	productIDs []int32,
+	quantities []int32,
+	userID int64,
+	orderID string,
+) error {
+	// 阶段1: 幂等检查
+	isLocked, err := m.FindLockOrder(ctx, session, orderID, userID, m.lockdecreasetable)
+	if err != nil {
+		return err
+	}
+	if isLocked {
+		return nil
+	}
 
-		// --- 阶段3: 批量锁定库存记录 ---
-		query := fmt.Sprintf(`
+	// 阶段2: 创建锁记录（30分钟有效期）
+	if err := m.LockOrder(ctx, session, orderID, userID, m.lockdecreasetable); err != nil {
+		return fmt.Errorf("创建锁失败: %w", err)
+	}
+
+	// --- 阶段3: 批量锁定库存记录 ---
+	query := fmt.Sprintf(`
             SELECT "product_id", "total", "sold"
             FROM %s 
             WHERE "product_id" IN (?)
             FOR UPDATE`, m.table)
 
-		// 处理IN查询参数化
-		query, args, err := sqlx1.In(query, productIDs)
-		if err != nil {
-			return fmt.Errorf("build IN query failed: %w", err)
-		}
-		query = sqlx1.Rebind(sqlx1.DOLLAR, query)
+	// 处理IN查询参数化
+	query, args, err := sqlx1.In(query, productIDs)
+	if err != nil {
+		return fmt.Errorf("build IN query failed: %w", err)
+	}
+	query = sqlx1.Rebind(sqlx1.DOLLAR, query)
 
-		var inventories []*Inventory
-		if err := session.QueryRowsCtx(ctx, &inventories, query, args...); err != nil {
-			return fmt.Errorf("batch lock inventory failed: %w", err)
-		}
+	var inventories []*Inventory
+	if err := session.QueryRowsCtx(ctx, &inventories, query, args...); err != nil {
+		return fmt.Errorf("batch lock inventory failed: %w", err)
+	}
 
-		// 转换为快速查找map
-		inventoryMap := make(map[int32]*Inventory, len(inventories))
-		for _, inv := range inventories {
-			inventoryMap[int32(inv.ProductId)] = inv
-		}
+	// 转换为快速查找map
+	inventoryMap := make(map[int32]*Inventory, len(inventories))
+	for _, inv := range inventories {
+		inventoryMap[int32(inv.ProductId)] = inv
+	}
 
-		// --- 阶段4: 库存预检查 ---
-		for i, pid := range productIDs {
-			inv, exists := inventoryMap[pid]
-			if !exists {
-				return fmt.Errorf("product %d not found: %w", pid, sqlx.ErrNotFound)
-			}
-			if inv.Total < int64(quantities[i]) {
-				return fmt.Errorf("product %d not enough: %w", pid, biz.ErrInventoryNotEnough)
-			}
+	// --- 阶段4: 库存预检查 ---
+	for i, pid := range productIDs {
+		inv, exists := inventoryMap[pid]
+		if !exists {
+			return fmt.Errorf("product %d not found: %w", pid, sqlx.ErrNotFound)
 		}
-
-		// --- 阶段5: 执行批量扣减 ---
-		if err := m.Batchdecrease(ctx, session, productIDs, quantities); err != nil {
-			return fmt.Errorf("batch decrease failed: %w", err)
+		if inv.Total < int64(quantities[i]) {
+			return fmt.Errorf("product %d not enough: %w", pid, biz.ErrInventoryNotEnough)
 		}
+	}
 
-		return nil
-	})
+	// --- 阶段5: 执行批量扣减 ---
+	if err := m.Batchdecrease(ctx, session, productIDs, quantities); err != nil {
+		return fmt.Errorf("batch decrease failed: %w", err)
+	}
+
+	return nil
 }
 func (m *customInventoryModel) Batchdecrease(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error {
 	// 阶段3: 批量更新

@@ -17,16 +17,9 @@ type Config struct {
 	ProductRpc     zrpc.RpcClientConf
 	CouponsRpc     zrpc.RpcClientConf
 	RabbitMQConfig commonconfig.RabbitMQConfig
-	PrometheusExt  PrometheusExtConf
 }
 
 type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
-}
-
-type PrometheusExtConf struct {
-	Host string
-	Port int
-	Path string
 }

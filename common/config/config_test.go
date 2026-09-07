@@ -54,3 +54,33 @@ func TestRabbitMQConfigDns(t *testing.T) {
 		})
 	}
 }
+
+func TestConsumerConfigEffective(t *testing.T) {
+	t.Parallel()
+
+	// 零值回落默认：重试上限 3、退避 1s、停机等待 10s、幂等租约 1h、SUCCESS 标记 24h
+	got := ConsumerConfig{}.Effective()
+	if got.RetryLimit != 3 || got.BackoffBaseMs != 1000 ||
+		got.ShutdownTimeoutMs != 10000 || got.IdempotencyTtlSeconds != 3600 ||
+		got.SuccessTtlSeconds != 86400 {
+		t.Fatalf("unexpected defaults: %+v", got)
+	}
+
+	// 显式配置保留
+	custom := ConsumerConfig{
+		RetryLimit:            5,
+		BackoffBaseMs:         500,
+		ShutdownTimeoutMs:     3000,
+		IdempotencyTtlSeconds: 7200,
+		SuccessTtlSeconds:     3600,
+	}.Effective()
+	if custom != (ConsumerConfig{RetryLimit: 5, BackoffBaseMs: 500, ShutdownTimeoutMs: 3000, IdempotencyTtlSeconds: 7200, SuccessTtlSeconds: 3600}) {
+		t.Fatalf("custom config altered: %+v", custom)
+	}
+
+	// 非法值回落默认
+	invalid := ConsumerConfig{RetryLimit: -1, BackoffBaseMs: -1, ShutdownTimeoutMs: -1, IdempotencyTtlSeconds: -1, SuccessTtlSeconds: -1}.Effective()
+	if invalid != (ConsumerConfig{RetryLimit: 3, BackoffBaseMs: 1000, ShutdownTimeoutMs: 10000, IdempotencyTtlSeconds: 3600, SuccessTtlSeconds: 86400}) {
+		t.Fatalf("invalid values should fall back to defaults: %+v", invalid)
+	}
+}

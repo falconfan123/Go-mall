@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -10,10 +9,12 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
+	inventorypb "github.com/falconfan123/Go-mall/services/inventory/pb"
 	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/falconfan123/Go-mall/services/payment/internal/server"
@@ -24,6 +25,7 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -47,6 +49,7 @@ func main() {
 	})
 	paymentSvc := NewPaymentService(ctx)
 	paymentSvc.startHTTPServer()
+	paymentSvc.startFallbackWorker()
 
 	defer s.Stop()
 
@@ -56,6 +59,11 @@ func main() {
 
 type PaymentService struct {
 	ctx *svc.ServiceContext
+	// recon 对账状态（进程内存）：当日已跑则跳过
+	reconMu      sync.Mutex
+	lastReconDay string
+	// stripeLister Stripe 会话拉取抽象（nil=默认实现；测试注入 fake，Rule 6）
+	stripeLister func(ctx context.Context, startSec, endSec int64) ([]stripeSessionData, error)
 }
 
 func NewPaymentService(ctx *svc.ServiceContext) *PaymentService {
@@ -185,13 +193,61 @@ func (s *PaymentService) processStripePaymentSuccess(
 		return err
 	}
 
+	// 结算输入快照预取（事务外；outbox payload 与结算输入共用，design 决策 4）：
+	// 金额/优惠券来自订单行，items 来自订单项（Initiate 与 Ensure 共用同一集合）。
+	detail, err := s.ctx.OrderRpc.GetOrder(ctx, &order.GetOrderRequest{
+		OrderId: orderID,
+		UserId:  userID,
+	})
+	if err != nil {
+		return err
+	}
+	if detail.StatusCode != code.Success {
+		return fmt.Errorf("query order detail failed: %s", detail.StatusMsg)
+	}
+	items := make([]*inventorypb.InventoryReq_Items, 0, len(detail.Items))
+	for _, it := range detail.Items {
+		items = append(items, &inventorypb.InventoryReq_Items{
+			ProductId: int32(it.ProductId),
+			Quantity:  int32(it.Quantity),
+		})
+	}
+	input := &svc.SettlementInput{
+		OrderID:        orderID,
+		UserID:         int32(userID),
+		PreOrderID:     detail.Order.PreOrderId,
+		TransactionID:  transactionID,
+		PaidAmount:     paidAmount,
+		PaidAt:         paidAt,
+		Items:          items,
+		CouponID:       detail.Order.CouponId,
+		DiscountAmount: detail.Order.DiscountAmount,
+		OriginAmount:   detail.Order.OriginalAmount,
+	}
+
 	if payment.PaymentStatus(paymentRecord.Status) != payment.PaymentStatus_PAYMENT_STATUS_PAID {
-		paymentRecord.TransactionId = sql.NullString{String: transactionID, Valid: transactionID != ""}
-		paymentRecord.PaidAmount = sql.NullInt64{Int64: paidAmount, Valid: true}
-		paymentRecord.PaidAt = sql.NullInt64{Int64: paidAt, Valid: true}
-		paymentRecord.Status = int64(payment.PaymentStatus_PAYMENT_STATUS_PAID)
-		paymentRecord.UpdatedAt = time.Now()
-		if err := s.ctx.PaymentModel.Update(ctx, paymentRecord); err != nil {
+		// 两写事务（design 决策 4）：支付单翻转与结算待办同事务落库——
+		// "翻转了但未触发编排"只可能存在于 outbox pending 行，由 relay 必达接力。
+		// 条件更新带状态机门槛（status <> PAID），rows==1（本次翻转成功）才写待办。
+		payloadBytes, err := json.Marshal(input)
+		if err != nil {
+			return err
+		}
+		err = s.ctx.Model.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+			rows, err := s.ctx.PaymentModel.UpdateStatusToPaidWithSession(
+				ctx, session, paymentID, transactionID, paidAmount, paidAt)
+			if err != nil {
+				return err
+			}
+			if rows == 1 {
+				return s.ctx.OutboxModel.InsertPendingWithSession(
+					ctx, session, orderID, paymentID, int64(userID), string(payloadBytes))
+			}
+			return nil
+		})
+		if err != nil {
+			logx.Errorw("payment flip transaction failed (rolled back, stripe will retry)",
+				logx.Field("err", err), logx.Field("order_id", orderID), logx.Field("payment_id", paymentID))
 			return err
 		}
 	}
@@ -207,27 +263,18 @@ func (s *PaymentService) processStripePaymentSuccess(
 		return fmt.Errorf("query order state failed: %s", orderState.StatusMsg)
 	}
 
-	if ordertypes.OrderStatus(orderState.Order.OrderStatus) == ordertypes.OrderStatusPaid &&
-		ordertypes.PaymentStatus(orderState.Order.PaymentStatus) == ordertypes.PaymentStatusPaid {
-		return nil
-	}
+	// 结算统一走 Saga（design 决策 1/2）：本地支付单已 PAID，此后由 dtm 编排
+	// 订单/库存/优惠券三分支；快路径（订单已 Paid）与正常路径共用同一确定性 gid，
+	// 重复发起由 dtm 幂等收敛（Ensure），outbox relay 为系统性必达保证（本 change）。
+	orderPaid := ordertypes.OrderStatus(orderState.Order.OrderStatus) == ordertypes.OrderStatusPaid &&
+		ordertypes.PaymentStatus(orderState.Order.PaymentStatus) == ordertypes.PaymentStatusPaid
 
-	orderRes, err := s.ctx.OrderRpc.UpdateOrder2PaymentSuccess(ctx, &order.UpdateOrder2PaymentSuccessRequest{
-		OrderId: orderID,
-		PaymentResult: &order.PaymentResult{
-			TransactionId: transactionID,
-			PaidAmount:    paidAmount,
-			PaidAt:        paidAt,
-		},
-		UserId: int32(userID),
-	})
-	if err != nil {
-		return err
+	if orderPaid {
+		// 快路径：订单已支付 → 幂等补建（saga in-flight/已完成均收敛为成功）
+		return s.ctx.SettlementSaga.Ensure(ctx, input)
 	}
-	if orderRes.StatusCode != code.Success {
-		return fmt.Errorf("update order status failed: %s", orderRes.StatusMsg)
-	}
-	return nil
+	// 正常路径：发起结算 saga（发起失败返回错误，webhook 500 触发 Stripe 重试）
+	return s.ctx.SettlementSaga.Initiate(ctx, input)
 }
 
 // 封装HTTP服务启动

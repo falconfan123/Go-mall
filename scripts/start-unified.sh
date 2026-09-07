@@ -10,6 +10,7 @@ STATE_DIR="/tmp/go-mall-supervisors"
 LOG_DIR="${PROJECT_ROOT}/scripts/logs"
 DEPEND_STACK="${PROJECT_ROOT}/construct/depend/docker-compose.yaml"
 LOKI_STACK="${PROJECT_ROOT}/infrastructure/docker-compose.yaml"
+OBSERVABILITY_STACK="${PROJECT_ROOT}/construct/observability/docker-compose.yaml"
 FRONTEND_DIR="${PROJECT_ROOT}/frontend"
 FRONTEND_PORT="3000"
 FRONTEND_LOG="${LOG_DIR}/frontend.log"
@@ -31,6 +32,7 @@ order:services/order:10004:rpc
 checkout:services/checkout:10005:rpc
 payment:services/payment:10006:rpc
 admin:services/admin:10012:rpc
+search:services/search:8081:rpc
 gateway:services/gateway:8888:gateway
 "
 
@@ -44,8 +46,9 @@ go-mall-gorse:8088:Gorse
 "
 
 INFRA_PORTS="2379 5432 5672 6379 9200 8088"
-CORE_PORTS="10000 10001 10002 10003 10004 10005 10006 10007 10008 10009 10010 10011 10012 8888"
+CORE_PORTS="10000 10001 10002 10003 10004 10005 10006 10007 10008 10009 10010 10011 10012 8081 8888"
 MANAGED_PORTS="${CORE_PORTS} ${FRONTEND_PORT}"
+METRICS_PORTS="11000 11001 11002 11003 11004 11005 11006 11007 11008 11009 11010 11011 11012 9888 9081"
 
 usage() {
     cat <<'EOF'
@@ -312,29 +315,33 @@ start_supervised_process() {
     label="$(service_label "$name")"
 
     : > "$log_file"
+    rm -f "$supervisor_pid_file" "$child_pid_file"
     if command -v launchctl >/dev/null 2>&1; then
         launchctl remove "$label" >/dev/null 2>&1 || true
         launchctl submit -l "$label" -- "$SUPERVISOR_SCRIPT" "$name" "$workdir" "$log_file" \
             "$supervisor_pid_file" "$child_pid_file" "$command"
-    else
-        nohup "$SUPERVISOR_SCRIPT" "$name" "$workdir" "$log_file" \
-            "$supervisor_pid_file" "$child_pid_file" "$command" >/dev/null 2>&1 < /dev/null &
-        local supervisor_pid=$!
-        append_pid "$name" "$supervisor_pid" "$port"
-        return 0
-    fi
-    local supervisor_pid
-    local attempts=20
-    local i
-    for ((i = 1; i <= attempts; i++)); do
-        supervisor_pid="$(read_pid_value "$supervisor_pid_file")"
-        if pid_running "$supervisor_pid"; then
-            break
+        local i
+        for ((i = 1; i <= 5; i++)); do
+            [[ -s "$supervisor_pid_file" ]] && break
+            sleep 1
+        done
+        if [[ -s "$supervisor_pid_file" ]]; then
+            local supervisor_pid
+            supervisor_pid="$(read_pid_value "$supervisor_pid_file")"
+            append_pid "$name" "$supervisor_pid" "$port"
+            return 0
         fi
-        sleep 1
-    done
+        # launchd 拒绝执行（如仓库位于外置卷时脚本被 launchd 拒载，exit 126）→ 回退 nohup 方式
+        launchctl remove "$label" >/dev/null 2>&1 || true
+    fi
+    nohup "$SUPERVISOR_SCRIPT" "$name" "$workdir" "$log_file" \
+        "$supervisor_pid_file" "$child_pid_file" "$command" >/dev/null 2>&1 < /dev/null &
+    local supervisor_pid
+    supervisor_pid=$!
     append_pid "$name" "$supervisor_pid" "$port"
+    return 0
 }
+
 
 start_service() {
     local srv_name="$1"
@@ -372,19 +379,19 @@ start_service() {
 
 start_stripe_forwarder() {
     if ! command -v stripe >/dev/null 2>&1; then
-        echo "未找到 Stripe CLI，请先安装 stripe 后再启动本地支付链路"
-        exit 1
+        echo "未找到 Stripe CLI，跳过本地支付 webhook 转发（支付链路验证需先安装 stripe）"
+        return 0
     fi
     if ! stripe_cli_authenticated; then
-        echo "Stripe CLI 未登录，请先执行 stripe login"
-        exit 1
+        echo "Stripe CLI 未登录，跳过本地支付 webhook 转发（如需验证支付链路请先执行 stripe login）"
+        return 0
     fi
 
     local webhook_secret
     webhook_secret="$(fetch_stripe_webhook_secret)"
     if [[ -z "$webhook_secret" ]]; then
-        echo "无法获取 Stripe webhook signing secret"
-        exit 1
+        echo "无法获取 Stripe webhook signing secret，跳过本地支付 webhook 转发"
+        return 0
     fi
     export STRIPE_WEBHOOK_SECRET="$webhook_secret"
 
@@ -396,9 +403,9 @@ start_stripe_forwarder() {
     local stripe_supervisor_pid
     stripe_supervisor_pid="$(read_pid_value "$(supervisor_pid_path stripe-listen)")"
     if ! pid_running "$stripe_supervisor_pid"; then
-        echo "stripe listen 启动失败"
+        echo "stripe listen 启动失败，跳过本地支付 webhook 转发"
         print_log_tail "$STRIPE_FORWARD_LOG"
-        exit 1
+        return 0
     fi
 }
 
@@ -468,6 +475,40 @@ start_loki_stack() {
     echo "启动 Loki/Grafana..."
     if ! docker compose -f "$LOKI_STACK" up -d loki promtail grafana >/dev/null 2>&1; then
         echo "Loki/Grafana 启动失败，继续启动主联调环境"
+    fi
+}
+
+check_metrics_ports() {
+    local port
+    for port in $METRICS_PORTS; do
+        if port_in_use "$port"; then
+            echo "指标端口已被占用: ${port}（服务端口+1000 规则，请释放后重试），占用进程："
+            lsof -Pi :"$port" -sTCP:LISTEN || true
+            exit 1
+        fi
+    done
+}
+
+start_observability_stack() {
+    if ! docker info >/dev/null 2>&1; then
+        echo "Docker 未运行，跳过 Jaeger/Prometheus"
+        return
+    fi
+    if [[ ! -f "$OBSERVABILITY_STACK" ]]; then
+        echo "未找到观测栈 compose 文件，跳过 traces/metrics 栈"
+        return
+    fi
+
+    echo "启动 Jaeger/Prometheus..."
+    if ! docker compose -f "$OBSERVABILITY_STACK" up -d jaeger prometheus >/dev/null 2>&1; then
+        echo "Jaeger/Prometheus 启动失败，继续启动主联调环境"
+        return
+    fi
+    if wait_for_container_health "observability-jaeger-1" 20 3 \
+        && wait_for_container_health "observability-prometheus-1" 20 3; then
+        echo "Jaeger/Prometheus 就绪 (jaeger ui:16686 prometheus:9090)"
+    else
+        echo "Jaeger/Prometheus 未在预期时间内就绪，继续启动主联调环境"
     fi
 }
 
@@ -553,6 +594,11 @@ status_all() {
     fi
 
     echo
+    echo "Observability stack:"
+    dependency_status_line "observability-jaeger-1" "16686" "jaeger" || overall=1
+    dependency_status_line "observability-prometheus-1" "9090" "prometheus" || overall=1
+
+    echo
     echo "Access URLs:"
     echo "  frontend: http://127.0.0.1:${FRONTEND_PORT}"
     echo "  gateway:  http://127.0.0.1:8888"
@@ -560,6 +606,8 @@ status_all() {
     echo "  gorse:    http://127.0.0.1:8088"
     echo "  grafana:  http://127.0.0.1:3001"
     echo "  loki:     http://127.0.0.1:3100"
+    echo "  jaeger ui:     http://127.0.0.1:16686"
+    echo "  prometheus:    http://127.0.0.1:9090"
     echo "  stripe webhook: ${STRIPE_WEBHOOK_URL}"
     echo
     echo "Logs:"
@@ -574,6 +622,7 @@ stop_all() {
     cleanup_old_processes
     docker compose -f "$DEPEND_STACK" down >/dev/null 2>&1 || true
     docker compose -f "$LOKI_STACK" down >/dev/null 2>&1 || true
+    docker compose -f "$OBSERVABILITY_STACK" down >/dev/null 2>&1 || true
 }
 
 start_all() {
@@ -583,8 +632,9 @@ start_all() {
     start_dependencies
     reconcile_postgres
     reconcile_rabbitmq
+    check_metrics_ports
 
-    for srv in system activity auths audit users inventory product carts coupons order checkout payment admin gateway; do
+    for srv in system activity auths audit users inventory product carts coupons order checkout payment admin search gateway; do
         start_service "$srv"
     done
 
@@ -593,6 +643,7 @@ start_all() {
     start_frontend
     scan_frontend
     start_loki_stack
+    start_observability_stack
 
     echo
     echo "本地联调环境已启动。"

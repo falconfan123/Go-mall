@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: dtm
-          image: yedf/dtm:latest
+          image: yedf/dtm:1.19.0
           imagePullPolicy: IfNotPresent
           args:
             - "-c=/app/dtm/configs/config.yaml"
@@ -59,10 +59,17 @@ metadata:
     app: dtm
 data:
   config.yaml: |-
-    MicroService:
-      Driver: 'dtm-driver-gozero' # 配置dtm使用go-zero的微服务协议
-      Target: 'consul://consul.go-mall:8500/dtmservice' # 把dtm注册到consul的这个地址
-      EndPoint: '0.0.0.0:36790'
+    Store:
+      Driver: 'postgres'          # 集群内 PostgreSQL（与业务库同实例风格，host 按集群实际调整）
+      Host: 'postgres.go-mall'
+      Port: 5432
+      User: 'root'
+      Password: 'fht3825099'
+      Database: 'dtm'             # 须先创建；存储表由 dtm 启动时自动迁移
+    TimeZoneOffset: 8             # 与 postgres 会话时区对齐（见 dev conf 同项注释）
+    # MicroService 注册暂不启用（集群无 consul）；各服务配置直连地址 dtm-service.go-mall:36790
+    # 如需服务发现：镜像已内置 dtmdriver-gozero，可配
+    # MicroService: { Driver: 'dtm-driver-gozero', Target: 'etcd://<etcd>:2379/dtmservice', EndPoint: '0.0.0.0:36790' }
 
 ---
 apiVersion: v1

@@ -241,3 +241,154 @@ Makefile 目标真实；粒度 ≤2h；scope 无蔓延（audit 不触及、Payme
 
 结论：🔴 清零，🟡 已修复，**tasks 冻结**。四个制品（proposal/specs/design/tasks）修订周期
 全部审核完毕，规划重新冻结，可进入 apply。
+
+### 实施期增量 · SettleOrder 退役登记（2026-09-04，apply 启动时）
+
+apply 启动核查发现：change 曾被并行会话在 0/21 任务时归档（17:31），且并行会话已完整实施
+第 1 版计划（consumerx 迁移/SettleOrder RPC/探针/门禁全绿，review-log 实施期三段记录）。
+经用户确认：单 change 实施现有 Saga 计划，并登记实施期发现——SettleOrder 退役
+（design 决策 1 附注 / proposal Impact API / tasks 5.4）。聚焦复审 🔴=0 可合入。
+仓库操作：还原点 f122f76（git add openspec/ 快照归档态）→ mv 回 changes/ → 删 premature
+主 spec（openspec/specs/async-settlement-reliability，真归档时重新同步）。
+
+### 实施记录 · 任务 1.1-1.4（2026-09-04）
+
+- 1.1 ✓ dtm Store=postgres（业务栈实为 PG，compose 的 mysql 是 gorse 用——修正 design/tasks
+  的 MySQL 表述）、镜像 pin yedf/dtm:1.19.0、compose 修挂载相对路径（configs/ 下需 ../，
+  原配置为带病路径）+ 挂 depend_mall 外部网络、TimeZoneOffset: 8（时区坑实测：不配则 cron
+  永远捞不到任务）。验证：容器启动/ping/重启 pong ✓。
+- 1.2 ✓ construct/depend/sql/dtm_barrier.sql（两段：dtm 库创建 + mall 库 barrier schema，
+  postgres 方言取自 dtm v1.19.0 sqls/dtmcli.barrier.postgres.sql）。验证：三库对象就绪 ✓。
+- 1.3 ✓ 依赖修正：github.com/dtm-labs/dtmclient 不存在——实为 github.com/dtm-labs/dtm
+  v1.19.0（client/dtmgrpc）。四服务 go get + tidy + build 全绿 ✓。
+- 1.4 ✓ spike（临时容器，不进主干）五场景全过：正常提交/重试至成功（指数退避）/确定性失败
+  逆序补偿/重复 gid 状态依赖语义/dtm 重启续跑。结论固化进 design 决策 1 附注（分支契约：
+  业务失败=Aborted；不可用=其他错误码；已 Paid 重放=成功）。
+
+### 实施记录 · 任务 1.5 / 2.1-2.3（2026-09-05）
+
+- 1.5 ✓ common ConsumerConfig 增加 SuccessTtlSeconds（默认 86400）+ 测试三段断言更新；
+  payment 新增 DtmConfig（Server/BusiHost/三分支端口）+ payment.yaml Dtm 段 + 配置加载
+  单测。偏差记录：任务原文写"四服务新增 DTM target"，实际只有 payment 发起 saga 需要
+  （分支服务不外呼 dtm，barrier 走上下文头+本地库），inventory/coupons 未加 Dtm 配置。
+- 2.1 ✓ idempotency 新增 Claim（三态 Lua：NEW/PROCESSING/SUCCESS，历史单态 "1" 与未知
+  值保守映射 Processing）+ MarkDone（SUCCESS PX）；CheckAndSet/Release 保留（audit，C13）。
+  单测 5 组（生命周期/旧值/租约过期重入/Release 重占）真实 Redis 全绿。
+- 2.2 ✓ consumerx Store 状态化 + Process 两态流程（Processing/Done 跳过、MarkDone 失败按
+  业务失败重投）+ Config.SuccessTTL（默认 24h）。测试重写 12 项含日志级别区分断言
+  （重投=info / 弃单=error）。既有约定保留：BuildKey 输出含 idempotency: 前缀（audit
+  双前缀键兼容，C13）。
+- 2.3 ✓ notify/delay/payment 三个适配层 SuccessTTL 装配 + seqStore fake 适配新接口；
+  order/payment 全部构建+测试绿。
+
+### 实施记录 · 任务 3.1-3.4（2026-09-05）
+
+- 3.1 ✓ order 分支：三分支判定（PendingPayment 流转 / **已 Paid 重放=成功** / 冲突=Aborted）
+  + barrier 接线（dtmgrpc.BarrierFromGrpc + BranchBarrier.CallWithDB，业务经
+  sqlx.NewSessionFromTx 注入 barrier 自管事务）；svc 新增 DtmDB（lib/pq，共用 DSN）。
+  实施期修复既有缺陷：原 rollback 逻辑 DB 错误后缺 return → orderRes 空指针 panic。
+  测试 9 例（5 单元 + 4 barrier 真库集成：首次结算/重放短路/冲突 Aborted/空补偿 NoOp，
+  含 barrier 行清理防跨运行污染）。
+- 3.2 ✓ inventory：模型抽 BatchDecrease/ReturnInventoryAtomWithSession（嵌套事务不可行，
+  errCantNestTx）；decrease/return logic barrier 分支（业务规则失败=Aborted，基础设施=退避
+  重试；直连路径语义原样保留）。coupons：**实施期发现** —— Saga 补偿回调与 action 共用
+  同类型 payload（UseCouponReq），既有 ReleaseCoupon(ReleaseCouponReq) 签名不兼容；
+  新增薄适配 RPC `UseCouponRollback(UseCouponReq)`（proto + pb 重生成 [package pb 映射修正]
+  + server 注册 + logic barrier 实现：Used→回滚可用+撤销流水 / Available·Locked·不存在→
+  容忍成功）；UseCoupon 抽 useCouponTx 共用体 + barrier 分支（"已使用"容忍提升为分支语义）；
+  CouponUsageModel 新增 DeleteByOrderId。
+- 3.3 ✓ 三补偿分支核验：order rollback（容忍语义重写：不存在/非 Paid→成功，补偿必须
+  始终成功；补偿执行 error 级日志 per specs 可观测契约）、inventory Return、coupons
+  Rollback 全部 barrier 化并单测/集成验证。
+- 3.4 ✓ make mock + 四服务 build 全绿。
+
+### 实施记录 · 任务 4.1-4.3 / 5.1-5.4（2026-09-05）
+
+- 任务顺序微调：5.4（SettleOrder 拆除）的 order 侧提前至 4.2 执行（settleorderlogic 依赖
+  notify 包，阻塞构建），5.2（payment 接线）随后插入——构建全程保持绿（Rule 1）。
+- 4.1 ✓ publish 已随 3.1 重写移除（无 notify import）。
+- 4.2 ✓ notify 目录（consumer/init/product）+ svc 装配（OrderNotifyMQ 字段/NotifyPublisher
+  接口/initOrderNotifyMQ/Start）全删。
+- 4.3 ✓ 全仓 rg：SettleOrder/OrderNotifyMQ/order-notify 零业务残留；四服务 build 绿。
+- 5.1 ✓ payment svc 新增 SettlementSaga（gid=settle:{orderId}；三分支+补偿 URL 由
+  DtmConfig(BusiHost+端口) 拼装；Initiate/Ensure；Ensure 语义：in-flight→dtm 静默接受、
+  终态 succeed→映射成功、终态 failed→error+告警（人工，已接受姿态））。
+  抽 SettlementSagaAPI 接口（Rule 6 可 mock）。
+- 5.2 ✓ payment.go 接线：本地 PAID 后——订单未 Paid → Initiate；订单已 Paid（快路径）
+  → Ensure。结算输入快照经既有 GetOrder RPC（items/金额/coupon_id）；
+  **实施期新增**：order pb Order 增补字段 coupon_id=18（additive，convert 填充）——
+  saga 分支 payload 需要券 ID 而原 Order 消息未暴露。
+- 5.3 ✓ make mock；5.4 ✓ SettleOrder 全链拆除（proto/pb/server/logic/test）。
+  payment 测试重写 6 例（快路径 Ensure 必达+payload 映射/Ensure 失败传播/正常路径
+  Initiate/Initiate 失败传播/两个查询失败传播）全绿。
+
+### 实施记录 · 任务 6.1 门禁（2026-09-05）
+
+make lint ✓ / make test-unit ✓（43 包 137+ 测试 0 失败；白名单移除已删除的 notify 包）
+/ make build ✓ / make gatekeeper ✓（7/7）。
+
+### 实施记录 · 任务 6.2 本地集成探针（2026-09-05）
+
+环境：真实 dtm 容器（yedf/dtm:1.19.0，postgres Store）+ 新二进制 order/inventory/coupons
+（10004/10007/10009）+ mall/dtm 双库 + 真实 rabbitmq。探针代码：services/payment/e2e_probe_test.go
+（build tag e2eprobe，不进白名单/CI）。
+
+- 探针① ✓ 正常结算三分支全成功：订单 Paid/Paid、库存 990001 sold=1 / 990002 sold=2、
+  券 Used + coupon_usage 流水 1 条、saga succeed。
+- 探针②③ ✓ 券分支确定性失败（用户券不存在 → coupons 业务失败 → codes.Aborted）→
+  saga failed → **逆序补偿实测**：订单回滚 PendingPayment(2)、库存回补 sold=0、无使用流水。
+- 探针④ ✓ 终态 saga 重复提交 → `Aborted: current status 'succeed', cannot sumbmit. FAILURE`
+  （Ensure 映射成功/failed→告警的原始依据，与单测一致）。
+- 探针⑤ ⚠️ 部分完成：delay 链路四项（毒消息一次即弃/失败 3 次弃单/优雅退出/channel 恢复）
+  框架级已由 consumerx 单测 + 并行会话真实 broker 探针（第一周期 C0-C5 勾验记录）背书，
+  本期未改动该代码路径；现场重验被 dev 环境陈旧消费者干扰（audit tmp/main 陈旧进程 +
+  start-unified 看护与手动探针实例抢端口，毒消息被无痕消费）。**待办**：start-unified.sh
+  干净重启后人工复核（rabbitmqadmin publish 到 order-delay-dlx-queue + 观察 error 日志）。
+  故 6.2 未勾选，留待人工复核后勾选。
+- 环境恢复：探针实例已停；spike 临时容器已清理；start-unified.sh restart 已触发
+  （后台推进中，卡在 audit 就绪检查——audit 为未改动服务，与本 change 无关）。
+
+### 任务 6.3 · explore-brief 第二轮 Checklist 逐项勾验（2026-09-05）
+
+- [x] C0 channel 修复（delay）：consumerx autoAck=false + 成功后 Ack，本期未动该核心。
+- [x] C1 fall-through：骨架统一失败处理 + 3.1 修复 rollback nil-deref（同款复制 bug）。
+- [x] C2 监督循环：第 1 版已落地保持（Run/consumeOnce/指数退避/优雅停机）。
+- [x] C3 幂等 → 两态键 lease 版（D9）：idempotency.Claim/MarkDone + consumerx 流程
+      （Processing/Done 跳过、失败 Release+INCR）+ 5 组单测。
+- [x] C4 重试上限：Redis INCR + 超限弃单告警保持，测试断言（含日志级别可区分）。
+- [x] C5 毒消息：一次即弃 + error 日志保持（单测；现场复核见 6.2 探针⑤ 待办）。
+- [x] C6 Saga 化：三分支/补偿/逆序补偿/EnsureSaga —— 3.x/5.x + e2e 探针①②③④。
+- [x] C6a dtm 依赖（github.com/dtm-labs/dtm v1.19.0）/barrier 三库（mall：order/inventory/
+      coupons 共用 barrier schema；dtm 库：server 存储表）/确定性 gid/barrier 接线/
+      已 Paid 不误判失败（barrier + 三分支判定 + 容忍，单测+集成+e2e 三层验证）。
+- [x] C6b notify 全链删除：目录/svc 装配/publish/import 零残留（rg + build）。
+- [x] C7 两态 TTL：IdempotencyTtlSeconds=lease（1h）+ SuccessTtlSeconds=24h 配置化。
+- [x] C8 业务幂等不回归：订单状态机/库存锁表容忍/券容忍保留；分支幂等双保险
+      （barrier + 容忍），e2e 探针③ 补偿全量回滚实测。
+- [x] C9 DDL 红线：pb 经 protoc 生成（order/coupons，package 映射修正）；SettlementSaga
+      封装于 svc 层，main 包不构造 pb。
+- [x] C10 测试：mock 先行（SettlementSagaAPI/OrdersModel/PaymentModel 全 fake）；四类关键
+      场景齐备（重试不误补偿/EnsureSaga 幂等/channel 恢复/失败不双扣）。
+- [x] C11 不做清单：Outbox/DLX/event.ID/延迟对账/PaymentDelayMQ 复活均未做。
+- [x] C12 PaymentDelayMQ 保持 nil（骨架随 consumerx 同步，决策 6）。
+- [x] C13 audit 不在 scope：CheckAndSet/Release 原语保留，audit 语义未破坏。
+
+结论：C0-C13 全部满足；21+1 任务中 22 项完成、6.2 留探针⑤人工复核待办。
+
+### 任务 6.2 · 探针⑤ 人工复核通过（2026-09-05，用户确认）
+
+环境：`./scripts/start-unified.sh` 干净重启后（消除此前陈旧消费者干扰），delay 链路四项
+复核结果均符合 specs 预期：
+
+- 毒消息投递 → **一次即弃**（Reject(false)，不再重投）+ error 级结构化告警日志（含消息体摘要）；
+- 业务失败重投 3 次达上限 → **弃单**（Reject(false)）+ 需人工介入级结构化告警日志（含业务
+  标识、失败原因、累计次数），日志级别与可恢复事件可区分。
+
+覆盖 specs 场景："非法 JSON 消息被弃""超过重试上限后弃单""弃单产生需人工介入级别的日志"。
+至此探针①-⑤全部通过，**任务 6.2 完成**。
+
+- [x] 6.2 本地集成验证（探针①②③④由自动化 e2e 覆盖见上文记录，探针⑤人工复核通过）
+
+（勘误）任务 1.5 勾选补记：工作已于实施期完成并验证（common ConsumerConfig.SuccessTtlSeconds
++ payment DtmConfig + yaml + conf 加载单测全绿，见"实施记录 · 任务 1.5 / 2.1-2.3"），勾选
+批次时遗漏。补勾后 22/22 全部完成。

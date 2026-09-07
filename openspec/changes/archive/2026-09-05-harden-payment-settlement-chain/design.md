@@ -54,6 +54,24 @@ payment 服务在本地 PAID 事务成功后，经 `dtmclient`（gRPC 模式，�
 - **备选**：Msg/Workflow 模式——本链路是典型的 rollback 型事务，Saga 语义最贴合，否决其他模式。
 - API 形状以 dtmclient 实际版本为准（实施期以最小 spike 验证 `NewSagaGrpc` + `Add` +
   `Submit` 及重复 gid 错误语义），设计不锁定具体函数签名。
+- **附注（实施期发现，2026-09-04）**：并行会话已将第 1 版 SettleOrder 完整落地（order proto
+  `:192-193` + `settleorderlogic.go` + payment.go:214 快路径调用）。本 change 实施时须将其
+  **退役**：proto 删除方法并重新生成（Rule 3）、`settleorderlogic.go` 与 server 注册删除、
+  payment 快路径改调 EnsureSaga 后无残留引用——避免"补发消息"与"补建 Saga"双入口并存。
+- **附注（spike 实测 dtm v1.19.0 语义，2026-09-04，任务 1.4）**：
+  - 分支返回 `codes.Aborted` = 确定性失败 → saga 立即逆序补偿（status=failed）；返回其他
+    错误（Unavailable/Internal 等）= 未知结果 → 指数退避重试**直至成功**（saga 无默认
+    TimeoutToFail 兜底，`trans_status.go:209` 仅 saga 携带显式值才生效）。
+    **分支实现契约：业务规则失败（订单冲突/券不适用等）必须 Aborted；下游不可用必须用
+    非 Aborted 错误码；"已 Paid 重放"必须返回成功。**
+  - 重复 gid：`MaySaveNewTrans` OnConflict DoNothing；Submit 对 in-flight（prepared/submitted）
+    静默接受；对终态（succeed/failed）返回 `cannot sumbmit` 错误（api.go:31-38）。EnsureSaga
+    据此映射：nil→成功；错误含 status 'succeed'→成功（结算已完成）；status 'failed'→不
+    可能经快路径触达（失败必然已补偿 branch1→订单回 PendingPayment→走普通路径），普通
+    路径撞 tombstone 时返回错误 + error 告警（人工介入，属已接受的残余风险姿态）。
+  - dtm 重启后在途 saga 从 postgres 存储续跑（实测 attempt#1 后重启，后续 attempt 成功收敛）。
+  - **时区坑**：postgres 会话时区 Asia/Shanghai + dtm 容器 UTC 时，cron 用 naive 字符串比较
+    timestamptz 永远捞不到到期任务——必须 `TimeZoneOffset: 8`（dev/manifests 均已配）。
 
 ### 决策 2：分支/补偿映射与"已 Paid"语义调整
 

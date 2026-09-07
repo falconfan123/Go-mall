@@ -11,7 +11,7 @@ Etcd:
 
 Telemetry:
   Name: payment.rpc
-  Endpoint: http://localhost:14268/api/traces
+  Endpoint: http://localhost:9411/api/v2/spans
   Batcher: zipkin
   Sampler: 1.0
 
@@ -58,8 +58,35 @@ RabbitMQConfig:
   Pass: "guest"
   VHost: "/"
 
-# Prometheus 监控暴露
-PrometheusExt:
+Consumer:
+  RetryLimit: 3
+  BackoffBaseMs: 1000
+  ShutdownTimeoutMs: 10000
+  IdempotencyTtlSeconds: 3600
+  SuccessTtlSeconds: 86400
+
+# DTM saga 发起方配置（Server 为 dtm gRPC 直连；BusiHost 为 dtm 容器回调分支服务的 host 前缀）
+Dtm:
+  Server: localhost:36790
+  HttpAddr: localhost:36789
+  BusiHost: host.docker.internal
+  OrderPort: 10004
+  InventoryPort: 10007
+  CouponsPort: 10009
+
+# 结算兜底三层（outbox relay / 对账扫描 / Stripe 对账）
+Fallback:
+  RelayTickMs: 10000
+  ScannerTickMs: 300000
+  Scan1ThresholdMinutes: 10
+  Scan2ThresholdMinutes: 35
+  RelayMaxAttempts: 5
+  TombstoneMaxRetry: 3
+  ReconHour: 2
+  ReconDisabled: false
+
+DevServer:
+  Enabled: true
   Host: 0.0.0.0
-  Port: 9106
-  Path: /metrics
+  Port: 11006
+  EnablePprof: false

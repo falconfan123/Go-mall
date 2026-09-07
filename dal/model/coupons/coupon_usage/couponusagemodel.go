@@ -17,6 +17,7 @@ type (
 		couponUsageModel
 		WithSession(session sqlx.Session) CouponUsageModel
 		QueryUsageListByUserId(ctx context.Context, userId uint64, page, size int32) ([]*CouponUsage, error)
+		DeleteByOrderId(ctx context.Context, session sqlx.Session, orderId string) error
 	}
 
 	customCouponUsageModel struct {
@@ -52,4 +53,11 @@ func NewCouponUsageModel(conn sqlx.SqlConn) CouponUsageModel {
 
 func (m *customCouponUsageModel) WithSession(session sqlx.Session) CouponUsageModel {
 	return NewCouponUsageModel(sqlx.NewSqlConnFromSession(session))
+}
+
+// DeleteByOrderId 按订单删除使用记录（Saga 补偿：回滚"已使用"时同步撤销流水）。
+func (m *customCouponUsageModel) DeleteByOrderId(ctx context.Context, session sqlx.Session, orderId string) error {
+	query := fmt.Sprintf("delete from %s where \"order_id\" = $1", m.table)
+	_, err := session.ExecCtx(ctx, query, orderId)
+	return err
 }

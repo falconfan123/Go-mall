@@ -1,9 +1,9 @@
 package delay
 
 import (
-	"context"
 	"time"
 
+	commonconfig "github.com/falconfan123/Go-mall/common/config"
 	"github.com/falconfan123/Go-mall/dal/model/order"
 	"github.com/falconfan123/Go-mall/services/checkout/checkoutservice"
 	"github.com/falconfan123/Go-mall/services/coupons/couponsclient"
@@ -26,6 +26,8 @@ const (
 
 type OrderDelayMQ struct {
 	conn            *amqp.Connection
+	dial            func() (*amqp.Connection, error)
+	consumerCfg     commonconfig.ConsumerConfig
 	OrderModel      order.OrdersModel
 	OrderItemsModel order.OrderItemsModel
 	Model           sqlx.SqlConn
@@ -127,6 +129,8 @@ func Init(c config.Config) (*OrderDelayMQ, error) {
 	}
 	orderDelay := &OrderDelayMQ{
 		conn:            conn,
+		dial:            func() (*amqp.Connection, error) { return amqp.Dial(c.RabbitMQConfig.Dns()) },
+		consumerCfg:     c.Consumer.Effective(),
 		OrderModel:      order.NewOrdersModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		CheckoutRpc:     checkoutservice.NewCheckoutService(zrpc.MustNewClient(c.CheckoutRpc)),
 		CouponRpc:       couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponRpc)),
@@ -135,6 +139,6 @@ func Init(c config.Config) (*OrderDelayMQ, error) {
 		OrderItemsModel: order.NewOrderItemsModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
 		Redis:           redis.MustNewRedis(c.RedisConf),
 	}
-	go orderDelay.consumer(context.TODO())
+	// 消费者生命周期由调用方通过 Start(ctx) 纳入服务启停管理（不再裸跑 goroutine）
 	return orderDelay, nil
 }

@@ -4,7 +4,7 @@
 // - protoc             v6.33.1
 // source: order.proto
 
-package order
+package pb
 
 import (
 	context "context"
@@ -23,6 +23,7 @@ const (
 	OrderService_CreateOrder_FullMethodName                        = "/order.OrderService/CreateOrder"
 	OrderService_CreateOrderRollback_FullMethodName                = "/order.OrderService/CreateOrderRollback"
 	OrderService_CancelOrder_FullMethodName                        = "/order.OrderService/CancelOrder"
+	OrderService_CloseExpiredOrder_FullMethodName                  = "/order.OrderService/CloseExpiredOrder"
 	OrderService_GetOrder_FullMethodName                           = "/order.OrderService/GetOrder"
 	OrderService_ListOrders_FullMethodName                         = "/order.OrderService/ListOrders"
 	OrderService_UpdateOrder2PaymentSuccess_FullMethodName         = "/order.OrderService/UpdateOrder2PaymentSuccess"
@@ -46,6 +47,8 @@ type OrderServiceClient interface {
 	CreateOrderRollback(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error)
 	// CancelOrder 取消订单 由用户发起
 	CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error)
+	// CloseExpiredOrder 关闭超时未支付订单（对账扫描器 scan2 复用关单业务）
+	CloseExpiredOrder(ctx context.Context, in *CloseExpiredOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error)
 	// GetOrder 获取订单详情
 	GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error)
 	// ListOrders 分页查询订单列表
@@ -106,6 +109,16 @@ func (c *orderServiceClient) CancelOrder(ctx context.Context, in *CancelOrderReq
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EmptyRes)
 	err := c.cc.Invoke(ctx, OrderService_CancelOrder_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) CloseExpiredOrder(ctx context.Context, in *CloseExpiredOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmptyRes)
+	err := c.cc.Invoke(ctx, OrderService_CloseExpiredOrder_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,6 +209,8 @@ type OrderServiceServer interface {
 	CreateOrderRollback(context.Context, *CreateOrderRequest) (*EmptyRes, error)
 	// CancelOrder 取消订单 由用户发起
 	CancelOrder(context.Context, *CancelOrderRequest) (*EmptyRes, error)
+	// CloseExpiredOrder 关闭超时未支付订单（对账扫描器 scan2 复用关单业务）
+	CloseExpiredOrder(context.Context, *CloseExpiredOrderRequest) (*EmptyRes, error)
 	// GetOrder 获取订单详情
 	GetOrder(context.Context, *GetOrderRequest) (*OrderDetailResponse, error)
 	// ListOrders 分页查询订单列表
@@ -233,6 +248,9 @@ func (UnimplementedOrderServiceServer) CreateOrderRollback(context.Context, *Cre
 }
 func (UnimplementedOrderServiceServer) CancelOrder(context.Context, *CancelOrderRequest) (*EmptyRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method CancelOrder not implemented")
+}
+func (UnimplementedOrderServiceServer) CloseExpiredOrder(context.Context, *CloseExpiredOrderRequest) (*EmptyRes, error) {
+	return nil, status.Error(codes.Unimplemented, "method CloseExpiredOrder not implemented")
 }
 func (UnimplementedOrderServiceServer) GetOrder(context.Context, *GetOrderRequest) (*OrderDetailResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrder not implemented")
@@ -344,6 +362,24 @@ func _OrderService_CancelOrder_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrderServiceServer).CancelOrder(ctx, req.(*CancelOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_CloseExpiredOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloseExpiredOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).CloseExpiredOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_CloseExpiredOrder_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).CloseExpiredOrder(ctx, req.(*CloseExpiredOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -496,6 +532,10 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelOrder",
 			Handler:    _OrderService_CancelOrder_Handler,
+		},
+		{
+			MethodName: "CloseExpiredOrder",
+			Handler:    _OrderService_CloseExpiredOrder_Handler,
 		},
 		{
 			MethodName: "GetOrder",

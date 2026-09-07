@@ -1,5 +1,8 @@
 ./common/utils/cryptx
 ./common/utils/token
+./common/config
+./common/utils/idempotency
+./common/mq/consumerx
 ./services/audit/internal/domain/entity
 ./services/audit/internal/application/service
 ./services/auths/internal/domain/entity
@@ -22,6 +25,9 @@
 ./services/order/internal/domain/entity
 ./services/order/internal/domain/aggregate
 ./services/order/internal/application/service
+./services/order/internal/logic
+./services/order/internal/mq/delay
+./services/payment
 ./services/payment/internal/domain/valueobject
 ./services/payment/internal/domain/entity
 ./services/payment/internal/domain/aggregate

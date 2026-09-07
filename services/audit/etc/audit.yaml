@@ -11,7 +11,7 @@ Etcd:
 # 链路追踪
 Telemetry:
   Name: audit.rpc
-  Endpoint: http://localhost:14268/api/traces
+  Endpoint: http://localhost:9411/api/v2/spans
   Batcher: zipkin
   Sampler: 1.0
 Log:
@@ -41,11 +41,6 @@ ElasticSearch:
   Addr: "http://localhost:9200"
   IndexName: "audit_logs"
 
-# Prometheus 监控暴露
-PrometheusExt:
-  Host: 0.0.0.0
-  Port: 9108
-  Path: /metrics
 
 DevServer:
   Enabled: true

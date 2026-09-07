@@ -36,7 +36,7 @@
 - **依赖**：order/inventory/coupons/payment 服务 go.mod 新增 `github.com/dtm-labs/dtmclient`（含 dtm-driver-gozero）；common 模块 amqp 依赖已随第 1 版落地（无需新增）。
 - **配置**：order/inventory/coupons/payment yaml 新增 DTM server target；consumer 参数已随第 1 版落地（RetryLimit/BackoffBaseMs/ShutdownTimeoutMs/IdempotencyTtlSeconds），本次将 `IdempotencyTtlSeconds` 语义拆分为 lease TTL（PROCESSING，配置化）与 SUCCESS TTL（默认 24h）两个配置项。
 - **DB/基建**：order/inventory/coupons 三库 `dtm_barrier` 表迁移；dtm server + consul 为部署前置——注意 `configs/docker-compose.dev.yml` 中 dtm 服务在 `optional` profile 下，本地开发需 `docker compose --profile optional up` 显式启用。
-- **API**：无新增/删除 RPC（全部复用存量 proto，第 1 版的 SettleOrder 方案作废）；无字段变更。
+- **API**：无新增 RPC；**删除**第 1 版遗留的 `SettleOrder` RPC（并行实施期已落地：order proto/logic + payment 快路径调用，本 change 以 EnsureSaga 取代并退役之，见 design 决策 1 附注）。
 - **行为**：结算路径不再经过 MQ（**BREAKING**）；幂等键两态语义变更（**BREAKING**）；delay consumer 确认语义变更（投递即确认 → 处理完成才确认）已在第 1 版落地，本次仅随骨架重构适配两态键，无新增行为变更。
 - **风险**：saga 补偿正确性依赖分支幂等（barrier 必须先行落地）；dtm server 单点可用性影响结算时效（重试由 DTM 自带，服务恢复后续跑）；已落地的第 1 版骨架需重构而非回退，存在迁移窗口。
 - **部署**：三库 barrier 表迁移 → 部署 order/inventory/coupons（分支+barrier 就位）→ 最后部署 payment（saga 发起）。

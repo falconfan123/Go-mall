@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/falconfan123/Go-mall/common v0.0.0-20260312153719-88b43b07ae7d
 	github.com/jmoiron/sqlx v1.4.0
+	github.com/lib/pq v1.12.3
 	github.com/zeromicro/go-zero v1.10.1
 )
 
@@ -21,7 +22,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.11 // indirect
-	github.com/lib/pq v1.12.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect

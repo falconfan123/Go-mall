@@ -49,6 +49,7 @@ func convertToOrderResp(orderModelRes *order2.Orders) *orderpb.Order {
 		PreOrderId:     orderModelRes.PreOrderId,
 		Reason:         orderModelRes.Reason.String,
 		TransactionId:  orderModelRes.TransactionId.String,
+		CouponId:       orderModelRes.CouponId,
 		UserId:         uint32(orderModelRes.UserId),
 		Items:          []*orderpb.OrderItem{}, // 初始化订单项切片
 	}

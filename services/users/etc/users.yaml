@@ -11,7 +11,7 @@ Etcd:
 # 链路追踪
 Telemetry:
   Name: users.rpc
-  Endpoint: http://localhost:14268/api/traces
+  Endpoint: http://localhost:9411/api/v2/spans
   Batcher: zipkin
   Sampler: 1.0
 
@@ -46,16 +46,10 @@ AuthConfig:
   AccessSecret: "uKq5xR8vW2zN9mP4sL7jH6yG3bF1dC0"
   AccessExpire: 86400
 
-
 Cache:
   - Host: localhost:6379 #缓存地址
     Pass: ""
     Type: node  
-
-PrometheusExt:
-  Host: 0.0.0.0   # 监控暴露的 IP
-  Port: 9100       # 监控暴露的端口
-  Path: /metrics   # 默认路径（可自定义）
 
 RedisConf:
   Host: localhost:6379
@@ -65,3 +59,9 @@ RedisConf:
 GorseConfig:
   GorseAddr: http://localhost:8088
   GorseApikey: 5105502fc46a411c896aa5b50c31e951
+
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 11001
+  EnablePprof: false

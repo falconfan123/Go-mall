@@ -283,4 +283,7 @@ service Coupons {
   rpc ReleaseCoupon(ReleaseCouponReq) returns (EmptyResp);
   // 使用优惠券（支付成功确认后）
   rpc UseCoupon(UseCouponReq) returns (EmptyResp);
+  // 使用优惠券回滚（Saga 补偿分支）：Saga 补偿回调与 action 共用同类型 payload
+  // （UseCouponReq），故补偿方法必须接受 UseCouponReq（实施期发现，design 决策 2）。
+  rpc UseCouponRollback(UseCouponReq) returns (EmptyResp);
 }

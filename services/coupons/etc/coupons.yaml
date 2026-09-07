@@ -2,7 +2,6 @@ Name: coupons.rpc
 ListenOn: 0.0.0.0:10009
 Mode: dev
 
-
 # 服务发现
 Etcd:
   Hosts:
@@ -12,7 +11,7 @@ Etcd:
 # 链路追踪
 Telemetry:
   Name: coupons.rpc
-  Endpoint: http://localhost:14268/api/traces
+  Endpoint: http://localhost:9411/api/v2/spans
   Batcher: zipkin
   Sampler: 1.0
 
@@ -26,13 +25,11 @@ PostgresConfig:
   datasource: postgres://root:fht3825099@localhost:5432/mall?sslmode=disable
   Conntimeout: 5
 
-
 RedisConf:
   Host: localhost:6379
   Type: node
   Pass: "" # 如果有密码则填写
   Tls: false
-
 
 ProductRpc:
   Etcd:
@@ -42,8 +39,8 @@ ProductRpc:
   NonBlock: true
   Timeout: 5000
 
-# Prometheus 监控暴露
-PrometheusExt:
+DevServer:
+  Enabled: true
   Host: 0.0.0.0
-  Port: 9109
-  Path: /metrics
+  Port: 11009
+  EnablePprof: false

@@ -3,6 +3,7 @@ services:
     image: jaegertracing/all-in-one:1.61.0
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
     ports:
       - "5775:5775/udp"
       - "6831:6831/udp"
@@ -22,9 +23,9 @@ services:
       - go-mall
     restart: unless-stopped
   prometheus:
-    image: bitnami/prometheus:latest
+    image: prom/prometheus:latest
     volumes:
-      - ./conf/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+      - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     restart: unless-stopped

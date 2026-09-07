@@ -4,6 +4,10 @@ global:
   evaluation_interval: 15s # 每15秒评估一次规则。默认是每1分钟一次。
 
 # 搜刮配置
+# 端口规则：指标端口 = 服务端口 + 1000（gateway 8888→9888，search 8081→9081）
+# host 说明：Prometheus 运行在 bridge 网络容器内，宿主机服务统一用 host.docker.internal 抓取；
+#           仅 Prometheus 自抓（9090）保留容器内 localhost。
+# 标签约定：namespace=go-mall；env=development 与 promtail 侧口径一致（本地开发环境）。
 scrape_configs:
   - job_name: 'prometheus' # 监控Prometheus
     # 覆盖全局默认值，每15秒从该作业中刮取一次目标
@@ -12,137 +16,173 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   # ============ Go-mall 微服务监控 ============
-  # Gateway HTTP 服务
+  # Gateway HTTP 服务 (metrics on 9888)
   - job_name: 'gateway'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:8888']
+      - targets: ['host.docker.internal:9888']
         labels:
           namespace: go-mall
           service: gateway
+          env: development
 
-  # 用户服务 (gRPC + metrics on 11000)
+  # 用户服务 (metrics on 11001)
   - job_name: 'users'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:11000']
+      - targets: ['host.docker.internal:11001']
         labels:
           namespace: go-mall
-          service: users-rpc
+          service: users
+          env: development
 
-  # 认证服务 (gRPC + metrics on 9101)
+  # 认证服务 (metrics on 11000)
   - job_name: 'auths'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9101']
+      - targets: ['host.docker.internal:11000']
         labels:
           namespace: go-mall
-          service: auths-rpc
+          service: auths
+          env: development
 
-  # 商品服务 (gRPC + metrics on 9102)
+  # 商品服务 (metrics on 11002)
   - job_name: 'product'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9102']
+      - targets: ['host.docker.internal:11002']
         labels:
           namespace: go-mall
-          service: products-rpc
+          service: product
+          env: development
 
-  # 搜索服务 (gRPC + metrics on 9113)
+  # 搜索服务 (stats server metrics on 9081)
   - job_name: 'search'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9113']
+      - targets: ['host.docker.internal:9081']
         labels:
           namespace: go-mall
-          service: search-rpc
+          service: search
+          env: development
 
-  # 购物车服务 (gRPC + metrics on 9103)
+  # 购物车服务 (metrics on 11003)
   - job_name: 'carts'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9103']
+      - targets: ['host.docker.internal:11003']
         labels:
           namespace: go-mall
-          service: carts-rpc
+          service: carts
+          env: development
 
-  # 订单服务 (gRPC + metrics on 9104)
+  # 订单服务 (metrics on 11004)
   - job_name: 'order'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9104']
+      - targets: ['host.docker.internal:11004']
         labels:
           namespace: go-mall
-          service: order-rpc
+          service: order
+          env: development
 
-  # 结算服务 (gRPC + metrics on 9105)
+  # 结算服务 (metrics on 11005)
   - job_name: 'checkout'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9105']
+      - targets: ['host.docker.internal:11005']
         labels:
           namespace: go-mall
-          service: checkout-rpc
+          service: checkout
+          env: development
 
-  # 支付服务 (gRPC + metrics on 9106)
+  # 支付服务 (metrics on 11006)
   - job_name: 'payment'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9106']
+      - targets: ['host.docker.internal:11006']
         labels:
           namespace: go-mall
-          service: payment-rpc
+          service: payment
+          env: development
 
-  # 库存服务 (gRPC + metrics on 9107)
+  # 库存服务 (metrics on 11007)
   - job_name: 'inventory'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9107']
+      - targets: ['host.docker.internal:11007']
         labels:
           namespace: go-mall
-          service: inventory-rpc
+          service: inventory
+          env: development
 
-  # 审计服务 (gRPC + metrics on 9108)
+  # 审计服务 (metrics on 11008)
   - job_name: 'audit'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9108']
+      - targets: ['host.docker.internal:11008']
         labels:
           namespace: go-mall
-          service: audit-rpc
+          service: audit
+          env: development
 
-  # 优惠券服务 (gRPC + metrics on 9109)
+  # 优惠券服务 (metrics on 11009)
   - job_name: 'coupons'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9109']
+      - targets: ['host.docker.internal:11009']
         labels:
           namespace: go-mall
-          service: coupons-rpc
+          service: coupons
+          env: development
 
-  # 系统服务 (gRPC + metrics on 9110)
+  # 系统服务 (metrics on 11010)
   - job_name: 'system'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9110']
+      - targets: ['host.docker.internal:11010']
         labels:
           namespace: go-mall
-          service: system-rpc
+          service: system
+          env: development
 
-  # 活动服务 (gRPC + metrics on 9111)
+  # 活动服务 (metrics on 11011)
   - job_name: 'activity'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9111']
+      - targets: ['host.docker.internal:11011']
         labels:
           namespace: go-mall
-          service: activity-rpc
+          service: activity
+          env: development
 
-  # 管理服务 (gRPC + metrics on 9112)
+  # 管理服务 (metrics on 11012)
   - job_name: 'admin'
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9112']
+      - targets: ['host.docker.internal:11012']
         labels:
           namespace: go-mall
-          service: admin-rpc
+          service: admin
+          env: development
+
+  # ============ 线上服务器机器指标 (SSH 隧道口，server-status-dashboard) ============
+  # gomall-1 (node_exporter on server loopback:9100, tunnel 127.0.0.1:9101)
+  - job_name: 'gomall-1'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:9101']
+        labels:
+          namespace: go-mall
+          env: production
+          instance: gomall-1
+
+  # gomall-2 (node_exporter on server loopback:9100, tunnel 127.0.0.1:9102)
+  - job_name: 'gomall-2'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:9102']
+        labels:
+          namespace: go-mall
+          env: production
+          instance: gomall-2

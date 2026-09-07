@@ -3,6 +3,12 @@ Host: 0.0.0.0
 Port: 8888
 Timeout: 12000
 
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 9888
+  EnablePprof: false
+
 Log:
   Mode: "console"
   Encoding: "json"
@@ -225,3 +231,10 @@ Upstreams:
       - Method: get
         Path: /api/v1/admin/products
         RpcPath: admin.AdminProductService/ListProducts
+
+# 链路追踪
+Telemetry:
+  Name: gateway
+  Endpoint: http://localhost:9411/api/v2/spans
+  Batcher: zipkin
+  Sampler: 1.0

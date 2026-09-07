@@ -26,8 +26,15 @@ Activity:
   TokenExpire: 60 # token 有效期（秒）
   AdvanceSeconds: 5 # 提前获取 token 的秒数
 
-# Prometheus 监控暴露
-PrometheusExt:
+DevServer:
+  Enabled: true
   Host: 0.0.0.0
-  Port: 9111
-  Path: /metrics
+  Port: 11011
+  EnablePprof: false
+
+# 链路追踪
+Telemetry:
+  Name: activity.rpc
+  Endpoint: http://localhost:9411/api/v2/spans
+  Batcher: zipkin
+  Sampler: 1.0

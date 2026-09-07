@@ -75,3 +75,9 @@ func (s *CouponsServer) UseCoupon(ctx context.Context, in *coupons.UseCouponReq)
 	l := logic.NewUseCouponLogic(ctx, s.svcCtx)
 	return l.UseCoupon(in)
 }
+
+// 使用优惠券回滚（Saga 补偿分支）
+func (s *CouponsServer) UseCouponRollback(ctx context.Context, in *coupons.UseCouponReq) (*coupons.EmptyResp, error) {
+	l := logic.NewUseCouponRollbackLogic(ctx, s.svcCtx)
+	return l.UseCouponRollback(in)
+}
