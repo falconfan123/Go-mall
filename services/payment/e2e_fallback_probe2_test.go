@@ -33,6 +33,7 @@ import (
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/falconfan123/Go-mall/services/payment/internal/svc"
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 // fbDtmDB 打开 dtm 库连接（trans_global 等 saga 状态表在 dtm 库而非 mall 库）。
@@ -112,9 +113,10 @@ func fb2PostWebhook(t *testing.T, orderID, paymentID string, userID uint32, amou
 }
 
 // seedUnpaid 种未支付订单+支付单（webhook 翻转路径的输入态）。
-func seedUnpaid(t *testing.T, db *sql.DB, orderID, paymentID, couponID string) {
+// createdMinAgo=1：线上快 tick（scanner 5s）下避免订单在 saga 完成前被 scan2 超龄关单。
+func seedUnpaid(t *testing.T, db *sql.DB, orderID, paymentID, couponID string, createdMinAgo int) {
 	t.Helper()
-	fbSeed(t, db, orderID, couponID, 2, 2, 0)
+	fbSeedAt(t, db, orderID, couponID, 2, 2, 0, createdMinAgo)
 	// fbSeed 把 payment 置 PAID——本探针需要未支付初始态
 	if _, err := db.Exec(`UPDATE payments SET status=1, paid_amount=NULL, paid_at=0, transaction_id='' WHERE order_id=$1`, orderID); err != nil {
 		t.Fatalf("revert payment: %v", err)
@@ -125,7 +127,7 @@ func seedUnpaid(t *testing.T, db *sql.DB, orderID, paymentID, couponID string) {
 
 func TestFB2P1OutboxFullChainViaSignedWebhook(t *testing.T) {
 	db := fbDB(t)
-	seedUnpaid(t, db, "fb2-o1", "pay-fb2-o1", "")
+	seedUnpaid(t, db, "fb2-o1", "pay-fb2-o1", "", 1)
 
 	rc := fb2PostWebhook(t, "fb2-o1", "pay-fb2-o1", fbUser, 9100, "pi-probe-fb2-o1")
 	if rc != http.StatusOK {
@@ -166,7 +168,7 @@ func TestFB2P1KillRelayRescansExactlyOnce(t *testing.T) {
 	for attempt := 1; attempt <= 3; attempt++ {
 		orderID := fmt.Sprintf("fb2-k%d", attempt)
 		payID := "pay-" + orderID
-		seedUnpaid(t, db, orderID, payID, "")
+		seedUnpaid(t, db, orderID, payID, "", 1)
 
 		rc := fb2PostWebhook(t, orderID, payID, fbUser, 9100, "pi-probe-"+orderID)
 		if rc != http.StatusOK {
@@ -220,7 +222,7 @@ func TestFB2P1KillRelayRescansExactlyOnce(t *testing.T) {
 
 func TestFB2P2Scan1ResettlesOrphan(t *testing.T) {
 	db := fbDB(t)
-	fbSeed(t, db, "fb2-o2", "", 2, 2, time.Now().Add(-20*time.Minute).Unix())
+	fbSeedAt(t, db, "fb2-o2", "", 2, 2, time.Now().Add(-20*time.Minute).Unix(), 1)
 
 	fbWait(t, fb2ScanTimeout, func() bool { return fbOrderStatus(t, db, "fb2-o2") == 3 })
 	if got := fbSold(t, db, fbProID); got != 1 {
@@ -233,7 +235,7 @@ func TestFB2P2Scan1ResettlesOrphan(t *testing.T) {
 func TestFB2P3TombstoneRetrySucceeds(t *testing.T) {
 	db := fbDB(t)
 	// 券 ID 指向不存在的券 → 首个 saga 券分支必然 Aborted（构造墓碑）
-	fbSeed(t, db, "fb2-o3", "cpn-fb2-invalid", 2, 2, time.Now().Add(-15*time.Minute).Unix())
+	fbSeedAt(t, db, "fb2-o3", "cpn-fb2-invalid", 2, 2, time.Now().Add(-15*time.Minute).Unix(), 1)
 
 	// 等 scanner tick1：EnsureSaga → 券失败 → saga failed（订单回 Pending）
 	ddb := fbDtmDB(t)
@@ -332,6 +334,31 @@ func reconFixtureLive(t *testing.T) (*PaymentService, *fallbackScanner, *fakeExc
 
 func confLoadProbe(path string, c *config.Config) error {
 	return conf.LoadConfig(path, c)
+}
+
+// reconProbeConfig 线上探针专用配置：DB 指线上 mall（port-forward 5433）、
+// OrderRpc 直连线上 order（port-forward 11004）、dtm 指线上 dtm（port-forward 36791/36788）；
+// Stripe 用本地 etc/payment.yaml 的测试 key。
+func reconProbeConfig(t *testing.T) config.Config {
+	t.Helper()
+	var c config.Config
+	if err := confLoadProbe("etc/payment.yaml", &c); err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	c.Fallback = c.Fallback.Effective()
+	c.PostgresConfig.DataSource = fbDSN
+	c.OrderRpc = zrpc.RpcClientConf{
+		Endpoints: []string{"localhost:10404"},
+		NonBlock:  true,
+		Timeout:   2000,
+	}
+	c.Dtm.Server = "localhost:36791"
+	c.Dtm.HttpAddr = "localhost:36788"
+	c.Dtm.BusiHost = "10.2.4.3"
+	c.Dtm.OrderPort = 10004
+	c.Dtm.InventoryPort = 10007
+	c.Dtm.CouponsPort = 10009
+	return c
 }
 
 // seedSessionAndConfirm 测试模式创建 CheckoutSession 并用测试卡确认（session 变 paid）。
@@ -435,7 +462,7 @@ func fb2StripeAPI(t *testing.T, method, path string, form map[string]string) map
 // P5-方向1：Stripe 有账（测试卡已扣）+ 本地未 PAID → recon 自动重放 → 本地 PAID + 结算完成
 func TestFB2P5ReconDirection1AutoReplay(t *testing.T) {
 	db := fbDB(t)
-	seedUnpaid(t, db, "fb2-o5", "pay-fb2-o5", "")
+	seedUnpaid(t, db, "fb2-o5", "pay-fb2-o5", "", 1)
 	// 订单应付与 Stripe 会话金额一致（重放校验链要求）
 	if _, err := db.Exec(`UPDATE orders SET payable_amount=9100, original_amount=9100, discount_amount=0 WHERE order_id='fb2-o5'`); err != nil {
 		t.Fatalf("align payable: %v", err)
@@ -445,14 +472,9 @@ func TestFB2P5ReconDirection1AutoReplay(t *testing.T) {
 	// （webhook 丢失场景本地 transaction_id 为空，重放以 Stripe 会话元数据为准）
 	seedSessionAndConfirm(t, "fb2-o5", "pay-fb2-o5", fbUser, 9100)
 
-	// 驱动对账（窗口覆盖"现在"）
-	var c config.Config
-	if err := confLoadProbe("etc/payment.yaml", &c); err != nil {
-		t.Fatalf("load: %v", err)
-	}
-	c.Fallback = c.Fallback.Effective()
+	// 驱动对账（窗口覆盖"现在"，线上探针配置）
+	c := reconProbeConfig(t)
 	sc := svc.NewServiceContext(c)
-	sc.ExceptionModel = &fakeExceptionModel{}
 	ps := &PaymentService{ctx: sc}
 	now := time.Now()
 	ps.runReconWindow(context.Background(), now.Unix()-7200, now.Unix()+3600, c.Fallback)
@@ -471,17 +493,13 @@ func TestFB2P5ReconDirection1AutoReplay(t *testing.T) {
 // P5-方向2：本地 PAID、Stripe 无账 → 冻结告警，不回滚
 func TestFB2P5ReconDirection2Freezes(t *testing.T) {
 	db := fbDB(t)
-	fbSeed(t, db, "fb2-o6", "", 2, 2, time.Now().Unix())
+	fbSeedAt(t, db, "fb2-o6", "", 2, 2, time.Now().Unix(), 1)
 	// 交易号指向 Stripe 不存在的账
 	if _, err := db.Exec(`UPDATE payments SET transaction_id='tx-fb2-fabricated' WHERE order_id='fb2-o6'`); err != nil {
 		t.Fatalf("set fabricated tx: %v", err)
 	}
 
-	var c config.Config
-	if err := confLoadProbe("etc/payment.yaml", &c); err != nil {
-		t.Fatalf("load: %v", err)
-	}
-	c.Fallback = c.Fallback.Effective()
+	c := reconProbeConfig(t)
 	sc := svc.NewServiceContext(c)
 	exc := &fakeExceptionModel{}
 	sc.ExceptionModel = exc

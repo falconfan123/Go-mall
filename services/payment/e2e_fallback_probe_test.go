@@ -26,8 +26,10 @@ import (
 )
 
 const (
-	fbDSN    = "postgres://root:fht3825099@localhost:5432/mall?sslmode=disable"
-	fbDtmDSN = "postgres://root:fht3825099@localhost:5432/dtm?sslmode=disable"
+	// 线上探针模式：DSN 经 kubectl port-forward 指到 gomall k3s 集群（postgres 5433 / order 11004 / payment 11112）
+	// 线上 dtm 复用 mall 库（trans_global 等表在 mall），故 fbDtmDSN 与 fbDSN 同库。
+	fbDSN    = "postgres://root:fht3825099@localhost:5433/mall?sslmode=disable"
+	fbDtmDSN = "postgres://root:fht3825099@localhost:5433/mall?sslmode=disable"
 	fbUser   = 8888
 	fbProID  = 991001
 	fbProID2 = 991002

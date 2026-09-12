@@ -207,3 +207,24 @@ exception UpsertOpen 返回值——已全部复跑确认。）
 - **探针⑤ 对账方向2（冻结告警）**：本地 PAID + 虚构 tx → recon →「本地已支付但 Stripe 无对应账，冻结待查」（fake 断言 fb2-o6；真实库 fb2-o3/o4 同证据）→ 断言不回滚：payment 仍 PAID、订单保持播种态、无新 saga。
 
 探针工具修补（tag 守卫，不影响常规 build/test/lint）：fbSeed 补 payment_method/order_addresses/product_desc（webhook 预取 GetOrder 强校验）+ address_id 显式 max+1；P1 签名补 api_version；P4 迟到支付 paid_at 对齐 scan1 阈值；P5 改用 raw API（stripe-go 无 payment_intent_data.shipping，payment_pages confirm 需要 billing_details）。7.2 至此**勾选完成**。
+
+### 实施记录 · 任务 7.2 线上验证（2026-09-08，gomall k3s 集群 live）
+
+**部署**：本地构建 `go-mall/{payment,order,inventory,coupons}:settlement-fb`（linux/amd64）→ docker save → 导入 gomall-1/gomall-2 两节点 containerd → 更新 deployment 镜像 + payment/order configmap（Dtm/Stripe 测试key/Consumer/Fallback）→ 新建 coupons-rpc deployment+svc+configmap。线上 DDL：mall 库建 `payment_outbox`/`settlement_exception`（settlement_fallback.sql）+ dtm 表（kv/trans_global/trans_branch_op/dt_barrier.barrier）。
+
+**探针①-⑤ 线上 PASS（默认快 tick 配置：relay 1s / scanner 5s）**：
+- ① outbox 全链 3.9s：真签名 webhook → 翻转+outbox 同事务 → relay `outbox item ensured` → dtm saga（action=10.2.4.3:10004/10007，hostNetwork 回调）→ done + 订单 Paid + 库存扣减。
+- ② scan1 孤儿单 2.3s：PAID+Pending(20min) 无 outbox → 自动 EnsureSaga → 订单 Paid。
+- ③ 墓碑 r2 9.8s：失效券 → r1 failed 补偿 → 修券 → scan1 `tombstone retry initiated settle:fb2-o3:r2` → succeed（含线上 coupons 三分支）。
+- ④ scan2 竞态 7.9s：超龄单自动关单（order→6）→ 关后补 PAID（paid_at>scan1 阈值）→ 下轮 scan1 `is_new=true` 退款 exception。
+- ⑤ 方向1 重放 9.8s：Stripe 测试真实会话 → recon → payment PAID + 真实 PI + 订单 Paid；方向2 冻结 6.5s：虚构 tx → `本地已支付但 Stripe 无对应账` + 断言不回滚。
+
+**线上环境缺陷（部署中发现，已修复）**：
+1. **线上 dtm 从未建表**（日志持续 `relation "trans_global" does not exist` panic，Running 假健康）→ 手动建 kv/trans_global/trans_branch_op + dtm_barrier.barrier，重启后正常（36789/36790）。
+2. **barrier 唯一约束名不匹配**：dtm `InsertBarrier` 用 `ON CONFLICT ON CONSTRAINT uniq_barrier`，自动命名约束导致分支失败 → 重建为 `uniq_barrier`。
+3. **order 新代码缺 Consumer 配置段** → order-config 补段后服务才启动成功。
+4. **线上无 coupons 服务** → 新建 coupons-rpc（镜像 settlement-fb + configmap，ProductRpc→products.rpc）。
+5. **dtm 分支回调网络**：NodePort 在 k3s 未监听（dtm pod 访问超时）→ 改 **hostNetwork**（业务服务直接监听 master 节点 IP:10004/10007/10009）+ payment/order/inventory/coupons/dtm 全部 nodeSelector 固定 master（vm-4-3-ubuntu）；跨节点 pod→节点IP 不可达，同节点直通。
+6. payment configmap 从旧结构（Stripe 空/无 Dtm/Fallback/Consumer）升级。
+
+**探针工具线上适配**（tag 守卫）：fbDSN/fbDtmDSN → 线上 mall（port-forward 5433；线上 dtm 表在 mall 库，故两 DSN 同库）；P1/P2/P3/P5 seed 改 createdMinAgo=1（线上 scanner 5s 快 tick，避免 saga 完成前被 scan2 抢关单）；P5 依赖覆盖（OrderRpc 直连线上 order port-forward 10404、Dtm 指线上 dtm port-forward 36791/36788、Stripe 用本地测试 key、方向1 改真实 ExceptionModel）。本地复跑需切回本地 DSN/seed。
