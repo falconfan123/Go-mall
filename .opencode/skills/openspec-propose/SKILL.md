@@ -116,7 +116,14 @@ When the user is ready to implement, they must start the apply workflow explicit
       - Ask the user to clarify
       - Then continue with creation
 
-6. **Show final status**
+6. **整体反思审核（Reflection Harness，每个 change 仅一次）——全部制品齐备后、冻结前**
+   - **提案制品在进入 apply 之前，必须且只需经过一次整体审核**：等上一步把 `applyRequires` 传递闭包内的全部制品（proposal/specs/design/tasks）创建完成后，调 `@openspec-reviewer`（只读子智能体，edit/write/bash deny；与主智能体不同模型，独立视角）对**完整变更包**做一次整体审读。不逐批审、不边生成边审。
+   - **审核输入**：让 `@openspec-reviewer` 读取 `openspec/changes/<name>/explore-brief.md` 作为需求基线 checklist + 全部制品文件；若存在 review-log.md 则参考历史结论，不重复报告已修复问题。检查点：需求全覆盖、范围无越界、制品间一致、验收可执行。
+   - **循环规则（同一门禁内）**：有 🔴 → 主智能体修复对应制品 → 再次整体审核（累计最多 5 轮）→ 🔴 清零即冻结全部制品；超 5 轮仍未清零 → 停止自动化交用户决策：Mandatory freeze（强制冻结）/ Fallback design（缩小范围重审）。
+   - **review-log 必记**：每轮审核结论追加到 `openspec/changes/<name>/review-log.md`（防上下文丢失；轮次计数 = 已有"## 审查轮次"数 + 1）。
+   - 备选通道（手动/CI）：`./openspec/reviewer/openspec-review.sh <change-name> --log`（opencode run headless 只读 agent: openspec-review-headless / opencode-go/kimi-k2.6）。
+
+7. **Show final status**
    ```bash
    openspec status --change "<name>"
    ```

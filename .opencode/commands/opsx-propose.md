@@ -109,17 +109,13 @@ When the user is ready to implement, they must start the apply workflow explicit
       - Ask the user to clarify
       - Then continue with creation
 
-6. **反思审核（Reflection Harness 必做）——每个制品生成后、进入下一制品前**
-   - **提案制品在进入 apply 之前，必须经过 `@openspec-reviewer` 审核**（只读子智能体，edit/write/bash deny）。🔴 清零才允许冻结，进入下一制品。
-   - **逐批审核（强制，严禁一次生成全部再统一审核）**：
-     - 创建 `proposal.md` → 调 `@openspec-reviewer` 审核 → 🔴 清零 → **冻结**
-     - 创建 `specs/<cap>/spec.md` → 审核（对照已冻结 proposal + explore-brief）→ 🔴 清零 → **冻结**
-     - 创建 `design.md` → 审核（对照已冻结 proposal/specs）→ 🔴 清零 → **冻结**
-     - 创建 `tasks.md` → 审核（对照全部已冻结制品）→ 🔴 清零 → **冻结**
-   - **审核输入**：让 `@openspec-reviewer` 读取 `openspec/changes/<name>/explore-brief.md` 作为需求基线 checklist + 已冻结的前序制品；若存在 review-log.md 则参考历史结论，不重复报告已修复问题。
-   - **循环规则**：有 🔴 → 主智能体修复当前制品 → 再次审核（同批累计最多 5 轮）→ 超 5 轮仍未清零 → 停止自动化交用户决策：Mandatory freeze（强制冻结）/ Fallback design（缩小范围重审）。
+6. **整体反思审核（Reflection Harness，每个 change 仅一次）——全部制品齐备后、冻结前**
+   - **提案制品在进入 apply 之前，必须且只需经过一次整体审核**：等步骤 5 把 `applyRequires` 传递闭包内的全部制品（proposal/specs/design/tasks）创建完成后，调 `@openspec-reviewer`（只读子智能体，edit/write/bash deny；与主智能体不同模型，独立视角）对**完整变更包**做一次整体审读。不逐批审、不边生成边审。
+   - **审核输入**：让 `@openspec-reviewer` 读取 `openspec/changes/<name>/explore-brief.md` 作为需求基线 checklist + 全部制品文件；若存在 review-log.md 则参考历史结论，不重复报告已修复问题。检查点：需求全覆盖、范围无越界、制品间一致、验收可执行。
+   - **循环规则（同一门禁内）**：有 🔴 → 主智能体修复对应制品 → 再次整体审核（累计最多 5 轮）→ 🔴 清零即冻结全部制品；超 5 轮仍未清零 → 停止自动化交用户决策：Mandatory freeze（强制冻结）/ Fallback design（缩小范围重审）。
    - **review-log 必记**：每轮审核结论追加到 `openspec/changes/<name>/review-log.md`（防上下文丢失；轮次计数 = 已有"## 审查轮次"数 + 1）。
-   - 备选通道（手动/CI）：`./openspec/reviewer/openspec-review.sh <change-name> --batch <artifact> --log`（opencode run headless 只读 agent: openspec-review-headless / opencode-go/kimi-k2.6）。
+   - 备选通道（手动/CI）：`./openspec/reviewer/openspec-review.sh <change-name> --log`（opencode run headless 只读 agent: openspec-review-headless / opencode-go/kimi-k2.6）。
+   - 冻结后若制品被后续修改（如 /opsx-update 调整），可手动补一次整体复查（`/openspec-reflect` 仅作可选复查，非主流程必做）。
 
 7. **Show final status**
    ```bash
