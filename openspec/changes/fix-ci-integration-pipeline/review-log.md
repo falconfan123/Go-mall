@@ -24,3 +24,9 @@
 
 ### 结论
 整体审核 🔴 清零，proposal/specs/design/tasks 冻结。制品与 explore-brief A1–A6 / C1–C8 完整承接，"不削弱门禁"贯穿四层。
+
+## apply 增量：A6 验证结论（2026-09-14）
+
+- CI 全量 build **146s**（run #34830158766）、本地 **93s** → 达标，**D1 确认走 B**。
+- 新根因：audit 连 ES 失败（30 次重试）→ failed to listen（依赖就绪），与 system 编译超时并列，B 方案覆盖两者。
+- 附：draft PR #71 触发方式验证通过（integration.yml 仅 pull_request 触发，需 draft PR）。

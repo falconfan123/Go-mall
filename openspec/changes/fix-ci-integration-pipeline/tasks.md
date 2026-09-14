@@ -2,7 +2,7 @@
 
 ## 1. A6 关键假设验证（design 第一验证项）
 
-- [ ] 1.1（验证命令修正）在 CI 加一步 `go build ./...`（先于起栈），**开 draft PR 触发**（integration.yml 仅在 pull_request→main / push→main 触发，临时分支 push 不触发），`gh run view <id> --log` 取该 step 的 duration 字段（成功 run 用 --log 而非 --log-failed）；验证：记录 build 步骤耗时秒数，对照 design A6 阈值（冷编译≤8min/缓存≤2min）判定 B 方案可行性
+- [x] 1.1 在 CI 加一步 `go build ./...`（先于起栈），**开 draft PR 触发**（integration.yml 仅在 pull_request→main / push→main 触发，临时分支 push 不触发），`gh run view <id> --log` 取该 step 的 duration 字段（成功 run 用 --log 而非 --log-failed）；验证：记录 build 步骤耗时秒数，对照 design A6 阈值（冷编译≤8min/缓存≤2min）判定 B 方案可行性
 - [ ] 1.2 本地验证等价性：`GOTOOLCHAIN=go$(cat .go-version|tr -d ' ') go build ./...` 在本地计时，与 CI 结果对比；验证：命令完成且给出本地耗时（作为 CI 参考基线）
 
 ## 2. D2 模块修复（Quality 转绿）
