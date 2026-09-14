@@ -37,3 +37,8 @@
 - 来源核实：`git show 254330c`（Initial commit，2026-03-10）确认该结构存量存在，非 settlement 遗留。
 - 成因：R2a 编译错误（undefined biz）使 vet 在编译阶段失败、分析未执行；修复 dal 编译后 vet 才暴露存量 unreachable——"编译错误掩盖 vet 分析"。
 - 要求：删除后 go-ci-vet.sh 全模块无第二处 unreachable（有则停下报告）；make test-unit 无回归。
+
+## apply 增量：第 2 组完成（2026-09-14）
+
+- D2（dal replace common）+ D6（删 unreachable 1 行）+ unit-tests redis service 三处修复后，**Quality 6 job 全绿**（run #34833333861：Go Vet/Unit Tests/Govulncheck/Mock Consistency/Coverage Gate/Quality 全 success）。
+- Unit Tests 原失败根因补充：CI 无 redis → idempotency 测试 PingCtx 内部 logx.Must panic（非编译/测试断言失败），加 redis:7 service 解决（CI 依赖提供，不削弱门禁）。
