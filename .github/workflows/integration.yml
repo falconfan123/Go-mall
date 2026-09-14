@@ -42,6 +42,13 @@ jobs:
       - name: Sync workspace
         run: go work sync
 
+      - name: Measure full build (A6 verify)
+        run: |
+          start=$(date +%s)
+          bash scripts/go-ci-build.sh --all
+          echo "A6_FULL_BUILD_SECONDS=$(( $(date +%s) - start ))"
+        # 临时测量步骤（fix-ci-integration-pipeline A6），判定后移除或保留
+
       - name: Run RPC integration tests
         run: make test-integration
 
