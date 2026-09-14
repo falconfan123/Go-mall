@@ -30,3 +30,10 @@
 - CI 全量 build **146s**（run #34830158766）、本地 **93s** → 达标，**D1 确认走 B**。
 - 新根因：audit 连 ES 失败（30 次重试）→ failed to listen（依赖就绪），与 system 编译超时并列，B 方案覆盖两者。
 - 附：draft PR #71 触发方式验证通过（integration.yml 仅 pull_request 触发，需 draft PR）。
+
+## apply 增量：D6 例外（2026-09-14，用户拍板选 A）
+
+- 用户拍板：本 change 允许唯一业务代码例外 = 删除 `dal/model/inventory/inventorymodel.go:102` unreachable code（naked block 外冗余 `return nil`，语义等价）。
+- 来源核实：`git show 254330c`（Initial commit，2026-03-10）确认该结构存量存在，非 settlement 遗留。
+- 成因：R2a 编译错误（undefined biz）使 vet 在编译阶段失败、分析未执行；修复 dal 编译后 vet 才暴露存量 unreachable——"编译错误掩盖 vet 分析"。
+- 要求：删除后 go-ci-vet.sh 全模块无第二处 unreachable（有则停下报告）；make test-unit 无回归。

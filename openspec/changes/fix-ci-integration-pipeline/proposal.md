@@ -24,4 +24,4 @@ CI 长期失败：近 200 次 run 成功率 51.5%，失败高度集中在 Integr
 - **依赖清单**：`dal/go.mod`（加 replace）、可能触发 `go.sum` 调整。
 - **门禁**：GitHub branch protection（main）required status checks 分阶段配置。
 - **风险**：预编译全量 build 在 2 核 runner 的耗时未知（A6 关键假设，design 阶段先实测）；GOWORK 策略改动对 build.yml 矩阵的影响（A5，design 验证项）；Govulncheck 历史独立失败（#33077827869/#29748971423）需核对是否纳入。
-- **明确排除**：Mock Consistency 不纳入（A1 已绿）；不改业务代码。
+- **明确排除**：Mock Consistency 不纳入（A1 已绿）；不改业务代码。**唯一例外（经用户拍板，2026-09-14）**：删除 `dal/model/inventory/inventorymodel.go` 中 1 行不可达死代码（`BatchReturnInventoryAtomWithSession` naked block 外冗余 `return nil`，语义等价）——它是 `go vet` unreachable code 报错源，删除是达成 Quality 全绿（C2）的必要条件；来源为 Initial commit 254330c（2026-03-10）存量缺陷，非本 change 引入。

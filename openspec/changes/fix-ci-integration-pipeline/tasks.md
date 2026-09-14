@@ -7,9 +7,9 @@
 
 ## 2. D2 模块修复（Quality 转绿）
 
-- [ ] 2.1 `dal/go.mod` 增加 `replace github.com/falconfan123/Go-mall/common => ../../common`；验证：`cd dal && GOWORK=off go build ./...` 通过、不再报 `undefined biz.ErrReturnAlreadyLocked`
-- [ ] 2.2 模拟 CI 独立模块编译全绿：`bash scripts/go-ci-vet.sh`（GOWORK=off 逐模块 vet）；验证：命令 exit 0、无 `undefined` 类错误
-- [ ] 2.3 A5 外溢检查：`make lint`（staticcheck 等）通过；`GOWORK=off go mod tidy` 不产生多余 go.mod/go.sum 变更（`git diff --stat` 仅预期文件）；`go build ./...`（go.work 下）无回归；验证：三条命令均通过、diff 符合预期
+- [x] 2.1 `dal/go.mod` 增加 `replace github.com/falconfan123/Go-mall/common => ../../common`；验证：`cd dal && GOWORK=off go build ./...` 通过、不再报 `undefined biz.ErrReturnAlreadyLocked`
+- [x] 2.2 模拟 CI 独立模块编译全绿：`bash scripts/go-ci-vet.sh`（GOWORK=off 逐模块 vet）；验证：命令 exit 0、无 `undefined` 类错误
+- [x] 2.3 A5 外溢检查：`make lint`（staticcheck 等）通过；`GOWORK=off go mod tidy` 不产生多余 go.mod/go.sum 变更（`git diff --stat` 仅预期文件）；`go build ./...`（go.work 下）无回归；验证：三条命令均通过、diff 符合预期
 - [ ] 2.4（验证命令修正）开 draft PR 触发一次 Quality 流水线，观察 6 个 job（mock-consistency/unit-tests/coverage/go-vet/govulncheck/quality-summary）；验证：`gh run view <id> --json jobs` 的 6 个 job 全 success
 
 ## 3. D1 集成脚本二进制化

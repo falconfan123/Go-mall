@@ -77,3 +77,11 @@
 - **本地 Mac 等价计时**：**93s**（go.work 各模块 `go build ./...`，0 失败）。
 - **go/no-go 判定**：达标（146s < 冷编译阈值 480s、缓存阈值 120s 略超但冷编译场景；146s << 45min 预算 40% 的 1080s）→ **D1 走 B（预编译二进制起服务）**。
 - **新增根因证据**：本次 run 集成失败点为 `audit` 服务连 ES(9200) 30 次重试失败 → `failed to listen: audit`（依赖就绪不足），区别于 9-07 的 `system` 90s 编译超时——R1 扩展为"编译慢 + 依赖就绪"两类，均被 B 方案的预编译 + 依赖探针加强覆盖。
+
+
+### D6 例外：删除 1 行不可达死代码（Quality 转绿的必要，用户拍板 2026-09-14）
+
+- 来源：`dal/model/inventory/inventorymodel.go:102` unreachable code，追溯至 **Initial commit 254330c（2026-03-10）** 的存量结构（naked block 内已 `return nil`，块外冗余 `return nil`），**非 settlement-fallback-layers 遗留**。
+- 成因解释：此前 CI 的 Go Vet 因 `dal` 模块编译错误（`undefined biz.ErrReturnAlreadyLocked`，R2a）**在编译阶段就失败，vet 分析未被执行**；修复 dal 编译后，vet 才继续到分析阶段，暴露了被编译错误掩盖的存量 unreachable code。即"编译错误掩盖 vet 分析 → 修好编译后才暴露"。
+- 处置：本 change 唯一业务代码改动 = 删除该 1 行（语义等价，不改逻辑）；用户已拍板。验证：删除后 `go-ci-vet.sh` 全模块无任何 unreachable/undefined，且 `make test-unit` 无回归。
+- 若发现第二处 unreachable/其他 vet 阻断 → 停下报告，不作为本 change 例外批量吸收。

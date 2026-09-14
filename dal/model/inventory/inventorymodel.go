@@ -99,7 +99,6 @@ func (m *customInventoryModel) BatchReturnInventoryAtomWithSession(ctx context.C
 		return nil
 
 	}
-	return nil
 }
 
 func (m *customInventoryModel) BatchReturn(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error {
