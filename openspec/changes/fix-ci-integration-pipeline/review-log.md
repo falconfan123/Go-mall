@@ -59,3 +59,22 @@
   - order 0（别名修复后 ok）。
 - 未发现 coupons/inventory 真实服务缺陷证据（均为基座/环境）。
 - C1 口径调整（见 design D8）：Integration 起栈稳定 + 测试套可执行；存量测试问题（D8/发现项）修复前，Integration 转 required 延迟至测试套修复变更完成。
+
+## apply 增量：D8 种子实施 + 第 1/2 步发现项（2026-09-14）
+
+### D8 coupons 种子（已实施）
+- seed.go 加 `SeedUserCoupons(t)`（DB 直连重置 user_id=1 持 5 张测试券：LOCK/RELEASE/USE/DUP=AVAILABLE(1)、USED=USED(3)）；coupons_use_test.go 三组 Test 开头调用。
+- 结果：Lock/Unlock 组全绿（种子生效）；UseCoupon 剩 2 子用例。
+
+### 发现项 F1：coupons UseCoupon 2 子用例断言过时（不改断言）
+- 失败：`Test_UseCouponLogic_UseCoupon/{状态非锁定,重复使用}` 期望 `90011 CouponStatusInvalid`，实际服务返回 Success(0)。
+- 证据：coupons 服务日志 `use coupon success cid=USED20250525001`（useCouponTx 对 status==USED **容忍成功**，幂等契约，usecouponlogic.go:98-102）；测试期望 90011 为旧语义。
+- 复现：`cd test/rpc && GOWORK=off GO_MALL_TEST_LOCAL=1 go test -count=1 -v -run Test_UseCouponLogic_UseCoupon ./coupons/`
+- 性质：测试断言过时（服务幂等契约演进）。处置：记发现项，另开变更更新断言；不阻塞本 change 的起栈/门禁目标。
+
+### 发现项 F2：inventory HighConcurrency 缓存一致性（非真丢扣，不阻塞）
+- 失败：`TestInventoryService_HighConcurrency` expected 0 / actual 270~790（5 次重跑 4 过 1 败）。
+- **DB 证据**：`SELECT total,sold FROM inventory WHERE product_id=9999` → `total=0, sold=1000`（**扣满，无丢扣**）。
+- 根因：GetInventory 返回**缓存值**（getinventorylogic.go:47,64 `res.Inventory = cachedTotal`），而 DecreaseInventory **未同步缓存**（无 AdjustInventoryCache 调用；ReturnInventory 有）→ 读陈旧缓存 → 测试断言看到"漏扣"假象。
+- 复现：`cd test/rpc && GOWORK=off GO_MALL_TEST_LOCAL=1 go test -count=1 -run TestInventoryService_HighConcurrency ./inventory/`（偶发）
+- 性质：缓存一致性缺陷 / 测试读缓存断言（DB 正确，非并发丢扣）。处置：记发现项另开变更；**不阻塞 Integration 转 required**（非库存越过边界/负数/总量不符）。
