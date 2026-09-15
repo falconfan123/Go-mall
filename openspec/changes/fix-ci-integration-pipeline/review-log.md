@@ -78,3 +78,24 @@
 - 根因：GetInventory 返回**缓存值**（getinventorylogic.go:47,64 `res.Inventory = cachedTotal`），而 DecreaseInventory **未同步缓存**（无 AdjustInventoryCache 调用；ReturnInventory 有）→ 读陈旧缓存 → 测试断言看到"漏扣"假象。
 - 复现：`cd test/rpc && GOWORK=off GO_MALL_TEST_LOCAL=1 go test -count=1 -run TestInventoryService_HighConcurrency ./inventory/`（偶发）
 - 性质：缓存一致性缺陷 / 测试读缓存断言（DB 正确，非并发丢扣）。处置：记发现项另开变更；**不阻塞 Integration 转 required**（非库存越过边界/负数/总量不符）。
+
+## apply 增量：第 4/5/7 组完成（2026-09-14）
+
+### 第 4 组 D4 诊断产物（run #34939050248 验证）
+- integration.yml：移除 A6 临时 build 步骤（二进制 build 已并入 ci-rpc-stack.sh）；失败时收集 `docker ps -a` / `ss -ltnp` / 服务日志 / 依赖健康 → `integration-diagnostics`（retention 7）。
+- quality.yml：go-vet 失败时收集 runner 快照 / dal vet 输出 → `quality-diagnostics`（retention 7）。
+- 验证：Integration 失败 run #34939050248 下载 `integration-diagnostics`，含 docker-ps/listening-ports/service-logs/dep-*-health/dependency-logs ✓（A4 清单齐全）。
+
+### 第 5 组 D3 阶段 1（main protection）
+- 前置记录：`gh api .../branches/main/protection` → **404 "Branch not protected"**（回滚依据）。
+- 设 required status checks contexts = **["Build", "Quality"]**（不含 Integration），enforce_admins=false；`gh api` 复核 contexts 确认。
+- 防自锁：PR #71 为 draft（不可合并），`gh pr checks --required` 在 draft 上显示全部 checks 属 GitHub draft 特有行为；**protection contexts（API）为权威** = Build/Quality，Integration 不在 required，不阻塞合并。
+
+### 第 7 组
+- 7.1 红线自查：continue-on-error / t.Skip 的 + 行均为 openspec 制品"禁令表述"（非 CI 配置/代码实际使用）；无删除 `_test.go`；改动白名单 = .github(2)/dal(3)/scripts(1)/test(8)/openspec(24)，services 2 个为已授权例外（D6 一行 + 探针）。
+- 7.2 D5 Govulncheck：历史失败（#33077827869 8-27 / #29748971423 7-20）当前 Quality run（#34833333861）govulncheck 已绿；无 major 依赖升级触发，D5 无例外。
+- 7.3/7.4：验收记录 + `docs/resume_metrics_report.md` 新节「CI 修复实证」。
+- tasks：18/18 完成（6.x 为合并后跟踪）。
+
+### C1 口径更新（D8/F1/F2 后）
+- Integration 转 required 前提：测试套修复变更（F1 断言过时 / F2 缓存一致性）完成后，按 A3（14 天 20 run 绿率≥90% + 同 commit 3 次全绿）观察再转阶段 2。F2 已证非真丢扣（DB sold=1000 正确），不阻塞；F1 为断言过时，需另开变更更新测试断言。
