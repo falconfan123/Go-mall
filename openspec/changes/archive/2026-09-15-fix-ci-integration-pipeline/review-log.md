@@ -99,3 +99,11 @@
 
 ### C1 口径更新（D8/F1/F2 后）
 - Integration 转 required 前提：测试套修复变更（F1 断言过时 / F2 缓存一致性）完成后，按 A3（14 天 20 run 绿率≥90% + 同 commit 3 次全绿）观察再转阶段 2。F2 已证非真丢扣（DB sold=1000 正确），不阻塞；F1 为断言过时，需另开变更更新测试断言。
+
+## branch protection 已移除（2026-09-15，用户确认）
+
+- 删除前摘要：required_checks=[Build, Quality]、required_approving_review_count=0、enforce_admins=false。
+- 回滚依据存档：`docs/main-branch-protection-2026-09-15.json`（docs/ gitignore）。
+- 执行：`gh api -X DELETE repos/falconfan123/Go-mall/branches/main/protection` → exit 0。
+- 验证：该 API 返回 **404 "Branch not protected"**；ruleset `main-ci-gate`（16839817）仍 `enforcement=active`、contexts=[Build, Quality] → **ruleset 为唯一权威**。
+- 回滚命令（如需恢复）：`gh api -X PUT repos/falconfan123/Go-mall/branches/main/protection --input docs/main-branch-protection-2026-09-15.json`（该 JSON 为 GET 响应，恢复前按 PUT schema 校验）。
