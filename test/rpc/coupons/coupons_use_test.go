@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	coupons "github.com/falconfan123/Go-mall/services/coupons/pb"
+	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -17,6 +18,7 @@ const (
 )
 
 func Test_LockCouponLogic_LockCoupon(t *testing.T) {
+	seed.SeedUserCoupons(t)
 	uci := lockCouponCode
 	pid := "pre-lock-coupon"
 	t.Run("正常情况", func(t *testing.T) {
@@ -54,6 +56,7 @@ func Test_LockCouponLogic_LockCoupon(t *testing.T) {
 }
 
 func Test_UnlockCouponLogic_UnlockCoupon(t *testing.T) {
+	seed.SeedUserCoupons(t)
 	uci := releaseCouponCode
 	pid := "pre-release-coupon"
 	t.Run("正常情况", func(t *testing.T) {
@@ -107,6 +110,7 @@ func Test_ListCouponsUsageLogic_ListCouponsUsage(t *testing.T) {
 
 // 记录使用优惠券
 func Test_UseCouponLogic_UseCoupon(t *testing.T) {
+	seed.SeedUserCoupons(t)
 	uid := 1
 
 	t.Run("正常情况", func(t *testing.T) {

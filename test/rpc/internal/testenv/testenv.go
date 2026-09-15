@@ -63,6 +63,9 @@ func RunID() string {
 }
 
 func ServiceAddr(service string, port int) string {
+	// 注意：ServiceAddr() 全部调用点均为 gRPC target（grpc.NewClient /
+	// grpc.DialContext，已验证 test/ 下 25 处，无 HTTP/URL 用途）。
+	// override 值若用作 gRPC target 必须自带 scheme（如 passthrough:/// 或 dns:///）。
 	if v := strings.TrimSpace(serviceEndpointOverrides()[service]); v != "" {
 		return v
 	}
@@ -70,7 +73,9 @@ func ServiceAddr(service string, port int) string {
 		return service
 	}
 	if LocalMode() {
-		return fmt.Sprintf("127.0.0.1:%d", port)
+		// D7（fix-ci-integration-pipeline）：grpc-go 默认 resolver 已 dns 化，
+		// 裸 ip:port 当 target 会 zero addresses；本地直连须显式 passthrough scheme。
+		return fmt.Sprintf("passthrough:///127.0.0.1:%d", port)
 	}
 	return fmt.Sprintf("%s-rpc.%s.%s:%d", service, Namespace(), DefaultServiceDomain, port)
 }

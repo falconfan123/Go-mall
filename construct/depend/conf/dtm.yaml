@@ -1,4 +1,16 @@
-MicroService:
-  Driver: 'dtm-driver-gozero' # 配置dtm使用go-zero的微服务协议
-  Target: 'consul://consul:8500/dtmservice' # 把dtm注册到consul的这个地址
-  EndPoint: 'localhost:36790' # dtm的本地地址
+# dtm server 配置（dev）
+# 由 configs/docker-compose.dev.yml 的 dtm 服务挂载；镜像固定 yedf/dtm:1.19.0
+# （与各服务客户端 github.com/dtm-labs/dtm v1.19.0 版本匹配）
+Store:
+  Driver: 'postgres'      # 业务栈实际数据库为 PostgreSQL（go-mall-postgres，depend_mall 网络）
+  Host: 'postgres'        # depend_mall 网络内别名
+  Port: 5432
+  User: 'root'
+  Password: 'fht3825099'
+  Database: 'dtm'         # 独立库，须先创建（见 construct/depend/sql/dtm_barrier.sql 第一段）；存储表由 dtm 启动时自动迁移
+TimeZoneOffset: 8        # postgres 会话时区为 Asia/Shanghai(+08)，dtm 进程（容器内 UTC）需对齐，
+                         # 否则 cron 以 UTC naive 字符串比较 timestamptz 会永远捞不到到期任务（实施期实测踩坑）
+# MicroService 注册暂不启用：本地栈无 consul，go-zero 服务侧使用直连地址 localhost:36790
+# 访问 dtm；dtm 容器经 host.docker.internal 回调宿主机上的分支服务。
+# 如后续启用服务发现：官方镜像已内置 dtmdriver-gozero，可配
+# MicroService: { Driver: 'dtm-driver-gozero', Target: 'etcd://etcd:2379/dtmservice', EndPoint: ... }

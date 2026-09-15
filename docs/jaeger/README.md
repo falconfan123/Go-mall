@@ -47,7 +47,9 @@
 
 ### 1. 启动 Jaeger
 
-项目已配置 Docker Compose，启动观测服务：
+> **说明**：Jaeger 与 Prometheus 位于 `construct/observability/docker-compose.yaml`，日志栈（Loki/Promtail/Grafana）位于 `infrastructure/docker-compose.yaml`，两者是独立的 compose。
+> 统一启动脚本 `./scripts/start-unified.sh` 现已一并拉起/停止 Jaeger + Prometheus + 日志栈（推荐）。
+> 以下手动方式保留作备选。
 
 ```bash
 cd construct/observability

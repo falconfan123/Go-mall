@@ -13,11 +13,4 @@ type Config struct {
 	PostgresConfig config.PostgresConfig
 	ElasticSearch  config.ElasticSearchConfig
 	RedisConf      redis.RedisConf
-	PrometheusExt  PrometheusExtConf
-}
-
-type PrometheusExtConf struct {
-	Host string
-	Port int
-	Path string
 }

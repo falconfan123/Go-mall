@@ -51,6 +51,16 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -153,6 +163,23 @@ jobs:
 
       - name: Run go vet across workspace modules
         run: bash scripts/go-ci-vet.sh
+
+      - name: Collect diagnostics on failure
+        if: failure()
+        run: |
+          mkdir -p diagnostics
+          { go version; uname -a; } > diagnostics/runner-env.txt 2>&1 || true
+          (cd dal && GOWORK=off go vet ./...) > diagnostics/dal-vet.txt 2>&1 || true
+          cp -r .artifacts/unit-report diagnostics/unit-report 2>/dev/null || true
+
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-diagnostics
+          path: diagnostics/
+          retention-days: 7
+          if-no-files-found: warn
 
   govulncheck:
     name: Govulncheck

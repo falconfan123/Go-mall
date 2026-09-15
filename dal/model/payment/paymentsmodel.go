@@ -11,6 +11,9 @@ import (
 
 var _ PaymentsModel = (*customPaymentsModel)(nil)
 
+// paidStatusPaidValue payments.status 的 PAID 枚举值（DB bigint；与 pb PaymentStatus_PAYMENT_STATUS_PAID 对应）
+const paidStatusPaidValue = 2
+
 type (
 	// PaymentsModel is an interface to be customized, add more methods here,
 	// and implement the added methods in customPaymentsModel.
@@ -23,6 +26,7 @@ type (
 		FindOneByOrderId(ctx context.Context, orderID string) (*Payments, error)
 		CheckExistByOrderId(ctx context.Context, orderID string) (bool, error)
 		FindExpired(ctx context.Context, limit int) ([]*Payments, error)
+		UpdateStatusToPaidWithSession(ctx context.Context, session sqlx.Session, paymentId, transactionId string, paidAmount, paidAt int64) (rowsAffected int64, err error)
 	}
 
 	customPaymentsModel struct {
@@ -109,4 +113,18 @@ func (m *defaultPaymentsModel) FindExpired(ctx context.Context, limit int) ([]*P
 		return nil, err
 	}
 	return payments, nil
+}
+
+// UpdateStatusToPaidWithSession 带状态机门槛的条件更新（design 决策 4）：
+// 仅当当前状态非 PAID 时翻转为 PAID（并发 webhook 下只有一次生效），返回影响行数。
+// rowsAffected==1 表示本次翻转成功（调用方负责同事务写入 outbox 待办）。
+func (m *customPaymentsModel) UpdateStatusToPaidWithSession(ctx context.Context, session sqlx.Session, paymentId, transactionId string, paidAmount, paidAt int64) (int64, error) {
+	query := fmt.Sprintf(`UPDATE %s SET "transaction_id" = NULLIF($1, ''), "paid_amount" = $2, "paid_at" = $3,
+		"status" = $4, "updated_at" = now()
+		WHERE "payment_id" = $5 AND "status" <> $4`, m.table)
+	res, err := session.ExecCtx(ctx, query, transactionId, paidAmount, paidAt, paidStatusPaidValue, paymentId)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
 }

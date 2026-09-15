@@ -42,6 +42,7 @@ require (
 	github.com/falconfan123/Go-mall/services/product v0.0.0-00010101000000-000000000000
 	github.com/falconfan123/Go-mall/services/users v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
+	github.com/lib/pq v1.12.3
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/stretchr/testify v1.11.1
 	github.com/zeromicro/go-zero v1.10.1
@@ -89,10 +90,8 @@ require (
 	go.opentelemetry.io/proto/otlp v1.10.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/term v0.44.0 // indirect
 	golang.org/x/text v0.39.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260414002931-afd174a4e478 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478 // indirect

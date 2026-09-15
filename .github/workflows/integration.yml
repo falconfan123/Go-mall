@@ -60,6 +60,28 @@ jobs:
           name: rpc-service-logs
           if-no-files-found: ignore
           path: scripts/logs/*.log
+          retention-days: 7
+
+      - name: Collect diagnostics on failure
+        if: failure()
+        run: |
+          mkdir -p diagnostics
+          docker ps -a > diagnostics/docker-ps.txt 2>&1 || true
+          ss -ltnp > diagnostics/listening-ports.txt 2>&1 || true
+          cp -r scripts/logs diagnostics/service-logs 2>/dev/null || true
+          cp -r .artifacts/dependency-logs diagnostics/dependency-logs 2>/dev/null || true
+          for c in etcd rabbitmq elasticsearch postgres redis gorse; do
+            docker inspect --format '{{.Name}} status={{.State.Status}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}}' go-mall-$c > diagnostics/dep-$c-health.txt 2>&1 || true
+          done
+
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-diagnostics
+          path: diagnostics/
+          retention-days: 7
+          if-no-files-found: warn
 
       - name: Upload dependency logs
         if: always()

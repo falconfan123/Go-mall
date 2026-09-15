@@ -15,7 +15,6 @@ type Config struct {
 	InventoryRpc   zrpc.RpcClientConf
 	GorseConfig    config.GorseConfig
 	Minio          Minio
-	PrometheusExt  PrometheusExtConf
 }
 
 type Minio struct {
@@ -30,10 +29,4 @@ type Minio struct {
 type PostgresConfig struct {
 	DataSource  string
 	Conntimeout int
-}
-
-type PrometheusExtConf struct {
-	Host string
-	Port int
-	Path string
 }

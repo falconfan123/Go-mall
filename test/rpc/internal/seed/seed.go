@@ -2,9 +2,13 @@ package seed
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"os"
 	"sync/atomic"
 	"testing"
+
+	_ "github.com/lib/pq"
 
 	checkoutpb "github.com/falconfan123/Go-mall/services/checkout/pb"
 	inventorypb "github.com/falconfan123/Go-mall/services/inventory/pb"
@@ -127,5 +131,44 @@ func MakeOrderRequest(preOrderID string, userID uint32, addressID uint64, paymen
 		AddressId:     addressID,
 		PaymentMethod: paymentMethod,
 		OrderId:       orderID,
+	}
+}
+
+// SeedUserCoupons 重置 coupons 集成测试所需的 user_coupons 种子行
+// （user_id=1 持 5 张测试券；LOCK/RELEASE/USE/DUP=AVAILABLE(1)、USED=USED(3)）。
+// coupons 测试会改变券状态（锁定/使用），故每个用例前重置到初始态。
+// 直连 DB（集成栈 postgres），不改测试断言、不 skip 用例。
+func SeedUserCoupons(t *testing.T) {
+	t.Helper()
+	host := os.Getenv("GO_MALL_CI_POSTGRES_HOST")
+	if host == "" {
+		host = "127.0.0.1"
+	}
+	dsn := fmt.Sprintf("postgres://root:fht3825099@%s:5432/mall?sslmode=disable", host)
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	defer db.Close()
+	if err := db.Ping(); err != nil {
+		t.Fatalf("postgres unreachable for coupon seed: %v", err)
+	}
+	rows := []struct {
+		couponID string
+		status   int
+	}{
+		{"LOCK20250525001", 1},
+		{"RELEASE20250525001", 1},
+		{"USE20250525001", 1},
+		{"USED20250525001", 3},
+		{"DUP20250525001", 1},
+	}
+	for _, r := range rows {
+		if _, err := db.Exec(`DELETE FROM user_coupons WHERE user_id=1 AND coupon_id=$1`, r.couponID); err != nil {
+			t.Fatalf("clean user_coupon %s: %v", r.couponID, err)
+		}
+		if _, err := db.Exec(`INSERT INTO user_coupons (user_id, coupon_id, status) VALUES (1,$1,$2)`, r.couponID, r.status); err != nil {
+			t.Fatalf("seed user_coupon %s: %v", r.couponID, err)
+		}
 	}
 }

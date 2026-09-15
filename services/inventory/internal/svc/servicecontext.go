@@ -2,9 +2,12 @@ package svc
 
 import (
 	"context"
+	"database/sql"
 	_ "embed"
 	"fmt"
 	"strconv"
+
+	_ "github.com/lib/pq"
 
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/dal/model/inventory"
@@ -21,6 +24,8 @@ type ServiceContext struct {
 	Config         config.Config
 	Rdb            *redis.Redis
 	InventoryModel inventory.InventoryModel
+	// DtmDB barrier 专用连接（dtm BranchBarrier.Call 自管事务；与业务共用同一 DSN）
+	DtmDB *sql.DB
 
 	DecreaseInventoryShal string
 	ReturnInventoryShal   string
@@ -29,10 +34,18 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 
 	// 创建ServiceContext实例
+	dtmDB, err := sql.Open("postgres", c.PostgresConfig.DataSource)
+	if err != nil {
+		logx.Errorf("open dtm barrier db failed: %v", err)
+		panic(err)
+	}
+	dtmDB.SetMaxOpenConns(20)
+
 	svcCtx := &ServiceContext{
 		Config:         c,
 		Rdb:            redis.MustNewRedis(c.RedisConf),
 		InventoryModel: inventory.NewInventoryModel(sqlx.NewSqlConn("postgres", c.PostgresConfig.DataSource)),
+		DtmDB:          dtmDB,
 	}
 
 	// 执行缓存预热，失败只记录日志，避免把短暂的数据库/缓存异常放大成服务不可用

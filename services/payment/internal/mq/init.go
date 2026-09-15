@@ -1,9 +1,9 @@
 package mq
 
 import (
-	"context"
 	"time"
 
+	commonconfig "github.com/falconfan123/Go-mall/common/config"
 	"github.com/falconfan123/Go-mall/services/payment/internal/config"
 	"github.com/streadway/amqp"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -17,8 +17,10 @@ const (
 )
 
 type PaymentDelayMQ struct {
-	conn  *amqp.Connection
-	Redis *redis.Redis
+	conn        *amqp.Connection
+	dial        func() (*amqp.Connection, error)
+	consumerCfg commonconfig.ConsumerConfig
+	Redis       *redis.Redis
 }
 type PaymentReq struct {
 	OrderId string
@@ -77,9 +79,12 @@ func Init(c config.Config) (*PaymentDelayMQ, error) {
 
 	}
 	paymentDelay := &PaymentDelayMQ{
-		conn:  conn,
-		Redis: redis.MustNewRedis(c.RedisConf),
+		conn:        conn,
+		dial:        func() (*amqp.Connection, error) { return amqp.Dial(c.RabbitMQConfig.Dns()) },
+		consumerCfg: c.Consumer.Effective(),
+		Redis:       redis.MustNewRedis(c.RedisConf),
 	}
-	go paymentDelay.consumer(context.TODO())
+	// 消费者生命周期由调用方通过 Start(ctx) 纳入服务启停管理（不再裸跑 goroutine）。
+	// 注意：该队列当前在 svc 中保持禁用（PaymentMQ=nil），接线属独立变更。
 	return paymentDelay, nil
 }

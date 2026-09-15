@@ -107,16 +107,17 @@ services:
 
   # DTM 分布式事务（可选）
   dtm:
-    image: yedf/dtm:latest
+    image: yedf/dtm:1.19.0
     container_name: go-mall-dtm
     ports:
       - "36789:36789"
       - "36790:36790"
     command: [ "-c", "/app/dtm/configs/config.yaml" ]
     volumes:
-      - ./construct/depend/conf/dtm.yaml:/app/dtm/configs/config.yaml
+      - ../construct/depend/conf/dtm.yaml:/app/dtm/configs/config.yaml
     networks:
       - go-mall
+      - depend_mall   # 复用 depend 栈的 postgres（dtm Store）与 etcd
     restart: unless-stopped
     profiles:
       - optional
@@ -128,3 +129,5 @@ volumes:
 networks:
   go-mall:
     driver: bridge
+  depend_mall:
+    external: true

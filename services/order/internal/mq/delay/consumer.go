@@ -2,144 +2,38 @@ package delay
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"time"
 
-	"github.com/falconfan123/Go-mall/common/consts/code"
-	ordertypes "github.com/falconfan123/Go-mall/common/types/order"
-	idempotency "github.com/falconfan123/Go-mall/common/utils/idempotency"
-	order2 "github.com/falconfan123/Go-mall/dal/model/order"
-	"github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/falconfan123/Go-mall/common/mq/consumerx"
 )
 
+// errSkipSideEffects 哨兵错误：订单状态非 Created，跳过后续副作用（按成功路径确认）。
+var errSkipSideEffects = errors.New("skip side effects")
+
+// consumer 用加固骨架消费 order-delay 死信队列：
+// autoAck=false 手动确认、监督重启、幂等 claim/release、有界重试、毒消息一次即弃。
 func (a *OrderDelayMQ) consumer(ctx context.Context) {
-	ch, err := a.conn.Channel()
-	if err != nil {
-		logx.Errorw("Failed to open a channel", logx.Field("err", err))
-		return
-	}
-	results, err := ch.Consume(
-		DeadLetterQueue, // 死信队列名称
-		"",              // 消费者标签
-		true,            // 自动确认（ack）
-		false,           // 排他性
-		false,           // 本地消息
-		false,           // 等待确认
-		nil,             // 参数
+	c := consumerx.New[*OrderReq](
+		a.conn,
+		a.dial,
+		consumerx.NewRedisStore(a.Redis),
+		newDelayHandler(a),
+		consumerx.Config{
+			QueueName:          DeadLetterQueue,
+			IdempotencyService: "order",
+			IdempotencyQueue:   "delay",
+			RetryLimit:         a.consumerCfg.RetryLimit,
+			BackoffBase:        time.Duration(a.consumerCfg.BackoffBaseMs) * time.Millisecond,
+			ShutdownTimeout:    time.Duration(a.consumerCfg.ShutdownTimeoutMs) * time.Millisecond,
+			IdempotencyTTL:     time.Duration(a.consumerCfg.IdempotencyTtlSeconds) * time.Second,
+			SuccessTTL:         time.Duration(a.consumerCfg.SuccessTtlSeconds) * time.Second,
+		},
 	)
-	if err != nil {
-		logx.Errorw("Failed to register a consumer", logx.Field("err", err))
-	}
-	logx.Infow("Starting RabbitMQ consumer...")
+	c.Run(ctx)
+}
 
-	for res := range results {
-		logx.Infow("start to consume order", logx.Field("body", string(res.Body)))
-
-		var msg *OrderReq
-		var orderModelRes *order2.Orders
-		if err := json.Unmarshal(res.Body, &msg); err != nil {
-			logx.Errorw("failed to unmarshal message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			if err := res.Reject(true); err != nil {
-				logx.Errorw("failed to reject message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			}
-			continue
-		}
-
-		// 幂等检查：检查并设置去重 key
-		idempotencyKey := idempotency.BuildKey("order", "delay", msg.OrderId)
-		isProcessed, err := idempotency.CheckAndSet(ctx, a.Redis, idempotencyKey, time.Hour)
-		if err != nil {
-			logx.Errorw("failed to check idempotency", logx.Field("err", err), logx.Field("key", idempotencyKey))
-			if err := res.Reject(true); err != nil {
-				logx.Errorw("failed to reject message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			}
-			continue
-		}
-		if isProcessed {
-			logx.Infow("message already processed, skipping", logx.Field("key", idempotencyKey))
-			if err := res.Ack(false); err != nil {
-				logx.Errorw("failed to ack message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			}
-			continue
-		}
-
-		// --------------- reverse --------------- 幂等
-		// 1. 更新订单状态为已过期
-		// 2. 释放优惠券
-		// 3. 释放预扣减的库存
-		isContinue := true
-		if err := a.Model.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
-			ordersModel := a.OrderModel.WithSession(session)
-			orderRes, err := ordersModel.GetOrderByOrderIDAndUserIDWithLock(ctx, msg.OrderId, msg.UserID)
-			if err != nil {
-				return err
-			}
-			orderModelRes = orderRes
-
-			// 只进行处理创建订单的订单
-			if ordertypes.OrderStatus(orderRes.OrderStatus) != ordertypes.OrderStatusCreated {
-				isContinue = false
-				return nil
-			}
-			if err := ordersModel.UpdateOrderStatusByOrderIDAndUserID(
-				ctx,
-				msg.OrderId,
-				msg.UserID,
-				ordertypes.OrderStatusClosed,
-				ordertypes.PaymentStatusExpired,
-			); err != nil {
-				return err
-			}
-			return nil
-		}); err != nil {
-			logx.Errorw("failed to update order status", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			if err := res.Reject(true); err != nil {
-				logx.Errorw("failed to reject message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			}
-		}
-		if !isContinue {
-			logx.Infow("info to update order status")
-			if err := res.Ack(true); err != nil {
-				logx.Errorw("failed to ack message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			}
-			continue
-		}
-		orderItems, err := a.OrderItemsModel.QueryOrderItemsByOrderID(ctx, orderModelRes.OrderId)
-		if err != nil {
-			logx.Errorw("failed to query order items", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			if err := res.Reject(true); err != nil {
-				logx.Errorw("failed to reject message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			}
-			continue
-		}
-		ItemsReq := make([]*inventoryclient.InventoryReq_Items, len(orderItems))
-		for i, orderItem := range orderItems {
-			ItemsReq[i] = &inventoryclient.InventoryReq_Items{
-				ProductId: int32(orderItem.ProductId),
-				Quantity:  int32(orderItem.Quantity),
-			}
-		}
-		returnPreInventoryResp, err := a.InventoryRpc.ReturnPreInventory(ctx, &inventoryclient.InventoryReq{
-			PreOrderId: orderModelRes.PreOrderId,
-			Items:      ItemsReq,
-			UserId:     int32(orderModelRes.UserId),
-		})
-		if err != nil {
-			logx.Errorw("failed to decrease pre inventory", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			if err := res.Reject(true); err != nil {
-				logx.Errorw("failed to reject message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-			}
-			continue
-		}
-		if returnPreInventoryResp.StatusCode != code.Success {
-			logx.Infow("info to decrease pre inventory", logx.Field("status_msg", returnPreInventoryResp.StatusMsg))
-		}
-		if err := res.Ack(false); err != nil {
-			logx.Errorw("failed to ack message", logx.Field("err", err), logx.Field("body", string(res.Body)))
-		}
-		logx.Infow("consumer order", logx.Field("body", string(res.Body)),
-			logx.Field("queue", QueueName))
-	}
+// Start 在独立 goroutine 中启动消费者；ctx 取消时优雅退出（服务停机时触发）。
+func (a *OrderDelayMQ) Start(ctx context.Context) {
+	go a.consumer(ctx)
 }

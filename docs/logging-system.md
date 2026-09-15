@@ -40,13 +40,18 @@ Go-Mall 项目采用 Loki + Grafana 集中式日志架构，替代原来散落�
 
 ## 快速开始
 
+> **栈的位置说明**：日志栈（Loki/Promtail/Grafana）位于 `infrastructure/docker-compose.yaml`；
+> 链路/指标栈（Jaeger/Prometheus）位于 `construct/observability/docker-compose.yaml`。
+> 两者是**两个独立 compose**，统一启动脚本 `./scripts/start-unified.sh` 现已将它们一并拉起/停止，
+> 不存在指向两处合一的统一 compose 文件。
+
 ### 启动日志系统
 
 ```bash
-# 方式1: 使用统一启动脚本 (推荐)
+# 方式1: 使用统一启动脚本 (推荐) —— 同时拉起日志栈与 Jaeger/Prometheus 观测栈
 ./scripts/start-unified.sh
 
-# 方式2: 手动启动
+# 方式2: 手动启动 (备选，仅日志栈；观测栈需另执行 cd construct/observability && docker-compose up -d jaeger prometheus)
 cd infrastructure
 docker-compose up -d
 ```
@@ -54,7 +59,7 @@ docker-compose up -d
 ### 停止日志系统
 
 ```bash
-# 方式1: 使用统一脚本
+# 方式1: 使用统一脚本 —— 同时清理日志栈与观测栈
 ./scripts/start-unified.sh stop
 
 # 方式2: 手动停止

@@ -60,6 +60,9 @@ message Order {
 
   // 订单项信息
   repeated OrderItem items = 17;
+
+  // 优惠券（结算 saga 分支 payload 需要；实施期补充，additive）
+  string coupon_id = 18;
 }
 message OrderItem {
   string item_id = 1;
@@ -101,6 +104,11 @@ message SeckillResponse {
   string status_msg = 2;
   string order_id = 3;         // 订单ID（如果成功）
   string message = 4;          // 额外信息
+}
+
+message CloseExpiredOrderRequest {
+  string order_id = 1;
+  int32 user_id = 2;
 }
 
 message CancelOrderRequest {
@@ -181,6 +189,8 @@ service OrderService {
 
   //  CancelOrder 取消订单 由用户发起
   rpc CancelOrder(CancelOrderRequest) returns (EmptyRes);
+  //  CloseExpiredOrder 关闭超时未支付订单（对账扫描器 scan2 复用关单业务）
+  rpc CloseExpiredOrder(CloseExpiredOrderRequest) returns (EmptyRes);
   // GetOrder 获取订单详情
   rpc GetOrder(GetOrderRequest) returns (OrderDetailResponse);
   // ListOrders 分页查询订单列表

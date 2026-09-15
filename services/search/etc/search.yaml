@@ -32,5 +32,12 @@ ProductRpc:
 
 PrometheusExt:
   Host: 0.0.0.0
-  Port: 9113
+  Port: 9081
   Path: /metrics
+
+# 链路追踪
+Telemetry:
+  Name: search.rpc
+  Endpoint: http://localhost:9411/api/v2/spans
+  Batcher: zipkin
+  Sampler: 1.0

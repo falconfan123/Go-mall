@@ -42,3 +42,4 @@ pb 结构体禁止泄漏到 logic/service 层。进入逻辑层前必须转换�
 ## 项目文档
 - `docs/dev-map.md` — 开发导航图
 - `docs/specs/template.md` — SPEC 编写模板
+- `docs/servers.md` — 线上服务器清单（gomall-1 / gomall-2，线上调试前先读）

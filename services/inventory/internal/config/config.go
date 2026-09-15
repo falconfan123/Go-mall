@@ -11,11 +11,4 @@ type Config struct {
 	zrpc.RpcServerConf
 	PostgresConfig config.PostgresConfig
 	RedisConf      redis.RedisConf
-	PrometheusExt  PrometheusExtConf
-}
-
-type PrometheusExtConf struct {
-	Host string
-	Port int
-	Path string
 }

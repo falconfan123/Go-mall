@@ -11,7 +11,7 @@ Etcd:
 # 链路追踪
 Telemetry:
   Name: auths.rpc
-  Endpoint: http://localhost:14268/api/traces
+  Endpoint: http://localhost:9411/api/v2/spans
   Batcher: zipkin
   Sampler: 1.0
 # localhost
@@ -36,9 +36,3 @@ DevServer:
   Host: 0.0.0.0
   Port:  11000
   EnablePprof: false
-
-# Prometheus 监控暴露
-PrometheusExt:
-  Host: 0.0.0.0   # 监控暴露的 IP
-  Port: 9100       # 监控暴露的端口
-  Path: /metrics   # 默认路径
