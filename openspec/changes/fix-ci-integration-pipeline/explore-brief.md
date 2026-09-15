@@ -52,7 +52,7 @@
 
 ## Checklist（反思审核基线）
 
-- [ ] C1 Integration 稳定转绿，**可判定口径（A3）**：从本 change 首个修复 commit 合并之后开始计数；按 run 序（非按天）；观察窗口 = 修复合并后 14 天内满 20 次 Integration run，绿率 ≥90%；且**同一 commit 至少重复触发 3 次全绿**（验证非 flaky）。
+- [ ] C1 Integration 稳定转绿，**可判定口径（A3，D8 收口后调整）**：Integration 起栈稳定、测试套**可执行**（全部编译通过、无 setup 级失败）；从本 change 首个修复 commit 合并后按 run 序计数，14 天内满 20 次 run 绿率 ≥90%，同一 commit 重复触发 3 次全绿。**前提**：存量测试基座问题（D8 补种子/别名）与记发现项的测试包修复完成后才按 A3 判定转 required；测试断言过时/服务缺陷不凑"0 失败"，登记后由另开变更修复。
 - [ ] C2 Quality 全绿（Go Vet/Govulncheck/Unit Tests/Coverage Gate 均绿；Mock Consistency 已在 A1 证实绿，不作为本 change 验收项）。
 - [ ] C3 失败时 CI 产出可诊断日志（A4 清单）：各业务服务 stderr/stdout 日志（`scripts/logs/*.log` 或 `.artifacts/ci-rpc-stack/*.log`）、`docker ps -a` 全量、依赖容器健康状态、端口监听快照（`ss -ltnp`）、etcd/rabbitmq/minio 健康探针结果——以上打包为 artifact 上传，PR 中通过 Actions run 的 Artifacts 页面可访问，保留期遵循 repo 默认（建议显式设为 7 天）。
 - [ ] C4 门禁定位明确（**分阶段 required，A2**）：阶段 1 仅 Build+Quality 设 required；阶段 2 在 Integration 连续观察 N 次全绿后加入 required。禁止在阶段 1 把 Integration 设为 required（防自锁）。

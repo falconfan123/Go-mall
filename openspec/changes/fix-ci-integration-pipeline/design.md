@@ -85,3 +85,19 @@
 - 成因解释：此前 CI 的 Go Vet 因 `dal` 模块编译错误（`undefined biz.ErrReturnAlreadyLocked`，R2a）**在编译阶段就失败，vet 分析未被执行**；修复 dal 编译后，vet 才继续到分析阶段，暴露了被编译错误掩盖的存量 unreachable code。即"编译错误掩盖 vet 分析 → 修好编译后才暴露"。
 - 处置：本 change 唯一业务代码改动 = 删除该 1 行（语义等价，不改逻辑）；用户已拍板。验证：删除后 `go-ci-vet.sh` 全模块无任何 unreachable/undefined，且 `make test-unit` 无回归。
 - 若发现第二处 unreachable/其他 vet 阻断 → 停下报告，不作为本 change 例外批量吸收。
+
+### D7 例外：测试基座 gRPC target scheme 修正（用户拍板 2026-09-14）
+
+- 问题：`testenv.ServiceAddr()` LocalMode 返回裸 `127.0.0.1:port`，作为 `grpc.NewClient`/`grpc.DialContext` 的 target 时，grpc-go（默认 resolver dns 化）对无 scheme 的 ip:port 解析失败 → `zero addresses` → 集成测试 58/58 失败。
+- 性质：**测试环境适配**（grpc-go 1.63+ 默认 resolver 行为变化），语义不变、不放宽断言、不 skip。**起栈修复后才暴露的存量问题**（此前 Integration 起栈即挂，测试从未执行）。
+- 修复：LocalMode 返回 `passthrough:///127.0.0.1:%d`；k8s 分支（dns scheme）不动；env override 分支保持原样、注释注明"override 值若作 gRPC target 必须自带 scheme"。
+- 依据：ServiceAddr() 25 个调用点全部为 gRPC target（grpc.NewClient / harness.go:381 DialContext / coupons init.go），无 HTTP/URL 用途（grep 验证）→ 改 helper 返回值无连带影响；harness.go 与 coupons 均走该 helper，无独立构造点。
+
+### D8 例外：测试基座（起栈修复后首次执行的存量测试基座问题，用户拍板 2026-09-14）
+
+- 范围：本 change 内**测试基座类**（别名/种子/helper/编译）修复到通过；**测试断言过时或真实服务缺陷 → 记发现项另开变更**，严禁改断言、注释测试、t.Skip、known-fail 凑"0 失败"。
+- 具体项：
+  1. **order 别名**：query_test.go / update_test.go / init.go 的 `services/order/pb` import 补 `order` 别名（对齐同目录 create_test.go 既有写法，非发明新写法；init.go 保留并修好，不删除——orderClient 无引用但为残缺 stub 死代码，用户要求保留修好）。
+  2. **user_coupons 种子缺失**（coupons Lock/Unlock/Use 测试）：LockCoupon 逻辑按 `GetUserCouponByUserIdCouponIdWithLock(user1, 券码)` 查 user_coupons，无种子行 → "优惠券不存在"；seed.go 仅种 inventory。补 user_coupons 种子（user 1 持 LOCK/RELEASE/USE/USED/DUP 券，对应 AVAILABLE/LOCKED/USED 状态），INSERT 于测试前（seed 或 reconcile），不改断言。
+  3. **inventory 高并发 flaky**：`TestInventoryService_HighConcurrency` 重跑 3 次 1 败 2 过（证据：单独 `go test -run` 连续重跑）→ 归 flaky（并发时序/2 核资源），记录；不因 flaky 改断言/降并发。若后续判定为真实并发缺陷 → 记发现项。
+- **C1 口径（Integration 转绿）相应调整**：Integration 起栈稳定、测试套**可执行**（全部编译通过、无 setup 级失败）；除已登记的存量测试问题（D8 处理中；inventory flaky）外测试断言全绿；Integration 加入 required 需等测试套修复变更（D8 完成 + 任何记发现项的测试包修复）后再按 A3 判定。

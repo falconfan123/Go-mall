@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEPEND_STACK="$ROOT_DIR/construct/depend/docker-compose.yaml"
 STATE_DIR="${GO_MALL_CI_STATE_DIR:-$ROOT_DIR/.artifacts/ci-rpc-stack}"
+BIN_DIR="${GO_MALL_CI_BIN_DIR:-$STATE_DIR/bin}"
 PID_FILE="$STATE_DIR/pids.txt"
 LOG_DIR="${GO_MALL_CI_LOG_DIR:-$ROOT_DIR/scripts/logs}"
 DEPENDENCY_LOG_DIR="${GO_MALL_CI_DEPENDENCY_LOG_DIR:-$ROOT_DIR/.artifacts/dependency-logs}"
@@ -279,9 +280,14 @@ start_dependencies() {
   for service in "${DEPENDENCY_SERVICES[@]}"; do
     local container="go-mall-${service}"
     echo "waiting for $container"
-    # Skip health check for elasticsearch in CI - it takes too long to become healthy
+    # elasticsearch 在 CI 起得慢：改端口就绪等待（>=90s），而非固定 sleep；
+    # audit 等服务启动需要 ES 9200 已监听（fix-ci-integration-pipeline D1）
     if [[ "$service" == "elasticsearch" ]]; then
-      sleep 30
+      if ! wait_for_port 9200 127.0.0.1 120 2; then
+        docker logs "$container" >"$DEPENDENCY_LOG_DIR/${service}.log" 2>&1 || true
+        echo "dependency port not ready: elasticsearch 9200" >&2
+        exit 1
+      fi
       continue
     fi
     if ! wait_for_container_health "$container"; then
@@ -330,6 +336,27 @@ reconcile_rabbitmq() {
   docker exec go-mall-rabbitmq rabbitmqctl set_user_tags admin administrator >/dev/null
 }
 
+# 预编译全部业务服务到 BIN_DIR（fix-ci-integration-pipeline D1/B：2 核 runner 上
+# go run 逐服务编译超时，预编译一次后启动用二进制，根治集成启动失败）。
+build_all_binaries() {
+  mkdir -p "$BIN_DIR"
+  local spec name rel_dir entrypoint port
+  for spec in "${SERVICES[@]}"; do
+    IFS=: read -r name rel_dir entrypoint port <<<"$spec"
+    if [[ -x "$BIN_DIR/$name" ]]; then
+      continue
+    fi
+    echo "building $name to $BIN_DIR/$name"
+    # 包模式 build（go build .）：入口文件单文件模式不含同包其它文件，
+    # 会漏 fallbackworker.go 等（settlement 后 payment.go 引用包内函数）
+    if ! (cd "$ROOT_DIR/$rel_dir" && GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" "$GO_CMD" build -o "$BIN_DIR/$name" .); then
+      echo "build failed: $name" >&2
+      return 1
+    fi
+  done
+  return 0
+}
+
 start_service() {
   local name="$1"
   local rel_dir="$2"
@@ -352,21 +379,28 @@ start_service() {
   fi
 
   echo "starting $name on $port"
+  # D1/B：优先使用预编译二进制（$BIN_DIR/$name），无二进制时回退 go run（兼容本地未预编译）
+  # 引号用 " 转义（bin_cmd 在外层双引号字符串里展开，单引号会被当字面拼接）
+  if [[ -x "$BIN_DIR/$name" ]]; then
+    local bin_cmd="exec $BIN_DIR/$name -f $config_file"
+  else
+    local bin_cmd="exec env GOTOOLCHAIN=$GOTOOLCHAIN_VALUE STRIPE_API_KEY=$STRIPE_API_KEY_VALUE STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET_VALUE $GO_CMD run $entrypoint -f $config_file"
+  fi
   if command -v setsid >/dev/null 2>&1; then
     setsid bash -lc "
       cd '$service_dir'
-      exec env GOTOOLCHAIN='$GOTOOLCHAIN_VALUE' STRIPE_API_KEY='$STRIPE_API_KEY_VALUE' STRIPE_WEBHOOK_SECRET='$STRIPE_WEBHOOK_SECRET_VALUE' '$GO_CMD' run '$entrypoint' -f '$config_file' > '$log_file' 2>&1
+      $bin_cmd > '$log_file' 2>&1
     " &
   else
     (
       cd "$service_dir"
-      exec env GOTOOLCHAIN="$GOTOOLCHAIN_VALUE" STRIPE_API_KEY="$STRIPE_API_KEY_VALUE" STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET_VALUE" "$GO_CMD" run "$entrypoint" -f "$config_file" >"$log_file" 2>&1
+      $bin_cmd >"$log_file" 2>&1
     ) &
   fi
   local pid=$!
   echo "$name:$pid:$port" >>"$PID_FILE"
 
-  if ! wait_for_port "$port" 127.0.0.1 90 1; then
+  if ! wait_for_port "$port" 127.0.0.1 180 1; then
     tail -n 120 "$log_file" >&2 || true
     echo "service failed to listen: $name" >&2
     exit 1
@@ -455,6 +489,7 @@ run_local_suite() {
   start_dependencies
   reconcile_postgres
   reconcile_rabbitmq
+  build_all_binaries || exit $?
   start_services
   scan_ports
   status
@@ -471,6 +506,7 @@ case "$command" in
     start_dependencies
     reconcile_postgres
     reconcile_rabbitmq
+    build_all_binaries || exit $?
     start_services
     scan_ports
     status

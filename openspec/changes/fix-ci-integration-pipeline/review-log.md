@@ -42,3 +42,20 @@
 
 - D2（dal replace common）+ D6（删 unreachable 1 行）+ unit-tests redis service 三处修复后，**Quality 6 job 全绿**（run #34833333861：Go Vet/Unit Tests/Govulncheck/Mock Consistency/Coverage Gate/Quality 全 success）。
 - Unit Tests 原失败根因补充：CI 无 redis → idempotency 测试 PingCtx 内部 logx.Must panic（非编译/测试断言失败），加 redis:7 service 解决（CI 依赖提供，不削弱门禁）。
+
+## apply 增量：D7 例外（2026-09-14，用户拍板选 A）
+
+- 3.4 集成测试 58/58 失败根因：testenv.ServiceAddr LocalMode 裸 ip:port 作 gRPC target → grpc-go dns resolver zero addresses（grpc-go 默认 resolver dns 化）。
+- 修复：LocalMode 返回 passthrough:///127.0.0.1:port；k8s 分支不动；env override 注释注明需自带 scheme。
+- 依据：25 个 ServiceAddr 调用点全为 gRPC target（grpc.NewClient/DialContext），无 HTTP 用途；harness.go:381 与 coupons/init.go 均走 helper，无独立构造点。
+- 性质：测试环境适配，语义不变、不放宽断言、不 skip；起栈修复后暴露的存量问题（此前 Integration 起栈即挂，测试从未执行）。
+
+## apply 增量：D8 测试基座收口（2026-09-14，用户确认收口口径）
+
+- 纠正：撤回 init.go 删除（git restore）；order 别名修复（3 文件补 order 别名，对齐 create_test.go），order 包 go test ok。
+- 全量分类（test-integration 79 测 11 失败）：
+  - coupons 11 例 = **测试基座种子缺失**（user_coupons 无 user1 种子行，Lock/Unlock/Use 查不到 → 优惠券不存在/状态错；LockCoupon 逻辑 GetUserCouponByUserIdCouponIdWithLock 证据；seed.go 仅种 inventory）。处置：D8 补种子，不改断言。
+  - inventory 2 例 = **flaky**（重跑 3 次 1 败 2 过）。处置：记录，不因 flaky 改断言。
+  - order 0（别名修复后 ok）。
+- 未发现 coupons/inventory 真实服务缺陷证据（均为基座/环境）。
+- C1 口径调整（见 design D8）：Integration 起栈稳定 + 测试套可执行；存量测试问题（D8/发现项）修复前，Integration 转 required 延迟至测试套修复变更完成。

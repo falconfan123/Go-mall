@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/falconfan123/Go-mall/common/consts/code"
 	checkout "github.com/falconfan123/Go-mall/services/checkout/pb"
-	"github.com/falconfan123/Go-mall/services/order/pb"
+	order "github.com/falconfan123/Go-mall/services/order/pb"
 	"github.com/falconfan123/Go-mall/test/rpc/internal/harness"
 	"github.com/falconfan123/Go-mall/test/rpc/internal/seed"
 	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
