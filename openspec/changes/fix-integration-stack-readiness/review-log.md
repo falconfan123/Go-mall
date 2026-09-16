@@ -1,0 +1,68 @@
+# Review Log · fix-integration-stack-readiness
+
+## 审查轮次 1 — 2026-09-16（proposal + specs + design + tasks）
+
+**审核方式**：@openspec-reviewer 对完整变更包（proposal/design/tasks/specs/.openspec.yaml）重审（备选通道脚本）。
+
+### 🔴 遗留（2 条，未冻结）
+1. **tasks 1.3 / design D2「保留端口兜底」与 delta spec「端口 9200 就绪 MUST NOT 视为就绪」直接矛盾** → 改为"仅保留 wait_for_container_health 超时/重试兜底，不以端口就绪作判据或兜底"。
+2. **tasks 3.3 引用不存在的 review-log.md** → 本文件补建，round 记录与阶段 2 口径重写均落位。
+
+### 🟡 建议（记录）
+1. 补 start-unified.sh 依赖栈验证（task 2.3）。
+2. 取证 grep 模式覆盖切换后新失败签名（`dependency not healthy` / `dependency failed to start`）。
+3. task 1.1 验证命令补 `-f` compose 路径。
+4. design D2「端口兜底」措辞（已随 🔴1 修复）。
+5. task 2.1 确认其它依赖容器正常存活。
+
+### 结论
+**2 🔴 未清零 → 不冻结**。修复后重审。
+## 审查轮次 2 — 2026-09-16
+
+**审核方式**：@openspec-reviewer 重审（修复循环内）。
+
+### 🔴 遗留（1 条，未冻结）
+1. **ES healthcheck `curl -f` 无法区分 yellow/red**：`/_cluster/health` 恒返回 HTTP 200，`wait_for_status=yellow` 超时时仍 200 + `status:red`；`curl -f` 校验状态码不足 → 容器可能被误判 healthy（与 `wait_for_port` 缺陷行为等价）→ **改为解析响应体**：`curl -sS "..._cluster/health?wait_for_status=yellow&timeout=5s" | grep -qE '"status"[[:space:]]*:[[:space:]]*"(yellow|green)"'`（design D2 / spec / tasks 1.2 同步）。
+
+### 🟡 建议（已吸收）
+1. tasks 1.2 验证命令补 `docker inspect --format` 容器名。
+2. design/tasks 明确"全局 DEPENDENCY_PORTS 端口扫描保留为通用安全网，移除仅 ES 特判"。
+3. design Risks 补其它依赖同为 macOS 绝对路径 bind mount 的低概率风险。
+4. tasks 3.1 `ok  `（两空格）→ `ok[[:space:]]`（Go test 输出为制表符）。
+
+### 结论
+**1 🔴 → 修复后重审**。
+
+## 审查轮次 3 — 2026-09-16
+
+### 🔴 遗留（1 条，未冻结）
+1. **`wait_for_container_health` 默认 120s < ES healthcheck 最坏 600s**：原 ES 特判 240s；改默认参数后 120s，可能在实际就绪前退出 → 修复：ES 显式 `wait_for_container_health "$container" 180 2`（360s，≥原 240s），healthcheck 参数 `interval 10s/timeout 5s/retries 30/start_period 40s`，脚本超时 ≥ healthcheck 就绪检测窗口（design D2 / tasks 1.2/1.3）。
+
+### 🟡 建议（已吸收）
+1. design Risks 关联 task 2.1 作为其它依赖风险取证点。
+2. proposal Impact 补命名卷迁移提示（复制原目录 / `docker volume rm`）。
+
+### 结论
+**1 🔴 → 修复后重审**。
+
+## 审查轮次 4 — 2026-09-16
+
+### 🔴 遗留（2 条，未冻结）
+1. **design Risks 残留旧 healthcheck 参数**（`retries: 20 × interval 30s`，≈600s）与 D2 正文（`interval 10s/retries 30/start_period 40s`）矛盾 → 已改为与正文一致，并注明"脚本超时 ≥ 检测窗口"。
+2. **spec 就绪判据场景缺 healthcheck 关键参数**（interval/timeout/retries/start_period）→ 已补入 spec。
+
+### 🟡 建议（已吸收）
+1. tasks 1.2 验证补 start_period 内返回空值的重试提示。
+
+### 结论
+**2 🔴 修复后重审（round 5）**。
+
+## 审查轮次 5 — 2026-09-16（冻结）
+
+### 🔴 遗留
+无
+
+### 结论
+**🔴 清零 → 本批冻结**。历史 4 轮 🔴（端口兜底矛盾 / review-log 缺失 / `curl -f` 无法区分 yellow-red / 超时窗口不匹配 / Risks 残留旧参数 / spec 缺参数）已全部闭合。
+- 说明：脚本对「### 🔴 遗留」下 `- 无`（带项目符号）的冻结判据为机械误判（脚本仅匹配裸 `无`），实际审核输出 🔴 = 无，故按实质冻结。
+- 💡 已吸收：tasks 1.2 验证备注改为 `starting`（非空值）；design Risks 注明 340s 为 Docker unhealthy 阈值假设。

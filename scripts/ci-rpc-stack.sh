@@ -280,12 +280,13 @@ start_dependencies() {
   for service in "${DEPENDENCY_SERVICES[@]}"; do
     local container="go-mall-${service}"
     echo "waiting for $container"
-    # elasticsearch 在 CI 起得慢：改端口就绪等待（>=90s），而非固定 sleep；
-    # audit 等服务启动需要 ES 9200 已监听（fix-ci-integration-pipeline D1）
+    # elasticsearch 在 CI 起得慢；就绪判据 = 容器 healthcheck（wait_for_status=yellow 解析响应体，
+    # 端口就绪不足——ES 绑定 9200 早于集群可用）。360s 覆盖 healthcheck 就绪检测窗口
+    # （fix-integration-stack-readiness D2）
     if [[ "$service" == "elasticsearch" ]]; then
-      if ! wait_for_port 9200 127.0.0.1 120 2; then
+      if ! wait_for_container_health "$container" 180 2; then
         docker logs "$container" >"$DEPENDENCY_LOG_DIR/${service}.log" 2>&1 || true
-        echo "dependency port not ready: elasticsearch 9200" >&2
+        echo "dependency not healthy: $container" >&2
         exit 1
       fi
       continue
