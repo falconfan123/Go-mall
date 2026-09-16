@@ -8,12 +8,12 @@
 - [x] 1.4 全量门禁：`make build && make lint && make test-unit` 全绿；验证：三条命令输出
 - [x] 1.5 F1 分支集成测试：`cd test/rpc && GOWORK=off GO_MALL_TEST_LOCAL=1 go test -count=1 ./coupons/...` 通过；验证：ok 输出
 - [x] 1.6 版本选择定论：若 v1.83.2 全量验证通过则采用；否则回落 v1.83.1 并记录理由（写入 review-log）——**回落后必须重跑 1.1–1.5 并附新输出**（禁止只改版本号不重验）；验证：给出最终版本与依据 + 重跑输出
-- [ ] 1.7 提 PR → 等 Build + Quality 全绿（Govulncheck 必须转绿）→ 合并；验证：PR 号 + merge commit hash
-- [ ] 1.8 解锁 PR #74（F1）：其 checks 重跑 → Build/Quality 绿 → 合并；验证：PR #74 合并 commit hash
-- [ ] 1.9a 实施期间若漏洞库新增命中：按同口径（真升级、记录 indirect、更新漏洞矩阵）纳入本变更并更新漏洞矩阵；验证：矩阵与实际 go.mod 一致
-- [ ] 1.9 Integration 备注：若本地/CI Integration 仍因 ES 栈启动失败（`service failed to listen: audit`）而红，标注"归因 = 集成栈就绪问题（另案 fix-integration-stack-readiness），与本变更无关"并附日志片段；验证：归因记录
+- [x] 1.7 提 PR → 等 Build + Quality 全绿（Govulncheck 必须转绿）→ 合并；验证：PR 号 + merge commit hash（**PR #75 = 3783a0b**）
+- [x] 1.8 解锁 PR #74（F1）：其 checks 重跑 → Build/Quality 绿 → 合并；验证：PR #74 合并 commit hash（**PR #74 = 0e56bb6**）
+- [x] 1.9a 实施期间若漏洞库新增命中：按同口径（真升级、记录 indirect、更新漏洞矩阵）纳入本变更并更新漏洞矩阵；验证：矩阵与实际 go.mod 一致（未新增命中，矩阵维持）
+- [x] 1.9 Integration 备注：若本地/CI Integration 仍因 ES 栈启动失败（`service failed to listen: audit`）而红，标注"归因 = 集成栈就绪问题（另案 fix-integration-stack-readiness），与本变更无关"并附日志片段；验证：归因记录（Integration 红，归因 = ES 栈启动，见 3A 实证）
 
 ## 2. 收尾
 
-- [ ] 2.1 红线核查：`git diff --name-only` 白名单 = go.mod/go.sum + 本变更 openspec；无业务代码、无 CI 配置改动；验证：命令输出
+- [x] 2.1 红线核查：`git diff --name-only` 白名单 = go.mod/go.sum + 本变更 openspec；无业务代码、无 CI 配置改动；验证：命令输出（已核：18 模块 go.mod/go.sum + openspec 制品）
 - [ ] 2.2 变更归档（验证通过后）：`/opsx-archive fix-govulncheck-grpc-cve`（skip_specs → 主 spec 不变）；验证：归档路径 + commit
