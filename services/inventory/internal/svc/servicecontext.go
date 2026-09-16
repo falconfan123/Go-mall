@@ -66,18 +66,26 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	return svcCtx
 }
 
-// 新增预热方法
+// 预热：只回填**缺失**的缓存键，不覆盖已存在的值。
+// 缓存键 inventory:product:{pid} 口径为可用库存（可售）；若键已存在（可能含在途预扣后的可用值），
+// 用 DB total 覆盖会造成可用库存虚高（超卖面）。见 fix-inventory-cache-invalidation design D1b。
 func (s *ServiceContext) PreheatInventoryCache() error {
 	// 1. 从数据库读取所有库存数据（或指定商品）
 	inventories, err := s.InventoryModel.FindAll(context.Background())
 	if err != nil {
 		return fmt.Errorf("读取库存数据失败: %v", err)
 	}
-	// 2. 缓存库存数据，TTL 5分钟
 
 	for _, inv := range inventories {
 		productKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, inv.ProductId)
-		if err := s.Rdb.Set(productKey, strconv.Itoa(int(inv.Total))); err != nil {
+		exists, err := s.Rdb.ExistsCtx(context.Background(), productKey)
+		if err != nil {
+			return fmt.Errorf("检查库存缓存键失败: %v", err)
+		}
+		if exists {
+			continue
+		}
+		if err := s.Rdb.SetCtx(context.Background(), productKey, strconv.Itoa(int(inv.Total))); err != nil {
 			return fmt.Errorf("缓存库存数据失败: %v", err)
 		}
 	}

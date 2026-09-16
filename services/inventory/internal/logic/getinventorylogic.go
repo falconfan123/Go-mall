@@ -53,7 +53,8 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 		return nil, err
 	}
 	if !cached {
-		if _, err := l.svcCtx.LoadInventoryFromDBToCache(l.ctx, int64(in.ProductId)); err != nil {
+		invRecord, err := l.svcCtx.LoadInventoryFromDBToCache(l.ctx, int64(in.ProductId))
+		if err != nil {
 			if errors.Is(err, inventorymodel.ErrNotFound) {
 				l.Logger.Infow("product not in inventory", logx.Field("product_id", in.ProductId))
 				res.StatusCode = code.ProductNotFoundInventory
@@ -66,7 +67,7 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 			)
 			return nil, err
 		}
-		cachedTotal = inventoryResp.Total
+		cachedTotal = invRecord.Total
 	}
 
 	res.Inventory = cachedTotal

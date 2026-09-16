@@ -43,6 +43,8 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.UpdateInventoryReq)
 			return nil, err
 		}
 
+		// 缓存键 inventory:product:{pid} 口径为可用库存（可售），全量 SET 新值。
+		// 无在途预扣时可用库存 = DB total = 新设置值；若存在在途预扣会被覆盖（已知限制，见 fix-inventory-cache-invalidation design D2）。
 		if err := l.svcCtx.SetInventoryCacheCtx(l.ctx, int64(item.ProductId), int64(item.Quantity)); err != nil {
 			l.Logger.Errorw("update inventory cache failed",
 				logx.Field("product_id", item.ProductId),

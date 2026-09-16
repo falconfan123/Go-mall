@@ -1,56 +1,87 @@
 ## Context
 
-- 见 `proposal.md` — Why 与 `explore-brief.md`。证据：`AdjustInventoryCacheCtx` 调用计数（return=3、decrease/pre/return-pre/update=0）；`GetInventory` 读缓存（getinventorylogic.go:47/72）；DB sold=1000 正确、集成测试偶发失败（读缓存旧值）。
+见 `proposal.md`（Why）与 `explore-brief.md`（含「重探索：失败时刻实证 + 缓存键语义裁定」节）。核心事实：
+
+- 缓存键 `inventory:product:{pid}` 被**双重语义**共用：预扣/回补 Lua 当**可用库存**（`decreaselua.lua` DECRBY / `returnlua.lua` INCRBY），DB 镜像写入当**账面 total**（`svc/cache.go:43-49` 写 `inventoryRecord.Total`）。
+- `GetInventory` 读该键返回（`getinventorylogic.go:47/72`）；缓存缺失回填分支用早期 DB 读值（`:69` ← `:35`）。
+- 实证（8 次重跑）：3 次 FAIL（actual 390/990/730），DB 恒 `total=0, sold=1000`（扣满无丢扣），预扣/扣减 RPC 传输层 err 计数 0，缓存键测试后为空。
+- 2B-0 调用方核证：6 处实质调用方**全部需要可用库存**，无消费者需要账面 total 镜像。
 
 ## Goals / Non-Goals
 
-- **Goals**：所有库存写路径写后缓存与 DB 一致；缓存失败降级不阻断业务写；一致性可验证。
-- **Non-Goals**：不改扣减正确性（DB 已正确）、不改幂等锁语义、不引入新缓存层。
+- **Goals**：缓存键口径统一为可用库存；读路径回填一致；预扣响应体状态可判定；`TestInventoryService_HighConcurrency` ≥10 次 0 失败。
+- **Non-Goals**：不改 DB 扣减正确性；不修 ES 栈（另案）；不改 ruleset / 不设 Integration required；不引入持久化预留表。
 
 ## Decisions
 
-### D1 修复方向：写路径补同步（A），否 GetInventory 改读 DB（B）/ 缓存失效（C）
+### D1 缓存键方案：A 统一键（推荐）vs B 双键
 
-- **选定 A**：为 `decreaseinventorylogic` / `decreasepreinventorylogic` / `returnpreinventorylogic` / `updateinventorylogic` 补齐 `AdjustInventoryCacheCtx`（对齐 `returninventorylogic` 既有做法）。
-  - 理由：与既有模式一致（return 已是此做法）；保留读路径缓存收益；改动局限在写路径。
-- **被否代价**：
-  - B（GetInventory 改读 DB）：改动小但丢弃读缓存收益（读高频）；且与既有缓存设计矛盾。
-  - C（写后删缓存键）：需处理并发失效竞态（删-回填窗口读到 DB 旧值/重复回填）。
+- **A 统一键（选定）**：`inventory:product:{pid}` 唯一口径 = **可用库存**。预扣/回补 Lua 维持 DECRBY/INCRBY（已是可用语义）；DB 镜像类写入改为按可用库存计算后写入；`GetInventory` 直接返回该键。
+  - **理由**：2B-0 证明**无任何调用方需要账面 total 镜像**——双键会造出无消费者的键；改动最小（读路径 + 回填口径 + 写路径核对）；与预扣 Lua 既有语义天然一致。
+- **B 双键（被否）**：`inventory:product:{pid}`（可用）+ `inventory:product:{pid}:reserved`（预留），回填时 `available = total − reserved`。
+  - **被否代价**：多一个需同步维护的键（且预留仅存在于缓存，双键仍需定义预留的持久化，否则回填仍不精确）；无消费者；复杂度上升。
+- **结论**：选 A；B 仅在"缓存丢失仍需精确还原在途预留"时才必要，本变更范围不需要。
 
-### D2 影响面：delta 语义 + 全量写路径扫描
+### D1b 预热（`PreheatInventoryCache`）纳入范围：只回填缺失键
 
-- `AdjustInventoryCacheCtx(productID, delta)` 的 delta 方向须与写路径对库存的实际变更一致：
-  - 扣减（sold+、total-）→ delta 取对应方向；预扣/预扣回补同理；更新库存按实际增量。
-  - 实施时逐一核对每个写路径的 `sold`/`total` 变更方向，避免反向。
-- 全量扫描 model 层改 `sold`/`total` 的方法（`Batchdecrease`/`BatchReturn`/`DecreaseInventoryAtom`/`ReturnInventory`/`UpdateOrCreate`），映射到 logic 写路径，确认无遗漏。
+- 现状 `PreheatInventoryCache`（`servicecontext.go:70-86`）服务启动时遍历全量 DB 库存，`Rdb.Set(productKey, inv.Total)` **无条件覆盖**缓存键。统一可用库存语义后，若 Redis 存活而 inventory Pod 重启（滚动更新/迁移/OOM），预热会用 `total` 覆盖含在途预扣的可用库存 → **可用库存虚高（超卖面）**。
+- **决定**：预热改为**只回填缺失键**（键不存在时才写），不覆盖已存在值；与 `EnsureInventoryCacheCtx` 的"缺失才回填"语义一致。此为既有隐患，统一语义后必须一并修复（否则本变更放大事故面）。
 
-### D3 验证：一致性断言 + 并发重跑
+### D2 可用库存公式与预留限制
 
-- 新增/修改单测：各写路径写后 `GetInventory` == DB 值（mock redis 或真实 redis）。
-- 集成测试 `TestInventoryService_HighConcurrency` 多次重跑（≥5 次）稳定通过 + 写后一致性断言。
-- 断言口径：读 `GetInventory` 与 DB 直接查询值相等（消除缓存滞后偏差）。
+- 领域权威定义：`AvailableStock() = TotalStock − LockedStock`（`domain/aggregate/inventory.go:36-38`）。
+- DB 仅有 `inventory.total` / `inventory.sold` 两列（`\d inventory` 实测），**无预留列**；预扣量仅存在于缓存（`decreaselua.lua` 只 DECRBY 库存键 + SET 幂等锁键，不写 DB）。
+- 对齐公式（用于验收断言）：`可用库存期望值 = (DB total + DB sold) − DB sold − 在途预留 = DB total − 在途预留`。全部确认后 `在途预留 = 0` → 期望值 = `DB total`（测试卖光场景 = `0`）。
+- **限制（显式声明）**：预留为**缓存态**，缓存冷启动（`LoadInventoryFromDBToCache`）时无在途预留可还原 → 回填可用库存 = `DB total`（即 `预留 = 0` 的冷启动假设）。此为既有设计约束，本变更不引入持久化预留表。
+  - **可执行性说明**：`LoadInventoryFromDBToCache` 的改动 = 在 `SetInventoryCacheCtx(total)` 基础上**加语义注释**（注明"写入值 = 可用库存，冷启动预留=0 假设；DB 无预留列，无法在回填时还原在途预扣"），**不要求写出无法从 DB 计算的"公式"**。验收标准 = "写 total + 语义声明 + 注释"而非"真公式"。
 
-### D4 降级：缓存失败不阻断业务写
+### D3 写路径 × 可用库存增量（逐条核对，避免二次扣减/反向）
 
-- 各写路径缓存同步失败时仅记日志（与 `ReturnInventory` 既有降级一致），不回滚 DB 写。
+| 写路径 | DB 变更 | 对可用库存增量 | 缓存动作 |
+|---|---|---|---|
+| `DecreasePreInventory`（预扣） | 无 | `−q` | Lua `DECRBY`（已存在，保持） |
+| `ReturnPreInventory`（回补预扣） | 无 | `+q` | Lua `INCRBY`（已存在，保持） |
+| `DecreaseInventory`（确认扣减） | `total −= q, sold += q` | **`0`**（预扣已占用，确认不改变可用） | **不加缓存写**（修正旧"补 Adjust"错误处方，避免二次扣减） |
+| `ReturnInventory`（回补） | `total += q, sold −= q` | `+q` | `AdjustInventoryCacheCtx(+q)`（已存在，保持；**barrier 与直连两条路径均调用**，见 `returninventorylogic.go:56/73/114`） |
+| `UpdateInventory`（更新库存） | `UpdateOrCreate(total=q)` | 设为 `q`（全量 SET；无在途预扣时 = 可用库存） | `SetInventoryCacheCtx(q)`（已存在；口径注明为可用库存；**全量 SET 非增量**） |
+| `PreheatInventoryCache`（服务启动预热） | 无 | 不改变（只回填缺失键） | 键缺失时 `Set(可用库存=total)`；**键已存在则跳过（不覆盖在途预扣）** |
+
+> **已知限制（确认阶段缓存丢失）**：预扣 DECRBY 后、确认（DecreaseInventory）前若缓存键丢失（Redis 闪断/运维误删），因确认路径"不加缓存写"，下次 `GetInventory` 回填 DB `total`（该值**含**预扣量，预扣未写 DB）→ 可用库存虚高 → 可能超卖。此为既有"预留缓存态"限制的具体风险面；本变更**不处理**（需预留持久化，另案），spec 显式声明该场景不修复。
+
+### D4 读路径旧值修正
+
+- `getinventorylogic.go` 回填分支（`:56-69`）现用 `cachedTotal = inventoryResp.Total`（`:35` 早期 DB 读值）。
+- **改为**使用**刚回填的缓存值**：让 `LoadInventoryFromDBToCache` **返回其写入的可用库存值**（避免再读一次缓存的多余 Redis 往返），回填分支以该返回值为准，保证返回值与缓存一致。
+
+### D5 测试可判定性修正
+
+- `inventory_test.go` 预扣调用后仅 `if preErr != nil` 判定（`:310-323`），而"库存不足"是响应体 `StatusCode = InventoryNotEnough`（`decreasepreinventorylogic.go` Lua `return 2`），传输层 err=nil。
+- **改为**：预扣返回后校验 `resp.GetStatusCode()`；非成功（尤其 `InventoryNotEnough`）→ `t.Fail`（或 `t.Errorf`）并 `return`（不继续 `DecreaseInventory`）。
+
+### D6 验证
+
+- 单测/集成：`cd test/rpc && GOWORK=off GO_MALL_TEST_LOCAL=1 go test -count=10 ./inventory/...` → 0 失败（贴原始输出）。
+- 一致性断言：写后 `GetInventory` == 可用库存期望值（`DB total − 在途预留`；测试卖光场景 = 0）。
+- 门禁：`make build && make lint && make test-unit` 全绿。
 
 ## Risks / Trade-offs
 
-- **[delta 方向取错]** → D2 逐一核对 + C2 一致性断言（写后读 == DB）。
-- **[全量扫描遗漏写路径]** → C1 显式列出所有写路径与同步点；审查时核对 model 方法全集。
-- **[缓存失败降级不一致]** → D4 统一为"记日志不阻断"，与既有 return 一致。
-- **[并发下缓存写竞争]** → `AdjustInventoryCacheCtx` 若为原子增减（INCRBY/DECRBY 语义）则并发安全；若非原子（读-改-写）需评估——实施时确认其实现（svc/cache.go:73）。
+- **[口径不一致导致反向漂移]** → D3 逐路径表 + D6 一致性断言；确认路径明确"不加缓存写"。
+- **[服务重启预热覆盖在途预扣 → 超卖]** → D1b 改为只回填缺失键；spec 增加预热 Scenario。
+- **[UpdateInventory 覆盖在途预扣]** → 已知限制（spec 声明）：管理端调整前确认无活跃预扣；本变更不引入预留持久化。
+- **[预留缓存态限制]** → D2 显式声明；本变更不引入持久化预留。
+- **[测试修正可能暴露更多预扣失败]** → 正是 D5 目的（可判定）；若修正后预扣确有失败，按 D1 口径修复缓存初始化后应消除。
+- **[并发下缓存写竞争]** → `AdjustInventoryCacheCtx` 为原子 `IncrbyCtx`（`svc/cache.go:78`）；Lua DECRBY/INCRBY 原子。
 
 ## Migration Plan
 
-1. 全量扫描写路径与 delta 语义（D2），产出"写路径 × delta × 同步点"清单。
-2. 为 4 个写路径补齐 `AdjustInventoryCacheCtx`（D1）。
-3. 补单测（各写路径写后读一致）+ 跑集成测试多次（D3）。
-4. 门禁（Rule 1：编译/单测/lint）。
-5. 验收：C1–C6 checklist 核对。
+1. 统一口径（D1/D3）：核对并修正 `svc/cache.go` 可用库存口径（`LoadInventoryFromDBToCache` 等）。
+2. 读路径修正（D4）。
+3. 测试可判定性（D5）。
+4. 验证（D6）：`-count=10` + 一致性断言 + 门禁。
 
-**回滚**：改动为 inventory logic + 测试，可 git revert。
+**回滚**：改动为 `services/inventory` + `test/rpc/inventory`，可 git revert。
 
 ## Open Questions
 
-- `AdjustInventoryCacheCtx` 的并发原子性（影响 D3 并发断言设计）——实施首步确认 svc/cache.go:73 实现。
+- 无在途预留时回填 = `DB total` 是否为可接受口径？——**本变更按 A 统一键采纳"冷启动预留=0"假设**（D2 限制已声明）；如需精确还原在途预留，另案引入预留持久化（超本变更范围）。
