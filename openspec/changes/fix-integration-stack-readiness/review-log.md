@@ -66,3 +66,24 @@
 **🔴 清零 → 本批冻结**。历史 4 轮 🔴（端口兜底矛盾 / review-log 缺失 / `curl -f` 无法区分 yellow-red / 超时窗口不匹配 / Risks 残留旧参数 / spec 缺参数）已全部闭合。
 - 说明：脚本对「### 🔴 遗留」下 `- 无`（带项目符号）的冻结判据为机械误判（脚本仅匹配裸 `无`），实际审核输出 🔴 = 无，故按实质冻结。
 - 💡 已吸收：tasks 1.2 验证备注改为 `starting`（非空值）；design Risks 注明 340s 为 Docker unhealthy 阈值假设。
+
+## 合并后观察（apply 真验收，2026-09-16/17）
+
+**合并**：PR #80 → `6d0cb3d`。
+
+### 栈启动成功率 = 4/4（100%）
+| run | commit | 结果 | 栈启动（15 服务 ready） | 测试阶段 |
+|---|---|---|---|---|
+| 35124933859（PR #80） | 065b430 | success | ✅ 全 ready（含 `audit:10008 ready`） | 26 包/80 用例，0 失败 |
+| 35125626833 att1（main） | 6d0cb3d | success | ✅ 全 ready | 0 失败 |
+| 35125626833 att2 | 6d0cb3d | **failure** | ✅ 全 ready（栈启动成功） | **2 用例失败（首次暴露）** |
+| 35125626833 att3 | 6d0cb3d | success | ✅ 全 ready | 0 失败 |
+
+**失败签名对比**：修复前 15/15 run = `service failed to listen: audit` / `audit mq init attempt`；修复后 4/4 run = 0 该签名，0 `dependency not healthy`，0 `AccessDenied`。
+
+### 测试阶段真实失败清单（首次暴露，超出本变更范围）
+att2（及本地复现）暴露 2 个**测试阶段**失败（与栈启动无关）：
+1. `TestQueryProduct`（`test/rpc/product/product_test.go:136`）：`elastic: Error 400 (Bad Request): all shards failed [type=search_phase_execution_exception]` —— search 索引未就绪/未建（ES 全新命名卷下的索引初始化时序）。
+2. `TestGatewayHTTPHappyPath`（`test/rpc/scenarios/gateway_smoke/gateway_smoke_test.go:438`）：`invalid character 'r' looking for beginning of value`（响应非 JSON）。
+
+**处置**：二者均超出本变更白名单（compose + ci-rpc-stack.sh）与 Non-goals（不改测试断言），**本变更不修**；作为后续变更候选登记（search 索引初始化 / gateway smoke 断言）。栈启动目标已达成（100%）。
