@@ -93,15 +93,16 @@ services:
       - "9200:9200"
       - "9300:9300"
     volumes:
-      - /Volumes/Fan/docker-data/depend/es-data:/usr/share/elasticsearch/data
+      - es-data:/usr/share/elasticsearch/data
     networks:
       - mall
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health >/dev/null"]
-      interval: 30s
-      timeout: 10s
-      retries: 20
+      test: ["CMD-SHELL", "curl -sS \"http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s\" | grep -qE '\"status\"[[:space:]]*:[[:space:]]*\"(yellow|green)\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
 
   gorse:
     image: zhenghaoz/gorse-in-one
@@ -138,7 +139,8 @@ services:
       timeout: 5s
       retries: 8
 
-volumes: {}
+volumes:
+  es-data:
 
 networks:
   mall:
