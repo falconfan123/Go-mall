@@ -155,7 +155,9 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 		assert.Equal(t, int32(code.CouponsNotExist), res.StatusCode)
 		t.Log(res)
 	})
-	t.Run("优惠券状态非锁定", func(t *testing.T) {
+	// 已使用（USED）券再次 UseCoupon：服务按幂等契约容忍为成功
+	// （usecouponlogic.go:99-104：status==USED → tolerate as success，返回 nil）
+	t.Run("已使用券幂等容忍成功", func(t *testing.T) {
 		res, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
 			UserId:         int32(uid),
 			CouponId:       usedCouponCode,
@@ -166,6 +168,22 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		} // 事务错误处理方式特殊
+		assert.Equal(t, int32(code.Success), res.StatusCode)
+
+	})
+	// 可用（AVAILABLE）券未锁定直接 UseCoupon → 非 USED 且非 LOCKED → CouponStatusInvalid(90011)
+	// 保持 90011 分支覆盖（USED 券已改判为幂等成功，该分支需由 AVAILABLE 券覆盖）
+	t.Run("可用券未锁定直接使用", func(t *testing.T) {
+		res, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
+			UserId:         int32(uid),
+			CouponId:       lockCouponCode,
+			OrderId:        "order-available-coupon",
+			DiscountAmount: 100,
+			OriginAmount:   100,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
 		assert.Equal(t, int32(code.CouponStatusInvalid), res.StatusCode)
 
 	})
@@ -205,8 +223,9 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		// 第一次使用后状态就变了
-		assert.Equal(t, int32(code.CouponStatusInvalid), res2.GetStatusCode())
+		// 第一次使用后券状态为 USED；再次使用按幂等契约容忍为成功
+		// （usecouponlogic.go:99-104：status==USED → tolerate as success）
+		assert.Equal(t, int32(code.Success), res2.GetStatusCode())
 	})
 
 }
