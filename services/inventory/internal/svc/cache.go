@@ -40,6 +40,12 @@ func (s *ServiceContext) GetInventoryCacheCtx(ctx context.Context, productID int
 	return total, true, nil
 }
 
+// LoadInventoryFromDBToCache 回填库存缓存。
+//
+// 缓存键 inventory:product:{pid} 的口径为**可用库存**（可售）。
+// DB 仅有 total/sold 两列、无预留列，预扣量只存在于缓存（decreaselua DECRBY），
+// 因此回填时无法从 DB 还原在途预扣：在"冷启动无在途预扣"假设下，可用库存 = DB total。
+// 该假设为既有限制（见 fix-inventory-cache-invalidation design D2），此处按可用库存口径写入。
 func (s *ServiceContext) LoadInventoryFromDBToCache(ctx context.Context, productID int64) (*inventorymodel.Inventory, error) {
 	inventoryRecord, err := s.InventoryModel.FindOne(ctx, productID)
 	if err != nil {

@@ -1,6 +1,6 @@
 # Review Log · fix-inventory-cache-invalidation
 
-## 整体反思审核（proposal + specs + design + tasks）
+## 审查轮次 1 — 2026-09-16（proposal + specs + design + tasks，方向级）
 
 **审核方式**：@openspec-reviewer 逐路径核对证据代码（updateinventorylogic / decreasepreinventorylogic / returnpreinventorylogic / svc/cache.go / Lua 脚本 / inventorymodel.go）。
 
@@ -21,3 +21,20 @@
 
 ### 结论
 **4 🔴 未清零 → 本批不冻结**。审核建议：先补"失败时刻实证 + 缓存键语义裁定"两项，再定 D1 方向。F2 需重新 explore（根因/缓存语义）。
+
+## 审查轮次 2 — 2026-09-16（方向修订后整体重审，冻结）
+
+**审核方式**：@openspec-reviewer 对完整变更包（proposal/design/tasks/specs/.openspec.yaml）重审（备选通道脚本）。方向已由用户裁定 = 统一「可用库存」语义。
+
+### 修复循环（同一门禁内 3 次输出）
+1. 首轮：🔴 1（`PreheatInventoryCache` 无条件覆盖缓存键 → 统一语义后超卖面）+ 5 🟡 → 修复：proposal/design/spec/tasks 纳入预热"只回填缺失键"（design D1b）、UpdateInventory 已知限制、spec 预热 Scenario、tasks 1.1b/5.1。
+2. 次轮：🔴 3（tasks 缺写路径单测覆盖闭合 explore-brief C6；`LoadInventoryFromDBToCache` 可执行性模糊；确认阶段缓存丢失边界未声明）+ 3 🟡 → 修复：tasks 1.4 单测覆盖、design D2 可执行性说明、spec/design/proposal 已知限制、tasks 1.2b/2.1 连带。
+3. 末轮：**🔴 无** → 冻结。
+
+### 🟡 遗留（记录，不阻塞冻结）
+1. `DecreaseInventory` 直连路径"不加缓存写"仅在"存在前置预扣"时正确；已核实**活调用方（order 结算/seckill）均先 `DecreasePreInventory` 再 `DecreaseInventory`**，且直连路径要求 `PreOrderId` 并走 `FindLockOrder` 锁检查（`decreaseinventorylogic.go:74`）→ 无无预扣直扣调用方。若未来出现"无预扣直扣"调用方，需在 D3 补 fallback（另案）。
+2. spec 写入路径清单未显式列 `EnsureInventoryCacheCtx`（`cache.go:56`）；task 1.1 已要求核对，记录。
+3. tasks 4.4 验收模板建议同步到 design D6（可选）。
+
+### 结论
+**🔴 清零 → 本批冻结**（方向已裁定，本轮允许 apply）。上一轮 4 🔴（事实错误/双重语义/spec 不可判定/根因）已全部由方向修订 + 重探索（2A-2D）闭合。

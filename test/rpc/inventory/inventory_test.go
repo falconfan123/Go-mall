@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
+	"github.com/falconfan123/Go-mall/common/consts/code"
 	inventory "github.com/falconfan123/Go-mall/services/inventory/pb"
 	"github.com/falconfan123/Go-mall/test/rpc/internal/testenv"
 	"sync"
@@ -307,7 +308,7 @@ func TestInventoryService_HighConcurrency(t *testing.T) {
 			preOrderID := fmt.Sprintf("PRE_ORDER_%d_%d", userID, time.Now().UnixNano())
 
 			// 步骤1: 预扣库存
-			_, preErr := invClient.DecreasePreInventory(ctx, &inventory.InventoryReq{
+			preResp, preErr := invClient.DecreasePreInventory(ctx, &inventory.InventoryReq{
 				Items: []*inventory.InventoryReq_Items{
 					{ProductId: testProductID, Quantity: deductPerUser},
 				},
@@ -316,6 +317,12 @@ func TestInventoryService_HighConcurrency(t *testing.T) {
 			})
 			if preErr != nil {
 				t.Logf("用户 %d 预扣失败: %v", userID, preErr)
+				return
+			}
+			// 预扣"库存不足"是响应体状态（Lua return 2 → StatusCode=InventoryNotEnough，传输层 err=nil）；
+			// 必须校验响应体状态，不满足即判定失败且不继续扣减（见 fix-inventory-cache-invalidation D5）
+			if preResp.GetStatusCode() != code.Success {
+				t.Errorf("用户 %d 预扣响应体失败: status=%d msg=%s", userID, preResp.GetStatusCode(), preResp.GetStatusMsg())
 				return
 			}
 
