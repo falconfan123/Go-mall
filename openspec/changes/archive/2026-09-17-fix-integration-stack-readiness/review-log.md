@@ -87,3 +87,26 @@ att2（及本地复现）暴露 2 个**测试阶段**失败（与栈启动无关
 2. `TestGatewayHTTPHappyPath`（`test/rpc/scenarios/gateway_smoke/gateway_smoke_test.go:438`）：`invalid character 'r' looking for beginning of value`（响应非 JSON）。
 
 **处置**：二者均超出本变更白名单（compose + ci-rpc-stack.sh）与 Non-goals（不改测试断言），**本变更不修**；作为后续变更候选登记（search 索引初始化 / gateway smoke 断言）。栈启动目标已达成（100%）。
+
+### 阶段 2 观察台账（归档后继续追加；起算点 = 首个修复 commit 6d0cb3d，2026-09-16 17:01Z）
+
+| run | commit | 栈启动 | 测试阶段 |
+|---|---|---|---|
+| 35124933859（PR #80） | 065b430 | ✅ 15 服务 ready | 26 包/80 用例 0 失败 |
+| 35125626833 att1 | 6d0cb3d | ✅ | 0 失败 |
+| 35125626833 att2 | 6d0cb3d | ✅ | **2 用例失败**（TestQueryProduct / TestGatewayHTTPHappyPath，首次暴露，另案 fix-ci-flaky-product-gateway-tests） |
+| 35125626833 att3 | 6d0cb3d | ✅ | 0 失败 |
+| 35127766965 | 9f55f04 | ✅ | 0 失败 |
+| 35208845651 | 9ad9a9a6 | ✅ | 0 失败 |
+
+**截至归档时点**：completed run 计数（6d0cb3d 起）= **3**（35125626833 / 35127766965 / 35208845651）；**绿率 = 2/3**（att2 为测试阶段失败，栈启动仍成功；含 PR run 则 5 completed 中 3 绿）；栈启动成功率 = 6/6（100%）；同 commit 3 次全绿 = 6d0cb3d 已 3 次（att1/att3 + 35127766965 同 ES 修复代码基）≈ 满足，但 A3 口径需"同一 commit 至少 3 次全绿"且绿率 ≥90%（14 天 20 run）——目前 20 run 尚未累计。
+
+## Verify — 2026-09-17（归档前）
+
+一致性四项 + openspec validate：
+1. **proposal→tasks 可追溯**：What Changes ①②③（命名卷 / healthcheck 就绪 / 阶段2口径）→ tasks 1.1-1.3 / 2.x / 3.x。✓
+2. **tasks 全勾且有证据**：11/11 `- [x]`；证据 = PR #80（6d0cb3d）compose config 解析、ES healthy/green、audit listen、Integration 三件事取证、台账（上文）。✓
+3. **无越界改动**：`git show --stat 6d0cb3d` = construct/depend/docker-compose.yaml + scripts/ci-rpc-stack.sh + openspec 制品；无测试断言/ruleset 改动。✓
+4. **explore-brief C1–C4 逐条成立**：C1 15/15 栈启动失败已实证；C2 ES 根因数据卷不可写已实证（日志）；C3 方向=数据卷/健康检查；C4 修复后 0 `service failed to listen`、进入测试执行（6/6 栈启动）。✓
+
+**openspec validate**：`Change 'fix-integration-stack-readiness' is valid`。

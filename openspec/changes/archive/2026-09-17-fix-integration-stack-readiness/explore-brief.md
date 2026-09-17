@@ -40,7 +40,7 @@
 
 ## Checklist（立案基线）
 
-- [ ] C1 Integration failure run 中栈启动失败占比 100%（已实证，15/15）。
-- [ ] C2 ES 根因 = 数据卷不可写（bootstrap 失败），非测试断言（已实证日志）。
-- [ ] C3 修复方向 = ES 数据卷路径/健康检查（不涉及测试/业务/ruleset）。
-- [ ] C4 修复后 Integration 无"service failed to listen"栈失败，进入测试执行阶段。
+- [x] C1 Integration failure run 中栈启动失败占比 100%（已实证，15/15）。
+- [x] C2 ES 根因 = 数据卷不可写（bootstrap 失败），非测试断言（已实证日志）。
+- [x] C3 修复方向 = ES 数据卷路径/健康检查（不涉及测试/业务/ruleset）。
+- [x] C4 修复后 Integration 无"service failed to listen"栈失败，进入测试执行阶段。
