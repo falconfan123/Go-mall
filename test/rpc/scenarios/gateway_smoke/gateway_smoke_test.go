@@ -2,7 +2,9 @@ package gateway_smoke
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os/exec"
 	"strconv"
 	"testing"
@@ -480,5 +482,61 @@ func deleteRedisKey(t *testing.T, key string) {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("delete redis key failed key=%s err=%v output=%s", key, err, string(output))
+	}
+}
+
+// TestGatewayErrorResponseStructured 验证网关错误响应结构化契约（fix-gateway-error-response-format）：
+// 任意响应（含 4xx/5xx）body MUST 为合法 JSON；>=400 时 MUST 含 status_code/status_msg/trace_id。
+func TestGatewayErrorResponseStructured(t *testing.T) {
+	clients := harness.NewClients(t)
+	harness.WaitForServices(t, clients)
+
+	user := seed.CreateUser(t, clients.Users)
+	gateway := gatewayhttp.NewClient()
+	ctx, cancel := context.WithTimeout(context.Background(), testenv.Timeout())
+	defer cancel()
+
+	var login loginResp
+	resp, body, err := gateway.DoJSON(ctx, "POST", "/api/v1/users/login", nil, map[string]any{
+		"username": user.Username,
+		"password": user.Password,
+		"ip":       "127.0.0.1",
+	}, &login)
+	require.NoError(t, err)
+	gatewayhttp.RequireStatusOK(t, resp, body)
+	accessToken := pickString(
+		pickString(login.AccessToken, login.AccessTokenLegacy),
+		pickString(login.ShortToken, login.ShortTokenLegacy),
+	)
+	refreshToken := pickString(
+		pickString(login.RefreshToken, login.RefreshTokenLegacy),
+		pickString(login.LongToken, login.LongTokenLegacy),
+	)
+	authGateway := gateway.WithTokens(accessToken, refreshToken)
+
+	// ① 认证错误路径（无 token）→ 401，body 必须为合法 JSON（writeAuthError 透传，不二次包装）
+	var authOut any
+	_, authBody, err := gateway.DoJSON(ctx, "GET", "/api/v1/activity/token", map[string]string{
+		"activity_id": "1",
+	}, nil, &authOut)
+	require.NoError(t, err)
+	require.True(t, json.Valid(authBody), "401 body must be valid JSON: %s", string(authBody))
+
+	// ② 上游 RPC 错误路径（带 token，活动不存在）→ 响应 body 必须恒为合法 JSON；>=400 时含三字段
+	var token tokenResp
+	upResp, upBody, err := authGateway.DoJSON(ctx, "GET", "/api/v1/activity/token", map[string]string{
+		"activity_id": "999999",
+	}, nil, &token)
+	require.NoError(t, err)
+	require.True(t, json.Valid(upBody), "upstream error body must be valid JSON: %s", string(upBody))
+	if upResp.StatusCode >= http.StatusBadRequest {
+		var e struct {
+			StatusCode int    `json:"status_code"`
+			StatusMsg  string `json:"status_msg"`
+			TraceID    string `json:"trace_id"`
+		}
+		require.NoError(t, json.Unmarshal(upBody, &e))
+		require.NotEmpty(t, e.StatusMsg)
+		require.NotEmpty(t, e.TraceID)
 	}
 }
