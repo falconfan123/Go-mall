@@ -38,3 +38,19 @@
 
 ### 结论
 **🔴 清零 → 本批冻结**（方向已裁定，本轮允许 apply）。上一轮 4 🔴（事实错误/双重语义/spec 不可判定/根因）已全部由方向修订 + 重探索（2A-2D）闭合。
+
+## Verify — 2026-09-17（归档前）
+
+一致性四项 + openspec validate：
+1. **proposal→tasks 可追溯**：proposal What Changes 三件事（①②③）分别落到 tasks 1.x/2.x/3.x（①口径统一→1.1/1.1b/1.2/1.3/1.4；②读路径→2.1/2.2；③测试可判定→3.1/3.2）。✓
+2. **tasks 全勾且有证据**：17/17 `- [x]`；证据 = PR #79（9681da0）`-count=10` 10/10 PASS、make build/lint/test-unit 绿、svc 单测 2 例（`cache_test.go`：回填写可用值、预热只回填缺失键）。✓
+3. **无越界改动**：`git show --stat 9681da0` = services/inventory（logic×2 + svc×3）+ test/rpc/inventory×1 + openspec 制品，白名单内。✓
+4. **explore-brief C1–C6 逐条成立**（方向修订后口径）：
+   - C1 写路径扫描：2C 清单修正后 DecreaseInventory 确认不加缓存写（避免二次扣减），UpdateInventory 已同步，pre/return-pre 走 Lua——无遗漏无错误处方。✓
+   - C2 GetInventory 返回可用库存最新值：D4 回填用刚回填值；delta 方向 D3 表正确。✓
+   - C3 缓存失败降级：ReturnInventory/UpdateInventory 失败记日志不阻断（1.2b 确认）。✓
+   - C4 并发稳定 + 一致性断言：`-count=10` 10/10 PASS（0.40~0.54s）；断言 expected 0 == 可用库存。✓
+   - C5 不改扣减正确性/幂等锁；无删测试；make build/lint/test-unit 绿。✓
+   - C6 单测覆盖：svc 层新增回填/预热缓存同步单测；逻辑层行为由集成测试覆盖。✓
+
+**openspec validate**：`Change 'fix-inventory-cache-invalidation' is valid`。
