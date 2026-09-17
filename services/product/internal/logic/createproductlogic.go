@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
+	esproduct "github.com/falconfan123/Go-mall/dal/es/product"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	pc "github.com/falconfan123/Go-mall/dal/model/products/product_categories"
 	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
@@ -103,12 +104,13 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	}
 
 	res.ProductId = productId
+	productRes.Id = productId // 回写主键，使 ES 文档 _source.id 与 _id 一致（fix-product-search-index-readiness）
 
-	// 创建文档（自动JSON序列化）
+	// 创建文档（snake_case DTO 序列化，字段名与映射/查询一致）
 	if _, err := l.svcCtx.EsClient.Index().
 		Index(biz.ProductEsIndexName).
 		Id(strconv.FormatInt(productId, 10)).
-		BodyJson(productRes).
+		BodyJson(esproduct.NewProductDocument(productRes)).
 		Refresh("true").
 		Do(l.ctx); err != nil {
 		l.Logger.Errorw("product es creation failed",

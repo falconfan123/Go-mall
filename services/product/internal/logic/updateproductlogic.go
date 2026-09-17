@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/falconfan123/Go-mall/common/consts/biz"
 	"github.com/falconfan123/Go-mall/common/consts/code"
+	esproduct "github.com/falconfan123/Go-mall/dal/es/product"
 	product2 "github.com/falconfan123/Go-mall/dal/model/products/product"
 	"github.com/falconfan123/Go-mall/dal/model/products/product_categories"
 	inventoryclient "github.com/falconfan123/Go-mall/services/inventory/inventoryclient"
@@ -15,6 +16,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strconv"
+	"time"
 )
 
 type UpdateProductLogic struct {
@@ -51,6 +53,11 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 		Price:       in.Price,
 		Stock:       in.Stock,
 	}
+	// 保留既有 created_at（ES 文档排序依据），updated_at 置为当前时间
+	if existing, ferr := l.svcCtx.ProductModel.FindOne(l.ctx, in.Id); ferr == nil {
+		productRes.CreatedAt = existing.CreatedAt
+	}
+	productRes.UpdatedAt = time.Now()
 	res := &product.UpdateProductResp{}
 	// 2. 使用 Transact 开启事务
 	if err := l.svcCtx.Postgres.Transact(func(session sqlx.Session) error {
@@ -98,7 +105,7 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 	if _, err := l.svcCtx.EsClient.Update().
 		Index(biz.ProductEsIndexName).
 		Id(strconv.Itoa(int(in.Id))).
-		Doc(productRes).
+		Doc(esproduct.NewProductDocument(productRes)).
 		Refresh("true").
 		DocAsUpsert(true). // 如果文档不存在则创建
 		Do(l.ctx); err != nil && !elastic.IsNotFound(err) {
