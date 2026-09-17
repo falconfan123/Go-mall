@@ -32,12 +32,12 @@
 
 ## Checklist（反思审核基线）
 
-- [ ] C1 所有库存写路径（decrease/pre/return/pre-return/update）写后缓存与 DB 一致；全量扫描无遗漏写路径。
-- [ ] C2 `GetInventory` 返回最新值（写后读一致性）；`AdjustInventoryCacheCtx` delta 方向正确（sold/total 不反向）。
-- [ ] C3 缓存同步失败不阻断业务写（与 ReturnInventory 既有降级一致），仅记日志。
-- [ ] C4 `TestInventoryService_HighConcurrency` 稳定通过（多次重跑 0 失败）+ 缓存/DB 一致性断言。
-- [ ] C5 不改扣减正确性/幂等锁语义；不删测试/放宽断言；Rule 1 门禁（编译/单测/lint）通过。
-- [ ] C6 新增/修改单测覆盖各写路径的缓存同步（mock 或真实 redis）。
+- [x] C1 所有库存写路径（decrease/pre/return/pre-return/update）写后缓存与 DB 一致；全量扫描无遗漏写路径。
+- [x] C2 `GetInventory` 返回最新值（写后读一致性）；`AdjustInventoryCacheCtx` delta 方向正确（sold/total 不反向）。
+- [x] C3 缓存同步失败不阻断业务写（与 ReturnInventory 既有降级一致），仅记日志。
+- [x] C4 `TestInventoryService_HighConcurrency` 稳定通过（多次重跑 0 失败）+ 缓存/DB 一致性断言。
+- [x] C5 不改扣减正确性/幂等锁语义；不删测试/放宽断言；Rule 1 门禁（编译/单测/lint）通过。
+- [x] C6 新增/修改单测覆盖各写路径的缓存同步（mock 或真实 redis）。
 ---
 
 ## 重探索：失败时刻实证 + 缓存键语义裁定（2026-09-16，round 2 前置）
