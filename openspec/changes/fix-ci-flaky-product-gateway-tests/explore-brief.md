@@ -95,3 +95,31 @@ HTTP 500
 - [ ] C4 CI att2 归属：TestQueryProduct 机制环境无关可解释；gateway 用例 CI 归属待日志复核（假设未证实）。
 - [ ] C5 方向候选登记（ES template / initEs 补强 / 网关错误 JSON 化 / 测试容错 / env 治理）。
 - [ ] C6 本变更仅立案（explore-only），不 propose。
+## 环境剥离增量（2026-09-17，2A 复测结论）
+
+### rogue redis 鉴定（已 kill）
+```
+$ ps -p 1050 -o pid,ppid,user,etime,command
+1050 1 fan 10-12:48:20 /opt/homebrew/opt/redis/bin/redis-server 127.0.0.1:6379
+$ lsof -p 1050 | grep -E "cwd|txt"   # cwd=/opt/homebrew/var/db/redis（Homebrew 默认数据目录）
+```
+- PID 1050 = **Homebrew redis**（`/opt/homebrew/Cellar/redis/8.6.1`），PPID 1（launchd 自启），无密码（`CONFIG GET requirepass` 空），无本仓关联 → 判定"无关游离 redis" → **kill 1050**。
+- 对照：docker `go-mall-redis` 无密码（`AUTH jjzzchtt` → WRONGPASS），映射 0.0.0.0:6379；kill 后 127.0.0.1:6379 → 容器 redis（PING PONG）。
+
+### 复测（干净栈全重启后）
+```
+cd test/rpc && GOWORK=off GO_MALL_TEST_LOCAL=1 go test -count=1 -run TestGatewayHTTPHappyPath ./scenarios/gateway_smoke/...
+第 1 批：10 跑 → 1 FAIL（438 间歇）
+第 2 批：12 跑 → 0 FAIL
+合计：22 跑 1 FAIL ≈ 95% 绿
+```
+
+### 结论（CI 归属升级为有证据）
+1. **'r' 纯文本失败（line 438）= rogue redis 所致（有证据）**：kill 前确定性 10/10；kill 后失败点消失（第 1 批仅 1 次间歇回到 438，12/12 稳定）。
+2. **CI 归属**：CI 无 rogue redis（6379=容器）→ **'r' 机制在 CI 不成立**；CI att2 的 gateway 失败 = **假设（未证实）**，更可能是 transient（本次隔离后间歇 ~5% 亦见同类残留）。
+3. 残留间歇失败（1/22，438）为低概率问题，将在 变更B（网关错误响应 JSON 化）下被容错覆盖——测试对 RPC error 不再因非 JSON body 直接崩。
+4. 附注：隔离过程中本地服务重启扰动 etcd 服务发现（曾现 60010 / checkout connect 超时）——为本地编排伪影，非代码缺陷；已通过全栈重启归零。
+
+### 变更A/变更B 依据更新
+- 变更A（TestQueryProduct）：仍成立（15/15 确定性，索引映射竞态，与本 env 无关）。
+- 变更B（网关错误 JSON 化）：正当性**不依赖测试 flaky**——网关对 RPC error 返回 `rpc error: code = Unknown desc = activity not found or not started`（HTTP 500 纯文本）本身就是 API 契约缺陷（实测 curl 复现，见上）。
