@@ -1,7 +1,8 @@
 ---
 description: OpenSpec 变更审查员 — 在 propose 后 apply 前，批判性审查变更下的全部制品文件（proposal/design/specs/tasks），只读，只照亮问题不修改
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+# 默认走 opencode-go：kimi-for-coding 有 5 小时窗口额度，触顶报 "You've reached your 5-hour usage limit"；改回需改本行并重启 opencode
+model: opencode-go/kimi-k2.6
 temperature: 0.1
 permission:
   edit: deny

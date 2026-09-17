@@ -1,7 +1,8 @@
 ---
 description: OpenSpec 变更审查员(headless 备选通道)— 供 openspec/reviewer/openspec-review.sh 以 `opencode run --agent` 调用;只读,绝不修改文件
 mode: all
-model: kimi-for-coding/kimi-for-coding
+# 默认走 opencode-go：kimi-for-coding 有 5 小时窗口额度，触顶报 "You've reached your 5-hour usage limit"；改回需改本行并重启 opencode
+model: opencode-go/kimi-k2.6
 temperature: 0.1
 permission:
   edit: deny
