@@ -1,4 +1,11 @@
 {
+  "index_patterns": [
+    "products*"
+  ],
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
   "mappings": {
     "dynamic": "false",
     "properties": {
@@ -44,12 +51,10 @@
       "created_at": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss"
-
       },
       "updated_at": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss"
-
       }
     }
   }
