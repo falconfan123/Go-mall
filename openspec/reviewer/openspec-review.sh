@@ -150,7 +150,39 @@ echo "🔍 审查 openspec/changes/$CHANGE_NAME/（第 $ROUND 轮）— 审查�
 echo "   制品: ${REL_FILES[*]}"
 echo ""
 
-OUTPUT="$(cd "$ROOT" && "$OPENCODE" run --agent "$REVIEW_AGENT" -m "$REVIEW_MODEL" "$PROMPT" 2>&1)"
+# ---------- 执行审查 + 配额/过载自动回退（只重试一次） ----------
+# 触发: 审核输出/错误匹配 5-hour usage limit / engine is currently overloaded / rate limit 之一。
+# 行为: 换模型重跑一次 —— opencode-go/kimi-k2.6 → opencode-go/glm-5.3-flash；kimi-for-coding/* → opencode-go/kimi-k2.6。
+# 约束: ① 回退必须打印所用模型与原因（不静默）② 不改退出码语义（0=无🔴可冻结 / 1=有🔴 / 2=用法错误）③ 只重试一次，仍失败照常返回。
+FALLBACK_REASONS='5-hour usage limit|engine is currently overloaded|rate limit'
+
+run_review() {
+  local model="$1"
+  (cd "$ROOT" && "$OPENCODE" run --agent "$REVIEW_AGENT" -m "$model" "$PROMPT" 2>&1)
+}
+
+ACTUAL_MODEL="$REVIEW_MODEL"
+OUTPUT="$(run_review "$REVIEW_MODEL")"
+if echo "$OUTPUT" | grep -qiE "$FALLBACK_REASONS"; then
+  FALLBACK_REASON="$(echo "$OUTPUT" | grep -oiE "$FALLBACK_REASONS" | head -1)"
+  case "$REVIEW_MODEL" in
+    opencode-go/kimi-k2.6) FALLBACK_MODEL="opencode-go/glm-5.3-flash" ;;
+    kimi-for-coding/*) FALLBACK_MODEL="opencode-go/kimi-k2.6" ;;
+    *) FALLBACK_MODEL="" ;;
+  esac
+  if [[ -n "$FALLBACK_MODEL" && "$FALLBACK_MODEL" != "$REVIEW_MODEL" ]]; then
+    echo ""
+    echo "⚠️ 审查模型 $REVIEW_MODEL 触发配额/过载（匹配: ${FALLBACK_REASON}），回退到 $FALLBACK_MODEL 重试一次" >&2
+    echo ""
+    ACTUAL_MODEL="$FALLBACK_MODEL"
+    OUTPUT="$(run_review "$FALLBACK_MODEL")"
+  else
+    echo ""
+    echo "⚠️ 审查模型 $REVIEW_MODEL 触发配额/过载（匹配: ${FALLBACK_REASON}），但无可用回退模型，按原输出继续" >&2
+    echo ""
+  fi
+fi
+echo "（本次实际审查模型: ${ACTUAL_MODEL}）"
 echo "$OUTPUT"
 
 # ---------- 写 review-log ----------
@@ -159,7 +191,7 @@ if [[ $LOG -eq 1 ]]; then
     echo ""
     echo "## 审查轮次 $ROUND"
     echo ""
-    echo "_审查时间: $(date '+%Y-%m-%d %H:%M:%S') | 审查员: opencode run [$REVIEW_AGENT / $REVIEW_MODEL] (read-only) | 范围: ${REL_FILES[*]}_"
+    echo "_审查时间: $(date '+%Y-%m-%d %H:%M:%S') | 审查员: opencode run [$REVIEW_AGENT / $ACTUAL_MODEL] (read-only) | 范围: ${REL_FILES[*]}_"
     echo ""
     echo '```'
     echo "$OUTPUT"
@@ -172,13 +204,14 @@ fi
 # ---------- 冻结判据: 最后一个 "### 🔴 遗留" 小节为空/为"无" ----------
 # 注意: opencode run 输出不回显 prompt，但模型可能读取 review-log.md（含旧轮次 🔴 头），
 # 必须取最后一个 🔴 小节（模型最终结论在最后）
+# 宽容判定: 接受 无 / - 无 / 无。 / 无（0 条） 等（审核员按提示词可能输出 "- 无" 带项目符号）
 if echo "$OUTPUT" | grep -q '^### 🔴 遗留'; then
   LAST="$(echo "$OUTPUT" | grep -n '^### 🔴 遗留' | tail -1 | cut -d: -f1)"
   # 从最后一个 🔴 头开始，跳过头行，遇到下一个 "### " 小节头停止
   SECTION="$(echo "$OUTPUT" | tail -n +"$LAST" | awk 'NR==1{next} /^### /{exit} {print}')"
-  if echo "$SECTION" | grep -q '^[[:space:]]*无[[:space:]]*$'; then
+  if echo "$SECTION" | grep -qE '^\s*(-\s*)?无[。]?(\s*（0\s*条）?\s*)?$'; then
     echo ""
-    echo "✅ 本批 🔴 清零 → 可冻结（按批次顺序进入下一制品，或进入 /openspec-reflect 整体复查）"
+    echo "✅ 本批 🔴 清零 → 全部制品冻结，可进入 apply（单门禁：每个 change 只整体审一次，🔴 清零即冻结）"
     exit 0
   else
     echo ""
