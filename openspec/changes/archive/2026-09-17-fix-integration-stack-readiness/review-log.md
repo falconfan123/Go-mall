@@ -110,3 +110,27 @@ att2（及本地复现）暴露 2 个**测试阶段**失败（与栈启动无关
 4. **explore-brief C1–C4 逐条成立**：C1 15/15 栈启动失败已实证；C2 ES 根因数据卷不可写已实证（日志）；C3 方向=数据卷/健康检查；C4 修复后 0 `service failed to listen`、进入测试执行（6/6 栈启动）。✓
 
 **openspec validate**：`Change 'fix-integration-stack-readiness' is valid`。
+
+### 阶段 2 台账更新（2026-09-17 15:50Z 时点）
+
+**观察窗口**：2026-09-16 17:01Z（6d0cb3d）起，按 run 序。
+
+| # | run | commit | 结论 | 栈启动 | 测试阶段 |
+|---|---|---|---|---|---|
+| 1 | 35125626833 | 6d0cb3d | success | ✅ | att2 曾 2 用例失败 |
+| 2 | 35127766965 | 9f55f04 | success | ✅ | — |
+| 3 | 35208845651 | 9ad9a9a | success | ✅ | — |
+| 4 | 35209837046 | ff94b64 | success | ✅ | — |
+| 5 | 35211597441 | 4c75011 | success | ✅ | — |
+| 6 | 35212395873 | 97262f0 | success | ✅ | — |
+| 7 | 35229135219 | be6f057 | **failure** | ✅ | **TestLoginWithEmail**（新间歇用例） |
+| 8 | 35235134558 | ee7aee7 | success | ✅ | — |
+| 9 | 35241795099 | 76062d3 | success | ✅ | — |
+
+**指标**：
+- completed run 总数 = **9**；绿率 = **8/9 = 88.9%**（be6f057 的 TestLoginWithEmail 拖累，暂低于 90% 阈值）。
+- 栈启动成功率 = **9/9 = 100%**。
+- **同 commit 3 次全绿 = 已达成**：76062d3 att1/att2/att3 均 success（5A 主动验证）。
+- **距 A3（14 天 20 run、绿率 ≥90%）**：尚需 **11 个 run**；绿率需后续连续绿 run 拉回 ≥90%（每 +1 绿，9 个绿/10 run=90%）。
+
+**新增发现**：`TestLoginWithEmail`（test/rpc/users/login）为新的间歇失败用例（be6f057 首次暴露，栈启动正常），与变更A/B 无关，登记另案候选。
