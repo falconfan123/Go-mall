@@ -123,3 +123,32 @@ cd test/rpc && GOWORK=off GO_MALL_TEST_LOCAL=1 go test -count=1 -run TestGateway
 ### 变更A/变更B 依据更新
 - 变更A（TestQueryProduct）：仍成立（15/15 确定性，索引映射竞态，与本 env 无关）。
 - 变更B（网关错误 JSON 化）：正当性**不依赖测试 flaky**——网关对 RPC error 返回 `rpc error: code = Unknown desc = activity not found or not started`（HTTP 500 纯文本）本身就是 API 契约缺陷（实测 curl 复现，见上）。
+
+## 处置与闭环（2026-09-18）
+
+**一句话结论**：本立案发现的两个缺陷已分别由 `fix-product-search-index-readiness`（#87）与 `fix-gateway-error-response-format`（#88）修复；本变更不再单独实施，作为立案与证据记录保留。
+
+### 缺陷 1：商品搜索索引映射一致性（已修复）
+
+- **现象**：`TestQueryProduct` 本地 15/15 确定性失败；`product_test.go:136: rpc error: code = Unknown desc = elastic: Error 400 (Bad Request): all shards failed [type=search_phase_execution_exception]`；生产商品搜索/列表在索引未就绪或字段不一致时直接 500。
+- **根因 + 代码位置**：① 写路径 `createproductlogic.go:46/111` 用 DB 模型（`product2.Products`，仅 `db` 标签）`BodyJson` 序列化 → ES 文档字段 **PascalCase**（`CreatedAt`/`Price`/`Id`…）；② 查询排序 `queryproductlogic.go:50/54/56` 用 **snake_case**（`created_at`/`price`）→ sort 缺失字段 → `search_phase_execution_exception`；③ `initEs`（`servicecontext.go:98-107`）仅在索引缺失时建、失败不重试，bulk auto-create（`createproductlogic.go:108`）叠加动态大写映射。
+- **关键证据（命令 + 输出要点）**：`curl localhost:9200/products/_mapping` 干净卷三时点无索引、重启 product 前映射混合（`CreatedAt` 与 `created_at` 并存）、重启后纯净 snake_case → `TestQueryProduct` 5/5 PASS。
+- **修复落点与验收**：`fix-product-search-index-readiness`（**PR #87 → ee7aee7**）——写路径 snake_case DTO（`dal/es/product/document.go`）+ `products*` 索引模板（`template.json` + `dynamic:false`）+ `ensureProductIndex`（就绪重试 / 错误映射分页重建 / 失败阻断）；**验收：干净卷（`docker volume rm` 后起栈）`go test -count=10 -run TestQueryProduct` → 10/10 PASS，`_cat/indices` 映射 snake_case**。
+
+### 缺陷 2：网关错误响应非结构化（已修复）
+
+- **现象**：`TestGatewayHTTPHappyPath` `gateway_smoke_test.go:438` `invalid character 'r' looking for beginning of value`；curl 复现 body = `rpc error: code = Unknown desc = activity not found or not started`（HTTP 500，纯文本非 JSON）。
+- **根因 + 代码位置**：go-zero gateway `buildGrpcHandler`（`gateway/server.go:220-222`）对上游响应 `w.WriteHeader(status); io.Copy(w, resp.Body)` 原样透出 gRPC 错误 body；错误源为活动服务 `tokenlogic.go:53` 读 `act_start_limit` 缺失返回 error。
+- **关键证据（命令 + 输出要点）**：`curl ".../api/v1/activity/token?activity_id=..." -H "Short-Token: $ST" -H "Long-Token: $LT"` → HTTP 500 + `rpc error:...` 纯文本；本地 rogue redis（PID 1050）为 env 触发因素（隔离后该错误仍可被任意上游 RPC 错误触发）。
+- **修复落点与验收**：`fix-gateway-error-response-format`（**PR #88 → 76062d3**）——`responseRecorder` 中间件（状态 ≥400 且 body 非合法 JSON → `{"status_code","status_msg","trace_id"}`；已 JSON 错误/2xx 透传）+ `writeAuthError` 改 `json.NewEncoder`；**验收：curl 500 → `{"status_code":500,"status_msg":"rpc error: ...","trace_id":"..."}`，401 → `{"status_code":10000,...}` 合法 JSON 不二次包装，`TestGatewayHTTPHappyPath` 5/5 PASS**。
+
+### 新增登记（不立案、不实施）：TestLoginWithEmail
+
+- **首次暴露**：run `35229135219`（be6f057，2026-09-17），**栈启动正常**（15 服务 ready）。
+- **失败原文**（junit）：`--- FAIL: TestLoginWithEmail (0.15s)`（test/rpc/users/login）。
+- **对照**：该 run 为 8/9 绿中的唯一红（绿率 88.9% 拖累来源）。
+- **状态**：**登记另案候选，本次收尾不处理**。
+
+### 重启条件
+
+日后处理按正常流程：propose → 单门禁审核 → apply → verify → archive。
